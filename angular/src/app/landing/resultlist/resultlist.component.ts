@@ -52,7 +52,7 @@ export class ResultlistComponent implements OnInit {
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 5;
+    itemsPerPage: number = 20;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: number = 1;
 
@@ -239,7 +239,6 @@ export class ResultlistComponent implements OnInit {
         let tempValue = searchString.replace(/,/g, " ").replace(/  /g, " ");
 
         let lSearchPhases = tempValue.split(" ");
-        console.log("lSearchPhases", lSearchPhases);
         
         lSearchPhases.forEach((searchPhase: string) => {
             let searchWord: string = "";
@@ -337,7 +336,6 @@ export class ResultlistComponent implements OnInit {
 
         if(this.filterString != "noFilter" && this.filterString != ""){
             filters = this.filterString.split("&");
-            
             filters.forEach((filter) => {
                 switch(filter.split("=")[0]){
                     case "@type":
@@ -355,12 +353,16 @@ export class ResultlistComponent implements OnInit {
                         break;
                     case "topic.tag":
                         this.searchResults.forEach((object) => {
+                            
                             if(object.active == true){
                                 object.active = false;
                             
                                 object["topic"].forEach((oTopic) => {
-                                    if(oTopic["tag"].includes(filter.split("=")[1]))
+                                    let topics = filter.split("=")[1].split(",");
+                                    topics.forEach(topic => {
+                                        if(oTopic["tag"].includes(topic))
                                         object.active = true;
+                                    });
                                 })
                             }
                         });
