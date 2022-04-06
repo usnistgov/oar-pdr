@@ -474,6 +474,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         this.metricsData.url = "/metrics/" + this.reqId;
         this.recordType = (new NERDResource(this.md)).resourceLabel();
         this.theme = (new NERDResource(this.md)).theme();
+        console.log("Theme (@type):", this.theme);
 
         // set the document title
         this.setDocumentTitle();
