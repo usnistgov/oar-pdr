@@ -43,7 +43,7 @@ export class ResourceDataComponent implements OnChanges {
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
-    @Input() theme: string = 'nist';
+    @Input() theme: string = 'PublicDataResource';
 
     // pass out download status for metrics refresh
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();
@@ -56,6 +56,7 @@ export class ResourceDataComponent implements OnChanges {
     { }
 
     ngOnInit(): void {
+        console.log("Theme", this.theme);
         this.recordType = (new NERDResource(this.record)).resourceLabel();
     }
 

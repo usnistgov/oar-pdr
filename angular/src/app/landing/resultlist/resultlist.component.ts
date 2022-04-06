@@ -60,7 +60,7 @@ export class ResultlistComponent implements OnInit {
     @Input() searchValue: string;
     @Input() searchTaxonomyKey: string;
     @Input() mobWidth: number = 1920;
-    @Input() theme: string = 'nist';
+    @Input() theme: string = 'PublicDataResource';
     @Input() filterString: string = '';
 
     constructor(private searchService: SearchService) { }

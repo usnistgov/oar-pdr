@@ -33,7 +33,7 @@ export class SearchresultComponent implements OnInit {
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() theme: string = 'nist';
+    @Input() theme: string = 'PublicDataResource';
 
     constructor() {
     }

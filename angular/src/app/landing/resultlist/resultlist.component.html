@@ -44,7 +44,7 @@
                 >
                 <button pButton label="Home Page" type="button" class="p-button-sm"
                     icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"
-                    [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
+                    [ngClass]="{'visit-home-page': theme=='PublicDataResource', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
             </a>
             
             <a *ngIf="!resultItem.landingPage" style="float: right; margin-top: -0.5em;"
@@ -52,7 +52,7 @@
                 (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
                 <button pButton label="Home Page" type="button" class="p-button-sm"
                     icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"
-                    [ngClass]="{'visit-home-page': theme=='nist', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
+                    [ngClass]="{'visit-home-page': theme=='PublicDataResource', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
             </a>
 
             <div style="width: 80% !important;">

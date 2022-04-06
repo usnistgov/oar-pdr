@@ -42,7 +42,7 @@ export class AboutdatasetComponent implements OnChanges {
     private _collapsed: boolean = false;
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;
-    @Input() theme: string = 'nist';
+    @Input() theme: string = 'PublicDataResource';
 
     // Flag to tell if current screen size is mobile or small device
     @Input() mobileMode : boolean|null = false;

@@ -34,7 +34,7 @@
         </div>
 
         <!-- Access Pages -->
-        <div id="accessPages" *ngIf="accessPages.length > 0 && theme == 'nist'">
+        <div id="accessPages" *ngIf="accessPages.length > 0 && theme == 'PublicDataResource'">
             <b>Data and related material can be found at the following locations:</b>
             <br>
             <div *ngIf="theme=='ScienceTheme';else nistTheme">
@@ -102,7 +102,7 @@
             </ng-template>
         </div>
 
-        <pdr-data-files *ngIf="theme=='nist'"
+        <pdr-data-files *ngIf="theme=='PublicDataResource'"
             [record]="record" 
             [inBrowser]="inBrowser" 
             [editEnabled]="editEnabled" 
