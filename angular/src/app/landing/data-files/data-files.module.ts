@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { TreeTableModule } from 'primeng/treetable';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { BadgeModule } from 'primeng/badge';
 
 import { DataFilesComponent } from './data-files.component';
 
@@ -13,7 +14,7 @@ import { DataFilesComponent } from './data-files.component';
  */
 @NgModule({
     imports: [
-        CommonModule, RouterModule,
+        CommonModule, RouterModule, BadgeModule,
         TreeTableModule, OverlayPanelModule, ProgressSpinnerModule
     ],
     declarations: [

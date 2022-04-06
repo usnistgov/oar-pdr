@@ -14,7 +14,7 @@
   background-color: #F3F3F3;
   text-align: left;
   color: black;
-  padding: 1;
+  padding: 1px;
 }
 :host ::ng-deep citationDialog > button.p-button-icon-only{  
   border-radius: 50%;
@@ -34,12 +34,14 @@
   background-color: #1E6BA1;
   color: white;
   border: 0;
+  padding: 5px 10px;
 }
 
 :host ::ng-deep .p-treetable-tbody{
   /* background-color: #E4F2FC; */
   font-family: sans-serif;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 300;
 }
 
 :host ::ng-deep .p-treetable thead tr{
@@ -76,7 +78,7 @@
   font-family:  sans-serif;
   font-style:italic;
   color:#484646; 
-  font-size: 12;
+  font-size: 12px;
 }
 .copyCite{
   position:relative;
@@ -104,7 +106,7 @@
 {
   font-family:  sans-serif;
   color: grey;
-  font-size: 12;
+  font-size: 12px;
 }
 
 .fDetailsfFont{
@@ -144,9 +146,6 @@
   text-align: left;
 }
 
-:host ::ng-deep .faa-cart-plus:before {
-  /* color: #1E6BA1; */
-}
 :host ::ng-deep reflinks > a {
   
   font-family: sans-serif;
@@ -262,7 +261,7 @@
 .loading {
   position: fixed;
   z-index: 999;
-  overflow: show;
+  overflow: visible;
   margin: auto;
   top: 0;
   left: 0;
@@ -464,15 +463,13 @@ a:visited {
 .icon_enabled { 
   cursor: pointer;
   color: black;
-  padding: auto;
   font-size: 1em;
- }
+}
 
- .icon_disabled { 
+.icon_disabled { 
   color: rgb(200, 200, 200);
-  padding: auto;
   font-size: 1em;
- }
+}
 
 .filter-black{
   filter: invert(0.5);

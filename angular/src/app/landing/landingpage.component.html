@@ -17,11 +17,11 @@
 </div>
 
 <!-- landing page panel -->
-<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad center">
+<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad" style="padding: 30px 20px 20px 20px;">
   <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'"  style="width: 100%;">
     <!-- <div> -->
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
-      <div class="p-col-10 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
+      <div class="col-12 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
     </div>
@@ -102,7 +102,6 @@
                     
                 <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
               </div>
-            <!-- </div> -->
           </div>
         </div>
       </div>
