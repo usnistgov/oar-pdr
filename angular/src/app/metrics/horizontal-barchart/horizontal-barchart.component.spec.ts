@@ -51,9 +51,6 @@ describe('HorizontalBarchartComponent', () => {
         // 3 bars x 30/bar + margin top (30) + margin bottom(20) = 140
         expect(el.getAttribute("height")).toBe('140');
 
-        // should have the correct width
-        expect(el.getAttribute("width")).toBe('800');
-
         el = cmpel.querySelectorAll("rect"); 
 
         // Should have 3 bars 
