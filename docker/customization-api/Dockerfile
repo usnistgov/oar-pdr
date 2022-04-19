@@ -1,7 +1,7 @@
 FROM maven:3.5-jdk-8-alpine
 
 RUN  apk update && apk upgrade && apk add netcat-openbsd zip git less \
-                                          gnupg shadow python nss wget
+                                          gnupg shadow python perl wget
 
 # ENV GOSU_VERSION 1.10
 # RUN set -ex; arch=amd64; \
@@ -21,8 +21,6 @@ RUN  apk update && apk upgrade && apk add netcat-openbsd zip git less \
 # this is set to match identity information of the host user that is
 # launching the container.
 #
-
-
 RUN apk --no-cache add ca-certificates
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
 
@@ -44,7 +42,7 @@ RUN grep -qs ":${devuid}:[[:digit:]]+:" /etc/passwd || \
             --gid $devuid --uid $devuid $devuser
 RUN mkdir /home/$devuser/.m2
 
-VOLUME /app/dev
+VOLUME /dev/oar-pdr
 VOLUME /app/dist
 COPY settings.xml /app/mvn-user-settings.xml
 COPY settings.xml /home/$devuser/.m2/settings.xml
@@ -53,7 +51,8 @@ RUN chown $devuser:$devuser /home/$devuser/.m2/settings.xml && \
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod a+rx /app/entrypoint.sh
 
-WORKDIR /app/dev
+WORKDIR /dev/oar-pdr
 USER $devuser
 ENTRYPOINT [ "/app/entrypoint.sh" ]
+
 
