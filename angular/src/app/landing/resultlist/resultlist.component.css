@@ -5,7 +5,6 @@
     align-items:center;
     margin-bottom: 2em;
     background-color: var(--science-theme-background-blue); 
-    /* background-color: var(--science-theme-background-default); */
 }
 
 .title {
@@ -20,14 +19,14 @@
 .visit-home-page {
     font-size: 13px; 
     width:120px; 
-    background-color: #257a2d; 
+    background-color: var(--nist-green-default);
     height: 35px;
     color: white;
     float: right;
 }
 
 .visit-home-page:hover {
-    background-color: #6ac973; 
+    background-color: var(--nist-green-light);
 }
 
 .visit-home-page-forensics {
@@ -45,4 +44,16 @@
 
 .search-button {
     background-color: var(--science-theme-background-blue); 
+}
+
+#dog {
+    width:100px;margin: auto;
+    clear: both;
+    margin-top: 2em;
+    fill: var(--science-theme-background-blue); 
+}
+
+.nothing-found-text {
+    margin-left: 2em;
+    color: var(--science-theme-background-blue); 
 }

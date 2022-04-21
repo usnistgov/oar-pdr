@@ -6,6 +6,9 @@ import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-bro
 import { AppConfig } from '../../config/config'
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { TransferState } from '@angular/platform-browser';
+import { DropdownModule } from "primeng/dropdown";
+import { FormsModule } from '@angular/forms';
+import { InputTextareaModule } from 'primeng/inputtextarea';
 
 describe('ResultlistComponent', () => {
   let component: ResultlistComponent;
@@ -16,7 +19,12 @@ describe('ResultlistComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, BrowserTransferStateModule],
+        imports: [
+            HttpClientTestingModule, 
+            BrowserTransferStateModule, 
+            DropdownModule,
+            FormsModule,
+            InputTextareaModule],
         declarations: [ ResultlistComponent ],
         providers: [
             SearchService,

@@ -4,14 +4,14 @@
 <pdr-version [record]="record"></pdr-version> 
 
 <!-- Facilitators -->
-<div *ngIf="theme=='ScienceTheme'" style="width: 100%; margin-bottom: 2em;">
+<div *ngIf="theme == scienceTheme" style="width: 100%; margin-bottom: 2em;">
     <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
 </div>
 
 <!-- Citation info -->
 <div style="margin: 1em 0em;" id="cite">
     <div><b style="margin-right: 10px;">Cite this {{resourceType.toLowerCase()}}</b>
-        <span style="cursor: pointer; color: #1E6BA1;" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="citeCopied" class="badge"
+        <span id="copy-to-clipboard" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="citeCopied" class="badge"
         style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">Citation copied to clipboard</span>
     </div>
     <span [ngClass]="{'highlight': citeCopied}" [@enterAnimation]>
@@ -37,7 +37,7 @@
         <!-- JSON export button (right alignment) -->
         <div >
             <a [href]='getDownloadURL()'>
-                <span class="json-export-btn nist-blue-background" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 10px;"></i>Export</span></a>
+                <span class="json-export-btn nist-blue-bc" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 10px;"></i>Export</span></a>
         </div>
 
         <!-- JSON tree navigate buttons (left alignment) -->
@@ -66,8 +66,8 @@
 
 </div>
 
-<!-- Metrics info -->
-<div *ngIf="resourceType != 'Collection'" style="margin: 0em 0em 1em 0em;" id="metrics">
+<!-- Metrics info: for default theme only -->
+<div *ngIf="resourceType != scienceThemeResourceType" style="margin: 0em 0em 1em 0em;" id="metrics">
     <div>
         <b>Access Metrics</b>
     </div>

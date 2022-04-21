@@ -2,18 +2,10 @@
 <pdr-edit-control *ngIf="editEnabled" [inBrowser]="inBrowser"
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
-<div *ngIf="theme=='ScienceTheme'" >
+<div *ngIf="theme == scienceTheme" >
     <!-- Banner for Science Theme -->
     <div class="science-theme-banner" [ngStyle]="{ 'background-image': 'url(' + imageURL + ')','margin-bottom':'-1em'}">
     </div>    
-
-    <!-- Top portion of landing page -->
-    <!-- <app-forensicslandingbody [md]="md" [inBrowser]="inBrowser"></app-forensicslandingbody> -->
-
-    <!-- Forensics search result -->
-    <!-- <app-forensicssearchresult [md]="md" [inBrowser]="inBrowser"></app-forensicssearchresult> -->
-
-    <!-- Rest info -->
 </div>
 
 <!-- landing page panel -->

@@ -2,7 +2,7 @@
  * Classes and interfaces to support the NERDm metadata infrastructure
  */
 import { Injectable, InjectionToken } from '@angular/core';
-
+import { Themes, ThemesPrefs } from '../shared/globals/globals';
 import * as _ from 'lodash-es';
 
 /**
@@ -284,23 +284,16 @@ export class NERDResource {
 
     /**
      * Return theme
-     * @returns 
+     * @returns the first element of @type. If not exists, return "nist" (default)
      */
     public theme(): string {
-        if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
-            return this.data['@type'][0].replace(/\s/g, '').split(":")[1];
-        }else{
-            return "nist";
-        }
-    }
+        let theme : string = Themes.DEFAULT_THEME;
 
-    public resourceType(): string {
         if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
-            if(this.data['@type'][0].replace(/\s/g, '') == 'nrda:ScienceTheme')
-                return "Collection";
+            return ThemesPrefs.getTheme(this.data['@type'][0].replace(/\s/g, '').split(":")[1]);
         }
 
-        return "Dataset";
+        return theme;
     }
 }
 

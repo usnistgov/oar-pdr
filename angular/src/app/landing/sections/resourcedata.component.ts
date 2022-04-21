@@ -4,6 +4,7 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NerdmComp, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 /**
  * a component that lays out the "Data Access" section of a landing page.  This includes (as applicable)
@@ -38,12 +39,14 @@ export class ResourceDataComponent implements OnChanges {
     showRestrictedDescription: boolean = false;
     currentState = 'initial';
     recordType: string = "";
+    scienceTheme = Themes.SCIENCE_THEME;
+    defaultTheme = Themes.DEFAULT_THEME;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
-    @Input() theme: string = 'PublicDataResource';
+    @Input() theme: string;
 
     // pass out download status for metrics refresh
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();
@@ -56,7 +59,6 @@ export class ResourceDataComponent implements OnChanges {
     { }
 
     ngOnInit(): void {
-        console.log("Theme", this.theme);
         this.recordType = (new NERDResource(this.record)).resourceLabel();
     }
 
@@ -83,7 +85,7 @@ export class ResourceDataComponent implements OnChanges {
      */
     selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
         let use : NerdmComp[];
-        if(this.theme == "ScienceTheme") {
+        if(this.theme == Themes.SCIENCE_THEME) {
             use = comps.filter(cmp => cmp['@type'].includes("nrda:DynamicResourceSet"));
         }else{
             use = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&

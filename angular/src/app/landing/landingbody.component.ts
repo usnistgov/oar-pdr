@@ -50,7 +50,7 @@ export class LandingBodyComponent {
 
     @Input() metricsData: MetricsData;
     @Input() showJsonViewer: boolean = false;
-    @Input() theme: string = 'PublicDataResource';
+    @Input() theme: string;
 
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;

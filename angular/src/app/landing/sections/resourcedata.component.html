@@ -4,7 +4,7 @@
             <h3><b>Data Access</b></h3>
         </div>
 
-        <dl *ngIf="theme != 'ScienceTheme'">
+        <dl *ngIf="theme != scienceTheme">
             <dt>
                <span style="margin-left:0em" *ngIf="record['accessLevel'] === 'public'">
                    <i class="faa faa-globe"></i> These data are public.
@@ -26,7 +26,7 @@
         </dl>        
 
         <!-- Display Homepage button if 'landingPage field exist and does not contain '/od/id' -->
-        <div *ngIf="theme != 'ScienceTheme' && record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
+        <div *ngIf="theme != scienceTheme && record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
             For more information, please visit the
             <a target="_blank" href="{{ record['landingPage'] }}"
                (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
@@ -34,10 +34,10 @@
         </div>
 
         <!-- Access Pages -->
-        <div id="accessPages" *ngIf="accessPages.length > 0 && theme == 'PublicDataResource'">
+        <div id="accessPages" *ngIf="accessPages.length > 0 && theme == defaultTheme">
             <b>Data and related material can be found at the following locations:</b>
             <br>
-            <div *ngIf="theme=='ScienceTheme';else nistTheme">
+            <div *ngIf="theme == scienceTheme;else defaultTheme">
                 <div [ngStyle]="{'margin-top': '10px', 'background-color': apage['backcolor']}" *ngFor="let apage of accessPages" (mouseover)="apage['backcolor'] = '#f2f2f2'" (mouseout)="apage['backcolor'] = 'white'">
                     <i class="faa faa-external-link" style="margin-left:1em;"> 
                         <span >
@@ -62,7 +62,7 @@
                     </div>
                 </div>
             </div>
-            <ng-template #nistTheme>
+            <ng-template #defaultTheme>
                 <div [ngStyle]="{'margin-top': '10px', 'background-color': apage['backcolor']}" *ngFor="let apage of accessPages" (mouseover)="apage['backcolor'] = '#f2f2f2'" (mouseout)="apage['backcolor'] = 'white'">
                     <div class="indent-content" *ngIf="!apage['@type'].includes('nrdp:RestrictedAccessPage'); else RestrictedAccessPage">
                         <i class="faa faa-external-link"> <span style="margin-left:0em;">
@@ -102,20 +102,17 @@
             </ng-template>
         </div>
 
-        <pdr-data-files *ngIf="theme=='PublicDataResource'"
+        <pdr-data-files *ngIf="theme == defaultTheme"
             [record]="record" 
             [inBrowser]="inBrowser" 
-            [editEnabled]="editEnabled" 
-            [theme]="theme"
+            [editEnabled]="editEnabled"
             (dlStatus)="setDownloadStatus($event)">
         </pdr-data-files>
 
-        <div *ngIf="theme=='ScienceTheme'" style="margin-top: 2em;">
+        <div *ngIf="theme == scienceTheme" style="margin-top: 2em;">
             <app-searchresult 
                 [record]="record" 
-                [inBrowser]="inBrowser"
-                [theme]="theme" 
-                >
+                [inBrowser]="inBrowser">
             </app-searchresult>
         </div>
     </div>

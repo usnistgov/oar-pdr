@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
 
 /**
  * DEPRECATED!
@@ -31,6 +29,11 @@ export class CommonFunctionService {
         return v.toFixed(d) + ' ' + e[f];
     }
 
+    /**
+     * Make a deep copy of an object
+     * @param obj 
+     * @returns copy of the input object
+     */
     deepCopy(obj) {
         return JSON.parse(JSON.stringify(obj));
     }

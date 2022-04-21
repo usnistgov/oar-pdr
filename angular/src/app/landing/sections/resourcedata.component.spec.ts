@@ -16,6 +16,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { CartService } from '../../datacart/cart.service';
 
 import { config, testdata } from '../../../environments/environment';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 describe('ResourceDataComponent', () => {
     let component: ResourceDataComponent;
@@ -42,6 +43,7 @@ describe('ResourceDataComponent', () => {
         makeComp();
         component.inBrowser = true;
         component.record = JSON.parse(JSON.stringify(rec));
+        component.theme = Themes.DEFAULT_THEME;
         component.ngOnChanges({});
         fixture.detectChanges();
     }));

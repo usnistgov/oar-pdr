@@ -116,7 +116,6 @@ describe('MetricsComponent', () => {
         component.fileLevelData = fileLevelData;
         component.ediid = "3A1EE2F169DD3B8CE0531A570681DB5D1491";
         component.createChartData();
-        console.log('component.chartData', component.chartData);
         expect(component.chartData[0][0]).toEqual('1491_optSortSph20160701.m');
         expect(component.chartData[0][1]).toEqual(103);
         expect(component.chartData[1][0]).toEqual('/sub1/1491_optSortSphEvaluated20160701.cdf');

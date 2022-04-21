@@ -83,3 +83,7 @@ $type-colors: (
   }
 }
 
+#copy-to-clipboard {
+    cursor: pointer; 
+    color: var(--nist-blue-default);
+}

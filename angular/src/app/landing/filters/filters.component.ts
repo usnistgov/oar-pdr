@@ -436,10 +436,12 @@ export class FiltersComponent implements OnInit {
         }
 
         // NIST Research topics
+        let hasDefaultTheme: boolean = false;
         if (this.selectedThemesNode.length > 0) {
             if(lFilterString != '') lFilterString += "&";
 
             lFilterString += "topic.tag=";
+            hasDefaultTheme = true;
 
             for (let theme of this.selectedThemesNode) {
                 if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data !== 'undefined') {
@@ -457,8 +459,12 @@ export class FiltersComponent implements OnInit {
         // Forensics Research topics
         if (this.forensicsSelectedThemesNode.length > 0) {
             if(lFilterString != '') lFilterString += "&";
-
             lFilterString += "topic.tag=";
+
+            // if(!hasDefaultTheme)
+            //     lFilterString += "topic.tag=";
+            // else
+            //     lFilterString += ",";
 
             for (let theme of this.forensicsSelectedThemesNode) {
                 if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data !== 'undefined') {
@@ -520,7 +526,6 @@ export class FiltersComponent implements OnInit {
         lFilterString = this.removeEndingComma(lFilterString);
         if(!lFilterString) lFilterString = "NoFilter";
 
-        console.log("lFilterString", lFilterString)
         this.filterString.emit(lFilterString);
     }
 
@@ -836,40 +841,39 @@ export class FiltersComponent implements OnInit {
         for (let resultItem of searchResults) {
             if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
                 for (let topic of resultItem.topic) {
-                    // if(this.theme == 'forensics'){
-                        //Only collect topics whose tags start with "forensics"
-                        if(topic.tag.split(":")[0].trim().toLowerCase() == 'forensics') {
-                            topicLabel = topic.tag.substring(this.findNthOccurence(topic.tag, 1, ":")+1).trim();
-                            data = topic.tag.substring(this.findNthOccurence(topic.tag, 1, ":")+1).trim();
+                    let topics = topic.tag.split(":");
+                    let collectDefaultTheme: boolean = false;
 
-                            let thirdTopic = this.findNthOccurence(topic.tag, 2, ":");
-                            if(thirdTopic > 0){
-                                topicLabel = topicLabel.substring(0, thirdTopic)
-                            }
+                    if(topics[0].trim().toLowerCase() == 'forensics') {
+                        topicLabel = topic.tag.substring(this.findNthOccurence(topic.tag, 1, ":")+1).trim();
+                        data = topic.tag.substring(this.findNthOccurence(topic.tag, 1, ":")+1).trim();
 
-                            if (forensicsThemesArray.indexOf(topicLabel) < 0) {
-                                forensicsThemes.push({ label: topicLabel, value: data });
-                                forensicsThemesArray.push(topicLabel);
-                            }
-                        }else{
-                            topicLabel = _.split(topic.tag, ':')[0];
-                            topic = topic.tag;
-    
-                            if (themesArray.indexOf(topicLabel) < 0) {
-                                themes.push({ label: topicLabel, value: topic });
-                                themesArray.push(topicLabel);
-                            }
+                        let thirdTopic = this.findNthOccurence(topic.tag, 2, ":");
+                        if(thirdTopic > 0){
+                            topicLabel = topicLabel.substring(0, thirdTopic)
                         }
-                    // }else{
-                    //     topicLabel = _.split(topic.tag, ':')[0];
-                    //     topic = topic.tag;
 
-                    //     if (themesArray.indexOf(topicLabel) < 0) {
-                    //         themes.push({ label: topicLabel, value: topic });
-                    //         themesArray.push(topicLabel);
-                    //     }
-                    // }
+                        if (forensicsThemesArray.indexOf(topicLabel) < 0) {
+                            forensicsThemes.push({ label: topicLabel, value: data });
+                            forensicsThemesArray.push(topicLabel);
+                        }
 
+                        if(topics.length > 1){
+                            collectDefaultTheme = true;
+                        }
+                    }else{
+                        collectDefaultTheme = true;
+                    }
+
+                    if(collectDefaultTheme) {
+                        topicLabel = _.split(topic.tag, ':')[0];
+                        topic = topic.tag;
+
+                        if (themesArray.indexOf(topicLabel) < 0) {
+                            themes.push({ label: topicLabel, value: topic });
+                            themesArray.push(topicLabel);
+                        }
+                    }
                 }
             } else {
                 this.unspecifiedCount += 1;

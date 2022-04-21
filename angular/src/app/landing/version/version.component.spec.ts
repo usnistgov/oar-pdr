@@ -51,11 +51,11 @@ describe('VersionComponent', () => {
     it('test renderRelAsLink()', () => {
         let rel = JSON.parse(JSON.stringify(rec.versionHistory[0]));
         let html = component.renderRelAsLink(rel, "one version");
-        expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk">one version</a>');
+        expect(html).toContain('od/id/ark:/88434/mds0000fbk">one version</a>');
 
         rel.location = undefined;
         html = component.renderRelAsLink(rel, "one version");
-        expect(html).toContain('<a href="https://data.nist.gov/od/id/mds0000fbk">one version</a>');
+        expect(html).toContain('od/id/mds0000fbk">one version</a>');
 
         rel['@id'] = "doi:10.88434/mine";
         html = component.renderRelAsLink(rel, "one version");
@@ -69,7 +69,7 @@ describe('VersionComponent', () => {
     it('test renderRelVer()', () => {
         let rel = JSON.parse(JSON.stringify(rec.versionHistory[0]));
         let html = component.renderRelVer(rel, "1.2.1");
-        expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk">v1.0.0</a>');
+        expect(html).toContain('od/id/ark:/88434/mds0000fbk">v1.0.0</a>');
 
         html = component.renderRelVer(rel, "1.0.0");
         expect(html).toBe('v1.0.0');
@@ -78,7 +78,7 @@ describe('VersionComponent', () => {
     it('test renderRelId()', () => {
         let rel = JSON.parse(JSON.stringify(rec.versionHistory[0]));
         let html = component.renderRelId(rel, "1.2.1");
-        expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk">ark:/88434/mds0000fbk</a>');
+        expect(html).toContain('od/id/ark:/88434/mds0000fbk">ark:/88434/mds0000fbk</a>');
 
         component.editMode = EDIT_MODES.editMode;
         html = component.renderRelId(rel, "1.2.1");

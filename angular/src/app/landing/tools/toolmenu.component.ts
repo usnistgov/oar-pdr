@@ -10,6 +10,8 @@ import * as _ from 'lodash-es';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { CartConstants } from '../../datacart/cartconstants';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
+
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -92,7 +94,7 @@ export class ToolMenuComponent implements OnChanges {
     }
 
     menuStyle() {
-        if(this.theme == "ScienceTheme") {
+        if(this.theme == Themes.SCIENCE_THEME) {
             if(this.isPopup) 
                 return 'rightMenuStylePopST';
             else
@@ -148,10 +150,7 @@ export class ToolMenuComponent implements OnChanges {
             );
 
             
-        let resourceType: string = "Dataset";
-        if(this.recordType == "Science Theme"){
-            resourceType = "Collection";
-        }
+        let resourceType: string = ThemesPrefs.getResourceLabel(this.theme);
 
         subitems.push(
             this.createMenuItem("About This " + resourceType, "faa faa-arrow-circle-right ",
@@ -165,7 +164,7 @@ export class ToolMenuComponent implements OnChanges {
 
         subitems = [];
 
-        if(this.theme != 'ScienceTheme') {
+        if(this.theme != Themes.SCIENCE_THEME) {
             subitems = [
                 this.createMenuItem('Citation', "faa faa-angle-double-right", (event) => { this.toggleCitation(); }, null)
             ]
@@ -234,7 +233,7 @@ export class ToolMenuComponent implements OnChanges {
         }
 
         let resourceLabel: string = "Similar Resources";
-        if(this.recordType == "Science Theme"){
+        if(this.recordType == Themes.SCIENCE_THEME){
             resourceLabel = "Resources in this Collection";
         }
 

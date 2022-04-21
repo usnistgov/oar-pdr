@@ -15,11 +15,14 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
+import { DropdownModule } from "primeng/dropdown";
 
 @NgModule({
   declarations: [SearchresultComponent],
   imports: [
-    CommonModule, FiltersModule, ResultlistModule,
+    CommonModule, 
+    FiltersModule,
+    ResultlistModule,
     TreeModule, 
     DialogModule, 
     InputTextModule, 
@@ -31,7 +34,8 @@ import { TooltipModule } from 'primeng/tooltip';
     MessageModule,
     InputTextareaModule,
     ProgressSpinnerModule,
-    MultiSelectModule
+    MultiSelectModule,
+    DropdownModule
   ],
   exports: [
     SearchresultComponent

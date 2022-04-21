@@ -29,7 +29,6 @@ export class ResourceIdentityComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() theme: string = 'PublicDataResource';
 
     /**
      * create an instance of the Identity section

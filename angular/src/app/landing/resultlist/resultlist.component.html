@@ -1,11 +1,8 @@
-<div style="width: 100%;margin: 20px 0 20px 10px; padding: 20px 10px; margin-top: 35px !important;" *ngIf="showResult">
+<div style="width: 100%;margin: 20px 0 20px 5px; padding: 20px 10px 20px 3px; margin-top: 35px !important;" *ngIf="showResult">
     <div class="grid p-fluid result-header">
 
         <div class="col-12 md:col-3" style="font-weight: bold;color: white;margin-top: -10px !important;">
-            <span *ngIf="theme=='ScienceTheme'; else nistTheme"> {{totalResultItems}} datasets found</span>
-            <ng-template #nistTheme>
-                {{totalResultItems}} records found
-            </ng-template>
+            <span> {{totalResultItems}} datasets found</span>
         </div>
 
         <!-- Pagination -->
@@ -42,17 +39,15 @@
             <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.5em;"
                 href="{{resultItem.landingPage}}" target="_blank"
                 >
-                <button pButton label="Home Page" type="button" class="p-button-sm"
-                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"
-                    [ngClass]="{'visit-home-page': theme=='PublicDataResource', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
+                <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page-forensics"
+                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
             </a>
             
             <a *ngIf="!resultItem.landingPage" style="float: right; margin-top: -0.5em;"
                 href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
                 (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
-                <button pButton label="Home Page" type="button" class="p-button-sm"
-                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"
-                    [ngClass]="{'visit-home-page': theme=='PublicDataResource', 'visit-home-page-forensics': theme=='ScienceTheme'}"></button>
+                <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page-forensics"
+                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
             </a>
 
             <div style="width: 80% !important;">
@@ -133,6 +128,16 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <div *ngIf="noSearchResult">
+        <div style="text-align: center;border-bottom: 1px solid grey;">
+            <img id="dog" src="./assets/images/NothingFound2_s.png">
+            <span class="nothing-found-text">Nothing found...</span>
+        </div>
+    </div>
+
+    <div *ngIf="!searchResults">
+        Loading search result...
     </div>
 </div>

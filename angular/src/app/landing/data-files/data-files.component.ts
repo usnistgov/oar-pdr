@@ -76,7 +76,7 @@ interface DataFileItem {
     providers: [ ],
     animations: [
         trigger('detailExpand', [
-          state('collapsed', style({height: '0px', minHeight: '0', display: 'none'})),
+          state('collapsed', style({height: '0px', minHeight: '0'})),
           state('expanded', style({height: '*'})),
           transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
@@ -106,7 +106,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
     // Flag to tell if this is a publishing platform
     @Input() editEnabled: boolean;    //Disable download all functionality if edit is enabled
-    @Input() theme: string = 'PublicDataResource';
 
     // Download status to trigger metrics refresh in parent component
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();  
@@ -681,9 +680,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     getDownloadBtnColor(rowData: any) {
         if (rowData.downloadStatus == DownloadStatus.DOWNLOADED)
-            return 'green';
+            return 'var(--nist-green-dark)';
 
-        return '#1E6BA1';
+        return 'var(--science-theme-background-dark)';
     }
 
     /**
@@ -691,9 +690,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     getAddAllToDataCartBtnColor() {
         if (this.allInCart)
-            return 'green';
+            return 'var(--nist-green-dark)';
         else
-            return '#1E6BA1';
+            return 'var(--science-theme-background-dark)';
     }
 
     /**
@@ -710,24 +709,24 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * Following functions set tree table style
      */
     titleStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[0].width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[0].width, 'color': 'white', 'font-size': this.fontSize };
     }
 
     typeStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[1].width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[1].width, 'color': 'white', 'font-size': this.fontSize };
     }
 
     sizeStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[2].width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[2].width, 'color': 'white', 'font-size': this.fontSize };
     }
 
     statusStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[3].width, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[3].width, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
     }
 
     titleStyle(rowData: any) {
         let cursor = this.isLeaf(rowData)? 'pointer' : 'default';
-        let color = this.isLeaf(rowData)? '#1471AE' : 'black';
+        let color = this.isLeaf(rowData)? 'var(--science-theme-background-dark)' : 'black';
         return { 'width': this.cols[0].width,'height': '10px', 'margin-left': '10px', 'cursor': cursor, 'color': color, 'padding': 0, 'font-size': this.fontSize };
     }                        
 

@@ -4,16 +4,16 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 
 
 @Component({
-  selector: 'app-searchresult',
-  templateUrl: './searchresult.component.html',
-  styleUrls: ['./searchresult.component.css'],
-  animations: [
-    trigger('filterStatus', [
-    state('collapsed', style({width: '39px'})),
-    state('expanded', style({width: '*'})),
-    transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ])
-]
+    selector: 'app-searchresult',
+    templateUrl: './searchresult.component.html',
+    styleUrls: ['./searchresult.component.css'],
+    animations: [
+        trigger('filterStatus', [
+        state('collapsed', style({width: '39px'})),
+        state('expanded', style({width: '*'})),
+        transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ])
+    ]
 })
 export class SearchresultComponent implements OnInit {
     searchValue: string = 'isPartOf.@id=ark:/88434/mds9911';
@@ -22,6 +22,7 @@ export class SearchresultComponent implements OnInit {
     mobileMode: boolean = false; // set mobile mode to true if window width < 641
     filterWidth: number;
     filterMode: string = "normal";
+    resultWidth: any;
     searchTaxonomyKey: string;
     page: number = 1;
     filterToggler: string = 'expanded';
@@ -33,7 +34,6 @@ export class SearchresultComponent implements OnInit {
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
-    @Input() theme: string = 'PublicDataResource';
 
     constructor() {
     }
@@ -58,8 +58,10 @@ export class SearchresultComponent implements OnInit {
         if(this.mouseDragging) {
             let diff = this.mouse.x - this.prevMouseX;
             this.filterWidth = this.prevFilterWidth + diff;
-            if(this.filterWidth < 40) this.filterWidth = 39;
+            this.filterWidth = this.filterWidth < 40? 39 : this.filterWidth > 500? 500 : this.filterWidth;
         }
+
+        this.setResultWidth();
     }
 
     onMousedown(event) {
@@ -104,6 +106,8 @@ export class SearchresultComponent implements OnInit {
         }else{
             this.filterWidth = this.mobWidth - 40;
         }
+
+        this.setResultWidth();
     }
 
     /**
@@ -118,11 +122,11 @@ export class SearchresultComponent implements OnInit {
      * Set the width of the right side result list panel
      * @returns 
      */
-    resultWidth(){
+    setResultWidth(){
         if(this.mobWidth <= this.filterWidth){
-            return "100%";
+            this.resultWidth = "100%";
         }else{
-            return this.mobWidth - this.filterWidth - 20;
+            this.resultWidth = this.mobWidth - this.filterWidth - 20;
         }
     }
 }

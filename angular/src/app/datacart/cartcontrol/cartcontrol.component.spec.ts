@@ -8,6 +8,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DataCart } from '../../datacart/cart';
 import { CartService } from '../../datacart/cart.service';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
+import { BadgeModule } from 'primeng/badge';
 
 describe('CartcontrolComponent', () => {
     let component: CartcontrolComponent;
@@ -25,7 +26,8 @@ describe('CartcontrolComponent', () => {
         TestBed.configureTestingModule({
         declarations: [ CartcontrolComponent ],
         imports: [
-            HttpClientTestingModule],
+            HttpClientTestingModule,
+            BadgeModule],
         providers: [
             CartService,
             DownloadService,

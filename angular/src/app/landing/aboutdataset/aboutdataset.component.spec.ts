@@ -35,6 +35,7 @@ describe('AboutdatasetComponent', () => {
         component.inBrowser = true;
         component.metricsData = new MetricsData();
         component.showJsonViewer = true;
+        component.theme = 'nist';
         component.ngOnChanges({});
         fixture.detectChanges();
     });
@@ -71,6 +72,7 @@ describe('AboutdatasetComponent', () => {
     });
 
     it('getDownloadURL()', () => {
-        expect(component.getDownloadURL()).toEqual("https://data.nist.gov/rmm/records/?@id=ark:/88434/mds0000fbk");
+        let url = component.getDownloadURL().substring(component.getDownloadURL().split("/", 3).join("/").length);
+        expect(url).toEqual("/rmm/records/?@id=ark:/88434/mds0000fbk");
     });
 });

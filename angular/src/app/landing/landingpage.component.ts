@@ -26,7 +26,7 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 import { MetricsData } from "./metrics-data";
-
+import { Themes, ThemesPrefs } from '../shared/globals/globals';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -95,6 +95,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     recordType: string = "";
     imageURL: string;
     theme: string;
+    scienceTheme = Themes.SCIENCE_THEME;
+    defaultTheme = Themes.DEFAULT_THEME;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -127,7 +129,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 public breakpointObserver: BreakpointObserver) 
     {
         this.reqId = this.route.snapshot.paramMap.get('id');
-        console.log('this.reqId', this.reqId)
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
@@ -214,12 +215,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
+                this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
+                console.log("Theme (@type):", this.theme);
+
                 if(this.inBrowser){
                     if(this.editEnabled){
                         this.metricsData.hasCurrentMetrics = false;
                         this.showMetrics = true;
-                    }else
-                        this.getMetrics();
+                    }else{
+                        if(this.theme == Themes.DEFAULT_THEME)
+                            this.getMetrics();
+                    }
                 }
 
                 // proceed with rendering of the component
@@ -472,8 +478,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     useMetadata(): void {
         this.metricsData.url = "/metrics/" + this.reqId;
         this.recordType = (new NERDResource(this.md)).resourceLabel();
-        this.theme = (new NERDResource(this.md)).theme();
-        console.log("Theme (@type):", this.theme);
 
         // set the document title
         this.setDocumentTitle();

@@ -6,6 +6,8 @@ import { TransferState } from '@angular/platform-browser';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { SearchService } from '../../shared/search-service/index';
 import { BrowserTransferStateModule } from '@angular/platform-browser';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { FormsModule } from '@angular/forms';
 
 describe('FiltersComponent', () => {
     let component: FiltersComponent;
@@ -17,7 +19,11 @@ describe('FiltersComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [ FiltersComponent ],
-            imports: [HttpClientTestingModule, BrowserTransferStateModule],
+            imports: [
+                HttpClientTestingModule, 
+                BrowserTransferStateModule,
+                AutoCompleteModule,
+                FormsModule],
             providers: [
                 SearchService,
                 { provide: AppConfig,       useValue: cfg }

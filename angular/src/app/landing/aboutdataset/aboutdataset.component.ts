@@ -7,6 +7,7 @@ import { VersionComponent } from '../version/version.component';
 import { MetricsData } from "../metrics-data";
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { formatBytes } from '../../utils';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 @Component({
     selector: 'aboutdataset-detail',
@@ -38,11 +39,14 @@ export class AboutdatasetComponent implements OnChanges {
     citeCopied: boolean = false;
     nerdmDocUrl: string;
     resourceType: string;
+    scienceTheme = Themes.SCIENCE_THEME;
+    defaultTheme = Themes.DEFAULT_THEME;
+    scienceThemeResourceType = ThemesPrefs.getResourceLabel(Themes.SCIENCE_THEME);
     
     private _collapsed: boolean = false;
     @Input() record: NerdmRes;
     @Input() inBrowser: boolean;
-    @Input() theme: string = 'PublicDataResource';
+    @Input() theme: string;
 
     // Flag to tell if current screen size is mobile or small device
     @Input() mobileMode : boolean|null = false;
@@ -80,7 +84,7 @@ export class AboutdatasetComponent implements OnChanges {
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
         this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/unconfigured");
         this.citetext = (new NERDResource(this.record)).getCitation();
-        this.resourceType = (new NERDResource(this.record)).resourceType();
+        this.resourceType = ThemesPrefs.getResourceLabel(this.theme);
     }
 
     ngOnChanges(changes: SimpleChanges) {

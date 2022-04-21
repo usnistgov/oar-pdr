@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { SearchService } from '../../shared/search-service/index';
@@ -48,6 +48,7 @@ export class ResultlistComponent implements OnInit {
     searchFields: string[] = ["title", "description", "keyword"];
     showResult: boolean = true;
     PDRAPIURL: string = "https://data.nist.gov/od/id/";
+    noSearchResult: boolean = false;
 
     //Pagination
     totalResultItems: number = 0;
@@ -60,13 +61,11 @@ export class ResultlistComponent implements OnInit {
     @Input() searchValue: string;
     @Input() searchTaxonomyKey: string;
     @Input() mobWidth: number = 1920;
-    @Input() theme: string = 'PublicDataResource';
     @Input() filterString: string = '';
 
     constructor(private searchService: SearchService) { }
 
     ngOnInit(): void {
-        console.log("page", this.currentPage)
         let that = this;
         this.searchService.searchPhrase()
         .subscribe(
@@ -116,6 +115,7 @@ export class ResultlistComponent implements OnInit {
         let totalItems: number = 0;
 
         this.totalResultItems = this.searchResultsForDisplay.length;
+        this.noSearchResult = this.totalResultItems == 0;
 
         if(this.totalResultItems % this.itemsPerPage == 0)
             this.totalPages = Math.trunc(this.totalResultItems / this.itemsPerPage);
@@ -325,15 +325,17 @@ export class ResultlistComponent implements OnInit {
      * Apply filters from left side panel and the search word(s) from the search text box
      */
     filterResults() {
-        if(!this.searchResults) return;
+        if(this.searchResults == undefined) return;
 
         let filters: string[];
         
+        // Reset the search result
         this.resetResult();
 
-        if(this.searchPhases != "")
-            this.filterResultByPhase(this.searchPhases);
+        // Handle search text box first
+        this.filterResultByPhase(this.searchPhases);
 
+        // Handle filters
         if(this.filterString != "noFilter" && this.filterString != ""){
             filters = this.filterString.split("&");
             filters.forEach((filter) => {

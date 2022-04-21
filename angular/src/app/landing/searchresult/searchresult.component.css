@@ -1,19 +1,9 @@
 .search-result {
-    /* display: inline-block; */
     vertical-align: top;
-    /* padding-bottom: 100%;
-    margin-bottom: -100%; */
-    /* margin-left: 20px; */
-    /* height: auto; */
 }
 
 .filter {
-    /* display: inline-block;  */
     vertical-align: top;
-    /* padding-bottom: 100%;
-    margin-bottom: -100%; 
-    margin-left: -20px;
-    margin-right: -20px; */
 }
 
 #right_panel {
@@ -45,11 +35,15 @@
 }
 
 .splitter {
-    margin-left: 5px;
+    width: 20px;
     font-size:x-large;
     cursor: col-resize;
-    background-color: var(--science-theme-background-light2);
-    /* height: 100%; */
-    /* margin: auto; */
-    /* color: grey; */
+    background-color: var(--background-light-grey);
+}
+
+#separator {
+    margin: 8px 1px 0px 1px;
+    color: var(--science-theme-background-dark);
+    font-size: 20px;
+    text-align: center;
 }
