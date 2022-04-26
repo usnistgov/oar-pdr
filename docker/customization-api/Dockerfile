@@ -43,5 +43,3 @@ RUN chmod a+rx /app/entrypoint.sh
 WORKDIR /dev/oar-pdr
 USER $devuser
 ENTRYPOINT [ "/app/entrypoint.sh" ]
-
-
