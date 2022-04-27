@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { EditStatusComponent } from './editstatus.component';
@@ -46,7 +46,7 @@ describe('EditStatusComponent', () => {
         component._editmode = EDIT_MODES.EDIT_MODE;
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         fixture.detectChanges();
     }));

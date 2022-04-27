@@ -9,13 +9,17 @@
       "node"
     ]
   },
-  "exclude": [
-    "test.ts",
-    "**/*.spec.ts"
-  ],
   // Add "angularCompilerOptions" with the AppServerModule you wrote
   // set as the "entryModule".
   "angularCompilerOptions": {
-    "entryModule": "app/app.server.module#AppServerModule"
-  }
+    "entryModule": "app/app.server.module#AppServerModule",
+    "enableIvy": false
+  },
+  "files": [
+    "main.server.ts",
+    "../server.ts"
+  ],
+  "include": [
+    "**/*.d.ts"
+  ]
 }

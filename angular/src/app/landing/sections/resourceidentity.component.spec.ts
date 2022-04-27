@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 
 import { ToastrModule } from 'ngx-toastr';
@@ -37,7 +37,7 @@ describe('ResourceIdentityComponent', () => {
         // fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         component.ngOnChanges()

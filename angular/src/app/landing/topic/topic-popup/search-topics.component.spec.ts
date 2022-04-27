@@ -1,9 +1,9 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 
 import { SearchTopicsComponent } from './search-topics.component';
 import { FormsModule } from '@angular/forms';
-import { DataTableModule, TreeModule } from 'primeng/primeng';
+import { TreeModule } from 'primeng/tree';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TreeNode } from 'primeng/api';
 import { TestDataService } from '../../../shared/testdata-service/testDataService';
@@ -30,7 +30,7 @@ describe('SearchTopicsComponent', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
       cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
       cfg.locations.pdrSearch = "https://goob.nist.gov/search";
       cfg.status = "Unit Testing";
@@ -38,7 +38,7 @@ describe('SearchTopicsComponent', () => {
 
         TestBed.configureTestingModule({
             declarations: [SearchTopicsComponent],
-            imports: [FormsModule, DataTableModule, TreeModule, HttpClientTestingModule, RouterTestingModule],
+            imports: [FormsModule, TreeModule, HttpClientTestingModule, RouterTestingModule],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 NgbActiveModal,

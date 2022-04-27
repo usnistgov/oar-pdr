@@ -29,18 +29,18 @@
     width: 200px;
 }
 
-.menu-button {
+.rightmenu-button {
     float: right;
     // position: absolute; 
     // top: 1em; 
     // right: 1.5em;
     // overflow: hidden;
     width: 2.3em;
+    height: 2.3em;
     z-index: 10;
-    border: 1px solid red;
 }
 
-.sticky{
+.sticky-button{
     position: fixed;
     top: 1em; 
     right: 1.5em;
@@ -50,7 +50,7 @@
     z-index: 10;
 }
 
-.ui-menu-dynamic {
+.p-menu-dynamic {
     position: fixed;
     top: 1em; 
     right: 1.5em;

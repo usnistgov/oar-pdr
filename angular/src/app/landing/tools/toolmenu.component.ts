@@ -6,7 +6,7 @@ import { Menu } from 'primeng/menu';
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
 import { EditStatusService } from '../editcontrol/editstatus.service';
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { CartConstants } from '../../datacart/cartconstants';
@@ -44,7 +44,7 @@ export class ToolMenuComponent implements OnChanges {
     @Output() scroll = new EventEmitter<string>();
 
     // reference to the child menu (needed to toggle display when isPopup = true)
-    @ViewChild('tmenu')
+    @ViewChild('tmenu', { static: true })
     private menu : Menu;
 
     // the menu item configuration

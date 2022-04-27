@@ -1,5 +1,5 @@
 import { ElementRef } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { TransferState } from '@angular/platform-browser';
 import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -87,7 +87,7 @@ describe('LandingPageComponent', () => {
             ]
         }).compileComponents();
 
-        router = TestBed.get(Router);
+        router = TestBed.inject(Router);
         fixture = TestBed.createComponent(LandingPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

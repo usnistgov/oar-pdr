@@ -5,17 +5,15 @@
             <i class="faa faa-bar-chart faa-lg" style="padding-right: .5em;text-shadow: 1px 1px 2px darkgrey;"></i><label>Dataset Metrics</label>
         </span>
         <div *ngIf="screenWidth > screenSizeBreakPoint" style="float: right;">
-            <button (click)="saveMetricsAsImage()" pButton 
+            <button (click)="saveMetricsAsImage()" pButton iconPos="left" icon="faa faa-download faa-1x icon-white"
+                label="Download Graphics"
                 [disabled]="noChartData || noDatasetSummary"
                 [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green','margin-top':'1em', 'margin-right':'1.5em'}">
-                <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
-                Download Graphics
             </button>
-            <button (click)="saveMetrics()" pButton 
+            <button (click)="saveMetrics()" pButton iconPos="left" icon="faa faa-download faa-1x icon-white"
+                label="Download Metrics"
                 [disabled]="noChartData || noDatasetSummary"
                 [ngStyle]="{'width':'200px', 'height':'35px', 'float':'right', 'background-color':'green', 'margin-right':'0.5em','margin-top':'1em'}">
-                <i class="faa faa-download faa-1x icon-white" style="color: #fff;"></i>
-                Download Metrics
             </button>
         </div>
     </div>
@@ -23,15 +21,13 @@
 
 <!-- For small screen, display the two download buttons in the separated lines -->
 <div class="mobile-button-container" *ngIf="screenWidth <= screenSizeBreakPoint" >
-    <button (click)="saveMetrics()" pButton 
+    <button (click)="saveMetrics()" pButton label="Download Metrics" class="p-button-sm"
     [disabled]="noChartData || noDatasetSummary"
-    [ngStyle]="{'width':'150px', 'height':'35px', 'background-color':'green', 'margin-right':'0.5em'}">
-        Download Metrics
+    [ngStyle]="{'background-color':'green', 'margin-right':'0.5em'}">
     </button>
-    <button (click)="saveMetricsAsImage()" pButton 
+    <button (click)="saveMetricsAsImage()" pButton label="Download Graphics" class="p-button-sm"
     [disabled]="noChartData || noDatasetSummary"
-    [ngStyle]="{'width':'150px', 'height':'35px',  'background-color':'green'}">
-        Download Graphics
+    [ngStyle]="{'background-color':'green'}">
     </button>
 </div>
 
@@ -158,7 +154,7 @@
 <!-- Display tree table -->
 <div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" >
     <p-treeTable *ngIf="visible" [value]="files" [columns]="cols" selectionMode="single" [style]="{'max-height':'400px','overflow':'auto'}" stickyHeader="true" stickyTopAt=".layout-topbar"
-        [resizableColumns]="true" sortField="name">
+        [resizableColumns]="true" sortField="name" styleClass="p-treetable-sm">
         <ng-template pTemplate="header" let-columns>
             <tr>
                 <th *ngFor="let col of columns; let i = index" [style.width]="col.width" [style.font-size]="fontSize"

@@ -1,4 +1,4 @@
-import { async, inject, TestBed } from '@angular/core/testing';
+import { inject, TestBed, waitForAsync  } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { MetricsService } from './metrics.service';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
@@ -11,7 +11,7 @@ describe('MetricsService', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
         cfg.status = "Unit Testing";
@@ -31,7 +31,7 @@ describe('MetricsService', () => {
     }));
 
     it('should be created', () => {
-        const service: MetricsService = TestBed.get(MetricsService);
+        const service: MetricsService = TestBed.inject(MetricsService);
         expect(service).toBeTruthy();
     });
 });

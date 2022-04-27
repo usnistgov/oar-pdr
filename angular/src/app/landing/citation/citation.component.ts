@@ -35,31 +35,27 @@ export class CitationDescriptionComponent {
 @Component({
     selector: 'citation-popup',
     template: `
-<p-dialog #citepopup class="citationDialog" [closable]="false" [(visible)]="visible" 
-                     [modal]="false" [width]="width" [responsive]="true">
-  <p-header> Citation
-    <button style="position:relative; float:right; background-color:#1E6BA1; " type="button" 
-            pButton icon="faa faa-close" (click)="hide()"></button>
-  </p-header>
-  <citation-display [citetext]="citetext"></citation-display>
-</p-dialog>
-`,
+    <p-dialog #citepopup header="Citation" modal="true" [(visible)]="visible" (click)="hide()" [style]="{width: '70vw'}" [baseZIndex]="10000">
+      <p-header> Citation
+      </p-header>
+      <citation-display [citetext]="citetext"></citation-display>
+    </p-dialog>
+    `,
     styles: [
         `
-:host /deep/ citationDialog > button.ui-button-icon-only{  
-  border-radius: 50%;
-  width: 1.5em;
-  height: 1.5em;
-}
-
-:host /deep/  .ui-dialog .ui-dialog-titlebar{
-  background-color: #f1f1f1;
-  color: #212121;
-  font-family: sans-serif;
-  font-size: 16px;
-}
-`
-    ],
+        :host ::ng-deep .p-dialog.customDialog{
+            /* background-color:rgb(0, 255, 76); */
+            color: red;
+        }
+        
+        :host ::ng-deep .ui-dialog .ui-dialog-titlebar{
+            background-color: #05ff43 !important;
+            color: #212121;
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+        `
+    ]
 })
 export class CitationPopupComponent {
     @Input() citetext : string;

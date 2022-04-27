@@ -3,7 +3,7 @@
  */
 import { Injectable, InjectionToken } from '@angular/core';
 
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 
 /**
  * a representation of a NERDm Component

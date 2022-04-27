@@ -2,9 +2,9 @@ import { NgModule }     from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { SharedModule, ButtonModule, DialogModule } from 'primeng/primeng';
-// import { ButtonModule } from 'primeng/button';
-// import { DialogModule } from 'primeng/dialog';
+import { SharedModule } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 
 import { CitationDescriptionComponent, CitationPopupComponent } from './citation.component'
 

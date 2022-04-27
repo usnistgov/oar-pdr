@@ -6,8 +6,11 @@
 <div class="popup-tool-bar">
     <!-- Buttons are arranged from right to left -->
 
-    <p-toolbar name="toolbar" [style]="{'background':'none','border-width':'0'}">
-        <div class="ui-toolbar-group-right">
+    <p-toolbar name="toolbar" [style]="{'background':'none','border-width':'0','height':'3em'}">
+        <div class="ui-toolbar-group-left">
+
+        </div>
+        <div class="ui-toolbar-group-right" style="margin-top: -1em;">
             <!-- Cancel button -->
             <button pButton type="submit" class="btn-labeled" id="btn-cancel" (click)="activeModal.close('Close click')" label="Cancel"
                 icon="faa faa-trash faa-1x icon-white" iconPos="left">
@@ -71,7 +74,7 @@
     style="width:90%; margin: 0em auto 2em auto; height: 50vh; overflow-y: scroll; border: 1px solid lightgrey;">
 
     <div style="margin: .5em 1em .5em 1em;">
-        <p-treeTable *ngIf="isVisible" [value]="taxonomyTree">
+        <p-treeTable *ngIf="isVisible" [value]="taxonomyTree" styleClass="p-treetable-sm">
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
                 <tr (dblclick)="updateTopics(rowNode)" (click)="openPopup($event,op5)">
                     <td (mouseover)="setHighlight(rowData)" (mouseout)="setHighlight('')"

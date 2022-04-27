@@ -1,20 +1,20 @@
-
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot } from '@angular/router';
 import { SearchService } from '../shared/search-service/index';
-import { RouterStateSnapshot } from '@angular/router/src/router_state';
+import { RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-// import { catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import * as _ from 'lodash';
-import { Console } from '@angular/core/src/console';
+import * as _ from 'lodash-es';
+// import { Console } from '@angular/core/src/console';
 import 'rxjs/add/observable/of';
 import { first, tap } from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
 import { PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
-import { _throw } from 'rxjs/observable/throw';
+import { throwError } from 'rxjs';
+
 @Injectable()
 export class SearchResolve implements Resolve<any> {
 
@@ -38,8 +38,8 @@ export class SearchResolve implements Resolve<any> {
       return of(record);
     }
     else {
-      return this.searchService.searchById(recordid)
-        .catch((err: Response, caught: Observable<any[]>) => {
+      return this.searchService.searchById(recordid).pipe(
+        catchError((err: Response, caught: Observable<any[]>) => {
           console.log(err);
           if (err !== undefined) {
             console.log("ERROR STATUS :::" + err.status);
@@ -51,8 +51,8 @@ export class SearchResolve implements Resolve<any> {
             }
             //return Observable.throw('The Web server (running the Web site) is currently unable to handle the request.');
           }
-          return Observable.throw(caught);
-        })
+          return throwError(() => caught);
+        }))
     }
   }
 }

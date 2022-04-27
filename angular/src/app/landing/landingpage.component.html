@@ -3,23 +3,23 @@
                   [(mdrec)]="md" [requestID]="requestId"></pdr-edit-control>
 
 <!-- landing page panel -->
-<div *ngIf="!displaySpecialMessage && _showContent" class="ui-grid ui-grid-responsive ui-grid-pad center">
-  <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
+<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad" style="padding: 30px 20px 20px 20px;">
+  <div class="card" [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'"  style="width: 100%;">
     <!-- <div> -->
     <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
-      <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12" style="padding-left: 1%">
+      <div class="col-12 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
         <b>Landing page is loading...</b>
       </div>
     </div>
 
-    <!-- div to keep track of the menu button position -->
-    <div #stickyButton ></div>
-
     <!-- Menu button and the popup menu (mobile mode only) -->
     <div style="width: 100%; height: 0px;">
+        <!-- div to keep track of the menu button position -->
+        <div #stickyButton ></div>
+
         <button #menubtn
             *ngIf="md !== null && inBrowser && mobileMode" 
-            [ngClass]="windowScrolled ? 'sticky' : 'menu-button'" 
+            [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" 
             type="button"
             pButton 
             icon="faa faa-list" 
@@ -37,10 +37,10 @@
     </div>
 
     <div *ngIf="_showData" >
-      <div class="ui-g">
+      <div class="grid">
 
         <!-- landing page content -->
-        <div class="ui-g-10 ui-md-10 ui-lg-10 ui-sm-12">
+        <div class="col-12 col-md-10 col-lg-10 col-sm-12">
 
             <pdr-landing-body 
                 [md]="md" 
@@ -58,15 +58,15 @@
         <div *ngIf="inBrowser">
             <citation-popup 
                 [citetext]="getCitation()"
-                [(visible)]="citationVisible"
-                [width]="citationDialogWith">
+                [visible]="citationVisible"
+                [width]="citationDialogWith"
+                (visibleChange)="setCitationVisible($event)">
             </citation-popup>
         </div>
 
         <!-- side tool menu (for tablets and desktop displays  -->
-        <div class="ui-g-2 ui-md-2 ui-lg-2 ui-sm-12">
-          <div class="ui-g" style="position: sticky; top: 0;">
-            <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+        <div class="col-2 col-md-2 col-lg-2">
+          <div style="position: sticky; top: 1em;">
               <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
                 <tools-menu #menu2  
@@ -85,7 +85,6 @@
                     
                 <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
               </div>
-            </div>
           </div>
         </div>
       </div>

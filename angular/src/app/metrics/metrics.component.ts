@@ -4,8 +4,8 @@ import { CommonFunctionService } from '../shared/common-function/common-function
 import { ActivatedRoute } from '@angular/router';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { AppConfig } from '../config/config';
-import { TreeNode } from 'primeng/primeng';
-import { saveAs } from 'file-saver';
+import { TreeNode } from 'primeng/api';
+import { saveAs } from 'file-saver-es';
 import { RecordLevelMetrics } from './metrics';
 import { DatePipe } from '@angular/common';
 import { HorizontalBarchartComponent } from './horizontal-barchart/horizontal-barchart.component';
@@ -96,7 +96,7 @@ export class MetricsComponent implements OnInit {
 
     ngOnInit() {
         this.distApi = this.cfg.get("locations.portalBase", "/unconfigured")+"od/id/";
-        console.log('this.distApi', this.distApi);
+        // console.log('this.distApi', this.distApi);
         this.detectScreenSize();
         this.recordLevelData = new RecordLevelMetrics();
 
@@ -116,7 +116,7 @@ export class MetricsComponent implements OnInit {
                 this.searchService.searchById(this.ediid, true).subscribe(md => {
                     if(md) {
                         this.record = md as NerdmRes;
-                        console.log("Nerdm record", this.record);
+                        // console.log("Nerdm record", this.record);
                         this.datasetTitle = md['title'];
 
                         this.createNewDataHierarchy();
@@ -290,7 +290,6 @@ export class MetricsComponent implements OnInit {
      * @param files 
      */
     handleSum(files: TreeNode[]){
-        console.log("files", files);
         this.totalFileSize = 0;
         files.forEach(child => {
             const {downloads, fileSize} = this.sumFolder(child);

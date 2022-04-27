@@ -1,6 +1,6 @@
 import { Component, OnInit, OnChanges, SimpleChanges, Input, Output,
          HostListener, Inject, PLATFORM_ID, EventEmitter } from '@angular/core';
-import { TreeNode } from 'primeng/primeng';
+import { TreeNode } from 'primeng/api';
 import { AppConfig } from '../../config/config';
 import { CartService } from '../cart.service';
 import { DataCart } from '../cart';

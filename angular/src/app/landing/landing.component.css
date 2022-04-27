@@ -1,151 +1,9 @@
-.style-horizontal {
-  border: 0;
-  height: 1px;
-  background: #333;
-  background-image: linear-gradient(to right, #ccc, #333, #ccc);
-}
-
-.background-white
-{
-  background-color:#ffffff;
-}
-
-.white
-{
-  color:#ffffff;
-}
-
-.title
-{
-  /* color:#1471AE; */
-  font-size: 20px;
-}
-
-.recordType{
-  font-family: Arial, Helvetica, sans-serif; 
-  color:#707070; 
-  font-size: 14;
-}
-
-
-:host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
-  /* background-color: #B8D4E6; */
-  /* background-color:rgb(65, 68, 69); */
-  background-color:#2C8034;
-  padding: 2%;
-  padding-left: 5%;
-  font-family: sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
- 
-}
-
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
-  line-height: 1em;
-  min-height: 1em;
-  background-color: #e7f0f6;
-  word-wrap: break-word;
-  font-family: 'Sans-Serif';
-  font-size: 14px;
-}
-
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
-  line-height: 1em;
-  min-height: 1em;
-  /* background-color:  #e7f0f6; */
-  background-color: #F0FAF1;
-  word-wrap: break-word;
-  font-family: sans-serif;
-  font-size: 14px;
-  padding: 0;
-}
-
-:host /deep/ .rightMenuStyle > .ui-menu .ui-menuitem-link{
-  padding: 0.5em 0.2em 0.5em 0.5em;
-  font-family:  sans-serif;
-  font-size: 14px;
-}
-:host /deep/ .rightMenuStyle > .ui-menu{
-  width: 100%;
-}
-
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-:host /deep/ .rightMenuStylePop  > .ui-menu {
-  position: absolute;
-  width: 12em;
-  word-wrap: break-word;
-  font-family: sans-serif;
-  
-}
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
-  padding: 0.5em 0.2em 0.5em 0.5em;
-  font-size: 14px;
-}
-
-:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem{
-  line-height: 1em;
-  min-height: 1em;
-  /* background-color:  #e7f0f6; */
-  background-color: #F0FAF1;
-  word-wrap: break-word;
-  font-family: sans-serif;
-  font-size: 14px;
-  padding: 0;
-}
-
-:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
-  line-height: 1em;
-  min-height: 1em;
-  background-color: #e7f0f6;
-  word-wrap: break-word;
-  font-family: 'Sans-Serif';
-  font-size: 14px;
-}
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header {
-  background-color:#2C8034;
-  padding: 2%;
-  padding-left: 5%;
-  font-family: sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
- 
-}
-
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header{
-  padding: 0.5em 0.2em 0.5em 0.5em;
-  font-size: 14px;
-}
-
-/* :host /deep/ .rightMenuStyle > .ui-menu .ui-menu-list li.ui-menuitem{
-  background-color:#E7F0F6;
-  font-family: 'Sans-Serif';
-  word-wrap: break-word;
-  font-size: 0.9em;
-} */
-
-:host /deep/ .ui-widget-header{
-  border: 0px;
-  /* background-color:#336B87; */
-   /* background-color: #1D72AC; */
-   color: black;
-   background-color: #f1f1f1;
-}
-
-:host /deep/ .ui-widget-content{
-  border: 0px;
-}
-:host /deep/ .ui-menu{
+:host ::ng-deep .p-menu{
   padding: 0;
   border:0;
 }
 
-:host /deep/ .ui-state-active, :host /deep/ .ui-state-highlight{
+:host ::ng-deep .p-state-active, :host ::ng-deep .p-state-highlight{
   background-color: #F3F3F3;
   color: black;
   font-family: sans-serif;
@@ -156,53 +14,54 @@
   background-color: #F3F3F3;
   text-align: left;
   color: black;
-  padding: 1;
+  padding: 1px;
 }
-:host /deep/ citationDialog > button.ui-button-icon-only{  
+:host ::ng-deep citationDialog > button.p-button-icon-only{  
   border-radius: 50%;
   width: 1.5em;
   height: 1.5em;
 }
 
 
-:host /deep/  .ui-dialog .ui-dialog-titlebar{
+:host ::ng-deep  .p-dialog .p-dialog-titlebar{
   background-color: #f1f1f1;
   color: #212121;
   font-family: sans-serif;
   font-size: 16px;
 }
 
-:host /deep/ .ui-treetable-resizable .ui-treetable-thead > tr > th{
+:host ::ng-deep .p-treetable-resizable .p-treetable-thead > tr > th{
   background-color: #1E6BA1;
-  /* border-color: coral; */
   color: white;
   border: 0;
+  padding: 5px 10px;
 }
 
-:host /deep/ .ui-treetable-tbody{
+:host ::ng-deep .p-treetable-tbody{
   /* background-color: #E4F2FC; */
   font-family: sans-serif;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 300;
 }
 
-:host /deep/ .ui-treetable thead tr{
+:host ::ng-deep .p-treetable thead tr{
   border-bottom: 0;
 }
 
-:host /deep/ .ui-treetable thead tr th .ui-column-resizer{
+:host ::ng-deep .p-treetable thead tr th .p-column-resizer{
   color: white;
 }
 
-:host /deep/ .ui-treetable .ui-treetable-tbody > tr > td{
+:host ::ng-deep .p-treetable .p-treetable-tbody > tr > td{
   border-bottom: #8c8c8c  1px solid;
   
 }
-:host /deep/  .ui-treetable thead tr th .ui-sortable-column-icon {
+:host ::ng-deep  .p-treetable thead tr th .p-sortable-column-icon {
   color: white;
 }
 
 
-/* .ui-treetable .ui-treetable-thead > tr > th, .ui-treetable .ui-treetable-tbody > tr > td, .ui-treetable .ui-treetable-tfoot > tr > td */
+/* .p-treetable .p-treetable-thead > tr > th, .p-treetable .p-treetable-tbody > tr > td, .p-treetable .p-treetable-tfoot > tr > td */
 .fileinfosection{
   background-color:#F3F3F3; 
   padding: 2.5rem 2.5rem 2.5rem 2.5rem;
@@ -219,7 +78,7 @@
   font-family:  sans-serif;
   font-style:italic;
   color:#484646; 
-  font-size: 12;
+  font-size: 12px;
 }
 .copyCite{
   position:relative;
@@ -247,7 +106,7 @@
 {
   font-family:  sans-serif;
   color: grey;
-  font-size: 12;
+  font-size: 12px;
 }
 
 .fDetailsfFont{
@@ -287,14 +146,11 @@
   text-align: left;
 }
 
-:host /deep/ .faa-cart-plus:before {
-  /* color: #1E6BA1; */
-}
-:host /deep/ reflinks > a {
+:host ::ng-deep reflinks > a {
   
   font-family: sans-serif;
 }
-/* :host /deep/ fileDialog > .ui-overlaypanel .ui-overlaypanel-close {
+/* :host ::ng-deep fileDialog > .p-overlaypanel .p-overlaypanel-close {
   background-color: #1E6BA1;
   border-radius: 50%;
   transition: background-color 0.3s;
@@ -305,7 +161,7 @@
   line-height: 1.2em;
   text-align: center;
 } */
-/* :host /deep/  a > .ui-overlaypanel .ui-overlaypanel-close{
+/* :host ::ng-deep  a > .p-overlaypanel .p-overlaypanel-close{
   background-color: #1E6BA1;
 } */
 
@@ -315,7 +171,7 @@
   font-weight: bold;
    font-size: 10pt
 }
-:host >>> .ui-overlaypanel .ui-overlaypanel-close{
+:host ::ng-deep .p-overlaypanel .p-overlaypanel-close{
   background-color: #1E6BA1;
 }
 
@@ -395,7 +251,7 @@
   }
 }
 
-::ng-deep p-dialog .ui-dialog {
+::ng-deep p-dialog .p-dialog {
   overflow: scroll;
   max-height: 100%;
 }
@@ -405,7 +261,7 @@
 .loading {
   position: fixed;
   z-index: 999;
-  overflow: show;
+  overflow: visible;
   margin: auto;
   top: 0;
   left: 0;
@@ -589,6 +445,7 @@ a:visited {
   border-style: solid;
   border-color: lightgrey;
   border-width: 1px 1px 1px 0px;
+  margin-right: .5em;
 }
 
 .undo_button {
@@ -606,15 +463,13 @@ a:visited {
 .icon_enabled { 
   cursor: pointer;
   color: black;
-  padding: auto;
   font-size: 1em;
- }
+}
 
- .icon_disabled { 
+.icon_disabled { 
   color: rgb(200, 200, 200);
-  padding: auto;
   font-size: 1em;
- }
+}
 
 .filter-black{
   filter: invert(0.5);

@@ -10,8 +10,8 @@ import { Response } from 'express';
   styleUrls: ['landing.component.css'],
   selector: 'error-template',
   template: `
-  <div class="ui-g">
-      <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+  <div class="grid">
+      <div class = "col-12 col-md-12 col-lg-12 col-sm-12">
         <h3 id="error" name="error"><b>Error</b></h3><br>   
         <div>
         The landing page for the given ID cannot be displayed due to an internal error.  <br>
@@ -42,8 +42,8 @@ export class ErrorComponent {
   // styleUrls: ['landing.component.css'],
   selector: 'user-error',
   template: `
-    <div class="ui-g">
-        <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+    <div class="grid">
+        <div class = "col-12 col-md-12 col-lg-12 col-sm-12">
           <h3 id="uerror" name="uerror"><b>Error</b></h3><br>   
           <div>
             The landing page for the given ID cannot be displayed due to some error.  <br>

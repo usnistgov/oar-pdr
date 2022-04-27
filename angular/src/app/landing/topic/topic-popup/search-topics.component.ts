@@ -29,7 +29,7 @@ export class SearchTopicsComponent implements OnInit {
   toggle: Boolean = true;  
 
   @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
-  @ViewChild('panel0', { read: ElementRef }) public panel0: ElementRef<any>;
+  @ViewChild('panel0', { read: ElementRef, static: true }) public panel0: ElementRef<any>;
 
   constructor(
     private taxonomyListService: TaxonomyListService,

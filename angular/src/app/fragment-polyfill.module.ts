@@ -183,7 +183,7 @@ interface ModuleOptions {
 })
 export class FragmentPolyfillModule {
 
-	static forRoot( options?: ModuleOptions ) : ModuleWithProviders {
+	static forRoot( options?: ModuleOptions ) : ModuleWithProviders<FragmentPolyfillModule> {
 
 		return({
 			ngModule: FragmentPolyfillModule,

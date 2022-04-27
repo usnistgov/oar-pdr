@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { AppConfig } from '../../config/config';
 import { CartcontrolComponent } from './cartcontrol.component';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
@@ -16,7 +16,7 @@ describe('CartcontrolComponent', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
         cfg.status = "Unit Testing";
@@ -82,7 +82,7 @@ describe('CartcontrolComponent', () => {
         expect(component.getDownloadedBkColor()).toEqual("green");
     });
 
-    it('cart update', async(() => {
+    it('cart update', waitForAsync(() => {
         expect(component.totalDownloaded).toBe(0);
         expect(component.selectedFileCount).toBe(0);
         component.datacart.addFile("gov", { filePath: "hank", count: 8, downloadStatus: "downloaded",

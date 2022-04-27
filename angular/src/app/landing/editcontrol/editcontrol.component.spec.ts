@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppConfig } from '../../config/config';
 import { ConfirmationDialogService } from '../../shared/confirmation-dialog/confirmation-dialog.service';
@@ -39,7 +39,7 @@ describe('EditControlComponent', () => {
         // fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         fixture.detectChanges();
@@ -62,7 +62,7 @@ describe('EditControlComponent', () => {
     });
 
     // test startEditing()
-    it('startEditing()', async(() => {
+    it('startEditing()', waitForAsync(() => {
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
         let discbtn = cmpel.querySelector("#ec-discard-btn") 
@@ -92,7 +92,7 @@ describe('EditControlComponent', () => {
     }));
 
     // test discardEdits()
-    it('discardEdits()', async(() => {
+    it('discardEdits()', waitForAsync(() => {
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
 
@@ -123,7 +123,7 @@ describe('EditControlComponent', () => {
     }));
 
     // test doneEdits
-    it('doneEdits()', async(() => {
+    it('doneEdits()', waitForAsync(() => {
         expect(component._editMode).toBe(EDIT_MODES.VIEWONLY_MODE);
         let cmpel = fixture.nativeElement;
         let edbtn = cmpel.querySelector("#ec-edit-btn") 
