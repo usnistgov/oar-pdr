@@ -50,7 +50,7 @@
     "express": "^4.15.2",
     "file-saver": "^2.0.5",
     "file-saver-es": "^2.0.5",
-    "jquery": "^1.9.1",
+    "jquery": "^3.5.0",
     "lodash-es": "^4.17.21",
     "ngx-filesaver": "^9.0.0",
     "ngx-json-viewer": "^3.0.2",
