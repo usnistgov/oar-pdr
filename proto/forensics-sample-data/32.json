@@ -1,0 +1,171 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Biometrics",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsReferencedBy",
+            "location": "https://www.nist.gov/publications/analysis-three-different-regression-models-estimate-ballistic-performance-new-and",
+            "@id": "#ref:publications/analysis-three-different-regression-models-estimate-ballistic-performance-new-and",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.5#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Analysis of three different regression models to estimate the ballistic performance of new and environmentally conditioned body armor",
+            "issued": "2011-02",
+            "citation": "Mauchant, D., Rice, K. D., Riley, M. A., Lebber, D., Samarov, D., & Forster, A. L. (2011). Analysis of three different regression models to estimate the ballistic performance of new and environmentally conditioned body armor. doi:10.6028/nist.ir.7760\n",
+            "location": "https://doi.org/10.6028/NIST.IR.7760",
+            "@id": "#ref:10.6028/NIST.IR.7760",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "ballistic limit",
+        "logistic regression",
+        "c-log-log",
+        "probit"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2149",
+    "title": "Ballistic test results for several different soft body armor systems",
+    "theme": [
+        "Materials:Polymers",
+        "Public Safety:Law enforcement"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2149"
+        }
+    ],
+    "description": [
+        "The performance standard for ballistic-resistant body armor published by the National Institute of Justice (NIJ), NIJ Standard 0101.06, recommends estimating the perforation performance of body armor by performing a statistical analysis on V50 ballistic limit testing data.  The first objective of this study is to evaluate and compare the estimations of the performance provided by different statistical methods applied to ballistic data generated in the laboratory. Three different distribution models are able to describe the relationship between the projectile velocity and the probability of perforation are considered: the logistic, the probit and the complementary log-log response models. A secondary objective of this study is to apply the different methods to a new body armor model with unusual ballistic limit results, leading one to suspect that it may not be best described by a symmetric model, to determine if this data can be better fitted by a model other than the logistic model.  This work has been published as NISTIR 7760, \"Analysis of Three Different Regression Models to Estimate the Ballistic Performance of New and Environmentally Conditioned Body Armor.\"  The raw data (ballistic limit data) associated with this prior publication is archived in this dataset."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:amanda.forster@nist.gov",
+        "fn": "Amanda L. Forster"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2149",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M32149",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2011-02-14 00:00:00",
+    "ediid": "ark:/88434/mds2-2149",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/M32149",
+            "@id": "#doi:10.18434/M32149",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Ballistic test results for several different soft body armor systems"
+        },
+        {
+            "description": "SHA-256 checksum value for V50.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "title": "Ballistic test results for several different soft body armor systems",
+            "checksum": {
+                "hash": "4ed113d003b08bacf8d1a270c8cd0e8a926c37c25e9976083fc827ee789b9f01",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "filepath": "V50.zip.sha256",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2149/V50.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/V50.zip",
+            "@id": "cmps/V50.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "There are six .csv files, all contain V50 ballistic limit data, one for each of the armors tested. Each .csv has two columns, one for velocity in (m/s) and one for result.  The results are coded as a 1 if the armor was perforated by the projectile and a 0 if the armor stopped the projectile. A readme file gives additional information on the dataset.",
+            "format": {
+                "description": "This is a zipped complication of six .csv files and one .txt readme file."
+            },
+            "checksum": {
+                "hash": "ba8ee6071849d5883af434d1bda46727f695ef64d446fdbf8f26a0a653f4d66b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "filepath": "V50.zip",
+            "mediaType": "application/x-zip-compressed",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2149/V50.zip",
+            "title": "Ballistic test results for several different soft body armor systems",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/V50.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 4233
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,188 @@
+{
+    "issued": null,
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds1068c0v.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2018-06-12",
+                "version": "1.0.0",
+                "@id": "ark:/88434/mds1068c0v",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v.v1_0_0",
+                "description": "initial release"
+            },
+            {
+                "issued": "2018-06-12 00:00:00",
+                "version": "1.0.1",
+                "@id": "ark:/88434/mds1068c0v",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v.v1_0_1",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2018-06-12 00:00:00",
+                "version": "1.0.2",
+                "@id": "ark:/88434/mds1068c0v",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v.v1_0_2",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2018-06-12 00:00:00",
+                "version": "1.0.3",
+                "@id": "ark:/88434/mds1068c0v.v1_0_3",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v.v1_0_3",
+                "description": "metadata update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Biometrics",
+            "@type": "Concept"
+        },
+         {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Fingerprints: Plain",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Fingerprints: Rolled",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsCitedBy",
+            "title": "NIST special database 300: uncompressed plain and rolled images from fingerprint cards",
+            "issued": "2018-06",
+            "citation": "Fiumara, G., Flanagan, P., Grantham, J., Bandini, B., Ko, K., & Libert, J. (2018). NIST special database 300: uncompressed plain and rolled images from fingerprint cards. doi:10.6028/nist.tn.1993\n",
+            "location": "https://doi.org/10.6028/NIST.TN.1993",
+            "@id": "#ref:10.6028/NIST.TN.1993",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/6B5200EAC9FB2EB1E0532457068101C91919",
+    "annotated": "2022-03-11T16:25:01.068579",
+    "title": "NIST Special Database 300 Uncompressed Plain and Rolled Images from Fingerprint Cards ",
+    "theme": [
+        "Information Technology: Biometrics"
+    ],
+    "version": "1.0.3",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds1068c0v"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "NIST, working with the FBI, has digitized 888 inked fingerprint arrest cards that were in various physical conditions, from pristine to badly damaged and faded, and were collected during law enforcement professionals' duties. This database contains images of the 10 rolled fingerprint impressions, the two four-finger slap impressions (finger positions 13 and 14), the two thumb slap impressions (finger positions 11 and 12) and the segmented impressions from the slap images (13,14). The database also includes the coordinates that were used to segment the impressions from the slap fingerprint images.",
+        "The cards were scanned at three different resolutions: 500, 1,000, and 2,000 pixels per inch (PPI). All three resolutions were scanned in grayscale at a depth of 8 bits-per pixel.",
+        "Data available as of July 2018 is Special Database 300a, in 500 ppi with PNG formatted impressions.  Data at other resolutions, in other image formats, and in other record types may be forthcoming."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:patricia.flanagan@nist.gov",
+        "fn": "Patricia A. Flanagan"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds1068c0v",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M31919",
+    "keyword": [
+        "fingerprint",
+        "rolled",
+        "plain",
+        "segmentation",
+        "ink cards",
+        "biometrics",
+        "friction ridge"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "rights": "Use of this data requires users agree to be bound by the following terms and conditions. The database will only be used for biometrics related research. The database will not be further distributed, published, copied, or disseminated in any way or form",
+    "modified": "2018-06-12 00:00:00",
+    "ediid": "6B5200EAC9FB2EB1E0532457068101C91919",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/T4/1502472",
+            "description": "DOI Access to NIST Special Database 300 Uncompressed Plain and Rolled Images from Fingerprint Cards",
+            "title": "DOI Access to NIST Special Database 300 Uncompressed Plain and Rolled Images from Fingerprint Cards",
+            "format": {
+                "description": "text/html"
+            },
+            "@id": "#10.18434/T4/1502472",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/AccessPage"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2018-06-12",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds1068c0v",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v",
+            "description": "initial release"
+        },
+        {
+            "issued": "2018-06-12 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds1068c0v",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2018-06-12 00:00:00",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds1068c0v",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds1068c0v",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

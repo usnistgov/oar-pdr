@@ -1,0 +1,269 @@
+{
+    "issued": null,
+    "revised": "2022-02-25T21:40:21.752218",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "firstIssued": "2022-02-25T21:40:21.752218",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2527",
+    "annotated": "2022-02-25T21:40:21.752218",
+    "title": "Project REMEDY - Supplemental Information and Data",
+    "_editStatus": "done",
+    "theme": [
+        "Forensics: Drugs and toxicology"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2527"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "Project REMEDY aims to identify and characterize potential emerging drugs that have not been previously identified. This is a joint effort between the National Institute of Standards and Technology (NIST) and the Drug Enforcement Administration Special Testing and Research Laboratory (DEA-STRL). The data repository is meant to provide supplemental information and data for materials characterized as a part of Project REMEDY."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "",
+            "familyName": "Sisco",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0003-0252-1910",
+            "givenName": "Edward",
+            "@type": "foaf:Person",
+            "fn": "Edward  Sisco"
+        },
+        {
+            "middleName": "A.",
+            "familyName": "Urbas",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Aaron",
+            "@type": "foaf:Person",
+            "fn": "Aaron A. Urbas"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:edward.sisco@nist.gov",
+        "fn": "Edward Sisco"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2527",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2527",
+    "keyword": [
+        "Seized Drug",
+        "Emerging Drug",
+        "Novel Psychoactive Substance"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2021-12-27 00:00:00",
+    "ediid": "ark:/88434/mds2-2527",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2527",
+            "@id": "#doi:10.18434/mds2-2527",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Project REMEDY - Supplemental Information and Data"
+        },
+        {
+            "description": "Report for sample PSS0146 (MiPT)",
+            "filepath": "PSS0146 - Report (MiPT).pdf",
+            "checksum": {
+                "hash": "3979dfc89fb7631d5b3fa97ecbb7dc4a2c364210e9d751c4c03ec97c6f47db44",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "PSS0146 - Report (MiPT)",
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2527/PSS0146%20-%20Report%20%28MiPT%29.pdf",
+            "size": 1219194,
+            "@id": "cmps/PSS0146 - Report (MiPT).pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Report of analysis for sample RP0002 (PTHP).",
+            "filepath": "RP0002 - Report (PTHP).pdf",
+            "checksum": {
+                "hash": "310f874ac5aff4903706f40593a55d99c73008587c4843d760b9f2dd33628e84",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "RP0002 - Report (PTHP)",
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2527/RP0002%20-%20Report%20%28PTHP%29.pdf",
+            "size": 808781,
+            "@id": "cmps/RP0002 - Report (PTHP).pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Report of analysis for sample RP0001 (POXP)",
+            "filepath": "RP0001 - Report (POXP).pdf",
+            "checksum": {
+                "hash": "ce92b488b04dd9eb8a4a7b0b77cf348ad4bbc19bede9c338a58412ce4d7d28be",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "RP0001 - Report (POXP)",
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2527/RP0001%20-%20Report%20%28POXP%29.pdf",
+            "size": 730690,
+            "@id": "cmps/RP0001 - Report (POXP).pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "DART-MS, GC-MS, LC-MS/MS, and NMR data supporting the identification of REMEDY sample RP0002.",
+            "filepath": "RP0002 - Data.zip",
+            "checksum": {
+                "hash": "2da8d4720e1e2399017a74d0b3abeb50058fccdb4a3b4139b21f677de2137e7d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "RP0002 Data",
+            "mediaType": "application/x-zip-compressed",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2527/RP0002%20-%20Data.zip",
+            "size": 82046762,
+            "@id": "cmps/RP0002 - Data.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "List of compounds with reports and data available.",
+            "filepath": "REMEDY Sample Sheet.xlsx",
+            "checksum": {
+                "hash": "a1c83263e233cf4690e7a4cb89a074e7694a5bc964f00e68466b5efa00eb841f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "REMEDY Sample Sheet",
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2527/REMEDY%20Sample%20Sheet.xlsx",
+            "size": 10459,
+            "@id": "cmps/REMEDY Sample Sheet.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "DART-MS, GC-MS, LC-MS/MS, and NMR data supporting the identification of REMEDY sample RP0001.",
+            "filepath": "RP0001 - Data.zip",
+            "checksum": {
+                "hash": "327444cc8e4b69d72d9b2b6672fd16c2c5d3feb6625a85fdfe37758e50d4a5ff",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "RP0001 Data",
+            "mediaType": "application/x-zip-compressed",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2527/RP0001%20-%20Data.zip",
+            "size": 41280207,
+            "@id": "cmps/RP0001 - Data.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

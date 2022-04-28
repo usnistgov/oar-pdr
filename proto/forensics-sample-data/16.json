@@ -1,0 +1,129 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Face",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsCitedBy",
+            "title": "NIST special database 32 multiple encounter dataset II (MEDS-II) :",
+            "issued": "2011",
+            "citation": "Founds, A. P., Orlans, N., Whiddon, G., & Watson, C. (2011). NIST special database 32 multiple encounter dataset II (MEDS-II)â¯: doi:10.6028/nist.ir.7807\n",
+            "location": "https://doi.org/10.6028/NIST.IR.7807",
+            "@id": "#ref:10.6028/NIST.IR.7807",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "face",
+        "forensic",
+        "biometrics"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
+    "title": "Multiple Encounter Dataset (MEDS-II) - NIST Special Database 32",
+    "theme": [
+        "Information Technology:Biometrics"
+    ],
+    "version": "1.0.1",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds00wpckz"
+        }
+    ],
+    "description": [
+        "Multiple Encounter Dataset (MEDS-II) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, analysis, face image conformance, and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:patricia.flanagan@nist.gov",
+        "fn": "Patricia A. Flanagan"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds00wpckz",
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2011-07-11 00:00:00",
+    "ediid": "26DEBF5B517C6750E0531A570681AA751450",
+    "components": [
+        {
+            "accessURL": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
+            "description": "zip file with JPEG images of faces",
+            "format": {
+                "description": "zip file with jpeg images"
+            },
+            "describedByType": "text/csv",
+            "filepath": "NIST_SD32_MEDS-II_face.zip",
+            "mediaType": "application/zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "downloadURL": "http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-II_face.zip",
+            "title": "Multiple Encounter Dataset (MEDS-II)",
+            "@id": "cmps/NIST_SD32_MEDS-II_face.zip",
+            "describedBy": "http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-II_metadata.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2011-07-11",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds00wpckz",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00wpckz",
+            "description": "initial release"
+        },
+        {
+            "issued": "2011-07-11 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds00wpckz",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00wpckz",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

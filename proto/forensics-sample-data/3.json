@@ -1,0 +1,1707 @@
+{
+    "issued": "2018-11-06T15:39:03.0",
+    "revised": "2022-01-19T14:10:23.121761",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds1141dw08w.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2018-06-14",
+                "version": "1.0.0",
+                "@id": "ark:/88434/mds1141dw08w",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_0_0",
+                "description": "initial release"
+            },
+            {
+                "issued": "2018-06-14",
+                "version": "1.1.0",
+                "@id": "ark:/88434/mds1141dw08w",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_0",
+                "description": "data update"
+            },
+            {
+                "issued": "2018-06-14",
+                "version": "1.1.1",
+                "@id": "ark:/88434/mds1141dw08w",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_1",
+                "description": "metadata update: fix references"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.1.2",
+                "@id": "ark:/88434/mds1141dw08w.v1_1_2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_2",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.1.3",
+                "@id": "ark:/88434/mds1141dw08w.v1_1_3",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_3",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.1.4",
+                "@id": "ark:/88434/mds1141dw08w.v1_1_4",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_4",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.1.5",
+                "@id": "ark:/88434/mds1141dw08w.v1_1_5",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_5",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.1.6",
+                "@id": "ark:/88434/mds1141dw08w.v1_1_6",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_6",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.1.7",
+                "@id": "ark:/88434/mds1141dw08w.v1_1_7",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_1_7",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-12-09 00:00:00",
+                "version": "1.2.0",
+                "@id": "ark:/88434/mds1141dw08w.v1_2_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w.v1_2_0",
+                "description": "data update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: DNA and biological evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: DNA and biological evidence",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsReferencedBy",
+            "title": "Sequence-based U.S. population data for 27 autosomal STR loci",
+            "issued": "2018-11",
+            "citation": "Gettings, K. B., Borsuk, L. A., Steffen, C. R., Kiesler, K. M., & Vallone, P. M. (2018). Sequence-based U.S. population data for 27 autosomal STR loci. Forensic Science International: Genetics, 37, 106â115. doi:10.1016/j.fsigen.2018.07.013\n",
+            "label": "Forensic Science International: Genetics: Sequence-based U.S. population data for 27 autosomal STR loci",
+            "location": "https://doi.org/10.1016/j.fsigen.2018.07.013",
+            "@id": "#ref:10.1016/j.fsigen.2018.07.013",
+            "@type": [
+                "schema:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsReferencedBy",
+            "title": "Sequence-based US population data for the SE33 locus",
+            "issued": "2018-06-01",
+            "citation": "Borsuk, L. A., Gettings, K. B., Steffen, C. R., Kiesler, K. M., & Vallone, P. M. (2018). Sequence-based US population data for the SE33 locus. ELECTROPHORESIS, 39(21), 2694â2701. doi:10.1002/elps.201800091\n",
+            "label": "ELECTROPHORESIS: Sequence-based US population data for the SE33 locus",
+            "location": "https://doi.org/10.1002/elps.201800091",
+            "@id": "#ref:10.1002/elps.201800091",
+            "@type": [
+                "schema:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsSupplementTo",
+            "title": "Sequence-based U.S. population data for 7 X-STR loci",
+            "issued": "2020-12",
+            "citation": "Borsuk, L. A., Steffen, C. R., Kiesler, K. M., Vallone, P. M., & Gettings, K. B. (2020). Sequence-based U.S. population data for 7 X-STR loci. Forensic Science International: Reports, 2, 100160. doi:10.1016/j.fsir.2020.100160\n",
+            "location": "https://doi.org/10.1016/j.fsir.2020.100160",
+            "@id": "#ref:10.1016/j.fsir.2020.100160",
+            "@type": [
+                "npg:Document"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/6998B81EF78777B2E05324570681D4DC1911",
+    "annotated": "2022-01-19T14:10:23.121761",
+    "title": "U.S. population data for human identification markers",
+    "_editStatus": "done",
+    "theme": [
+        "Forensics: DNA and biological evidence"
+    ],
+    "version": "1.2.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds1141dw08w"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "The primary data consist of allele or haplotype frequencies for N=1036 anonymized U.S. population samples. Additional files are supplements to the associated publications. Any changes to spreadsheets are listed in the \"Change Log\" tab within each spreadsheet. DOI numbers for associated publications are listed below, under \"References\"."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "",
+            "familyName": "Borsuk",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "Applied Genetics Group"
+                    ],
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Lisa",
+            "@type": "foaf:Person",
+            "fn": "Lisa  Borsuk"
+        },
+        {
+            "middleName": "",
+            "familyName": "Gettings",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "Applied Genetics Group"
+                    ],
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Katherine",
+            "@type": "foaf:Person",
+            "fn": "Katherine  Gettings"
+        },
+        {
+            "middleName": "",
+            "familyName": "Kiesler",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "Applied Genetics Group"
+                    ],
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Kevin",
+            "@type": "foaf:Person",
+            "fn": "Kevin  Kiesler"
+        },
+        {
+            "middleName": "",
+            "familyName": "Steffen",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "Applied Genetics Group"
+                    ],
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Becky",
+            "@type": "foaf:Person",
+            "fn": "Becky  Steffen"
+        },
+        {
+            "middleName": "",
+            "familyName": "Vallone",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "Applied Genetics Group"
+                    ],
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Peter",
+            "@type": "foaf:Person",
+            "fn": "Peter  Vallone"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:katherine.gettings@nist.gov",
+        "fn": "Katherine Gettings"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds1141dw08w",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-1911",
+    "keyword": [
+        "STR",
+        "forensic",
+        "sequence",
+        "population",
+        "allele frequency",
+        "haplotype"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2021-12-09 00:00:00",
+    "ediid": "6998B81EF78777B2E05324570681D4DC1911",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/t4/1500024",
+            "description": "persistent identifier for Sequence-based U.S. population data for 27 autosomal STR loci",
+            "title": "DOI Access for Sequence-based U.S. population data for 27 autosomal STR loci",
+            "format": {
+                "description": "text/html"
+            },
+            "@id": "#10.18434/t4/1500024",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/AccessPage"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for the SE33 locus",
+            "@id": "cmps/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus",
+            "@type": [
+                "nrdp:Subcollection"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/Subcollection"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table1_ExtendedFlank.xlsx",
+            "checksum": {
+                "hash": "a6b38dd7382b0f65301366631c0331b48b17defb8810372a15222459529a9f63",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table1_ExtendedFlank.xlsx",
+            "size": 11998,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table1_ExtendedFlank.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table3_MotifPatterns.xlsx",
+            "checksum": {
+                "hash": "79820533136b13185377bfaf5cc044dc9e312171058560ca37f4bcb9ddf9ebde",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table3_MotifPatterns.xlsx",
+            "size": 16126,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table3_MotifPatterns.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table2_Frequency.xlsx",
+            "checksum": {
+                "hash": "7ab7882c88ff94c2748dacb9e380ae495fa27061bab321d4bca44daefbad88fd",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table2_Frequency.xlsx",
+            "size": 50334,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table2_Frequency.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Supplementary_Table2_Frequency.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table2_Frequency.xlsx.sha256",
+            "checksum": {
+                "hash": "beabb4854d1cdd7e2b449c71b41e28764180fdb4d1f658a9a632dc45c8dc311b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table2_Frequency.xlsx.sha256",
+            "describes": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table2_Frequency.xlsx",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table2_Frequency.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for README_SE33.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for the SE33 locus/README_SE33.txt.sha256",
+            "checksum": {
+                "hash": "ba92d38913b681c5bd8381829a407d96c791b80dbccfc30ee33e522858df4346",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/README_SE33.txt.sha256",
+            "describes": "cmps/Sequence based US population data for the SE33 locus/README_SE33.txt",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/README_SE33.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for the SE33 locus/README_SE33.txt",
+            "checksum": {
+                "hash": "c3ab59d9b9d5f7f0d408a9e9a60b9f3da36785ab273b90f6524988955128558c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/README_SE33.txt",
+            "size": 1493,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/README_SE33.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Supplementary_Table3_MotifPatterns.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table3_MotifPatterns.xlsx.sha256",
+            "checksum": {
+                "hash": "cc5ba5e82d8a6f5dc552f8a10135c4576a11138058c68572946f8541b3a5dd85",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table3_MotifPatterns.xlsx.sha256",
+            "describes": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table3_MotifPatterns.xlsx",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table3_MotifPatterns.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Supplementary_Table1_ExtendedFlank.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table1_ExtendedFlank.xlsx.sha256",
+            "checksum": {
+                "hash": "a00dca9f6c30439f3dc2fe00b478e844acb07a5c58a9b144e83c70efb80db9fa",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table1_ExtendedFlank.xlsx.sha256",
+            "describes": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table1_ExtendedFlank.xlsx",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table1_ExtendedFlank.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table4_PopulationStatistics.xlsx",
+            "checksum": {
+                "hash": "69ab76d2f9a2e7888ec0210c0a5c892fb88542f01a4e3af2a7d7161e4fd6cad9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table4_PopulationStatistics.xlsx",
+            "size": 12970,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table4_PopulationStatistics.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Supplementary_Table4_PopulationStatistics.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for the SE33 locus/Supplementary_Table4_PopulationStatistics.xlsx.sha256",
+            "checksum": {
+                "hash": "d2fbd410c025856dfc11359ecd8ac4f328b7dc6dfce2f77a09404ecf1ba295f6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%20the%20SE33%20locus/Supplementary_Table4_PopulationStatistics.xlsx.sha256",
+            "describes": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table4_PopulationStatistics.xlsx",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for the SE33 locus/Supplementary_Table4_PopulationStatistics.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes",
+            "@id": "cmps/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes",
+            "@type": [
+                "nrdp:Subcollection"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/Subcollection"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S3. Allele frequency table.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S3. Allele frequency table.xlsx.sha256",
+            "checksum": {
+                "hash": "ba94e683db50d3931fa435a0635bd47f34506fc28c65d57cd904961b6a74e0fd",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S3.%20Allele%20frequency%20table.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S3. Allele frequency table.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S3. Allele frequency table.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Figure S1ab.pdf",
+            "checksum": {
+                "hash": "eac69fc1c0736ffa126872e278b612180f81fe9b54e00b8c868127264031be15",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Figure%20S1ab.pdf",
+            "size": 126682,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Figure S1ab.pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S3. Allele frequency table.xlsx",
+            "checksum": {
+                "hash": "debb15b2c9f8af5cbd5cf5cc779d2f5b9bd1f076702dc04a6d232cc546cff7d9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S3.%20Allele%20frequency%20table.xlsx",
+            "size": 140266,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S3. Allele frequency table.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S10. Duplications and somatic mutants.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S10. Duplications and somatic mutants.xlsx.sha256",
+            "checksum": {
+                "hash": "b82d7a8206464b7ec21fef8d017f80a2c3af06c617e270d4a86e1a4b955ae7f7",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S10.%20Duplications%20and%20somatic%20mutants.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S10. Duplications and somatic mutants.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S10. Duplications and somatic mutants.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S5. Haplotype frequencies and haplotype-level forensic statistics.xlsx",
+            "checksum": {
+                "hash": "c6930774fa000be6860f20d5da5122869954c5429118d88406e40bc1825c948b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S5.%20Haplotype%20frequencies%20and%20haplotype-level%20forensic%20statistics.xlsx",
+            "size": 515654,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S5. Haplotype frequencies and haplotype-level forensic statistics.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S4. Allele call table.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S4. Allele call table.xlsx.sha256",
+            "checksum": {
+                "hash": "9be2147e6f1c43c08b63244cf67b3012c5ffe9d46d6624c22e038123a31b1ccf",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S4.%20Allele%20call%20table.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S4. Allele call table.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S4. Allele call table.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S1. CE and Sanger primers.xlsx",
+            "checksum": {
+                "hash": "f449af74b90392ba682623018e7e4c42a2996ed2d38066b009c5b0e725561348",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S1.%20CE%20and%20Sanger%20primers.xlsx",
+            "size": 12564,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S1. CE and Sanger primers.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/README_Y-STR.txt",
+            "checksum": {
+                "hash": "33d56f2f2ed66d21e468102dd92f771c5541f3d56953cd2f4297b3eb3ac367a9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/README_Y-STR.txt",
+            "size": 1046,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/README_Y-STR.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S11. Increase of allelic diversity by sequencing.xlsx",
+            "checksum": {
+                "hash": "de5913f5f146a436dfb8c02c24b27e30e66ace2390df79c538281bbb8bab99e8",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S11.%20Increase%20of%20allelic%20diversity%20by%20sequencing.xlsx",
+            "size": 15735,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S11. Increase of allelic diversity by sequencing.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S13. DYS481 nomenclature alternatives.xlsx",
+            "checksum": {
+                "hash": "304e39239e1ccea7a5d2b24f75c4ba157ffd2ce72229fdfbb4254dbd1c5ccd56",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S13.%20DYS481%20nomenclature%20alternatives.xlsx",
+            "size": 19631,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S13. DYS481 nomenclature alternatives.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S7. Haplotype pairs.xlsx",
+            "checksum": {
+                "hash": "f16fa1a37e4f80e1047addb3bde26ceb4faef12471669046337a513b8736d71c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S7.%20Haplotype%20pairs.xlsx",
+            "size": 12073,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S7. Haplotype pairs.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S4. Allele call table.xlsx",
+            "checksum": {
+                "hash": "9996de5d267d79b4eaa61f641303ff5a2b5192a6848694dc3a11f0a0610fd2ed",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S4.%20Allele%20call%20table.xlsx",
+            "size": 165059,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S4. Allele call table.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S10. Duplications and somatic mutants.xlsx",
+            "checksum": {
+                "hash": "3f9571ce75ea245d70355927ae0f320de8e1678e5161a06614389c7c63dea5d1",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S10.%20Duplications%20and%20somatic%20mutants.xlsx",
+            "size": 15408,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S10. Duplications and somatic mutants.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S9. Locus mutation rates.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S9. Locus mutation rates.xlsx.sha256",
+            "checksum": {
+                "hash": "313cfff6bcb451512f64afb974c44657d7f44ebdd02e94f8d051833d62b70f6e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S9.%20Locus%20mutation%20rates.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S9. Locus mutation rates.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S9. Locus mutation rates.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S13. DYS481 nomenclature alternatives.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S13. DYS481 nomenclature alternatives.xlsx.sha256",
+            "checksum": {
+                "hash": "bb5fb210b941312517e558884b46ebf9af8cd340f6d52be45438f2a54d458759",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S13.%20DYS481%20nomenclature%20alternatives.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S13. DYS481 nomenclature alternatives.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S13. DYS481 nomenclature alternatives.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Figure S1ab.pdf",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Figure S1ab.pdf.sha256",
+            "checksum": {
+                "hash": "85271824e43b603b084297f610d80ac2df9e02c3d9f369b6e39a8767f13e0d71",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Figure%20S1ab.pdf.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Figure S1ab.pdf",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Figure S1ab.pdf.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S2. Y-STR sequence ranges.xlsx",
+            "checksum": {
+                "hash": "27ec745331f6b9b239745c788eb3ea33f5bdbd88cc1a7edf65696601599d270f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S2.%20Y-STR%20sequence%20ranges.xlsx",
+            "size": 56110,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S2. Y-STR sequence ranges.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S9. Locus mutation rates.xlsx",
+            "checksum": {
+                "hash": "35cb07e5fe1353b984b0c8dfa98d359fe6062de70ae67e97a93ba087c9657493",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S9.%20Locus%20mutation%20rates.xlsx",
+            "size": 76709,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S9. Locus mutation rates.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S11. Increase of allelic diversity by sequencing.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S11. Increase of allelic diversity by sequencing.xlsx.sha256",
+            "checksum": {
+                "hash": "4ab61275595c7e2e142dedb2ed4ce24f38185be0fc6b3f15b0f15688c5e461b2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S11.%20Increase%20of%20allelic%20diversity%20by%20sequencing.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S11. Increase of allelic diversity by sequencing.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S11. Increase of allelic diversity by sequencing.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S6. Allele-level forensic statistics.xlsx",
+            "checksum": {
+                "hash": "addecfb08652f44865a6ec99184c5c134a4e407a9f2c04a0c98ffa17032e48d5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S6.%20Allele-level%20forensic%20statistics.xlsx",
+            "size": 61043,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S6. Allele-level forensic statistics.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S12. Flanking region polymorphisms.xlsx",
+            "checksum": {
+                "hash": "1e459730e7ba213082aaee0382e83dbdcf23b44368d3b96b3694eb8eddcab304",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S12.%20Flanking%20region%20polymorphisms.xlsx",
+            "size": 21412,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S12. Flanking region polymorphisms.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S5. Haplotype frequencies and haplotype-level forensic statistics.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S5. Haplotype frequencies and haplotype-level forensic statistics.xlsx.sha256",
+            "checksum": {
+                "hash": "01d416bde2c73aeda5456c6e21858ed8025203cce6293ccef14ac831b8941b39",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S5.%20Haplotype%20frequencies%20and%20haplotype-level%20forensic%20statistics.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S5. Haplotype frequencies and haplotype-level forensic statistics.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S5. Haplotype frequencies and haplotype-level forensic statistics.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S1. CE and Sanger primers.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S1. CE and Sanger primers.xlsx.sha256",
+            "checksum": {
+                "hash": "3da83a2774d55a723d362e07f4921e24dbb304a17c9135793a68ffafb0969906",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S1.%20CE%20and%20Sanger%20primers.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S1. CE and Sanger primers.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S1. CE and Sanger primers.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for README_Y-STR.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/README_Y-STR.txt.sha256",
+            "checksum": {
+                "hash": "b1c3e604b666af1d1969997c229db4c4e6d1f2f77a6224643bceae86ff28444b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/README_Y-STR.txt.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/README_Y-STR.txt",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/README_Y-STR.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S2. Y-STR sequence ranges.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S2. Y-STR sequence ranges.xlsx.sha256",
+            "checksum": {
+                "hash": "4a504536c7c96b199b50b506bfe9ae8768aba38f158a209af6fd01f1fa0eeaec",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S2.%20Y-STR%20sequence%20ranges.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S2. Y-STR sequence ranges.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S2. Y-STR sequence ranges.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S6. Allele-level forensic statistics.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S6. Allele-level forensic statistics.xlsx.sha256",
+            "checksum": {
+                "hash": "4c1dd4c7483f63dac88785e8ba4a0a0ac7fa1ed324a1dc5f03e8ab9916cda0ad",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S6.%20Allele-level%20forensic%20statistics.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S6. Allele-level forensic statistics.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S6. Allele-level forensic statistics.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S7. Haplotype pairs.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S7. Haplotype pairs.xlsx.sha256",
+            "checksum": {
+                "hash": "04d41d01b4068d5155cc9b7e3d8a67c1c356d480a74e17425597b9593498168b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S7.%20Haplotype%20pairs.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S7. Haplotype pairs.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S7. Haplotype pairs.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S8. AMOVA results.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S8. AMOVA results.xlsx.sha256",
+            "checksum": {
+                "hash": "daea105904d70a88689c731902596ec1db1d9b74c11093e14e0a3aa166bc6cdf",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S8.%20AMOVA%20results.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S8. AMOVA results.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S8. AMOVA results.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S8. AMOVA results.xlsx",
+            "checksum": {
+                "hash": "ccd57f172443ca417ebac9828e066434d4e49b7634439375419467930e8ec0b9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S8.%20AMOVA%20results.xlsx",
+            "size": 12124,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S8. AMOVA results.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Table S12. Flanking region polymorphisms.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S12. Flanking region polymorphisms.xlsx.sha256",
+            "checksum": {
+                "hash": "e58abf46d84659f22605d3e2d5e465a66f451cc0d957fd1167fc6d05e253db14",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Multi-dimensional%20evaluation%20of%20NIST%201032%20across%20four%20Y-STR%20multiplexes/Table%20S12.%20Flanking%20region%20polymorphisms.xlsx.sha256",
+            "describes": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S12. Flanking region polymorphisms.xlsx",
+            "size": 64,
+            "@id": "cmps/Multi-dimensional evaluation of NIST 1032 across four Y-STR multiplexes/Table S12. Flanking region polymorphisms.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 7 X STR loci",
+            "@id": "cmps/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci",
+            "@type": [
+                "nrdp:Subcollection"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/Subcollection"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Supplemental_File_1_ForenSeq_X-STR.config",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for 7 X STR loci/Supplemental_File_1_ForenSeq_X-STR.config.sha256",
+            "checksum": {
+                "hash": "ba5a1d1c8fb2ce9f3063ac762cb6541fa4206fc307e2ace01e39abb95bcc6c33",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci/Supplemental_File_1_ForenSeq_X-STR.config.sha256",
+            "describes": "cmps/Sequence based US population data for 7 X STR loci/Supplemental_File_1_ForenSeq_X-STR.config",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for 7 X STR loci/Supplemental_File_1_ForenSeq_X-STR.config.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 7 X STR loci/README_X-STR.txt",
+            "checksum": {
+                "hash": "7844b28252a3ba42cf22db850af03c28d82b148d5d97802b189311f0d3285287",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci/README_X-STR.txt",
+            "size": 5198,
+            "@id": "cmps/Sequence based US population data for 7 X STR loci/README_X-STR.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 7 X STR loci/Supplemental_File_2.xlsx",
+            "checksum": {
+                "hash": "f32b14eb125e993527163b234ac5e11c62d444f15451af18d1844bbb7208fc03",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci/Supplemental_File_2.xlsx",
+            "size": 338578,
+            "@id": "cmps/Sequence based US population data for 7 X STR loci/Supplemental_File_2.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Supplemental_File_2.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for 7 X STR loci/Supplemental_File_2.xlsx.sha256",
+            "checksum": {
+                "hash": "10368beb0f0def294b6bf76caa4d92a4ee72b6d94ff117a9742a0a1145c130dc",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci/Supplemental_File_2.xlsx.sha256",
+            "describes": "cmps/Sequence based US population data for 7 X STR loci/Supplemental_File_2.xlsx",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for 7 X STR loci/Supplemental_File_2.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 7 X STR loci/Supplemental_File_1_ForenSeq_X-STR.config",
+            "checksum": {
+                "hash": "61b439a7e349275cbe7b0d420026d8f5f3f649fbad8b0999393a088534354262",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci/Supplemental_File_1_ForenSeq_X-STR.config",
+            "size": 469,
+            "@id": "cmps/Sequence based US population data for 7 X STR loci/Supplemental_File_1_ForenSeq_X-STR.config",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for README_X-STR.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for 7 X STR loci/README_X-STR.txt.sha256",
+            "checksum": {
+                "hash": "bafab42c5eba91294b04a0418f1825747abff93a839e53d20c5a23978bb900a9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%207%20X%20STR%20loci/README_X-STR.txt.sha256",
+            "describes": "cmps/Sequence based US population data for 7 X STR loci/README_X-STR.txt",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for 7 X STR loci/README_X-STR.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 27 autosomal STR loci",
+            "@id": "cmps/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci",
+            "@type": [
+                "nrdp:Subcollection"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/Subcollection"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppTables.xlsx",
+            "checksum": {
+                "hash": "4139c18d58562805dab2731dd5df16801396034886ebf2a35c99a7a067a6523a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci/NIST1036_auSTR_Seq_SuppTables.xlsx",
+            "size": 654716,
+            "@id": "cmps/Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppTables.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for README_auSTR.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for 27 autosomal STR loci/README_auSTR.txt.sha256",
+            "checksum": {
+                "hash": "d02da2bf174e1c7b836c6125efd896a51f51835761a2fae1f3fa448d97eaae2f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci/README_auSTR.txt.sha256",
+            "describes": "cmps/Sequence based US population data for 27 autosomal STR loci/README_auSTR.txt",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for 27 autosomal STR loci/README_auSTR.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for NIST1036_auSTR_Seq_SuppFile1.pdf",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppFile1.pdf.sha256",
+            "checksum": {
+                "hash": "3f169eead0fba28630826820c3c71e9d9120b976a965b83be7c2d07a7cfa0c3d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci/NIST1036_auSTR_Seq_SuppFile1.pdf.sha256",
+            "describes": "cmps/Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppFile1.pdf",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppFile1.pdf.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppFile1.pdf",
+            "checksum": {
+                "hash": "1b700b1fb68a5175ae4f791a0f05a746074e3138e3fd44cf805a7e7bd788e5cd",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci/NIST1036_auSTR_Seq_SuppFile1.pdf",
+            "size": 817853,
+            "@id": "cmps/Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppFile1.pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for NIST1036_auSTR_Seq_SuppTables.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppTables.xlsx.sha256",
+            "checksum": {
+                "hash": "98c9bfd5abac3754048312cebc55903c9457b60c71e268ab2e3ae84236c8119e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci/NIST1036_auSTR_Seq_SuppTables.xlsx.sha256",
+            "describes": "cmps/Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppTables.xlsx",
+            "size": 64,
+            "@id": "cmps/Sequence based US population data for 27 autosomal STR loci/NIST1036_auSTR_Seq_SuppTables.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "filepath": "Sequence based US population data for 27 autosomal STR loci/README_auSTR.txt",
+            "checksum": {
+                "hash": "abc91cc7f5917110f90842af3239ed31c0460dc4edded44da63c5339482e2514",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/6998B81EF78777B2E05324570681D4DC1911/Sequence%20based%20US%20population%20data%20for%2027%20autosomal%20STR%20loci/README_auSTR.txt",
+            "size": 1183,
+            "@id": "cmps/Sequence based US population data for 27 autosomal STR loci/README_auSTR.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2018-06-14",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds1141dw08w",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w",
+            "description": "initial release"
+        },
+        {
+            "issued": "2018-06-14",
+            "version": "1.1.0",
+            "@id": "ark:/88434/mds1141dw08w",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w",
+            "description": "data update"
+        },
+        {
+            "issued": "2018-06-14",
+            "version": "1.1.1",
+            "@id": "ark:/88434/mds1141dw08w",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds1141dw08w",
+            "description": "metadata update: fix references"
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

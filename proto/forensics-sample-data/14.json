@@ -1,0 +1,243 @@
+{
+    "issued": "2020-12-03T16:47:14.0",
+    "revised": "2022-01-21T20:58:33.339047",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds2-2334.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2020-12-03",
+                "version": "1.0.0",
+                "@id": "ark:/88434/mds2-2334.v1_0_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2334.v1_0_0",
+                "description": "initial release"
+            },
+            {
+                "issued": "2020-12-03 00:00:00",
+                "version": "1.1.0",
+                "@id": "ark:/88434/mds2-2334.v1_1_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2334.v1_1_0",
+                "description": "data update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Energy",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Physics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Mathematics and Statistics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Materials",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Manufacturing",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Fire",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Electronics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Chemistry",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics",
+            "@type": "Concept"
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2334",
+    "annotated": "2022-01-21T20:58:33.339047",
+    "title": "Recipients of the Edward Uhler Condon Award, NIST, 1974-present",
+    "theme": [
+        "Energy",
+        "Physics",
+        "Mathematics and Statistics",
+        "Materials",
+        "Manufacturing",
+        "Forensics",
+        "Fire",
+        "Electronics",
+        "Chemistry"
+    ],
+    "version": "1.1.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2334"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "This is a list of the Edward Uhler Condon award recipients and links to their publications, where available, from 1974 to the present."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:katherine.sharpless@nist.gov",
+        "fn": "Katherine E. Sharpless"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2334",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2334",
+    "keyword": [
+        "Condon Award",
+        "Edward Uhler Condon"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2020-12-03 00:00:00",
+    "ediid": "ark:/88434/mds2-2334",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2334",
+            "@id": "#doi:10.18434/mds2-2334",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Recipients of the Edward Uhler Condon Award, NIST, 1974-present"
+        },
+        {
+            "description": "This file provides the name, article title, book/journal title, and DOI link (when available) to papers receiving the NIST Condon Award.",
+            "filepath": "Condon Award Recipients.csv",
+            "checksum": {
+                "hash": "3224090bfe059770e154c8d59b5f3eaaba7bfeb3579a8bbd3560c9b7da8770d2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "format": {
+                "description": "csv"
+            },
+            "mediaType": "application/vnd.ms-excel",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2334/Condon%20Award%20Recipients.csv",
+            "title": "Condon Award Recipients, 1974 to the Present",
+            "size": 11777,
+            "@id": "cmps/Condon Award Recipients.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "This is a list of the winners of NIST's Condon Award from 1974 to the present. Award winner names, article title, journal/book title, and DOI links (when available) are provided.",
+            "filepath": "Condon Award Recipients.xlsx",
+            "checksum": {
+                "hash": "44f64eeda05ef3394536aaa1fecae5ce045d0e4df55b3d7434075b73facefde4",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "format": {
+                "description": "xlsx"
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2334/Condon%20Award%20Recipients.xlsx",
+            "title": "Condon Award Recipients, 1974 to Present",
+            "size": 27934,
+            "@id": "cmps/Condon Award Recipients.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Condon Award Recipients.csv",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Condon Award Recipients.csv.sha256",
+            "checksum": {
+                "hash": "be81770886e78a6b901653773c1f4ebd8b3ad8a52d609d19bde45fadaaedabd5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for Recipients of the Edward Uhler Condon Award, 1974-present",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2334/Condon%20Award%20Recipients.csv.sha256",
+            "describes": "cmps/Condon Award Recipients.csv",
+            "size": 64,
+            "@id": "cmps/Condon Award Recipients.csv.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

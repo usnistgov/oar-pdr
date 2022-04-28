@@ -1,0 +1,165 @@
+{
+    "issued": "2020-02-24",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.3#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Environment: Environmental health",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Chemistry: Analytical chemistry",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Environment: Marine science",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "References",
+            "title": "Albatross Species Chemical Database and Annotated Bibliography",
+            "issued": "2020",
+            "citation": "Stacy Schuur. (2020). <i>Albatross Species Chemical Database and Annotated Bibliography</i> (Version 1.1.0) [Data set]. National Institute of Standards and Technology. https://doi.org/10.18434/MDS2-2304",
+            "location": "https://doi.org/10.18434/mds2-2304",
+            "@id": "#ref:10.18434/mds2-2304",
+            "@type": [
+                "schema:Dataset"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.3#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "seabird",
+        "tissues",
+        "PAHs",
+        "PBDEs",
+        "PCBs",
+        "PCDDs",
+        "PCDF",
+        "perflourinated acids",
+        "phenols",
+        "toxicology  pesticides",
+        "mercury",
+        "trace elements",
+        "heavy metals",
+        "inorganic",
+        "organic",
+        "chemistry",
+        "stable isotopes",
+        "Environment and Climate"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.3#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/6EA049AB82FD3B84E0532457068173B21933",
+    "title": "*** SUPERSEDED *** Albatross Species Chemical Database and Annotated Bibliography",
+    "theme": [
+        "Environment: Environmental health",
+        "Chemistry: Analytical chemistry",
+        "Environment: Marine science"
+    ],
+    "version": "1.0.2",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds109zm5026"
+        }
+    ],
+    "description": [
+        "*** These data have been superseded by the data at https://doi.org/10.18434/mds2-2304 ***\nData were corrected and additional files added.",
+        "Access database and annotated bibliography of contaminants in tissues from albatross (Family Diomedeidae) species"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:stacy.schuur@nist.gov",
+        "fn": "Stacy Schuur"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds109zm5026",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M31933",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2020-02-25",
+    "ediid": "6EA049AB82FD3B84E0532457068173B21933",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/M31933",
+            "title": "DOI Access for \"Albatross Species Chemical Database and Annotated Bibliography\"",
+            "@id": "#doi:10.18434/M31933",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "description": "This is the original DOI for this dataset."
+        },
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2304",
+            "title": "Access to the superseding data",
+            "@id": "#doi:10.18434/mds2-2304",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "description": "This is the DOI for the updated data that supersedes this dataset. "
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2020-02-25 00:00:00",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds109zm5026",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds109zm5026",
+            "description": "initial release"
+        },
+        {
+            "issued": "2020-02-25",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds109zm5026",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds109zm5026",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2021-01-08",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds109zm5026",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds109zm5026",
+            "description": "updated to indicate deprecation; point to replacement"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "resType": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

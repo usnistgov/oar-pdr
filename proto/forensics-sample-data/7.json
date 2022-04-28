@@ -1,0 +1,363 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "keyword": [
+        "Forensic Science",
+        "Forensics",
+        "GC-MS",
+        "Seized Drug",
+        "Drugs",
+        "Targeted Methods"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2367",
+    "title": "Data Supporting the Development of Targeted GC-MS Methods for Seized Drug Analysis",
+    "theme": [
+        "Forensics: Drugs and toxicology"
+    ],
+    "version": "1.5.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2367"
+        }
+    ],
+    "description": [
+        "This dataset contains information regarding the development of targeted GC-MS methods for forensic seized drug analysis. Included in this dataset are method parameter files, mass spectra, mass spectral databases, and retention time / retention index data."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:edward.sisco@nist.gov",
+        "fn": "Edward Sisco"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2367",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2367",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2021-02-18",
+    "ediid": "ark:/88434/mds2-2367",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2367",
+            "@id": "#doi:10.18434/mds2-2367",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for Cannabinoid_Spectra.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Cannabinoid_Spectra.zip.sha256",
+            "checksum": {
+                "hash": "3ebeb47132095dec15254144a27e43d262d2c66932bbc070c4b24915f8705b8d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Cannabinoid_Spectra.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Cannabinoid_Spectra.zip",
+            "@id": "cmps/Cannabinoid_Spectra.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "Replicate mass spectra for the synthetic cannabinoids evaluated. Files are named ##-##, where the first two digits represent the compound (refer to the Cannabinoids Retention Time & Index file for assignments) and the third and fourth digits represent the replicate number. ",
+            "filepath": "Cannabinoid_Spectra.zip",
+            "checksum": {
+                "hash": "12f63fc69dda214784337a763e58d27d3f2f39c82af8c1614a46a0c39632d8f0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/x-zip-compressed",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Cannabinoid_Spectra.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/DataFile"
+            ],
+            "@id": "cmps/Cannabinoid_Spectra.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 4028543
+        },
+        {
+            "description": "Contains GC-MS method parameters, mass spectra, and compound lists. ",
+            "filepath": "Cathinone Data.zip",
+            "checksum": {
+                "hash": "c5b1e6538678203f8dffa0c4bbad6f5df8395eedcf882811b218389bcae43022",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/x-zip-compressed",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Cathinone%20Data.zip",
+            "_status": "in progress",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/DataFile"
+            ],
+            "@id": "cmps/Cathinone Data.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 790295
+        },
+        {
+            "description": "A list of retention times and indices for all compounds added to the synthetic cannabinoid targeted method. The numeric identifiers for the corresponding mass spectra are also provided in this document.",
+            "filepath": "Cannabinoid Retention Times & Indices.xlsx",
+            "checksum": {
+                "hash": "e9bdd0a773b66939a52d9596200b48fd7b4db18162d2f9710524635693fba352",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Cannabinoid%20Retention%20Times%20%26%20Indices.xlsx",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/DataFile"
+            ],
+            "@id": "cmps/Cannabinoid Retention Times & Indices.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 19535
+        },
+        {
+            "description": "Synthetic Cannabinoids Method Parameters",
+            "filepath": "Synthetic Cannabinoid Method Parameters.txt",
+            "checksum": {
+                "hash": "b4107b36ee005412f0ab2ec800b46b3086087356e7fa138f6af3e4cfdc6bb20b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Synthetic%20Cannabinoid%20Method%20Parameters.txt",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/DataFile"
+            ],
+            "@id": "cmps/Synthetic Cannabinoid Method Parameters.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 21318
+        },
+        {
+            "description": "SHA-256 checksum value for Synthetic Cannabinoid Method Parameters.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Synthetic Cannabinoid Method Parameters.txt.sha256",
+            "checksum": {
+                "hash": "a67eb6b32abf6483804a680fd52ad7ee215645fe4246f51305bb4621def105b3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Synthetic%20Cannabinoid%20Method%20Parameters.txt.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Synthetic Cannabinoid Method Parameters.txt",
+            "@id": "cmps/Synthetic Cannabinoid Method Parameters.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Cannabinoid Retention Times & Indices.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Cannabinoid Retention Times & Indices.xlsx.sha256",
+            "checksum": {
+                "hash": "8f45961da1f1a6144708f1c54ba80b19b81c980e3092267dca7a30f7853f032c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Cannabinoid%20Retention%20Times%20%26%20Indices.xlsx.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Cannabinoid Retention Times & Indices.xlsx",
+            "@id": "cmps/Cannabinoid Retention Times & Indices.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Cathinone Data.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Cathinone Data.zip.sha256",
+            "checksum": {
+                "hash": "a2a27610b50c671922c618acf1b418dc58b35c9a3c2ee042e8e7739e763a7261",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2367/Cathinone%20Data.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/ChecksumFile"
+            ],
+            "_status": "in progress",
+            "describes": "cmps/Cathinone Data.zip",
+            "@id": "cmps/Cathinone Data.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2021-02-18",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "initial release"
+        },
+        {
+            "issued": "2021-02-18 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2021-02-18 00:00:00",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2021-02-18",
+            "version": "1.0.3",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2021-02-18",
+            "version": "1.1.0",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "data update"
+        },
+        {
+            "issued": "2021-02-18",
+            "version": "1.2.0",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "data update"
+        },
+        {
+            "issued": "2021-02-18",
+            "version": "1.3.0",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "data update"
+        },
+        {
+            "issued": "2021-02-18 00:00:00",
+            "version": "1.4.0",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "data update"
+        },
+        {
+            "issued": "2021-02-18",
+            "version": "1.5.0",
+            "@id": "ark:/88434/mds2-2367",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2367",
+            "description": "data update"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

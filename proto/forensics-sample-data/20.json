@@ -1,0 +1,174 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "keyword": [
+        "mass spectra",
+        "min-max test",
+        "seized drug analysis"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2418",
+    "title": "Supplemental Data and Source Code for Min-Max Test Research",
+    "_editStatus": "done",
+    "theme": [
+        "Forensics: Drugs and toxicology"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2418"
+        }
+    ],
+    "description": [
+        "The data, source code and scripts included in this dataset are used to generate the results presented in the manuscript \"The min-max test: an objective method for discriminating mass spectra\" by Moorthy and Sisco. The manuscript explores a new method for objectively discriminating electron ionization mass spectra, a task that is commonplace when compounds are closely eluting in gas chromatography mass spectrometry. The C++ source codes and R analysis scripts can be extended for other application areas."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "S.",
+            "familyName": "Moorty",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0002-5988-1389",
+            "givenName": "Arun",
+            "@type": "foaf:Person",
+            "fn": "Arun S. Moorty"
+        },
+        {
+            "middleName": "",
+            "familyName": "Sisco",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0003-0252-1910",
+            "givenName": "Edward",
+            "@type": "foaf:Person",
+            "fn": "Edward  Sisco"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:arun.moorthy@nist.gov",
+        "fn": "Arun Moorthy"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2418",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2418",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2021-05-28 00:00:00",
+    "ediid": "ark:/88434/mds2-2418",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2418",
+            "@id": "#doi:10.18434/mds2-2418",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        },
+        {
+            "description": "Supplemental data and source code to accompany the manuscript \"The min-max test: an objective method for discriminating mass spectra\"",
+            "format": {
+                "description": "zipped folder with mass spectra, source code, and result text files."
+            },
+            "checksum": {
+                "hash": "7be6eac5ee913ef8cc1493edb23e2d4f16d9c96344258ff6ba577cf07d9c7de7",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "filepath": "minmax_SourceAndData.zip",
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2418/minmax_SourceAndData.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/DataFile"
+            ],
+            "@id": "cmps/minmax_SourceAndData.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 573148186
+        },
+        {
+            "description": "SHA-256 checksum value for minmax_SourceAndData.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "minmax_SourceAndData.zip.sha256",
+            "checksum": {
+                "hash": "767775043dcd7ecfe4ebb55911bb7b3669b87a8efdee827aa441d5fd0eccbc06",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2418/minmax_SourceAndData.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.4#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/minmax_SourceAndData.zip",
+            "@id": "cmps/minmax_SourceAndData.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

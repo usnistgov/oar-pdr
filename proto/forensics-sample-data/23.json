@@ -1,0 +1,160 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsCitedBy",
+            "title": "The inorganic crystal structure data base",
+            "issued": "1983-05-01",
+            "citation": "Bergerhoff, G., Hundt, R., Sievers, R., & Brown, I. D. (1983). The inorganic crystal structure data base. Journal of Chemical Information and Modeling, 23(2), 66â69. doi:10.1021/ci00038a003\n",
+            "location": "https://doi.org/10.1021/ci00038a003",
+            "@id": "#ref:10.1021/ci00038a003",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.5#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Crystal data :",
+            "issued": "1986",
+            "citation": "Stalick, J. K. (1986). Crystal dataâ¯: doi:10.6028/nbs.tn.1229\n",
+            "location": "https://doi.org/10.6028/NBS.TN.1229",
+            "@id": "#ref:10.6028/NBS.TN.1229",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "New developments in the Inorganic Crystal Structure Database (ICSD): accessibility in support of materials research and design",
+            "issued": "2002-05-29",
+            "citation": "Belsky, A., Hellenbrandt, M., Karen, V. L., & Luksch, P. (2002). New developments in the Inorganic Crystal Structure Database (ICSD): accessibility in support of materials research and design. Acta Crystallographica Section B Structural Science, 58(3), 364â369. doi:10.1107/s0108768102006948\n",
+            "location": "https://doi.org/10.1107/S0108768102006948",
+            "@id": "#ref:10.1107/S0108768102006948",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "chemical structures",
+        "crystallography",
+        "crystal structures",
+        "diffraction",
+        "disorder",
+        "electrons",
+        "identification",
+        "inorganic",
+        "neutrons",
+        "magnetic",
+        "metals",
+        "minerals",
+        "materials",
+        "Rietveld",
+        "synchrotron",
+        "twinned",
+        "x-rays",
+        "Advanced Materials",
+        "Manufacturing",
+        "Safety",
+        "Security and Forensics"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2147",
+    "title": "NIST Inorganic Crystal Structure Database (ICSD)",
+    "theme": [
+        "Materials:Materials characterization",
+        "Materials:Modeling and computational material science"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2147"
+        }
+    ],
+    "description": [
+        "Materials discovery and development necessarily begins with the preparation and identification of product phase(s). Crystalline compounds can be identified by their characteristic diffraction patterns using X-rays, neutrons, and or electrons. An estimated 20,000 X-ray diffractometers and a comparable number of electron microscopes are used daily in materials research and development laboratories for this purpose. Access to crystal structure data is a critical step in solving research and applications problems in materials researches, and these data are of interest to analysts in areas such as materials design, property prediction and compound identification.",
+        "NIST Crystallographic Data Center, in collaboration with partners all over the world, evaluates and disseminates chemical, physical and crystallographic information published on these materials. NIST Standard Reference Database 3: NIST Inorganic Crystal Structure Database (NIST ICSD) is a comprehensive collection of crystal structure data of nonorganic compounds (including inorganics, ceramics, minerals, pure elements, metals, and intermetallic systems) containing over 210,000 entries and covering the literature from 1913.",
+        "NIST ICSD includes entries that fall into the following categories: full structure data from experimental refinement or derived from their iso-structural structure types, theoretically predicted structures from computer simulations, as well as partially characterized structures.",
+        "The NIST ICSD web application provides materials researchers with a user-friendly interface to search the database based on bibliographic information, chemistry, unit cell, space group, experimental settings, mineral name/group and other derived data from expert evaluation. In addition, it also provides users with functions to easily create and examine results from various crystallographic computations, such as reduced cell, bond distance/angle, calculated powder diffraction data, and structure standardization."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:igor.levin@nist.gov",
+        "fn": "Igor Levin"
+    },
+    "accessLevel": "restricted public",
+    "@id": "ark:/88434/mds2-2147",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M32147",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2018-10-19 00:00:00",
+    "ediid": "ark:/88434/mds2-2147",
+    "components": [
+        {
+            "accessURL": "https://icsd.nist.gov",
+            "description": "Search, display, and export the crystal structure data, or running scientific calculations using NIST ICSD.",
+            "title": "NIST Inorganic Crystal Structure Database",
+            "@id": "#",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/AccessPage"
+            ]
+        },
+        {
+            "accessURL": "https://doi.org/10.18434/M32147",
+            "@id": "#doi:10.18434/M32147",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for NIST Inorganic Crystal Structure Database (ICSD)"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

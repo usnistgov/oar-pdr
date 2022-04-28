@@ -1,0 +1,569 @@
+{
+    "issued": "2020-11-05",
+    "revised": "2022-01-20T21:57:37.323640",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds2-2313.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2020-10-20",
+                "version": "1.0.0",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "initial release"
+            },
+            {
+                "issued": "2020-10-20",
+                "version": "1.0.1",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2020-10-20",
+                "version": "1.0.2",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2020-10-20",
+                "version": "1.0.3",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2020-10-20",
+                "version": "1.0.4",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-02-25",
+                "version": "1.1.0",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "added updated data"
+            },
+            {
+                "issued": "2020-10-20",
+                "version": "1.2.0",
+                "@id": "ark:/88434/mds2-2313",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+                "description": "data update"
+            },
+            {
+                "issued": "2020-10-20",
+                "version": "1.3.0",
+                "@id": "ark:/88434/mds2-2313.v1_3_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313.v1_3_0",
+                "description": "data update"
+            },
+            {
+                "issued": "2020-10-20 00:00:00",
+                "version": "1.3.1",
+                "@id": "ark:/88434/mds2-2313.v1_3_1",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313.v1_3_1",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2020-10-20 00:00:00",
+                "version": "1.3.2",
+                "@id": "ark:/88434/mds2-2313.v1_3_2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313.v1_3_2",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2020-10-20 00:00:00",
+                "version": "1.4.0",
+                "@id": "ark:/88434/mds2-2313.v1_4_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313.v1_4_0",
+                "description": "data update"
+            },
+            {
+                "issued": "2020-10-20 00:00:00",
+                "version": "1.4.1",
+                "@id": "ark:/88434/mds2-2313.v1_4_1",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313.v1_4_1",
+                "description": "metadata update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Chemistry: Analytical chemistry",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2313",
+    "annotated": "2022-03-23T02:13:40.193310",
+    "title": "NIST DART-MS Forensics Database (is-CID)",
+    "_editStatus": "done",
+    "theme": [
+        "Chemistry: Analytical chemistry",
+        "Forensics: Drugs and toxicology"
+    ],
+    "version": "1.4.1",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2313"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "The NIST DART-MS Forensics Database is an evaluated collection of in-source collisionally-induced dissociation (is-CID) mass spectra of compounds of interest to the forensics community (e.g. seized drugs, cutting agents, etc.). The is-CID mass spectra were collected using Direct Analysis in Real-Time (DART) Mass Spectrometry (MS), either by NIST scientists or by contributing agencies noted per compound. The database is provided as a general-purpose structure data file (.SDF). For users on Windows operating systems, the .SDF format library can be converted to NIST MS Search format using Lib2NIST and then explored using NIST MS Search v2.4 for general mass spectral analysis. These software tools can be downloaded at https://chemdata.nist.gov. The  database is now (09-28-2021) also  provided in R data format (.RDS) for use with the R programming language.This database, also commonly referred to as a library, is one in a series of high-quality mass spectral libraries/databases produced by NIST (see NIST SRD 1a, https://dx.doi.org/10.18434/T4H594)."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "",
+            "familyName": "Sisco",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Edward ",
+            "@type": "foaf:Person",
+            "fn": "Edward   Sisco"
+        },
+        {
+            "middleName": "S.",
+            "familyName": "Moorthy",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Arun",
+            "@type": "foaf:Person",
+            "fn": "Arun S. Moorthy"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:arun.moorthy@nist.gov",
+        "fn": "Arun Moorthy"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2313",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2313",
+    "keyword": [
+        "Standard Reference Data",
+        "Mass Spectra",
+        "Ion Fragmentation",
+        "Mass Spectrometry",
+        "NIST Mass Spectral Libraries",
+        "Chemical Identification",
+        "Biosciences and Health",
+        "Security and Forensics"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2020-10-20 00:00:00",
+    "ediid": "ark:/88434/mds2-2313",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2313",
+            "@id": "#doi:10.18434/mds2-2313",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for NIST DART-MS Forensics Database 2020"
+        },
+        {
+            "filepath": "210622_HeLibrary_Cicada_Notes.pdf",
+            "checksum": {
+                "hash": "06dd3ec04dcf8592e96d7c0f69bd5449d0370d376b59de4ef9667f1dc38974e0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "Release Notes for NIST DART-MS Forensics Database Cicada (2021-06-22)",
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/210622_HeLibrary_Cicada_Notes.pdf",
+            "_status": "in progress",
+            "size": 45360,
+            "@id": "cmps/210622_HeLibrary_Cicada_Notes.pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "The NIST DART-MS Forensics library (is-CID mass spectra) updated as of January 19th, 2021. Includes in-source collisionally-induced dissociation (is-CID) mass spectra of 760 compounds of interest for the forensics computes. ",
+            "filepath": "NIST-DARTMS-Forensics-update-2021-01.SDF",
+            "checksum": {
+                "hash": "6ba482973022572ca0a1c210788a7c6b18b584048b23b40cccfc2ef445a29526",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "format": {
+                "description": "A structure data file (SDF) readable in any plain text editor. "
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/NIST-DARTMS-Forensics-update-2021-01.SDF",
+            "title": "NIST DART-MS Forensics Library (is-CID) - updated 2021/01",
+            "_status": "in progress",
+            "size": 31009658,
+            "@id": "cmps/NIST-DARTMS-Forensics-update-2021-01.SDF",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "This is the latest (2022-Jan-20) of the NIST DART-MS Forensics Database with is-CID mass spectra measured with helium gas in positive ion mode. The library is provided as both a general-purpose structure data file (.SDF) for use with any text editor and as an R data file (.RDS) for use with the R programming language.",
+            "filepath": "220120_He_Pos_Library_Earthworm.zip",
+            "checksum": {
+                "hash": "f6b8c6906542cdeb566b5f1e008c4106598947819d6f6dccb6b803d23ced5cc2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "NIST DART-MS Forensic Database - Earthworm",
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/220120_He_Pos_Library_Earthworm.zip",
+            "size": 25995431,
+            "@id": "cmps/220120_He_Pos_Library_Earthworm.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Updated NIST DART-MS Forensics Database including spectra of 830 compounds of interest.",
+            "filepath": "NIST_DART-MS_Forensics_Cicada.SDF",
+            "checksum": {
+                "hash": "f52a782f6bd4cb8933ab2fd2efe5ab5309521dc0c7da1ade4b07c2f8386b29c0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "format": {
+                "description": "SDF (text file)"
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/NIST_DART-MS_Forensics_Cicada.SDF",
+            "title": "Updated NIST DART-MS Forensics Database Cicada (2021-06-22)",
+            "_status": "in progress",
+            "size": 33433393,
+            "@id": "cmps/NIST_DART-MS_Forensics_Cicada.SDF",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for NIST-DARTMS-Forensics-v1.SDF",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "NIST-DARTMS-Forensics-v1.SDF.sha256",
+            "checksum": {
+                "hash": "54428651a27b246d02a5e506c39be7f623aaf5da63e79d4084b4923dd307fc8a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA-256 file for NIST-DARTMS-Forensics-v1.SDF",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/NIST-DARTMS-Forensics-v1.SDF.sha256",
+            "describes": "cmps/NIST-DARTMS-Forensics-v1.SDF",
+            "_status": "in progress",
+            "size": 64,
+            "@id": "cmps/NIST-DARTMS-Forensics-v1.SDF.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for 210915_He_Pos_Library_Dragonfly.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "210915_He_Pos_Library_Dragonfly.zip.sha256",
+            "checksum": {
+                "hash": "b417c43c6d272d8d3de89eb4849213b0020d3a042df6ad1841024a70fb6e8926",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for NIST DART-MS Forensics Database (He Pos Dragonfly)",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/210915_He_Pos_Library_Dragonfly.zip.sha256",
+            "describes": "cmps/210915_He_Pos_Library_Dragonfly.zip",
+            "size": 64,
+            "@id": "cmps/210915_He_Pos_Library_Dragonfly.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for 210622_HeLibrary_Cicada_Notes.pdf",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "210622_HeLibrary_Cicada_Notes.pdf.sha256",
+            "valid": true,
+            "title": "SHA256 File for Release Notes for NIST DART-MS Forensics Database Cicada (2021-06-22)",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/210622_HeLibrary_Cicada_Notes.pdf.sha256",
+            "describes": "cmps/210622_HeLibrary_Cicada_Notes.pdf",
+            "_status": "in progress",
+            "size": 64,
+            "@id": "cmps/210622_HeLibrary_Cicada_Notes.pdf.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for NIST_DART-MS_Forensics_Cicada.SDF",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "NIST_DART-MS_Forensics_Cicada.SDF.sha256",
+            "valid": true,
+            "title": "SHA256 File for Updated NIST DART-MS Forensics Database Cicada (2021-06-22)",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/NIST_DART-MS_Forensics_Cicada.SDF.sha256",
+            "describes": "cmps/NIST_DART-MS_Forensics_Cicada.SDF",
+            "_status": "in progress",
+            "size": 64,
+            "@id": "cmps/NIST_DART-MS_Forensics_Cicada.SDF.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "This is a new update of the NIST DART-MS Forensics Database with spectra measured with helium gas in positive ion mode. The library is  provided  as both a general-purpose structure data file (.SDF) for use with any text editor and as an R data file (.RDS) for use with the R programming language.",
+            "filepath": "210915_He_Pos_Library_Dragonfly.zip",
+            "checksum": {
+                "hash": "d9b59799bc0aa81862b17485d6dfb4122747241e40ded167aeddb535349a1b53",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "NIST DART-MS Forensics Database (He Pos Dragonfly)",
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/210915_He_Pos_Library_Dragonfly.zip",
+            "size": 25503638,
+            "@id": "cmps/210915_He_Pos_Library_Dragonfly.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "NIST-DARTMS-Forensics-v1.SDF",
+            "checksum": {
+                "hash": "c58fe99d7cfdc6dc5c48245a2ed7c7d0c4a6f2fac9d809da23ebc3033eedbe67",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "NIST-DARTMS-Forensics-v1.SDF",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/NIST-DARTMS-Forensics-v1.SDF",
+            "_status": "in progress",
+            "size": 34076589,
+            "@id": "cmps/NIST-DARTMS-Forensics-v1.SDF",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for NIST-DARTMS-Forensics-update-2021-01.SDF",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "NIST-DARTMS-Forensics-update-2021-01.SDF.sha256",
+            "checksum": {
+                "hash": "c1bfde96420e954e9b4e7a382ab90d09c396a6485bf4c6acd473d380c5567522",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for NIST DART-MS Forensics Library (is-CID) - updated 2021/01",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2313/NIST-DARTMS-Forensics-update-2021-01.SDF.sha256",
+            "describes": "cmps/NIST-DARTMS-Forensics-update-2021-01.SDF",
+            "size": 64,
+            "@id": "cmps/NIST-DARTMS-Forensics-update-2021-01.SDF.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2020-10-20",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "initial release"
+        },
+        {
+            "issued": "2020-10-20",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2020-10-20",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2020-10-20",
+            "version": "1.0.3",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2020-10-20",
+            "version": "1.0.4",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2021-02-25",
+            "version": "1.1.0",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "added updated data"
+        },
+        {
+            "issued": "2020-10-20",
+            "version": "1.2.0",
+            "@id": "ark:/88434/mds2-2313",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2313",
+            "description": "data update"
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

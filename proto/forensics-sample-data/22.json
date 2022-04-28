@@ -1,0 +1,148 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Digital and multimedia evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Digital and multimedia evidence",
+            "@type": "Concept"
+        }
+
+    ],
+    "keyword": [
+        "light field cameras",
+        "resolution; Lytro cameras",
+        "plenoptic cameras"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/65BA3C4B3B7E1B02E0532457068125BF1893",
+    "title": "Light field camera resolution evaluations",
+    "theme": [
+        "Electronics: Sensors",
+        "Information Technology: Data and informatics",
+        "Metrology: Dimensional metrology",
+        "Information Technology: Computational science",
+        "Forensics: Digital and multimedia evidence"
+    ],
+    "inventory": [
+        {
+            "forCollection": "",
+            "descCount": 3,
+            "byType": [
+                {
+                    "descCount": 3,
+                    "forType": "dcat:Distribution",
+                    "childCount": 3
+                },
+                {
+                    "descCount": 1,
+                    "forType": "nrd:Hidden",
+                    "childCount": 1
+                },
+                {
+                    "descCount": 2,
+                    "forType": "nrdp:AccessPage",
+                    "childCount": 2
+                }
+            ],
+            "childCollections": [],
+            "childCount": 3
+        }
+    ],
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds10ddpbn"
+        }
+    ],
+    "description": [
+        "Evaluation of Lateral and Depth Resolutions of Light Field Cameras: Light field cameras have the potential of becoming inexpensive and portable 3D imaging instruments. However, the suitability of this camera to a specific application depends on resolution requirements.  This data set was collected to assess the image resolution of light field cameras during acquisition configurations similar to the ones encountered by forensic photographers at crime scenes. Examples of 3D crime scene objects include tire tread and shoe imprints in substances like mud or snow. More information about the acquisition is provided at https://isg.nist.gov/deepzoomweb/resources/csmet/pages/lytro_camera/lytro_camera.html. The  data are available for assessing resolution parameters for other applications of light field cameras at https://isg.nist.gov/deepzoomweb/resources/lytroEvaluations/index.html."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:peter.bajcsy@nist.gov",
+        "fn": "Peter Bajcsy"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds10ddpbn",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/T4/1502498",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2018-02-16",
+    "ediid": "65BA3C4B3B7E1B02E0532457068125BF1893",
+    "components": [
+        {
+            "accessURL": "https://isg.nist.gov/deepzoomweb/resources/lytroEvaluations/index.html",
+            "description": "Web page for data browsing and download :",
+            "format": {
+                "description": "csv file"
+            },
+            "title": "Web page for data browsing and download",
+            "@id": "#deepzoomweb/resources/lytroEvaluations/index.html",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/AccessPage"
+            ]
+        },
+        {
+            "accessURL": "https://isg.nist.gov/deepzoomweb/resources/csmet/pages/lytro_camera/lytro_camera.html",
+            "description": "Web page with data collection description:",
+            "format": {
+                "description": "HTML page"
+            },
+            "title": "Web page with data collection description",
+            "@id": "#deepzoomweb/resources/csmet/pages/lytro_camera/lytro_camera.html",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/AccessPage"
+            ]
+        },
+        {
+            "accessURL": "https://doi.org/10.18434/T4/1502498",
+            "description": "DOI Access to Light field camera resolution evaluations",
+            "format": "text/html",
+            "title": "DOI Access to Light field camera resolution evaluations",
+            "@id": "#doi:10.18434/T4/1502498",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

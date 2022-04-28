@@ -1,0 +1,802 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Trace evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Trace evidence",
+            "@type": "Concept"
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://www.nist.gov/mml/materials-measurement-science-division/security-technologies-group/forensic-fiber-trace-evidence",
+    "dataHierarchy": [
+        {
+            "filepath": "1818_Red81_changeinabsorb.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample3_c2.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_sample_1_c1.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_sample_6_c1.csv"
+        },
+        {
+            "filepath": "1818_MSP_blue71.csv"
+        },
+        {
+            "filepath": "1818_MSP_yellow27.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample1_c1.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample4_c1.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_sample_2_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_changeinabsorb.csv"
+        },
+        {
+            "filepath": "1818_Molar Concentration Calculations for Dyeing Experiments.csv"
+        },
+        {
+            "filepath": "1818_MSP_red81VISonly.csv"
+        },
+        {
+            "filepath": "1818_MSP_time0.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample1_c3.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample2_c3.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample5_c1.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_sample_3_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample1_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample2_c2.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample3_c2.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample5_c1.csv"
+        },
+        {
+            "filepath": "1818_MSP_blue71glass.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample3_c1.csv"
+        },
+        {
+            "filepath": "1818_UVVis_alldyes.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_sample_4_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample1_c2.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_sample_5_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample1_c3.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample2_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample2_c3.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample3_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample4_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample6_c1.csv"
+        },
+        {
+            "filepath": "1818_Blue71_sample3_c3.csv"
+        },
+        {
+            "filepath": "1818_MSP_red81.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample1_c2.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample2_c1.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample2_c2.csv"
+        },
+        {
+            "filepath": "1818_Red81_sample3_c3.csv"
+        },
+        {
+            "filepath": "1818_Yellow27_changeinabsorb.csv"
+        }
+    ],
+    "title": "Photofading of Direct Dyes on Cotton Measured Using Microspectrophotometery (MSP)",
+    "theme": [
+        "Forensics: Trace evidence"
+    ],
+    "inventory": [
+        {
+            "forCollection": "",
+            "descCount": 41,
+            "childCollections": [],
+            "childCount": 41,
+            "byType": [
+                {
+                    "descCount": 41,
+                    "forType": "dcat:Distribution",
+                    "childCount": 41
+                },
+                {
+                    "descCount": 1,
+                    "forType": "nrdp:AccessPage",
+                    "childCount": 1
+                },
+                {
+                    "descCount": 40,
+                    "forType": "nrdp:DataFile",
+                    "childCount": 40
+                },
+                {
+                    "descCount": 40,
+                    "forType": "nrdp:DownloadableFile",
+                    "childCount": 40
+                }
+            ]
+        }
+    ],
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds0078h6z"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "Dataset contains UV-Vis spectra generated from dyed fibers exposed to light in the microspectrophotometer."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:amanda.forster@nist.gov",
+        "fn": "Amanda Forster"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds0078h6z",
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "keyword": [
+        "fiber",
+        "forensics",
+        "MSP",
+        "UV-Vis",
+        "dyes",
+        "trace evidence"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2017-01-13",
+    "ediid": "47E10286371BA75BE0531A5706811B9B1818",
+    "components": [
+        {
+            "filepath": "1818_Red81_changeinabsorb.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_changeinabsorb.csv",
+            "@id": "cmps/1818_Red81_changeinabsorb.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample3_c2.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample3_c2.csv",
+            "@id": "cmps/1818_Red81_sample3_c2.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_sample_1_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_sample_1_c1.csv",
+            "@id": "cmps/1818_Yellow27_sample_1_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_sample_6_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_sample_6_c1.csv",
+            "@id": "cmps/1818_Yellow27_sample_6_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_MSP_blue71.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_MSP_blue71.csv",
+            "@id": "cmps/1818_MSP_blue71.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_MSP_yellow27.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_MSP_yellow27.csv",
+            "@id": "cmps/1818_MSP_yellow27.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample1_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample1_c1.csv",
+            "@id": "cmps/1818_Red81_sample1_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample4_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample4_c1.csv",
+            "@id": "cmps/1818_Red81_sample4_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_sample_2_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_sample_2_c1.csv",
+            "@id": "cmps/1818_Yellow27_sample_2_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_changeinabsorb.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_changeinabsorb.csv",
+            "@id": "cmps/1818_Blue71_changeinabsorb.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Molar Concentration Calculations for Dyeing Experiments.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Molar+Concentration+Calculations+for+Dyeing+Experiments.csv",
+            "@id": "cmps/1818_Molar Concentration Calculations for Dyeing Experiments.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_MSP_red81VISonly.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_MSP_red81VISonly.csv",
+            "@id": "cmps/1818_MSP_red81VISonly.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_MSP_time0.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_MSP_time0.csv",
+            "@id": "cmps/1818_MSP_time0.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample1_c3.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample1_c3.csv",
+            "@id": "cmps/1818_Red81_sample1_c3.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample2_c3.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample2_c3.csv",
+            "@id": "cmps/1818_Red81_sample2_c3.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample5_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample5_c1.csv",
+            "@id": "cmps/1818_Red81_sample5_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_sample_3_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_sample_3_c1.csv",
+            "@id": "cmps/1818_Yellow27_sample_3_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample1_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample1_c1.csv",
+            "@id": "cmps/1818_Blue71_sample1_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample2_c2.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample2_c2.csv",
+            "@id": "cmps/1818_Blue71_sample2_c2.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample3_c2.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample3_c2.csv",
+            "@id": "cmps/1818_Blue71_sample3_c2.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample5_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample5_c1.csv",
+            "@id": "cmps/1818_Blue71_sample5_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_MSP_blue71glass.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_MSP_blue71glass.csv",
+            "@id": "cmps/1818_MSP_blue71glass.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample3_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample3_c1.csv",
+            "@id": "cmps/1818_Red81_sample3_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_UVVis_alldyes.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_UVVis_alldyes.csv",
+            "@id": "cmps/1818_UVVis_alldyes.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_sample_4_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_sample_4_c1.csv",
+            "@id": "cmps/1818_Yellow27_sample_4_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample1_c2.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample1_c2.csv",
+            "@id": "cmps/1818_Blue71_sample1_c2.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "accessURL": "https://doi.org/doi:10.18434/M3W88G",
+            "@id": "#10.18434/M3W88G",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/AccessPage"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_sample_5_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_sample_5_c1.csv",
+            "@id": "cmps/1818_Yellow27_sample_5_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample1_c3.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample1_c3.csv",
+            "@id": "cmps/1818_Blue71_sample1_c3.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample2_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample2_c1.csv",
+            "@id": "cmps/1818_Blue71_sample2_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample2_c3.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample2_c3.csv",
+            "@id": "cmps/1818_Blue71_sample2_c3.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample3_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample3_c1.csv",
+            "@id": "cmps/1818_Blue71_sample3_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample4_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample4_c1.csv",
+            "@id": "cmps/1818_Blue71_sample4_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample6_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample6_c1.csv",
+            "@id": "cmps/1818_Blue71_sample6_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Blue71_sample3_c3.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Blue71_sample3_c3.csv",
+            "@id": "cmps/1818_Blue71_sample3_c3.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_MSP_red81.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_MSP_red81.csv",
+            "@id": "cmps/1818_MSP_red81.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample1_c2.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample1_c2.csv",
+            "@id": "cmps/1818_Red81_sample1_c2.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample2_c1.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample2_c1.csv",
+            "@id": "cmps/1818_Red81_sample2_c1.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample2_c2.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample2_c2.csv",
+            "@id": "cmps/1818_Red81_sample2_c2.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Red81_sample3_c3.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Red81_sample3_c3.csv",
+            "@id": "cmps/1818_Red81_sample3_c3.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "filepath": "1818_Yellow27_changeinabsorb.csv",
+            "mediaType": "text/csv",
+            "downloadURL": "https://opendata.nist.gov/1818_Yellow27_changeinabsorb.csv",
+            "@id": "cmps/1818_Yellow27_changeinabsorb.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

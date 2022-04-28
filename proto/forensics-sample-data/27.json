@@ -1,0 +1,89 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Face",
+            "@type": "Concept"
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://www.nist.gov/itl/iad/image-group/color-feret-database",
+    "title": "Color FERET Database",
+    "theme": [
+        "Information Technology: Biometrics"
+    ],
+    "inventory": [
+        {
+            "forCollection": "",
+            "descCount": 0,
+            "childCollections": [],
+            "childCount": 0,
+            "byType": []
+        }
+    ],
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds014mftx"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "The DOD Counterdrug Technology Program sponsored the Facial Recognition Technology (FERET) program and development of the FERET database. The National Institute of Standards and Technology (NIST) is serving as Technical Agent for distribution of the FERET database. The goal of the FERET program is to develop new techniques, technology, and algorithms for the automatic recognition of human faces. As part of the FERET program, a database of facial imagery was collected between December 1993 and August 1996. The database is used to develop, test, and evaluate face recognition algorithms."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:patricia.flanagan@nist.gov",
+        "fn": "Patricia Flanagan"
+    },
+    "accessLevel": "restricted public",
+    "@id": "ark:/88434/mds014mftx",
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "keyword": [
+        "FERET",
+        "face",
+        "biometrics"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "rights": "Users must abide by the release agreement and request an account to obtain the data. For more information please visit http://www.nist.gov/itl/iad/ig/colorferet.cfm.",
+    "modified": "2000-01-20",
+    "ediid": "26F2FB7D11E1EB44E0531A570681D23C1451",
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

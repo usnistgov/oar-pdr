@@ -1,0 +1,164 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Information Technology: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Face",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsReferencedBy",
+            "location": "https://www.nist.gov/document/readmesd18pdf",
+            "@id": "#ref:document/readmesd18pdf",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "8 bit gray scales",
+        "facial recognition",
+        "front views",
+        "law enforcement",
+        "matching",
+        "mugshots",
+        "profile views",
+        "profiles"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/1E651A532AFD8816E0531A570681A662439",
+    "title": "NIST Mugshot Identification Database (MID) - NIST Special Database 18",
+    "theme": [
+        "Information Technology:Biometrics"
+    ],
+    "version": "1.0.4",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds00sxbvh"
+        }
+    ],
+    "description": [
+        "This database was distributed for use in development and testing of automated mugshot identification systems. The database consists of one zipped file, containing a total of 3,248 images of variable size using PNG format for the images and TXT format for corresponding metadata files. There are images of 1,573 individuals (cases) 1,495 male and 78 female. \r\n\r\n The database contains both front and side (profile) views when available. Separating front views and profiles, there are 131 cases with two or more front views and 1,418 with only one front view. Profiles have 89 cases with two or more profiles and 1,268 with only one profile. Cases with both fronts and profiles have 89 cases with two or more of both fronts and profiles, 27 with two or more fronts and one profile, and 1,217 with only one front and one profile."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:patricia.flanagan@nist.gov",
+        "fn": "Patricia A. Flanagan"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds00sxbvh",
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "doi": "doi:10.18434/t4159s",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2005-01-09 00:00:00",
+    "ediid": "1E651A532AFD8816E0531A570681A662439",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/t4159s",
+            "description": "DOI Access to NIST Mugshot Identification Database (MID) - NIST Special Database 18",
+            "format": "text/html",
+            "title": "DOI Access to NIST Mugshot Identification Database (MID) - NIST Special Database 18",
+            "@id": "#doi:10.18434/t4159s",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        },
+        {
+            "accessURL": "https://www.nist.gov/srd/nist-special-database-18",
+            "description": "This database is being distributed for use in developing and testing of mugshot identification systems. The database contains images of 1,573 individuals (cases) for a total of 3,248 images stored in PNG format. The mugshots are mainly of male cases, with the database containing 1495 male cases and 78 female cases. The gender and age of each individual are stored in a text file that accompanies each image.",
+            "format": {
+                "description": "the downloaded file is in zipped format with the images in PNG format"
+            },
+            "title": "Special  Database 18 -NIST Mugshot Identification Database (MID)",
+            "mediaType": "application/zip",
+            "@id": "#srd/nist-special-database-18",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/AccessPage"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2005-01-09",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds00sxbvh",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00sxbvh",
+            "description": "initial release"
+        },
+        {
+            "issued": "2005-01-09 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds00sxbvh",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00sxbvh",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2005-01-09 00:00:00",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds00sxbvh",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00sxbvh",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2005-01-09 00:00:00",
+            "version": "1.0.3",
+            "@id": "ark:/88434/mds00sxbvh",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00sxbvh",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2005-01-09 00:00:00",
+            "version": "1.0.4",
+            "@id": "ark:/88434/mds00sxbvh",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00sxbvh",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

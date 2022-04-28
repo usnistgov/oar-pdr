@@ -1,0 +1,171 @@
+{
+    "issued": null,
+    "revised": "2022-03-03T21:24:25.773471",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Metrology: Metric",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Data and informatics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Digital evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Digital evidence",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:publications/open-media-forensics-challenge-openmfc-2021-workshop-presentations",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://www.nist.gov/publications/open-media-forensics-challenge-openmfc-2021-workshop-presentations"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:nistpubs/ir/2021/NIST.IR.8377.pdf",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://nvlpubs.nist.gov/nistpubs/ir/2021/NIST.IR.8377.pdf"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:publication/get_pdf.cfm?pub_id=932934",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=932934"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:publication/get_pdf.cfm?pub_id=930801",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=930801"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:10.6028/NIST.IR.83963",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://doi.org/10.6028/NIST.IR.83963"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:10.6028/NIST.IR.83775",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://doi.org/10.6028/NIST.IR.83775"
+        }
+    ],
+    "firstIssued": "2022-03-03T21:24:25.773471",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://github.com/usnistgov/MediScore",
+    "annotated": "2022-03-03T21:24:25.773471",
+    "title": "MediScore: the NIST Medifor scoring and evaluation toolkit (https://github.com/usnistgov/MediScore) ",
+    "_editStatus": "done",
+    "theme": [
+        "Metrology: Metric",
+        "Information Technology: Data and informatics",
+        "Forensics: Digital evidence"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2565"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "MediScore (https://github.com/usnistgov/MediScore) is a NIST developed Medifor scoring and evaluation toolkit for Open Media Forensic Evaluation (OpenMFC). MediScore contains the source, documentation, and example data for the following tools:",
+        "Validator - Single/Double Source Detection Validator\nDetectionScorer - Single/Double Source Detection Evaluation Scorer\nMaskScorer - Single/Double Source Mask Evaluation (Localization) Scorer\nProvenanceFilteringScorer - Scorer for Provenance Filtering\nProvenanceGraphBuildingScorer - Scorer for Provenance Graph Building\nVideoTemporalLocalisationScoer - Scorer for Video Temporal Localization"
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:haiying.guan@nist.gov",
+        "fn": "Haiying Guan"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2565",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2565",
+    "keyword": [
+        "Open Media Forensics Challenge (OpenMFC); Media Forensics; Receiver Operating Characteristic (ROC) curve; Detection System; Localization System; Correct Detection (CD); False Alarm Rate (FAR)"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2021-04-22 00:00:00",
+    "ediid": "ark:/88434/mds2-2565",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2565",
+            "@id": "#doi:10.18434/mds2-2565",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for MediScore: the NIST Medifor scoring and evaluation toolkit (https://github.com/usnistgov/MediScore) "
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

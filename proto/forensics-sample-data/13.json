@@ -1,0 +1,1726 @@
+{
+    "issued": null,
+    "revised": "2021-09-30T18:44:03.678198",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Trace evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Materials: Materials characterization",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Trace evidence",
+            "@type": "Concept"
+        }
+    ],
+    "firstIssued": "2021-09-30T18:44:03.678198",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "landingPage": "https://data.nist.gov/od/id/mds2-2476",
+    "annotated": "2021-09-30T18:44:03.678198",
+    "title": "Automated particle analysis (SEM/EDS) data from samples known to have been exposed to gunshot residue and from samples occasionally mistaken for gunshot residue - like brake dust and fireworks.",
+    "_editStatus": "done",
+    "theme": [
+        "Forensics: Trace evidence",
+        "Materials: Materials characterization"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2476"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "Automated particle analysis (SEM/EDS) data from samples known to have been exposed to gunshot residue and from samples occasionally mistaken for gunshot residue - like brake dust and fireworks.",
+        "The dataset consists of analyses of 30 discrete samples: 12 from sampling automobiles (\"brake dust\"), 10 from sampling fireworks (\"sparklers\" and \"spinners\" and \"roman candles\"), 8 from shooter's left or right hands.",
+        "The analysis configuration meta-data for each analysis are contained in the \"configuration.txt\" and \"script.py\" files.  The raw data from each analysis is in the file pair \"data.pxz\" and \"data.hdz\".  The HDZ-file details the contents of the PXZ-file.  In addition, the \"mag0\" directory contains TIFF images with embedded X-ray spectra for each particle in the dataset.",
+        "Additional HDZ/PXZ files contain the results of reprocessing the \"data.hdz/.pxz\" in light of the \"mag0\" spectra and the standard spectra in \"25 keV.zip\"",
+        "The samples came from Amy Reynolds (amy.reynolds@pd.boston.gov) at the Boston Police Department.  The \"Shooter\" samples were taken from a volunteer who fired a gun at a local firing range and was then sampled immediately after.  They are part of a time series that was used to study GSR retention.",
+        "The TIFF Image/Spectrum files can be read using NIST DTSA-II (https://www.nist.gov/services-resources/software/nist-dtsa-ii) or NeXLSpectrum.jl (https://doi.org/10.18434/M32286).  The HDZ/PXZ files can be read using NIST Graf (available on request) or NeXLParticle.jl (https://github.com/usnistgov/NeXLParticle.jl)."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "W. M.",
+            "familyName": "Ritchie",
+            "affiliation": [
+                {
+                    "title": "National Institute of Standards and Technology",
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "subunits": [
+                        "Material Measurement Science Division",
+                        "Microanalysis Group"
+                    ]
+                }
+            ],
+            "orcid": "0000-0001-5734-5729",
+            "givenName": "Nicholas",
+            "@type": "foaf:Person",
+            "fn": "Nicholas W. M. Ritchie"
+        },
+        {
+            "middleName": "",
+            "familyName": "Renolds",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "Boston Police Department"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Amy",
+            "@type": "foaf:Person",
+            "fn": "Amy  Renolds"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:nicholas.ritchie@nist.gov",
+        "fn": "Nicholas Ritchie"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2476",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2476",
+    "keyword": [
+        "GSR",
+        "gunshot residue",
+        "forensic",
+        "scanning electron microscope",
+        "energy dispersive x-ray spectrometry",
+        "SEM/EDS",
+        "SEM/EDX",
+        "automated particle analsyis",
+        "APA"
+    ],
+    "language": [
+        "en"
+    ],
+    "modified": "2021-09-29 00:00:00",
+    "ediid": "ark:/88434/mds2-2476",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2476",
+            "@id": "#doi:10.18434/mds2-2476",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Automated particle analysis (SEM/EDS) data from samples known to have been exposed to gunshot residue and from samples occasionally mistaken for gunshot residue - like brake dust and fireworks."
+        },
+        {
+            "filepath": "Spinners - Post-ignition.zip",
+            "checksum": {
+                "hash": "bb15217faf54ee7e4239e814b16251dc582403f1c4d0ee5721c005f54da63ed2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Post-ignition.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Spinners - Post-ignition.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1564079336
+        },
+        {
+            "filepath": "25 keV.zip",
+            "checksum": {
+                "hash": "96d84fc285cc998e62bdbc07f0584c64b1b0ab6fe77487aaa4bd6cf9b68cbbeb",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/25%20keV.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/25 keV.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 641440
+        },
+        {
+            "description": "SHA-256 checksum value for Spinners - Post-cleanup.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Spinners - Post-cleanup.zip.sha256",
+            "checksum": {
+                "hash": "699afe7a1efa59fbbf4c1ef9cbe77675786c286b77f2b24075aa013b628d4cf3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Post-cleanup.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Spinners - Post-cleanup.zip",
+            "@id": "cmps/Spinners - Post-cleanup.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Shooter #3 - Zero time L.zip",
+            "checksum": {
+                "hash": "9c9399f90416ceaf2b8477b8b8ed00c2e9125006731469fe5d8936ab0080d0c0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%233%20-%20Zero%20time%20L.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #3 - Zero time L.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 2025392211
+        },
+        {
+            "description": "SHA-256 checksum value for Spinners - Post-handling, pre-ignition.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Spinners - Post-handling, pre-ignition.zip.sha256",
+            "checksum": {
+                "hash": "820389ac68f78c3be2ce6c3df5c6e8cae53a532f0c29205726c6b574cef1a1a2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Post-handling%2C%20pre-ignition.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Spinners - Post-handling, pre-ignition.zip",
+            "@id": "cmps/Spinners - Post-handling, pre-ignition.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Chevy Caprise 422PC2 Rear Passenger.zip",
+            "checksum": {
+                "hash": "ff1839ea23fd92140c5727ec8a0c33a033a047c7dfcfe19379d1f079db925f3f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Rear%20Passenger.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Chevy Caprise 422PC2 Rear Passenger.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 163092949
+        },
+        {
+            "filepath": "Sparklers during burn.zip",
+            "checksum": {
+                "hash": "5b1ffbbb00276a90caa78f9297d11feaf68f549137a0c437b28324b8f490b596",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Sparklers%20during%20burn.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Sparklers during burn.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 852691620
+        },
+        {
+            "filepath": "Shooter #1 - Zero time.zip",
+            "checksum": {
+                "hash": "a821b49062e9d66818b72f9f78d6a1d96c5323aa867e5a946ccbd5a878a3d144",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%231%20-%20Zero%20time.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #1 - Zero time.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 503836090
+        },
+        {
+            "filepath": "Ford Explorer B297 Rear Driver.zip",
+            "checksum": {
+                "hash": "b0d56edc968e7f273dc3453bc2c581e1a935dc4b6160eb5bd3c27eb946cfff9c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Rear%20Driver.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer B297 Rear Driver.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 152567769
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #1 - Zero time.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #1 - Zero time.zip.sha256",
+            "checksum": {
+                "hash": "8c0d12b2aeb496e6ea78cb0a2ab518139ea774d670e401c5f148d030f35fb382",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%231%20-%20Zero%20time.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #1 - Zero time.zip",
+            "@id": "cmps/Shooter #1 - Zero time.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #5 - Zero time R.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #5 - Zero time R.zip.sha256",
+            "checksum": {
+                "hash": "63153483553cdbab12e29edbfac1d3da22553d09389a10bcfc44c166032fe967",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%235%20-%20Zero%20time%20R.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #5 - Zero time R.zip",
+            "@id": "cmps/Shooter #5 - Zero time R.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Shooter #2 - Zero time.zip",
+            "checksum": {
+                "hash": "65a0ba9c2978e23b70ec174dbdf5f6b2d013ec7495d97fc5378d3fa42edd5dd4",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%232%20-%20Zero%20time.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #2 - Zero time.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 496907994
+        },
+        {
+            "filepath": "Shooter #4 - Zero time R.zip",
+            "checksum": {
+                "hash": "283bd6e551fd27e688091be324320d6cf17926e874e2be4f16f3b114e8a422f6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%234%20-%20Zero%20time%20R.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #4 - Zero time R.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 694118051
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #4 - Zero time L.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #4 - Zero time L.zip.sha256",
+            "checksum": {
+                "hash": "25d7e15ff6c82f3ffba2e1bea23461d1246468b7acfa02ac3a80aa4f07fdcf0a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%234%20-%20Zero%20time%20L.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #4 - Zero time L.zip",
+            "@id": "cmps/Shooter #4 - Zero time L.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer A213 Front Passenger.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer A213 Front Passenger.zip.sha256",
+            "checksum": {
+                "hash": "2062ec2a0b18bd250ac117882eb63563de6364edabc12918d6b05299def21382",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Front%20Passenger.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer A213 Front Passenger.zip",
+            "@id": "cmps/Ford Explorer A213 Front Passenger.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer B297 Front Driver.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer B297 Front Driver.zip.sha256",
+            "checksum": {
+                "hash": "2ab9d9078ecf61d38d6ee789d5bf541dd4128e4db3a73278358d00a9d3a66756",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Front%20Driver.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer B297 Front Driver.zip",
+            "@id": "cmps/Ford Explorer B297 Front Driver.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Sparklers post handling post burn.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sparklers post handling post burn.zip.sha256",
+            "checksum": {
+                "hash": "5e8618f42e88370089e2010aae39314ed5914bc73f4e57937fb1f17c09ab3e16",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Sparklers%20post%20handling%20post%20burn.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Sparklers post handling post burn.zip",
+            "@id": "cmps/Sparklers post handling post burn.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Roman Candles - Debris from JWC.zip",
+            "checksum": {
+                "hash": "8237a109c9467d1c9959d67621bb1a87c19283291adc08b1fb371e10a7a72bb0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Roman%20Candles%20-%20Debris%20from%20JWC.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Roman Candles - Debris from JWC.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 7889587
+        },
+        {
+            "filepath": "Ford Explorer A213 Front Passenger.zip",
+            "checksum": {
+                "hash": "19a70bacf73b89f04990812d18d238fbc211135566ab828772d27ca05dcfc84b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Front%20Passenger.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer A213 Front Passenger.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 156637236
+        },
+        {
+            "filepath": "Debris from sparklers.zip",
+            "checksum": {
+                "hash": "b39b7b2fbf4b0e73bae2793cb83484c3c4650c2c5dd1d712044d299782a5c32a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Debris%20from%20sparklers.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Debris from sparklers.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 478701615
+        },
+        {
+            "filepath": "Chevy Caprise 422PC2 Rear Driver.zip",
+            "checksum": {
+                "hash": "d22801b825151ef03255930704525e666b825e1585ac4e097186058b172a8e1d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Rear%20Driver.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Chevy Caprise 422PC2 Rear Driver.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 159371525
+        },
+        {
+            "filepath": "Chevy Caprise 422PC2 Front Driver.zip",
+            "checksum": {
+                "hash": "8edf736fdf19cc3d2523fea615349381c860e3b839051bf9966b5358c00ff3b3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Front%20Driver.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Chevy Caprise 422PC2 Front Driver.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 186327670
+        },
+        {
+            "description": "SHA-256 checksum value for Chevy Caprise 422PC2 Rear Driver.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Chevy Caprise 422PC2 Rear Driver.zip.sha256",
+            "checksum": {
+                "hash": "821908224716d66bfb4b5d5acac04565d62771b8674c4a6fa6d74058ab42d3ea",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Rear%20Driver.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Chevy Caprise 422PC2 Rear Driver.zip",
+            "@id": "cmps/Chevy Caprise 422PC2 Rear Driver.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Ford Explorer A213 Rear Passenger.zip",
+            "checksum": {
+                "hash": "a13fd330e1b3942131aa167c5ea8e6e74af599d39c8dc5aec62c856ca620baf8",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Rear%20Passenger.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer A213 Rear Passenger.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 160903543
+        },
+        {
+            "description": "SHA-256 checksum value for Chevy Caprise 422PC2 Rear Passenger.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Chevy Caprise 422PC2 Rear Passenger.zip.sha256",
+            "checksum": {
+                "hash": "04e4bb5687b7f799e007eed803117b409c3eef558044f51c383d30ea134a50fc",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Rear%20Passenger.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Chevy Caprise 422PC2 Rear Passenger.zip",
+            "@id": "cmps/Chevy Caprise 422PC2 Rear Passenger.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Ford Explorer B297 Front Driver.zip",
+            "checksum": {
+                "hash": "70aba1bc50209c6de8bbf0bf7211039263af532db456b8b45a6dd73376212e8f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Front%20Driver.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer B297 Front Driver.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 159042762
+        },
+        {
+            "filepath": "Ford Explorer A213 Front Driver.zip",
+            "checksum": {
+                "hash": "b54139d043f21faa7b79d71b2cab5066865862c1ac3ba5d50a9cb9543d9630ac",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Front%20Driver.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer A213 Front Driver.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 160751948
+        },
+        {
+            "filepath": "Ford Explorer B297 Rear Passenger.zip",
+            "checksum": {
+                "hash": "71b770b2de457b13a7ad2dcf18dd61e295907afe80b272fb3ab21d239c78ae4f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Rear%20Passenger.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer B297 Rear Passenger.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 157927681
+        },
+        {
+            "filepath": "Shooter #5 - Zero time R.zip",
+            "checksum": {
+                "hash": "41e2a07e5b4ac14b88ec13cba297e18bf007c71716354ef40128f89fe9a7d1c2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%235%20-%20Zero%20time%20R.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #5 - Zero time R.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 516701956
+        },
+        {
+            "description": "SHA-256 checksum value for Spinners - Debris from spinner.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Spinners - Debris from spinner.zip.sha256",
+            "checksum": {
+                "hash": "e180e9d8b9d484928e585145e2ce2a52a514d310d992b79626136a93f18a19d6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Debris%20from%20spinner.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Spinners - Debris from spinner.zip",
+            "@id": "cmps/Spinners - Debris from spinner.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Ford Explorer A213 Rear Driver.zip",
+            "checksum": {
+                "hash": "b291162bbd2051d1ecc6219ef98ae55083ad07053ad65811c38eb0d5a350d46d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Rear%20Driver.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer A213 Rear Driver.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 159755590
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer B297 Rear Driver.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer B297 Rear Driver.zip.sha256",
+            "checksum": {
+                "hash": "46ea1dec96e5d42ad0cdf08ccac17eab161707bded1073221793790c7f3d099b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Rear%20Driver.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer B297 Rear Driver.zip",
+            "@id": "cmps/Ford Explorer B297 Rear Driver.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer A213 Rear Passenger.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer A213 Rear Passenger.zip.sha256",
+            "checksum": {
+                "hash": "94597bc075ccadb64f3d6b977855c93ef9f5bafc00e3e6cb1359c3a28fdd7fd4",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Rear%20Passenger.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer A213 Rear Passenger.zip",
+            "@id": "cmps/Ford Explorer A213 Rear Passenger.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Spinners - Post-handling, pre-ignition.zip",
+            "checksum": {
+                "hash": "013dd777075fb4ad61baed00fd8108340718a8a9f3c81bfbb101aaa6890391e5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Post-handling%2C%20pre-ignition.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Spinners - Post-handling, pre-ignition.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 2154455550
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #3 - Zero time R.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #3 - Zero time R.zip.sha256",
+            "checksum": {
+                "hash": "2cf88b3ddbe77d5cdff6220442a6cf051577a03c36cd217c59eef00652d46da2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%233%20-%20Zero%20time%20R.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #3 - Zero time R.zip",
+            "@id": "cmps/Shooter #3 - Zero time R.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer A213 Rear Driver.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer A213 Rear Driver.zip.sha256",
+            "checksum": {
+                "hash": "91e5a947a7017748a54e0d4c2c6cadc4c3335c8f67671dbd78577b3747a5d0f5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Rear%20Driver.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer A213 Rear Driver.zip",
+            "@id": "cmps/Ford Explorer A213 Rear Driver.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Roman Candles - Post cleanup.zip",
+            "checksum": {
+                "hash": "73266da4e857199c9920eda640116482f76699d183db4275cdcfbe692ba8ea71",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Roman%20Candles%20-%20Post%20cleanup.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Roman Candles - Post cleanup.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1415823373
+        },
+        {
+            "description": "SHA-256 checksum value for Debris from sparklers.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Debris from sparklers.zip.sha256",
+            "checksum": {
+                "hash": "bef1af8e207b5bc3fbb69f567a30febe6c0ee06e9ce9367bd7f61ce9dd7475b5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Debris%20from%20sparklers.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Debris from sparklers.zip",
+            "@id": "cmps/Debris from sparklers.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Chevy Caprise 422PC2 Front Passenger.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Chevy Caprise 422PC2 Front Passenger.zip.sha256",
+            "checksum": {
+                "hash": "29e3cede874e62b01881ed35b747bdd376589b9eea98b273b3137eb640c798bc",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Front%20Passenger.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Chevy Caprise 422PC2 Front Passenger.zip",
+            "@id": "cmps/Chevy Caprise 422PC2 Front Passenger.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Shooter #5 - Zero time L.zip",
+            "checksum": {
+                "hash": "2d78fc59c32ea8c5c994d02617dc26ab9ed1cf27e22904be4378d224d6e5e7d7",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%235%20-%20Zero%20time%20L.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #5 - Zero time L.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 417698937
+        },
+        {
+            "description": "SHA-256 checksum value for Roman Candles - Debris from JWC.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Roman Candles - Debris from JWC.zip.sha256",
+            "checksum": {
+                "hash": "81a616f72e298deb4422c26277a3d3bb3ffde57e0e0a2d40a8ad193b4a98d117",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Roman%20Candles%20-%20Debris%20from%20JWC.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Roman Candles - Debris from JWC.zip",
+            "@id": "cmps/Roman Candles - Debris from JWC.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Roman Candles - Post cleanup.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Roman Candles - Post cleanup.zip.sha256",
+            "checksum": {
+                "hash": "a050b14815e2441a5557de753b184e3598931f0059d2a3ac5b65aff27059a3b1",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Roman%20Candles%20-%20Post%20cleanup.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Roman Candles - Post cleanup.zip",
+            "@id": "cmps/Roman Candles - Post cleanup.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Ford Explorer B297 Front Passenger.zip",
+            "checksum": {
+                "hash": "130a7dbba859c9679100d6e11bbdbb326d1a7b4802be58d0f896dcc780014377",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Front%20Passenger.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Ford Explorer B297 Front Passenger.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 158173466
+        },
+        {
+            "description": "SHA-256 checksum value for Roman Candles - Post-handling, pre-ignition.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Roman Candles - Post-handling, pre-ignition.zip.sha256",
+            "checksum": {
+                "hash": "f0a586e7d79ebcc6fb1407a6bc8c96e49a9371ea0eaef95e53c182b663de881a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Roman%20Candles%20-%20Post-handling%2C%20pre-ignition.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Roman Candles - Post-handling, pre-ignition.zip",
+            "@id": "cmps/Roman Candles - Post-handling, pre-ignition.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Spinners - Post-cleanup.zip",
+            "checksum": {
+                "hash": "a907c93cc661ad0c75b2d483f6c90827ceb4633e261e7b85bf2cc8d8539d3347",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Post-cleanup.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Spinners - Post-cleanup.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 2756971082
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer B297 Front Passenger.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer B297 Front Passenger.zip.sha256",
+            "checksum": {
+                "hash": "ae734315fdf9bf6372b3f58203a4bc56dae40a5bfc2325ea3a70d7ae7b048097",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Front%20Passenger.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer B297 Front Passenger.zip",
+            "@id": "cmps/Ford Explorer B297 Front Passenger.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Spinners - Post-ignition.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Spinners - Post-ignition.zip.sha256",
+            "checksum": {
+                "hash": "ed237bef8ae50ba35648ab2639a905a2b96fbcdf8a7e85079ce53d6eae844669",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Post-ignition.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Spinners - Post-ignition.zip",
+            "@id": "cmps/Spinners - Post-ignition.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #5 - Zero time L.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #5 - Zero time L.zip.sha256",
+            "checksum": {
+                "hash": "6fbf90105193a6ac0bc51f016e6914bd77411d7260b0765175ab71b2c06f3cdc",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%235%20-%20Zero%20time%20L.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #5 - Zero time L.zip",
+            "@id": "cmps/Shooter #5 - Zero time L.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #2 - Zero time.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #2 - Zero time.zip.sha256",
+            "checksum": {
+                "hash": "89e2b1428d9c3560543215482518ee4465b9c292190d9cc08d87ed637ee49dba",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%232%20-%20Zero%20time.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #2 - Zero time.zip",
+            "@id": "cmps/Shooter #2 - Zero time.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for 25 keV.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "25 keV.zip.sha256",
+            "checksum": {
+                "hash": "9381fc0c1c6ac9a2a1dd1bf0a571641c4eccec01a05e805ae6d8f8360e7e6567",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/25%20keV.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/25 keV.zip",
+            "@id": "cmps/25 keV.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Roman Candles - Post-handling, pre-ignition.zip",
+            "checksum": {
+                "hash": "85812bc389852b89bbcaa1f67c95bf3be37b5a56452bb748a7808b51da01b3d9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Roman%20Candles%20-%20Post-handling%2C%20pre-ignition.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Roman Candles - Post-handling, pre-ignition.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1080883788
+        },
+        {
+            "filepath": "Shooter #3 - Zero time R.zip",
+            "checksum": {
+                "hash": "a222d3b3aad77efe826aef10afb4d6aa194d21f66fba348aa4bca32830a61c79",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%233%20-%20Zero%20time%20R.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #3 - Zero time R.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1989034526
+        },
+        {
+            "description": "SHA-256 checksum value for Chevy Caprise 422PC2 Front Driver.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Chevy Caprise 422PC2 Front Driver.zip.sha256",
+            "checksum": {
+                "hash": "0832fdc052d84733cf05b7aa8aaa3643f4ead695376baa04563eed75ffce6417",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Front%20Driver.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Chevy Caprise 422PC2 Front Driver.zip",
+            "@id": "cmps/Chevy Caprise 422PC2 Front Driver.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Sparklers post handling post burn.zip",
+            "checksum": {
+                "hash": "7526ee7e68c7e6e6ed07c3a69b0bcda37b7b17f8577255fa5ebb84580ac95297",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Sparklers%20post%20handling%20post%20burn.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Sparklers post handling post burn.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 217709378
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer B297 Rear Passenger.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer B297 Rear Passenger.zip.sha256",
+            "checksum": {
+                "hash": "f4ccba82f06b811c73744af2c1de392314d1081e5a0a617407e1a30a4853afc1",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20B297%20Rear%20Passenger.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer B297 Rear Passenger.zip",
+            "@id": "cmps/Ford Explorer B297 Rear Passenger.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Sparklers during burn.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Sparklers during burn.zip.sha256",
+            "checksum": {
+                "hash": "fc195482eff275674e356929252d4269eda7e2a600929ff18f2b451a44703b3a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Sparklers%20during%20burn.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Sparklers during burn.zip",
+            "@id": "cmps/Sparklers during burn.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Spinners - Debris from spinner.zip",
+            "checksum": {
+                "hash": "4b9fd4c47ab3e6116e7aefcbea9d0200c0c04a7fbe35a7fc770805dbaebc85ab",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Spinners%20-%20Debris%20from%20spinner.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Spinners - Debris from spinner.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1263433217
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #4 - Zero time R.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #4 - Zero time R.zip.sha256",
+            "checksum": {
+                "hash": "cd6560cdda0f5e23127dac4142fd93a836d606c0b23fe0ac1a28daf6747447e9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%234%20-%20Zero%20time%20R.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #4 - Zero time R.zip",
+            "@id": "cmps/Shooter #4 - Zero time R.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Shooter #3 - Zero time L.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Shooter #3 - Zero time L.zip.sha256",
+            "checksum": {
+                "hash": "f16b0d9b4534335dceac3ee46fafef86053848ef7f1dc984ff86d6baee8bab19",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%233%20-%20Zero%20time%20L.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Shooter #3 - Zero time L.zip",
+            "@id": "cmps/Shooter #3 - Zero time L.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Ford Explorer A213 Front Driver.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Ford Explorer A213 Front Driver.zip.sha256",
+            "checksum": {
+                "hash": "0e1aa4f091bbf25069e5e8e5dc639322e503ec7ddfa58131063f51c705f85228",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Ford%20Explorer%20A213%20Front%20Driver.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Ford Explorer A213 Front Driver.zip",
+            "@id": "cmps/Ford Explorer A213 Front Driver.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Shooter #4 - Zero time L.zip",
+            "checksum": {
+                "hash": "9df9c982e7c519c25ae1459ab1f70c6b8555af38152e60a8bf122c0c1277d586",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Shooter%20%234%20-%20Zero%20time%20L.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Shooter #4 - Zero time L.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 581686067
+        },
+        {
+            "filepath": "Chevy Caprise 422PC2 Front Passenger.zip",
+            "checksum": {
+                "hash": "b2cf2876fa48bb8702dd4c1968b0a13aa07433e7992f37043e638448093fdf04",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2476/Chevy%20Caprise%20422PC2%20Front%20Passenger.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ],
+            "@id": "cmps/Chevy Caprise 422PC2 Front Passenger.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 160970047
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,1956 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsReferencedBy",
+            "location": "https://www.jove.com/video/58991/cutting-procedures-tensile-testing-ageing-flexible-unidirectional",
+            "@id": "#ref:video/58991/cutting-procedures-tensile-testing-ageing-flexible-unidirectional",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsCitedBy",
+            "title": "Cutting Procedures, Tensile Testing, and Ageing of Flexible Unidirectional Composite Laminates",
+            "issued": "2019-04-27",
+            "citation": "Engelbrecht-Wiggans, A., Krishnamurthy, A., Burni, F., Osborn, W., & Forster, A. L. (2019). Cutting Procedures, Tensile Testing, and Ageing of Flexible Unidirectional Composite Laminates. Journal of Visualized Experiments, (146). doi:10.3791/58991\n",
+            "location": "https://doi.org/10.3791/58991",
+            "@id": "https://doi.org/10.3791/58991",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsReferencedBy",
+            "location": "http://dx.doi.org/10.3791/58991",
+            "@id": "#ref:10.3791/58991",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "Composite laminate",
+        "flexible composite",
+        "strip tensile testing",
+        "body armor",
+        "aramid",
+        "hydrothermal ageing"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/8B3BFE0480BD4943E053245706812C692078",
+    "title": "Aged and unaged flexible unidirectional composite laminate tensile testing for soft body armor applications",
+    "version": "1.0.1",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds11b3dv01n"
+        }
+    ],
+    "description": [
+        "Flexible Unidirectional (UD) composite laminates are commonly being used for ballistic-resistant body armor. These laminates comprise UD layers, each constructed by laminating thin layers of high-performance fibers held in place using binder resins, with the fibers in each layer oriented parallel to each other. As these materials are used in body armor, it is important to investigate their long-term reliability, particularly with regards to exposure to temperature and humidity as these are known causes of degradation in other commonly used body armor materials. This work investigates the tensile behavior of a poly(p-phenylene terephthalamide), reffered to as PPTA, flexible UD laminate, both unaged and aged for up to 150 d at accelerated conditions of 70 °C and 76 % relative humidity (RH). Tests on aged specimens were performed at three different crosshead displacement rates and three different gauge lengths. Unaged characterization additionally included three different widths and two other configurations.",
+        "Certain commercial equipment, instruments, or materials are identified in this dataset in order to specify the experimental procedure adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the materials or equipment identified are necessarily the best available for the purpose."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "affiliation": [
+                {
+                    "@id": "sdporg:US-NIST",
+                    "@type": [
+                        "org:Organization"
+                    ],
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "givenName": "Amy",
+            "fn": "Amy Engelbrecht-Wiggans",
+            "familyName": "Engelbrecht-Wiggans"
+        },
+        {
+            "affiliation": [
+                {
+                    "@id": "sdporg:US-NIST",
+                    "@type": [
+                        "org:Organization"
+                    ],
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "givenName": "Amanda",
+            "fn": "Amanda Forster",
+            "familyName": "Forster"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:amy.engelbrecht-wiggans@nist.gov",
+        "fn": "Amy Engelbrecht-Wiggans"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds11b3dv01n",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M32078",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2018-08-31 00:00:00",
+    "ediid": "8B3BFE0480BD4943E053245706812C692078",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/M32078",
+            "@id": "#doi:10.18434/M32078",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Aged and unaged flexible unidirectional composite laminate tensile testing for soft body armor applications"
+        },
+        {
+            "filepath": "UDPE1_old_grips.zip",
+            "checksum": {
+                "hash": "370b2d1f4e60d6d526be69d7e49717bb02ec08f49be4037e5a5e765cbd97652a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPE1_old_grips.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPE1_old_grips.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 425165084
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_H_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_H_U_00.zip.sha256",
+            "checksum": {
+                "hash": "b61022818dbecd52a5aae0da16b59636339a774aa41e362afbf2738346e81352",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_H_U_00.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x10_010_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x10_010_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "3d6de9488bf54e5763da64aba01cda410dd34e4c9d89ef1a7d6aa26264a65990",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x10_010_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x10_010_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_300x10_010_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_100_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_100_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "48cc995cb727dcc77a5be6cccbcf053dd1afdfea8d1b42dd36e1294de6e7b231",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_100_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_100_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_300x30_100_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x10_010_H_U_04.zip",
+            "checksum": {
+                "hash": "a74cc3087f550e324b02a2586b97709844fffde6caaa28e2bdc4383acd45844e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x10_010_H_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x10_010_H_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 53769399
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_100_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_100_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "f07d9fd20f179c51bc1ba1c5319009026f6b3df25bc4086528de3424133b7882",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_100_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_100_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_300x30_100_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UD_tensile_strip_readme.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UD_tensile_strip_readme.txt.sha256",
+            "checksum": {
+                "hash": "fe1bee388a23bd2abd374c5bc0bb1289f4e1cc40f611fb6386d9a24d5a56aeb2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UD_tensile_strip_readme.txt.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UD_tensile_strip_readme.txt",
+            "@id": "cmps/UD_tensile_strip_readme.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_H_U_04.zip",
+            "checksum": {
+                "hash": "9a2640b57fc77842bf53da3505433a582b0fbc2ed5c17c1757c651416bdf4845",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 44253768
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_900x30_010_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_900x30_010_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "84cc443c4a0a87344ac1c0125120643a9af8fe734879fb7cb3f78e08fcc3f41b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_900x30_010_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_H_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_H_U_04.zip.sha256",
+            "checksum": {
+                "hash": "921983ffe8bf634292da70624b213826b687502d08cbce0260feae50051859cf",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_H_U_04.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_900x30_010_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_900x30_010_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "0f07b027880e1d925e5f704177e29d44cae558c321fc3e6b283fe791749ce8e0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_900x30_010_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_100x30_010_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_100x30_010_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "af3a8023ef1b653a7fa0a432b7b1b9444d218992168be45842fde22f4d9074e3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_100x30_010_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_U_18.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_U_18.zip.sha256",
+            "checksum": {
+                "hash": "55a7271919a481e47b81e6bedc1d9426ab31cef4c3990e9fe24765e260868d7c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_18.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_U_18.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_18.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_H_U_22.zip",
+            "checksum": {
+                "hash": "05aae9e08aebcdeca72ba253778265ed1c86199bcd98237467b8c9fc18305240",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_22.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_22.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 405676075
+        },
+        {
+            "filepath": "UDPPTA1_100x10_010_V_U_04.zip",
+            "checksum": {
+                "hash": "8c461c065fbae3f658cb0d4cd9ddd85be0981416d9a4ad5ec73b0e8457d125d9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x10_010_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_100x10_010_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 120669025
+        },
+        {
+            "filepath": "UDPPTA1_100x30_010_V_U_00.zip",
+            "checksum": {
+                "hash": "6bd99e35cf4e533aa9e62dfc75b4a2256fd9c4bc768ab7e3432b88816d3c9389",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 214910737
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_900x30_010_V_U_12.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_900x30_010_V_U_12.zip.sha256",
+            "checksum": {
+                "hash": "79cb641ee90b5f3f559b47798fd17f795dbe34f0dab40a9ceba71cdaa0e7053e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_12.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_900x30_010_V_U_12.zip",
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_12.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_900x30_010_V_U_00.zip",
+            "checksum": {
+                "hash": "fd9e27c0c1c860e61a79e16e9114514b42a6a3557ba42ce8b4274c0c5eb0c2a1",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 80400724
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_100x10_010_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_100x10_010_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "ff86fdeebc747fd9e5a2e9e8aeff5e222a39681a469186883af494c159ce9ca2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x10_010_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_100x10_010_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_100x10_010_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_100x30_010_V_U_04.zip",
+            "checksum": {
+                "hash": "d411ed16df2a7fa8f864eb5b804dd39e820690228c5a1fa228622f464bd47236",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 255361007
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_U_00.zip",
+            "checksum": {
+                "hash": "dbc6b88333b0c6a096f1195800ea23de34c05f975a70d030a0770fe7b8194457",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 152905359
+        },
+        {
+            "filepath": "UD_tensile_strip_readme.txt",
+            "checksum": {
+                "hash": "d2af3a6c6685bc7449e02670386760ea8cf09ba2762bb24651fa3d4e9b83ad92",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UD_tensile_strip_readme.txt",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UD_tensile_strip_readme.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 5226
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_U_08.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_U_08.zip.sha256",
+            "checksum": {
+                "hash": "1b5fd8d8f328224ac71f81a437390edd6b0887a50523a7d5aaa8d86b4b4ceefd",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_08.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_U_08.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_08.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_100x10_010_V_U_00.zip",
+            "checksum": {
+                "hash": "438efd98b9fb2fb0bf321c40851c4372dd067e0a2035a67ab6a67df6fdfe48ad",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x10_010_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_100x10_010_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 297276193
+        },
+        {
+            "filepath": "UDPPTA1_300x10_010_V_U_00.zip",
+            "checksum": {
+                "hash": "27522845ebf9fc411693efc543d04b0733b8e430acb13838ca8ccc5d3b6f7148",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x10_010_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x10_010_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 86076525
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_U_12.zip",
+            "checksum": {
+                "hash": "bf0cc8eccf9f8180e3caf819519cb198fb07eebf3b750acdb2c5cce8b8520eca",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_12.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_12.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 18056316
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_100x30_010_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_100x30_010_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "3e97117e7c50818635676db4c577e85d82fa8e86b7965933ec0c4be4072dfea0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_100x30_010_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_U_12.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_U_12.zip.sha256",
+            "checksum": {
+                "hash": "30b0cf77bffd5498041189eb969edc7036e99842666303139e4eb72c25a4e8a0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_12.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_U_12.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_12.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_100x30_010_V_U_22.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_100x30_010_V_U_22.zip.sha256",
+            "checksum": {
+                "hash": "99c09600cfb3fdad79cb79b1659ab858fe7cf572107e715eb7ad04e3d1e4573d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_22.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_100x30_010_V_U_22.zip",
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_22.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_001_V_U_12.zip",
+            "checksum": {
+                "hash": "5c4ae836a35c74d4875b80487a2ba038e7d18c58ac27bce97fa11a3dfabd3f41",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_12.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_12.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 56485788
+        },
+        {
+            "filepath": "UDPPTA1_300x30_100_V_U_04.zip",
+            "checksum": {
+                "hash": "d5f20f0835beb8458f63d543c7d961026bec350290e2c78f26d60f45e4be9a04",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_100_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_100_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 38556577
+        },
+        {
+            "filepath": "UDPPTA1_900x30_010_V_U_04.zip",
+            "checksum": {
+                "hash": "70f47627c8ed758082d6affa87e6a0585cf5ef186ca07584fbb6756abe18b2b0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 55040402
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_D_00.zip",
+            "checksum": {
+                "hash": "619f69f8b092aab9adad24058712f3ad643ec34c58c6fa796a90bdada18940cb",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_D_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_D_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 86160003
+        },
+        {
+            "filepath": "UDPPTA1_300x30_100_V_U_00.zip",
+            "checksum": {
+                "hash": "1d5fd3b9f50e5475cab9440cdee8656d0a862ef8d13341372ba151bb4287e8fe",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_100_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_100_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 114386304
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_H_U_00.zip",
+            "checksum": {
+                "hash": "8857a18bc32ad521f523f02cd21e41b46d3e67005cdc6849e6fd58cf0cec7452",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 116577821
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_H_U_12.zip",
+            "checksum": {
+                "hash": "656224e6a401071bea1f13ffafbfc360cecd64127720700bc598d85d801a0c5f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_12.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_12.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 160133678
+        },
+        {
+            "filepath": "UDPPTA1_300x30_001_V_U_00.zip",
+            "checksum": {
+                "hash": "594744586afae69612db8845ca7313003ac0c5dc7f67ce3b3af551bde7848006",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 131190127
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_001_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_001_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "1b82d88f90e093623eec4dc9f43baab9cfc0947560e2a012dc460dddb817b9a5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_001_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPE1_old_grips.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPE1_old_grips.zip.sha256",
+            "checksum": {
+                "hash": "671727567cf5df94014c0ecb2f001e127ad652b00aed249a574d9be53ecd5634",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPE1_old_grips.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPE1_old_grips.zip",
+            "@id": "cmps/UDPE1_old_grips.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_001_V_U_04.zip",
+            "checksum": {
+                "hash": "12fb6aa0d2cb5dcfa872b2c1502e5fd89ccd50c4a9ced5bf9a021ad5a988f98f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 88973294
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_U_04.zip.sha256",
+            "checksum": {
+                "hash": "0f0de3819244379fed9d98fac1d5d8bb4ec9b2cfcd220db32ceca96bcd88dd00",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_U_04.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_001_V_U_22.zip",
+            "checksum": {
+                "hash": "97fc1c45bbd1dfea0427b8545a5ba2ce6a6d74a096af06cc029db529d70ff42f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_22.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_22.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 677981579
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_H_U_22.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_H_U_22.zip.sha256",
+            "checksum": {
+                "hash": "fd45a0e6fe4387f23af5cd4fd88e662006614843e80d95822e5e439bd16b6ea0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_22.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_H_U_22.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_22.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_100x30_010_V_U_22.zip",
+            "checksum": {
+                "hash": "5aa4cbe74ce9c3895201e46ed7022737b557658056b1d4d699f17ac7780f402f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_22.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_22.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 264892986
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x10_010_H_U_04.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x10_010_H_U_04.zip.sha256",
+            "checksum": {
+                "hash": "d8573c1eadd93336c8d843d27e8fb65db1a04c1e45b60e8643d774705d92890c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x10_010_H_U_04.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x10_010_H_U_04.zip",
+            "@id": "cmps/UDPPTA1_300x10_010_H_U_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_U_08.zip",
+            "checksum": {
+                "hash": "798036322430f207ffdd9f129a2ea95392e2e864b0f0e6a43c22c644ec63547e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_08.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_08.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 68358088
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_D_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_D_00.zip.sha256",
+            "checksum": {
+                "hash": "cd56326fdcd9d15f7d81f456d4e536af3c158a77429d95435862a2892236b1d8",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_D_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_D_00.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_D_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_001_V_U_18.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_001_V_U_18.zip.sha256",
+            "checksum": {
+                "hash": "59b1fd9360d296239e4bf76cb25c7ceea00e29f10a62a80f64f41cd7bbb755f3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_18.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_001_V_U_18.zip",
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_18.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_900x30_010_V_U_12.zip",
+            "checksum": {
+                "hash": "d9d9c41f58ece56accf38eea699f3f1466ab34307b6a30e582b807612b30851f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_12.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_12.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 207836656
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x10_010_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x10_010_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "3fa9459ffe33646668e39749c2080411756e14926f6aea1b5f52b49707c1ef5a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x10_010_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x10_010_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_300x10_010_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_900x30_010_V_U_22.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_900x30_010_V_U_22.zip.sha256",
+            "checksum": {
+                "hash": "a32f257cc6d38b145b15e3e142dbe0a28620c9cf52295a2e24ec40bcf24675c6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_22.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_900x30_010_V_U_22.zip",
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_22.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPE1_new_grips.zip",
+            "checksum": {
+                "hash": "d62c36bbb9d1376d01c39b8404183bd02dc7682aef5142af4ba3bdc60ca65644",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPE1_new_grips.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPE1_new_grips.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 80322865
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_001_V_U_12.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_001_V_U_12.zip.sha256",
+            "checksum": {
+                "hash": "8dfe4d28450019d9aca4dc6bb7a15a901b90891e7dbc0c547d7c887a203c6486",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_12.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_001_V_U_12.zip",
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_12.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_U_18.zip",
+            "checksum": {
+                "hash": "a4184fb8c2acfcb48c8e7227505f71e0c7368a0144438b32da90bcc11af425b0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_18.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_18.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 144367993
+        },
+        {
+            "filepath": "UDPPTA1_300x70_010_V_U_00.zip",
+            "checksum": {
+                "hash": "b1f7411421ba0ff668dc372448a00d29cd4f1fd36e687f3355553066d8fab537",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x70_010_V_U_00.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x70_010_V_U_00.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 96249523
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x70_010_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x70_010_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "d9ec062f279b54c75333379e9ccb9317d309bf549936a4d87a01d8cca9cd232f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x70_010_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x70_010_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_300x70_010_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x10_010_V_U_04.zip",
+            "checksum": {
+                "hash": "5f325a6c68c487521eb3a83f7bb5fb864cc6fa58bae880692f125d862bb71516",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x10_010_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x10_010_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 83930446
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "cf42f65e4fc8fa1807ecdd0de9d6866da058549cd2ab2bca94a32f1af7d1b194",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_001_V_U_22.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_001_V_U_22.zip.sha256",
+            "checksum": {
+                "hash": "65b0ad0f456581a6ad5156795d6608381f9ddd40b0ee89201c33e036532842c2",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_22.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_001_V_U_22.zip",
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_22.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_U_04.zip",
+            "checksum": {
+                "hash": "f34092f69d551d934bd2cf687fb6d6e84bc5a3461fb86446d77b3d9395d18f9a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 79918322
+        },
+        {
+            "filepath": "UDPPTA1_900x30_010_V_U_22.zip",
+            "checksum": {
+                "hash": "7c6fb12bfe51539fa4980438e2b531460cea965d230a60b2910264f98a0866ce",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_900x30_010_V_U_22.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_900x30_010_V_U_22.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 259272182
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_001_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_001_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "2c7279dc81713861d73926f2d9b686a7c91f9aa2353b358fa6e906d46be79616",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_001_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_100x30_010_V_U_12.zip",
+            "checksum": {
+                "hash": "0a627d7ffa434fc626aa0ff242049b05561f28eb304a05d009f2ca1a970fb00e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_12.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_12.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 85385801
+        },
+        {
+            "filepath": "UDPPTA1_300x30_001_V_U_18.zip",
+            "checksum": {
+                "hash": "bdc89c4e544a9b916d4d78c630131a5f132cbd9db8a341cd19a0eda93080272b",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_001_V_U_18.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_001_V_U_18.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 654093668
+        },
+        {
+            "description": "SHA-256 checksum value for UDPE1_new_grips.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPE1_new_grips.zip.sha256",
+            "checksum": {
+                "hash": "99974c565673ef25fb552933901b3be7900ceeabbde68cc6210385122ff53686",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPE1_new_grips.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPE1_new_grips.zip",
+            "@id": "cmps/UDPE1_new_grips.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_100x10_010_V_U_00.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_100x10_010_V_U_00.zip.sha256",
+            "checksum": {
+                "hash": "ceb27dd2a966f2ad1014848edca5d377a8a0e64603784a5fbdc1b1b6cc752782",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x10_010_V_U_00.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_100x10_010_V_U_00.zip",
+            "@id": "cmps/UDPPTA1_100x10_010_V_U_00.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_100x30_010_V_U_12.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_100x30_010_V_U_12.zip.sha256",
+            "checksum": {
+                "hash": "90a47f6a63b4ff63ea8f5bc0d19e84e5c6da49d7f4dd2169d539af74791951e6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_100x30_010_V_U_12.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_100x30_010_V_U_12.zip",
+            "@id": "cmps/UDPPTA1_100x30_010_V_U_12.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "UDPPTA1_300x30_010_V_U_22.zip",
+            "checksum": {
+                "hash": "88d82407869eed4238a7bbfb35786025b3b6e0ca643be2be52381188e8cf849d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_22.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_22.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 169804344
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_V_U_22.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_V_U_22.zip.sha256",
+            "checksum": {
+                "hash": "a0811bf448e4d7f776d20aecd7a8934712494971a905342d35aaef32cd667a59",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_V_U_22.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_V_U_22.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_V_U_22.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for UDPPTA1_300x30_010_H_U_12.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "UDPPTA1_300x30_010_H_U_12.zip.sha256",
+            "checksum": {
+                "hash": "ec1442bd2648ff6dad73d3a431adac54b2a1bd2d3d11faef998e77564f43d897",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/8B3BFE0480BD4943E053245706812C692078/UDPPTA1_300x30_010_H_U_12.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/UDPPTA1_300x30_010_H_U_12.zip",
+            "@id": "cmps/UDPPTA1_300x30_010_H_U_12.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2018-08-31 00:00:00",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds11b3dv01n",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11b3dv01n",
+            "description": "initial release"
+        },
+        {
+            "issued": "2018-08-31 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds11b3dv01n",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds11b3dv01n",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "resType": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

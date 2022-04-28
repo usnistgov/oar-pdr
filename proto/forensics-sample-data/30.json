@@ -1,0 +1,84 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Standards: Reference materials",
+            "@type": "Concept"
+        }
+    ],
+    "keyword": [
+        "reference materials",
+        "hydroxylated PAHs",
+        "phthalate metabolites",
+        "phenol metabolites",
+        "VOC metabolites",
+        "drugs",
+        "health markers",
+        "Environment and Climate"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://www-s.nist.gov/srmors/view_detail.cfm?srm=3672",
+    "title": "SRM 3672 Organic Contaminants in Smokers' Urine (Frozen)",
+    "theme": [
+        "Standards: Reference materials"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds01fxwf8"
+        }
+    ],
+    "description": [
+        "SRM 3672 Organic Contaminants in Smokers' Urine (Frozen) - This Standard Reference Material (SRM) is intended for use in evaluating analytical methods for the determination of selected hydroxylated polycyclic aromatic hydrocarbons (hydroxylated PAHs) and phthalate, phenol, and volatile organic compound (VOC) metabolites in urine. All of the constituents for which certified and reference values are provided are naturally present in the urine. This data is public in the Certificate of Analysis for this material."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:srms@nist.gov",
+        "fn": "Steven J. Choquette"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds01fxwf8",
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2017-01-06",
+    "ediid": "4765EE7CC5F9A396E0531A57068160031726",
+    "components": [],
+    "versionHistory": [
+        {
+            "issued": "2017-01-06",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds01fxwf8",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds01fxwf8",
+            "description": "initial release"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

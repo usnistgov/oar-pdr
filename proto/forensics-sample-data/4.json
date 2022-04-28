@@ -1,0 +1,204 @@
+{
+    "issued": null,
+    "revised": "2022-03-04T22:20:53.867955",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Digital evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Identity and access management",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Digital evidence",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:publications/open-media-forensics-challenge-openmfc-2021-workshop-presentations",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://www.nist.gov/publications/open-media-forensics-challenge-openmfc-2021-workshop-presentations"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:nistpubs/ir/2021/NIST.IR.8377.pdf",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://nvlpubs.nist.gov/nistpubs/ir/2021/NIST.IR.8377.pdf"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:publication/get_pdf.cfm?pub_id=930801",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=930801"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ],
+            "@id": "#ref:publication/get_pdf.cfm?pub_id=932934",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "location": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=932934"
+        },
+        {
+            "refType": "IsSupplementTo",
+            "title": "Open Media Forensics Challenge (OpenMFC) 2020-2021: Past, Present, and Future",
+            "issued": "2021-09-29",
+            "citation": "Guan, H., Lee, Y., Diduch, L., Zhang, J. G., Ghorbanian, I., Kheyrkhah, T., Fontana, P. C., Fiscus, J., & Filliben, J. (2021). Open Media Forensics Challenge (OpenMFC) 2020-2021: Past, Present, and Future. https://doi.org/10.6028/nist.ir.8396\n",
+            "location": "https://doi.org/10.6028/NIST.IR.8396",
+            "@id": "#ref:10.6028/NIST.IR.8396",
+            "@type": [
+                "npg:Document"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsSupplementTo",
+            "title": "User Guide for NIST Media Forensic Challenge (MFC) Datasets",
+            "issued": "2021-07-06",
+            "citation": "Guan, H., Delgado, A., Lee, Y., Yates, A., Zhou, D., Kheyrkhah, T., & Fiscus, J. G. (2021). User Guide for NIST Media Forensic Challenge (MFC) Datasets. https://doi.org/10.6028/nist.ir.8377\n",
+            "location": "https://doi.org/10.6028/NIST.IR.8377",
+            "@id": "#ref:10.6028/NIST.IR.8377",
+            "@type": [
+                "npg:Document"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "firstIssued": "2022-03-04T22:20:53.867955",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2410",
+    "annotated": "2022-03-04T22:20:53.867955",
+    "title": "Open Media Forensics Challenge (OpenMFC) Evaluation Datasets",
+    "theme": [
+        "Forensics: Digital evidence",
+        "Information Technology: Identity and access management"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2410"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "The datasets contain the following parts for Open Media Forensics Challenge (OpenMFC) evaluations:\n1. NC16 Kickoff dataset\n2. NC17 development and evaluation datasets\n3. MFC18 development and evaluation datasets\n4. MFC19 development and evaluation datasets\n5. MFC20 development and evaluation datasets\n6. OpenMFC2022 steg datasets\n7. OpenMFC2022 deepfake datasets"
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:haiying.guan@nist.gov",
+        "fn": "Haiying Guan"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2410",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2410",
+    "keyword": [
+        "Open Media Forensics Challenge (OpenMFC); Media Forensics Challenge (MFC); Nimble Challenge (NC); Deepfakes; Steganography Detection Datasets;"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2020-08-29 00:00:00",
+    "ediid": "ark:/88434/mds2-2410",
+    "components": [
+        {
+            "accessURL": "https://mfc.nist.gov",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/AccessPage"
+            ],
+            "@id": "#",
+            "@type": [
+                "nrdp:AccessPage",
+                "dcat:Distribution"
+            ],
+            "title": "Open Media Forensics Challenge (OpenMFC) Evaluation "
+        },
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2410",
+            "@id": "#doi:10.18434/mds2-2410",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Open Media Forensics Challenge (OpenMFC) Evaluation Datasets"
+        },
+        {
+            "filepath": "NIST.IR.8377_published.pdf",
+            "checksum": {
+                "hash": "2be08bf8f753e9cd0e2e6d34ace7f528020fe9ea85c42029098abb5862e9a332",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "User Guide for NIST Media Forensic Challenge (MFC) Datasets",
+            "mediaType": "application/pdf",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2410/NIST.IR.8377_published.pdf",
+            "size": 2165709,
+            "@id": "cmps/NIST.IR.8377_published.pdf",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda: ScienceTheme",
+                "nrdp: PublicDataResource"
+            ]
+        }
+    ]
+}

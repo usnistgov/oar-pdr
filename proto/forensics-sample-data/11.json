@@ -1,0 +1,281 @@
+{
+    "issued": "2021-09-30T15:16:46.0",
+    "revised": "2022-03-08T22:17:21.052214",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds2-2448.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2021-09-30 00:00:00",
+                "version": "1.0.1",
+                "@id": "ark:/88434/mds2-2448.v1_0_1",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2448.v1_0_1",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-09-30 00:00:00",
+                "version": "1.1.0",
+                "@id": "ark:/88434/mds2-2448.v1_1_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2448.v1_1_0",
+                "description": "data update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Chemistry: Analytical chemistry",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsSupplementTo",
+            "title": "A New Library-Search Algorithm for Mixture Analysis Using DART-MS",
+            "issued": "2021-06-17",
+            "citation": "Moorthy, A. S., & Sisco, E. (2021). A New Library-Search Algorithm for Mixture Analysis Using DART-MS. Journal of the American Society for Mass Spectrometry, 32(7), 1725â1734. doi:10.1021/jasms.1c00097\n",
+            "location": "https://doi.org/10.1021/jasms.1c00097",
+            "@id": "#ref:10.1021/jasms.1c00097",
+            "@type": [
+                "schema:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2448",
+    "annotated": "2022-03-08T22:17:21.052214",
+    "title": "NIST/NIJ DART-MS Data Interpretation Tool",
+    "theme": [
+        "Forensics: Drugs and toxicology",
+        "Chemistry: Analytical chemistry"
+    ],
+    "_editStatus": "done",
+    "version": "1.1.0",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2448"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "Direct Analysis in Real Time Mass Spectrometry (DART-MS) is an analytical chemistry technology that is being increasingly employed in forensic applications. This form of mass spectrometry rapidly yields rich structural information about an analyte with minimal sample preparation. The challenge with DART-MS data, much like other data generated with high throughput technologies, lies in the data interpretation. This is especially true when the analyzed samples are multi-component mixtures like seized drug evidence. The NIST/NIJ DART-MS Data Interpretation Tool (DIT) is a freely available and open-source software tool developed to support the interpretation of in-source collision induced dissociation (is-CID) DART-MS data. The NIST/NIJ DART-MS DIT can be used to view reference mass spectra from DART-MS spectral libraries, search query DART-MS mass spectra of mixtures against reference libraries, using the Inverted Library Search Algorithm, and generate printable reports from search results. Several of the features, including the formatting of generated reports, were iteratively designed with input from local, state, and federal forensic practitioners, ensuring that the program is intuitive and usable for the expected users."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "",
+            "familyName": "Sisco",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0003-0252-1910",
+            "givenName": "Edward",
+            "@type": "foaf:Person",
+            "fn": "Edward  Sisco"
+        },
+        {
+            "middleName": "S.",
+            "familyName": "Moorthy",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0002-5988-1389",
+            "givenName": "Arun",
+            "@type": "foaf:Person",
+            "fn": "Arun S. Moorthy"
+        },
+        {
+            "middleName": "S.",
+            "familyName": "Tennyson",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Stephen",
+            "@type": "foaf:Person",
+            "fn": "Stephen S. Tennyson"
+        },
+        {
+            "middleName": "",
+            "familyName": "Corzo",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0003-1907-3368",
+            "givenName": "Ruthmara",
+            "@type": "foaf:Person",
+            "fn": "Ruthmara  Corzo"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:arun.moorthy@nist.gov",
+        "fn": "Arun Moorthy"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2448",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2448",
+    "keyword": [
+        "source code",
+        "DART-MS",
+        "Forensic Chemistry",
+        "Seized Drug Analysis",
+        "ILSA"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2021-09-30 00:00:00",
+    "ediid": "ark:/88434/mds2-2448",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2448",
+            "@id": "#doi:10.18434/mds2-2448",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for NIST/NIJ DART-MS Data Interpretation Tool"
+        },
+        {
+            "description": "SHA-256 checksum value for NIST-NIJ-DIT-v1.0.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "NIST-NIJ-DIT-v1.0.zip.sha256",
+            "checksum": {
+                "hash": "027773f5f726ceb1e40e4608ef0a7444e4bdc5e0db9e4c9f8088b8fb9db05ea7",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for NIST/NIJ DART-MS Data Interpretation Tool (DIT) version 1.0 [Oct 01, 2021]",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2448/NIST-NIJ-DIT-v1.0.zip.sha256",
+            "describes": "cmps/NIST-NIJ-DIT-v1.0.zip",
+            "size": 64,
+            "@id": "cmps/NIST-NIJ-DIT-v1.0.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "Source files and scripts for NIST/NIJ DART-MS Data Interpretation Tool (DIT).",
+            "filepath": "NIST-NIJ-DIT-v1.0.zip",
+            "checksum": {
+                "hash": "833d008314dddb35d10e20a6c90b3d75a68beab1683d56f762489d0ab1886777",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "format": {
+                "description": "Source files and scripts."
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2448/NIST-NIJ-DIT-v1.0.zip",
+            "title": "NIST/NIJ DART-MS Data Interpretation Tool (DIT) version 1.0 [Oct 01, 2021]",
+            "size": 373595967,
+            "@id": "cmps/NIST-NIJ-DIT-v1.0.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Minor updates to the NIST/NIJ DART-MS Data Interpretation Tool",
+            "filepath": "NIST-NIJ-DIT-v1.01.zip",
+            "checksum": {
+                "hash": "ead06582d0cbcd3659305e95c55a0d542ef024fb2764a819acfa384247b88b10",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "Source files and scripts for NIST/NIJ DART-MS Data Interpretation Tool (DIT) v.1.01",
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2448/NIST-NIJ-DIT-v1.01.zip",
+            "size": 389600559,
+            "@id": "cmps/NIST-NIJ-DIT-v1.01.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

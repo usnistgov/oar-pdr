@@ -1,0 +1,386 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Fingerprints",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Hand Geometry",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics: Palm",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsReferencedBy",
+            "location": "https://s3.amazonaws.com/nist-srd/SD19/sd19_users_guide_edition_2.pdf",
+            "@id": "#ref:nist-srd/SD19/sd19_users_guide_edition_2.pdf",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.5#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsReferencedBy",
+            "location": "https://s3.amazonaws.com/nist-srd/SD19/1stEditionUserGuide.pdf",
+            "@id": "#ref:nist-srd/SD19/1stEditionUserGuide.pdf",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "automated data capture",
+        "character recognition",
+        "characters",
+        "hand printed characters",
+        "hand prints",
+        "hand writing recognition",
+        "OCR",
+        "handprints",
+        "printed characters",
+        "recognition",
+        "software recognition"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://www.nist.gov/srd/nist-special-database-19",
+    "title": "NIST Handprinted Forms and Characters - NIST Special Database 19",
+    "theme": [
+        "Information Technology: Biometrics",
+        "Forensics: Biometrics"
+    ],
+    "version": "1.0.2",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds00tf5pn"
+        }
+    ],
+    "description": [
+        "Special Database 19 contains NIST's entire corpus of training materials for handprinted document and character recognition. It publishes Handprinted Sample Forms from 3600 writers, 810,000 character images isolated from their forms, ground truth classifications for those images, reference forms for further data collection, and software utilities for image management and handling. there are two editions of the databases.  One is the original database with the images in mis or pct format.  It also includes software to open and manipulate the data. The second edition has the images all in PNG format."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:patricia.flanagan@nist.gov",
+        "fn": "Patricia A. Flanagan"
+    },
+    "accessLevel": "restricted public",
+    "@id": "ark:/88434/mds00tf5pn",
+    "publisher": {
+        "@type": "org:Organization",
+        "name": "National Institute of Standards and Technology"
+    },
+    "doi": "doi:10.18434/t4h01c",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2016-08-18 00:00:00",
+    "ediid": "FF429BC1785F8B3EE0431A570681E858206",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/t4h01c",
+            "description": "DOI Access to NIST Handprinted Forms and Characters - NIST Special Database 19",
+            "format": "text/html",
+            "title": "DOI Access to NIST Handprinted Forms and Characters - NIST Special Database 19",
+            "@id": "#doi:10.18434/t4h01c",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ]
+        },
+        {
+            "description": "MD5 hashname file for by_class zip file  for Special Database 19 (2nd edition)",
+            "filepath": "by_class_md5.log",
+            "format": {
+                "description": "text format file"
+            },
+            "title": "MD5 file  for by_class",
+            "mediaType": "application/msword",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_class_md5.log",
+            "@id": "cmps/by_class_md5.log",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "the by_write zip file for Special Database 19 (2nd edition)",
+            "filepath": "by_write.zip",
+            "format": {
+                "description": "zip file"
+            },
+            "title": "by_write zip file Special Database 19 (2nd edition)",
+            "mediaType": "application/zip",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip",
+            "@id": "cmps/by_write.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "The by_field zip file of the Special database (2nd edition)",
+            "filepath": "by_field.zip",
+            "format": {
+                "description": "zip file"
+            },
+            "title": "by field zip file Special Database (2nd edition)",
+            "mediaType": "application/zip",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_field.zip",
+            "@id": "cmps/by_field.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "zip file with the by_class directory of Special Database 19 (2nd edition)",
+            "filepath": "by_class.zip",
+            "format": {
+                "description": "zip file"
+            },
+            "title": "by class zip file (2nd edition)",
+            "mediaType": "application/zip",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip",
+            "@id": "cmps/by_class.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "MD5 hashname file for the hsf_page zip file for the Special Database 19 (2nd edition)",
+            "filepath": "hsf_page_md5.log",
+            "format": {
+                "description": "text format file"
+            },
+            "title": "MD5 file for hsf_page zip file",
+            "mediaType": "application/msword",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/hsf_page_md5.log",
+            "@id": "cmps/hsf_page_md5.log",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "hsf_page zip file  for Special Database 19 (2nd edition)",
+            "filepath": "hsf_page.zip",
+            "format": {
+                "description": "zip file"
+            },
+            "title": "hsf page zip file for Special Database 19 (2nd edition)",
+            "mediaType": "application/zip",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/hsf_page.zip",
+            "@id": "cmps/hsf_page.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "MD5 hashname file for the  by_merge zip file for Special Database 19 (2nd edition)",
+            "filepath": "by_merge_md5.log",
+            "format": {
+                "description": "text format file"
+            },
+            "title": "MD5 file for by_merge zip file",
+            "mediaType": "application/msword",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_merge_md5.log",
+            "@id": "cmps/by_merge_md5.log",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "The 1st edition Special Database 19 zip file",
+            "filepath": "1stEdition1995.zip",
+            "format": {
+                "description": "zip format file"
+            },
+            "title": "1st edition Special Database 19 zip file",
+            "mediaType": "application/zip",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/1stEdition1995.zip",
+            "@id": "cmps/1stEdition1995.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "MD5 hashname file for the by_write zip file  for the Special Database 19 (2nd edition)",
+            "filepath": "by_write_md5.log",
+            "format": {
+                "description": "text format file"
+            },
+            "title": "MD5 file for by_write zip file",
+            "mediaType": "application/msword",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_write_md5.log",
+            "@id": "cmps/by_write_md5.log",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "MD5 hashname file for by_field zip file  for Special Database 19 (2nd edition)",
+            "filepath": "by_field_md5.log",
+            "format": {
+                "description": "text format file"
+            },
+            "title": "MD5 file for by_field",
+            "mediaType": "application/msword",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_field_md5.log",
+            "@id": "cmps/by_field_md5.log",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "The MD5 hashname file for the 1st edition Special Database 19 zip file",
+            "filepath": "1stEditionFilesMD5.log",
+            "format": {
+                "description": "text format file"
+            },
+            "title": "MD5 file for 1st Edition Special Database 19 zip file",
+            "mediaType": "application/msword",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/1stEditionFilesMD5.log",
+            "@id": "cmps/1stEditionFilesMD5.log",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Zip file for by_merge directory of the Special Database (2nd edition)",
+            "filepath": "by_merge.zip",
+            "format": {
+                "description": "zip file format"
+            },
+            "title": "by merge zip file for Special Database 19 (2nd edition)",
+            "mediaType": "application/zip",
+            "downloadURL": "https://s3.amazonaws.com/nist-srd/SD19/by_merge.zip",
+            "@id": "cmps/by_merge.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2016-08-18",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds00tf5pn",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00tf5pn",
+            "description": "initial release"
+        },
+        {
+            "issued": "2016-08-18 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds00tf5pn",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00tf5pn",
+            "description": "metadata update"
+        },
+        {
+            "issued": "2016-08-18 00:00:00",
+            "version": "1.0.2",
+            "@id": "ark:/88434/mds00tf5pn",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds00tf5pn",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

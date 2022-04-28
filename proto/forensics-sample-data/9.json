@@ -1,0 +1,582 @@
+{
+    "issued": "2021-06-15T11:26:05.0",
+    "revised": "2021-09-27T18:29:41.236935",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds2-2424.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2021-06-14 00:00:00",
+                "version": "1.0.0",
+                "@id": "ark:/88434/mds2-2424",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_0_0",
+                "description": "initial release"
+            },
+            {
+                "issued": "2021-06-14",
+                "version": "1.1.0",
+                "@id": "ark:/88434/mds2-2424",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_1_0",
+                "description": "data update"
+            },
+            {
+                "issued": "2021-06-14",
+                "version": "1.2.0",
+                "@id": "ark:/88434/mds2-2424.v1_2_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_2_0",
+                "description": "data update"
+            },
+            {
+                "issued": "2021-06-14 00:00:00",
+                "version": "1.2.1",
+                "@id": "ark:/88434/mds2-2424.v1_2_1",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_2_1",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-06-14 00:00:00",
+                "version": "1.2.2",
+                "@id": "ark:/88434/mds2-2424.v1_2_2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_2_2",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-06-14 00:00:00",
+                "version": "1.2.3",
+                "@id": "ark:/88434/mds2-2424.v1_2_3",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_2_3",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2021-06-14 00:00:00",
+                "version": "1.2.4",
+                "@id": "ark:/88434/mds2-2424.v1_2_4",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424.v1_2_4",
+                "description": "metadata update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },            
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2424",
+    "annotated": "2022-03-21T16:50:24.884325",
+    "title": "Templates for the Implementation of DART-MS for Seized Drug Analysis",
+    "_editStatus": "done",
+    "theme": [
+        "Forensics: Drugs and toxicology"
+    ],
+    "version": "1.2.4",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2424"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "This dataset includes templates to assist with laboratory implementation of direct analysis in real time mass spectrometry (DART-MS) for seized drug analysis. These templates should be modified as necessary to meet the needs of the particular laboratory. Certain commercial equipment, instruments, or materials are identified in this paper in order to specify the experimental procedure adequately.  Such identification is not intended to imply recommendation or endorsement by NIST, nor is it intended to imply that the materials or equipment identified are necessarily the best available for the purpose. These opinions, recommendations, findings, and conclusions do not necessarily reflect the views or policies of NIST or the United States Government."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "",
+            "familyName": "Sisco",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "643.05"
+                    ],
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Edward",
+            "@type": "foaf:Person",
+            "fn": "Edward  Sisco"
+        },
+        {
+            "middleName": "",
+            "familyName": "Burns",
+            "affiliation": [
+                {
+                    "subunits": [
+                        "Forensic Sciences Division"
+                    ],
+                    "@type": "org:Organization",
+                    "title": "Maryland State Police"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Amber",
+            "@type": "foaf:Person",
+            "fn": "Amber  Burns"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:edward.sisco@nist.gov",
+        "fn": "Edward Sisco"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2424",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2424",
+    "keyword": [
+        "DART-MS",
+        "Forensics",
+        "Seized Drug",
+        "Implementation",
+        "Validation"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "modified": "2021-06-14 00:00:00",
+    "ediid": "ark:/88434/mds2-2424",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/mds2-2424",
+            "@id": "#doi:10.18434/mds2-2424",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Templates for the Implementation of DART-MS for Seized Drug Analysis"
+        },
+        {
+            "description": "Example validation plan for DART-MS analysis of seized drugs.",
+            "filepath": "DART Validation Plan_Unformatted.docx",
+            "checksum": {
+                "hash": "52fbdc12917767ac5962dae14ff0b7e1832aa0c55a5cba0828f76c12a5178a8f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "DART-MS Validation Plan",
+            "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Plan_Unformatted.docx",
+            "size": 45918,
+            "@id": "cmps/DART Validation Plan_Unformatted.docx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Example maintenance manual for DART-MS.",
+            "filepath": "DART Maintenance_Unformatted.docx",
+            "checksum": {
+                "hash": "43cb67b144edd258ee13ee6c90258738b8be40ec569cd2a489e6c9bd51abc9be",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "DART-MS Maintenance Manual",
+            "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Maintenance_Unformatted.docx",
+            "size": 27365,
+            "@id": "cmps/DART Maintenance_Unformatted.docx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for DART SOP_Unformatted.docx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "DART SOP_Unformatted.docx.sha256",
+            "checksum": {
+                "hash": "04e89cc1d46cba18b4cf4ebf288d5ad9f1aca63d309468779f65f611a47550c7",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for Example SOP",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20SOP_Unformatted.docx.sha256",
+            "describes": "cmps/DART SOP_Unformatted.docx",
+            "size": 64,
+            "@id": "cmps/DART SOP_Unformatted.docx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "Run sheets to accompany the DART-MS validation plan.",
+            "filepath": "DART Validation Run Sheets.docx",
+            "checksum": {
+                "hash": "b48f8cfe16e70c28d899b4e9c4fd6bfb23e7983de5a30afb5bd808b7349a5ed3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "DART-MS Run Sheets",
+            "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Run%20Sheets.docx",
+            "size": 53467,
+            "@id": "cmps/DART Validation Run Sheets.docx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Example SOP for operation and analysis of data.",
+            "filepath": "DART SOP_Unformatted.docx",
+            "checksum": {
+                "hash": "f32b795246b9e20d69c30ad5c874eec1c3a03187f9d543c8bfa6e66abbcd8667",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "Example SOP",
+            "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20SOP_Unformatted.docx",
+            "size": 2803203,
+            "@id": "cmps/DART SOP_Unformatted.docx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "Excel sheet to assist in working up DART-MS validation data.",
+            "filepath": "DART Validation Data Workup_Blank.xlsx",
+            "checksum": {
+                "hash": "13c813fe8de2bdd419af889de3fce1b3fa5e2109491b5fe2345de8db455c184c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "DART-MS Validation Data Workup",
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Data%20Workup_Blank.xlsx",
+            "size": 319152,
+            "@id": "cmps/DART Validation Data Workup_Blank.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for DART Validation Data Workup_Blank.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "DART Validation Data Workup_Blank.xlsx.sha256",
+            "checksum": {
+                "hash": "f26a7c1b28c9ce2309f64ff5ed4959c407ae3d83eace1b2ae865377e3765a3c8",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for DART-MS Validation Data Workup",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Data%20Workup_Blank.xlsx.sha256",
+            "describes": "cmps/DART Validation Data Workup_Blank.xlsx",
+            "size": 64,
+            "@id": "cmps/DART Validation Data Workup_Blank.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for DART Validation Run Sheets.docx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "DART Validation Run Sheets.docx.sha256",
+            "checksum": {
+                "hash": "0d531e20ede013e8a8459482f91a60f42d5e6817338dc46cebfe1b3ca4c66de3",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for DART-MS Run Sheets",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Run%20Sheets.docx.sha256",
+            "describes": "cmps/DART Validation Run Sheets.docx",
+            "size": 64,
+            "@id": "cmps/DART Validation Run Sheets.docx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "Example search list for use with MassMountaineer. Search list last updated March 1, 2021.",
+            "filepath": "210301_Seized Drug Search List.xlsx",
+            "checksum": {
+                "hash": "4b3bd1f379ce7579acb694f8cbd71a63cb6f96c79f25422ebf90a86c582245c8",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "Search List",
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/210301_Seized%20Drug%20Search%20List.xlsx",
+            "size": 65879,
+            "@id": "cmps/210301_Seized Drug Search List.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for 210301_Seized Drug Search List.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "210301_Seized Drug Search List.xlsx.sha256",
+            "checksum": {
+                "hash": "1f35a0f99a9092b68f0b521c1e15b6e33e8ec27c6d80566b85349261502c906c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for Search List",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/210301_Seized%20Drug%20Search%20List.xlsx.sha256",
+            "describes": "cmps/210301_Seized Drug Search List.xlsx",
+            "size": 64,
+            "@id": "cmps/210301_Seized Drug Search List.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "Excel document to assist with data analysis using the validation plan.",
+            "filepath": "DART Validation Data Workup_Blank_v2.xlsx",
+            "checksum": {
+                "hash": "58b47540d5fcb20b2c2199d38b4b4b3614a5f614df2fb2174978ede79bc6448e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "title": "Validation Plan Data Workup",
+            "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Data%20Workup_Blank_v2.xlsx",
+            "size": 318831,
+            "@id": "cmps/DART Validation Data Workup_Blank_v2.xlsx",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for DART Maintenance_Unformatted.docx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "DART Maintenance_Unformatted.docx.sha256",
+            "checksum": {
+                "hash": "5af365e34cbf5ec13a26cb3281782e30e8233d6ec0ce42264cc5dcdb8dd0ed34",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for DART-MS Maintenance Manual",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Maintenance_Unformatted.docx.sha256",
+            "describes": "cmps/DART Maintenance_Unformatted.docx",
+            "size": 64,
+            "@id": "cmps/DART Maintenance_Unformatted.docx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for DART Validation Data Workup_Blank_v2.xlsx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "DART Validation Data Workup_Blank_v2.xlsx.sha256",
+            "checksum": {
+                "hash": "1070df2478d1d5e2753f08b9e7a77843e4dac5a3d31fc57ddd4b2004c504032d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for Validation Plan Data Workup",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Data%20Workup_Blank_v2.xlsx.sha256",
+            "describes": "cmps/DART Validation Data Workup_Blank_v2.xlsx",
+            "size": 64,
+            "@id": "cmps/DART Validation Data Workup_Blank_v2.xlsx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        },
+        {
+            "description": "SHA-256 checksum value for DART Validation Plan_Unformatted.docx",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "DART Validation Plan_Unformatted.docx.sha256",
+            "checksum": {
+                "hash": "44edf03943515a9af8bcdff697d5e3b729ed98e904ee2be9faf77d33255a058c",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": true,
+            "title": "SHA256 File for DART-MS Validation Plan",
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2424/DART%20Validation%20Plan_Unformatted.docx.sha256",
+            "describes": "cmps/DART Validation Plan_Unformatted.docx",
+            "size": 64,
+            "@id": "cmps/DART Validation Plan_Unformatted.docx.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/ChecksumFile"
+            ]
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2021-06-14 00:00:00",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds2-2424",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424",
+            "description": "initial release"
+        },
+        {
+            "issued": "2021-06-14",
+            "version": "1.1.0",
+            "@id": "ark:/88434/mds2-2424",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2424",
+            "description": "data update"
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

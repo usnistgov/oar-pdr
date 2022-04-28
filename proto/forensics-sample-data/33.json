@@ -1,0 +1,344 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        }, 
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Ballistics",
+            "@type": "Concept"
+        }
+    ],
+    "references": [],
+    "keyword": [
+        "body armor",
+        "field aging",
+        "artificial aging",
+        "ballistic resistance"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2179",
+    "title": "Aged Body Armor- Linking Theory to Practice by Predicting Ballistic Performance from Mechanical Properties",
+    "theme": [
+        "Materials:Polymers",
+        "Materials:Materials characterization"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2179"
+        }
+    ],
+    "description": [
+        "We present correlations found between the tensile strengths of yarns extracted from armor and the V50 ballistic limit when significant degradation of the mechanical properties of the extracted yarns was observed. These studies provided the basis for a validation dataset from which we compare the experimentally measured V50 ballistic limit results to the theoretically predicted V50 results. This approach is promising for the development of a tool for fielded-armor-performance surveillance relying upon mechanical testing of armor coupon samples.",
+        "There are 3 datasets included. The first dataset consists of failure strength and failure strain for yarns extracted from aged ballistic vests, where the vests were aged in laboratory accelerated ageing conditions. The second dataset consists of failure strength for yarns extracted from aged vests, where the vests were aged in the field. The third dataset consists of V50 measurements on vests that were aged using an accelerated laboratory protocol."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:amanda.forster@nist.gov",
+        "fn": "Amanda L. Forster"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2179",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M32179",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2012-05-31 00:00:00",
+    "ediid": "ark:/88434/mds2-2179",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/M32179",
+            "@id": "#doi:10.18434/M32179",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Aged Body Armor- Linking Theory to Practice by Predicting Ballistic Performance from Mechanical Properties"
+        },
+        {
+            "description": "SHA-256 checksum value for Fieldaged_tensile_results.csv",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Fieldaged_tensile_results.csv.sha256",
+            "checksum": {
+                "hash": "932c4d1ab9b8769ee41e3db2ec43505f14c50cbeed995ed8342078c8578b061f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Fieldaged_tensile_results.csv.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Fieldaged_tensile_results.csv",
+            "@id": "cmps/Fieldaged_tensile_results.csv.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Labaged_V50_results.csv",
+            "checksum": {
+                "hash": "cd4fd327c5b88863e2179a3135bd8124a55a4cb1ece547ee18c83eb6acc3a343",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Labaged_V50_results.csv",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/Labaged_V50_results.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1145
+        },
+        {
+            "filepath": "Labaged_tensile_results.csv",
+            "checksum": {
+                "hash": "9eb08f1c72a1a00458222e40c0e681e2fd23a4ef6edb443d9050d10742e03af0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Labaged_tensile_results.csv",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/Labaged_tensile_results.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 15966
+        },
+        {
+            "filepath": "Labaging_Conditions.csv",
+            "checksum": {
+                "hash": "eea6f8fa392b6e7084c0fd6322a710f50d6007d3605ef61b3666aca6997d1932",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Labaging_Conditions.csv",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/Labaging_Conditions.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 311
+        },
+        {
+            "description": "SHA-256 checksum value for V50_data_readme.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "V50_data_readme.txt.sha256",
+            "checksum": {
+                "hash": "fd06336b5593d97751ff4d176da36114bb6dedf667850197d80e12290ed7623d",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/V50_data_readme.txt.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/V50_data_readme.txt",
+            "@id": "cmps/V50_data_readme.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Labaged_tensile_results.csv",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Labaged_tensile_results.csv.sha256",
+            "checksum": {
+                "hash": "ed6f38127f5c55971817a2e877354eb6477d6a96d40b8d0777f7975770162f01",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Labaged_tensile_results.csv.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Labaged_tensile_results.csv",
+            "@id": "cmps/Labaged_tensile_results.csv.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Labaging_Conditions.csv",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Labaging_Conditions.csv.sha256",
+            "checksum": {
+                "hash": "13fdad2e3035d0ae1dccf828cbf114e6d8fd0936c50ebccf19d3be90a908b9f6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Labaging_Conditions.csv.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Labaging_Conditions.csv",
+            "@id": "cmps/Labaging_Conditions.csv.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Fieldaged_tensile_results.csv",
+            "checksum": {
+                "hash": "2080c1e23102e48817a241d680454fa9bbf3bc960720ee70ff6af7efae0dde6a",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Fieldaged_tensile_results.csv",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/Fieldaged_tensile_results.csv",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 16555
+        },
+        {
+            "filepath": "V50_data_readme.txt",
+            "checksum": {
+                "hash": "4ad0951348dc8d9c33a1a104dcd8dd36770eb92254947843d87a2df1404819d0",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/V50_data_readme.txt",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/V50_data_readme.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 5176
+        },
+        {
+            "description": "SHA-256 checksum value for Labaged_V50_results.csv",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Labaged_V50_results.csv.sha256",
+            "checksum": {
+                "hash": "5c82b9a1c66dc5bd6dce7b051f5cc29068a19c8336e0ba78e5c04e9cacf8f8c6",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2179/Labaged_V50_results.csv.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Labaged_V50_results.csv",
+            "@id": "cmps/Labaged_V50_results.csv.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        }
+    ],
+    "@type": [
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

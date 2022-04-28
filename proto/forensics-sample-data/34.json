@@ -1,0 +1,373 @@
+{
+    "issued": "2019-10-07",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        }
+    ],
+    "references": [
+        {
+            "refType": "IsCitedBy",
+            "title": "Disentangling High Strength Copolymer Aramid Fibers to Enable the Determination of Their Mechanical Properties",
+            "issued": "2018-09-01",
+            "citation": "Forster, A. L., Rodriguez Cardenas, V., Krishnamurthy, A., Tsinas, Z., Engelbrecht-Wiggans, A., & Gonzalez, N. (2018). Disentangling High Strength Copolymer Aramid Fibers to Enable the Determination of Their Mechanical Properties. Journal of Visualized Experiments, (139). doi:10.3791/58124\n",
+            "location": "https://doi.org/10.3791/58124",
+            "@id": "https://doi.org/10.3791/58124",
+            "@type": [
+                "npg:Article"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        },
+        {
+            "refType": "IsReferencedBy",
+            "location": "http://dx.doi.org/10.3791/58124",
+            "@id": "#ref:10.3791/58124",
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "keyword": [
+        "5-amino-2-(p-aminophenyl) benzimidazole",
+        "PBIA",
+        "PPTA",
+        "body armor",
+        "single fiber tensile testing",
+        "ballistic materials",
+        "aramid fibers",
+        "environmental degradation",
+        "strength",
+        "mechanical testing",
+        "hydrothermal ageing"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2123",
+    "title": "Aged and unaged PBIA-based copolymer testing for soft body armor applications",
+    "theme": [
+        "Materials:Materials characterization"
+    ],
+    "version": "1.0.1",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2123"
+        }
+    ],
+    "description": [
+        "Traditionally, soft body armor has been made from materials such as poly(p-phenylene terephthalamide) (PPTA) and ultra-high molar mass polyethylene (UHMMPE). However, to diversify the fiber choices in the United States body armor market, copolymer fibers based on the combination of 5-amino-2-(p-aminophenyl) benzimidazole (PBIA) and PPTA were introduced. Little is known regarding the long-term stability of PBIA fibers, but as condensation polymers, they have potential sensitivity to moisture and humidity.  Ballistic resistance and other critical structural properties of these fibers are predicated on their superior mechanical properties.  Therefore, it is important to characterize the strength of these materials and understand their vulnerability to environmental conditions to evaluate their use lifetime in safety applications.  Three PBIA-based fibers were selected for the study. The fibers were thoroughly washed to remove an organic coating, which held the individual fibers in each yarn bundle together, allowing for the disentangling of single fibers for mechanical testing.  Molecular spectroscopy and single fiber tensile testing were performed on the fibers to characterize changes in their chemical structure, tensile strength, and strain to failure as a function of exposure time to four different hydrothermal ageing conditions."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "affiliation": [
+                {
+                    "@id": "sdporg:US-NIST",
+                    "@type": [
+                        "org:Organization"
+                    ],
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "givenName": "Amy",
+            "familyName": "Engelbrecht-Wiggans",
+            "fn": "Amy Engelbrecht-Wiggans"
+        },
+        {
+            "affiliation": [
+                {
+                    "@id": "sdporg:US-NIST",
+                    "@type": [
+                        "org:Organization"
+                    ],
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "givenName": "Amanda",
+            "familyName": "Forster",
+            "fn": "Amanda Forster"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:amy.engelbrecht-wiggans@nist.gov",
+        "name": "Amy Engelbrecht-Wiggans",
+        "fn": "Amy Engelbrecht-Wiggans"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2123",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/M32123",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2019-09-09 00:00:00",
+    "ediid": "ark:/88434/mds2-2123",
+    "components": [
+        {
+            "accessURL": "https://doi.org/10.18434/M32123",
+            "@id": "#doi:10.18434/M32123",
+            "@type": [
+                "nrd:Hidden",
+                "dcat:Distribution"
+            ],
+            "title": "DOI Access for Aged and unaged PBIA-based copolymer testing for soft body armor applications"
+        },
+        {
+            "filepath": "FTIR data.zip",
+            "checksum": {
+                "hash": "dbfd9ef2af0803ad440d0b4692ace43685c698e69871202a2ec0ab6f11baff6e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/FTIR%20data.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/FTIR%20data.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 351904
+        },
+        {
+            "description": "SHA-256 checksum value for FTIR data.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "FTIR data.zip.sha256",
+            "checksum": {
+                "hash": "5103e0da2cfd46606df529da7b4e0f24b934c301d23a7e49d914102c9ecadd16",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/FTIR%20data.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/FTIR data.zip",
+            "@id": "cmps/FTIR%20data.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Tensile data.zip",
+            "checksum": {
+                "hash": "ba934113ed13e9643b27351938866c1b38b93bafdc6d1a03beeb3754f660c753",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/Tensile%20data.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/Tensile%20data.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 1222507092
+        },
+        {
+            "description": "SHA-256 checksum value for Tensile data.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Tensile data.zip.sha256",
+            "checksum": {
+                "hash": "c61079868f8cd146ff40f89cdc96d5ec29725e26347866fc91e6f03acd559eba",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/Tensile%20data.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Tensile data.zip",
+            "@id": "cmps/Tensile%20data.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "copolymer_PPTA_readme.txt",
+            "checksum": {
+                "hash": "b7721d49b1dc8114f93b3ef4b8d7b21836af063b3dcf8d8d8190884fd6a751fb",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "text/plain",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/copolymer_PPTA_readme.txt",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/copolymer_PPTA_readme.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 5730
+        },
+        {
+            "description": "SHA-256 checksum value for copolymer_PPTA_readme.txt",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "copolymer_PPTA_readme.txt.sha256",
+            "checksum": {
+                "hash": "d93c826db7607b65a7bfd77b9538fbed9fc10235177203fb16ef187c4f06bdc4",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/copolymer_PPTA_readme.txt.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/copolymer_PPTA_readme.txt",
+            "@id": "cmps/copolymer_PPTA_readme.txt.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "description": "SHA-256 checksum value for Moisture data.zip",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "filepath": "Moisture data.zip.sha256",
+            "checksum": {
+                "hash": "38bbea4694edeb9f1b4a528a16ccf4da181bd82f8668f4fb2071dde7c526ed0f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/octet-stream",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/Moisture%20data.zip.sha256",
+            "valid": true,
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/ChecksumFile"
+            ],
+            "describes": "cmps/Moisture data.zip",
+            "@id": "cmps/Moisture%20data.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 64
+        },
+        {
+            "filepath": "Moisture data.zip",
+            "checksum": {
+                "hash": "4cc46d77ee07a4ad741b75d375f49a22fd47085206a7768a2e8d9281e66650f5",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/ark:/88434/mds2-2123/Moisture%20data.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/DataFile"
+            ],
+            "@id": "cmps/Moisture%20data.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "size": 13431
+        }
+    ],
+    "versionHistory": [
+        {
+            "issued": "2019-09-09 00:00:00",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds2-2123",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2123",
+            "description": "initial release"
+        },
+        {
+            "issued": "2019-09-09 00:00:00",
+            "version": "1.0.1",
+            "@id": "ark:/88434/mds2-2123",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2123",
+            "description": "metadata update"
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}

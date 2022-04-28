@@ -1,0 +1,176 @@
+{
+    "issued": null,
+    "revised": "2022-03-21T19:32:47.312607",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "releaseHistory": {
+        "@id": "ark:/88434/mds2-2551.rel",
+        "@type": [
+            "nrdr:ReleaseHistory"
+        ],
+        "hasRelease": [
+            {
+                "issued": "2022-03-05",
+                "version": "1.0.0",
+                "@id": "ark:/88434/mds2-2551.v1_0_0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2551.v1_0_0",
+                "description": "initial release"
+            },
+            {
+                "issued": "2022-03-05 00:00:00",
+                "version": "1.0.1",
+                "@id": "ark:/88434/mds2-2551.v1_0_1",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2551.v1_0_1",
+                "description": "metadata update"
+            },
+            {
+                "issued": "2022-03-05 00:00:00",
+                "version": "1.0.2",
+                "@id": "ark:/88434/mds2-2551.v1_0_2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds2-2551.v1_0_2",
+                "description": "metadata update"
+            }
+        ]
+    },
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Chemistry: Analytical chemistry",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Drugs and toxicology",
+            "@type": "Concept"
+        }
+    ],
+    "firstIssued": "2022-03-21T19:32:47.312607",
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/mds2-2551",
+    "annotated": "2022-03-21T20:33:36.868755",
+    "title": "Supplemental Data and Source Code for ILSA Research",
+    "theme": [
+        "Chemistry: Analytical chemistry",
+        "Forensics: Drugs and toxicology"
+    ],
+    "_editStatus": "done",
+    "version": "1.0.2",
+    "programCode": [
+        "006:052"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2551"
+        }
+    ],
+    "status": "available",
+    "description": [
+        "Source code associated with the Inverted Library Search Algorithm (ILSA) for identifying mixture components using is-CID mass spectra. This source code is frozen to accompany the manuscript titled \"Updates to the Inverted Library Search Algorithm for mixture analysis\" by Moorthy et. al.",
+        "The primary function, \"asm_ILSA.R\" in the \"source/Functions\" directory, receives as input up to three is-CID query mass spectra, a pure compound reference is-CID mass spectral library, and a set of search parameters. To help a user organize their input to the asm_ILSA.R function, we have provided in the root directory \"asm_ILSA_CLA.R\"--a prototype command line application. A user can use this prototype application as a guide for using the ILSA in their own research, adjusting input files, search libraries and search parameters. At present, search libraries must be formatted as .RDS files as produced by NIST. Query spectra can be in several standard formats for is-CID mass spectra: \".txt\", \".csv\", \".jsp\"."
+    ],
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "authors": [
+        {
+            "middleName": "S.",
+            "familyName": "Moorthy",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0002-5988-1389",
+            "givenName": "Arun",
+            "@type": "foaf:Person",
+            "fn": "Arun S. Moorthy"
+        },
+        {
+            "middleName": "",
+            "familyName": "Sisco",
+            "affiliation": [
+                {
+                    "@id": "ror:05xpvk416",
+                    "@type": "org:Organization",
+                    "title": "National Institute of Standards and Technology"
+                }
+            ],
+            "orcid": "0000-0003-0252-1910",
+            "givenName": "Edward",
+            "@type": "foaf:Person",
+            "fn": "Edward  Sisco"
+        }
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:arun.moorthy@nist.gov",
+        "fn": "Arun Moorthy"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds2-2551",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/mds2-2551",
+    "keyword": [
+        "Mass Spectrometry",
+        "Mixture Analysis",
+        "Search Algorithms",
+        "Seized Drug Analysis"
+    ],
+    "license": "https://www.nist.gov/open/license",
+    "rights": "Purchase is not required for data downloading. Users must complete registration form to download data.",
+    "modified": "2022-03-05 00:00:00",
+    "ediid": "ark:/88434/mds2-2551",
+    "components": [
+        {
+            "filepath": "ILSAv2_ConsoleVersion1.zip",
+            "checksum": {
+                "hash": "d2be0529a5d89c176d678f35a80bd623ca07943017e845125ac168c9ae5e0a6e",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "mediaType": "application/zip",
+            "downloadURL": "https://data.nist.gov/od/ds/mds2-2551/ILSAv2_ConsoleVersion1.zip",
+            "size": 16033554,
+            "@id": "cmps/ILSAv2_ConsoleVersion1.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+            ]
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "isPartOf": [
+        {
+            "title": "Forensics Data Collection",
+            "proxyFor": "ark:/88434/mds9911",
+            "@type": [
+                "nrda:ScienceTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}
