@@ -9,6 +9,7 @@ import { TransferState } from '@angular/platform-browser';
 import { DropdownModule } from "primeng/dropdown";
 import { FormsModule } from '@angular/forms';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { testdata } from '../../../environments/environment';
 
 describe('ResultlistComponent', () => {
   let component: ResultlistComponent;
@@ -16,6 +17,7 @@ describe('ResultlistComponent', () => {
   let plid : Object = "browser";
   let ts : TransferState = new TransferState();
   let cfg : AppConfig = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
+  let nrd1 = testdata['test1'];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -37,6 +39,7 @@ describe('ResultlistComponent', () => {
   beforeEach(() => {
         fixture = TestBed.createComponent(ResultlistComponent);
         component = fixture.componentInstance;
+        component.md = nrd1;
         fixture.detectChanges();
   });
 

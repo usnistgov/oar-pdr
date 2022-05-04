@@ -2,6 +2,7 @@ import { Component, OnInit, Input, SimpleChanges, ViewChild, ElementRef } from '
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { SearchService } from '../../shared/search-service/index';
+import { AppConfig } from '../../config/config';
 import { timeout } from 'rxjs-compat/operator/timeout';
 import { ThisReceiver } from '@angular/compiler';
 import * as e from 'express';
@@ -63,11 +64,15 @@ export class ResultlistComponent implements OnInit {
     @Input() mobWidth: number = 1920;
     @Input() filterString: string = '';
 
-    constructor(private searchService: SearchService) { }
+    constructor(private searchService: SearchService, private cfg: AppConfig) { }
 
     ngOnInit(): void {
+        this.PDRAPIURL = this.cfg.get('locations.landingPageService',
+                                   'https://data.nist.gov/od/id/');
+
         let that = this;
-        this.searchService.searchPhrase()
+        let url = (new NERDResource(this.md)).scienceThemeSearchUrl();
+        this.searchService.searchPhrase(url)
         .subscribe(
             searchResults => {
                 this.resultCount = searchResults['ResultCount'];

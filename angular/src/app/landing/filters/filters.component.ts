@@ -7,6 +7,7 @@ import { TaxonomyListService, SearchfieldsListService } from '../../shared/index
 import * as _ from 'lodash-es';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { SearchService } from '../../shared/search-service';
+import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 
 const SEARCH_SERVICE = 'SEARCH_SERVICE';
 
@@ -121,6 +122,7 @@ export class FiltersComponent implements OnInit {
     exception: string;
     errorMsg: string;
 
+    @Input() md: NerdmRes = null;
     @Input() searchValue: string;
     @Input() searchTaxonomyKey: string;
     @Input() parent: HTMLElement; // parent div
@@ -292,7 +294,8 @@ export class FiltersComponent implements OnInit {
     search() {
         this.searching = true;
         let that = this;
-        return this.searchService.searchPhrase()
+        let url = (new NERDResource(this.md)).scienceThemeSearchUrl();
+        return this.searchService.searchPhrase(url)
         .subscribe(
             searchResults => {
                 that.onSuccess(searchResults.ResultData);

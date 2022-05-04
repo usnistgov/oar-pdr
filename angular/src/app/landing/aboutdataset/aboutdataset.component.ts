@@ -42,6 +42,7 @@ export class AboutdatasetComponent implements OnChanges {
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
     scienceThemeResourceType = ThemesPrefs.getResourceLabel(Themes.SCIENCE_THEME);
+    isPartOf: string = "";
     
     private _collapsed: boolean = false;
     @Input() record: NerdmRes;
@@ -81,6 +82,18 @@ export class AboutdatasetComponent implements OnChanges {
                 public gaService: GoogleAnalyticsService) {  }
 
     ngOnInit(): void {
+        if(this.record["isPartOf"] != undefined) {
+            this.isPartOf = "This dataset is part of ";
+
+            for(let i = 0; i < this.record["isPartOf"].length; i++) {
+                if(i > 0 && i < this.record["isPartOf"].length-1) this.isPartOf += ", ";
+                if(i == this.record["isPartOf"].length-1) this.isPartOf += " and ";
+                this.isPartOf += this.record["isPartOf"][i].title;
+            }
+
+            this.isPartOf += ".";
+        }
+
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
         this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/unconfigured");
         this.citetext = (new NERDResource(this.record)).getCitation();

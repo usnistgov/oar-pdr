@@ -2,7 +2,7 @@
     <div style="display: flex; width: 100%; margin-top: 1em;">
         <!-- Left side filters -->
         <div [@filterStatus]="filterToggler" style="vertical-align: top;" [style.width.px]="filterWidth">
-                <app-filters [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [mobileMode]="mobileMode" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
+                <app-filters [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [mobileMode]="mobileMode" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
 
         </div>
 

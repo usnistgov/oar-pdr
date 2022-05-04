@@ -295,6 +295,17 @@ export class NERDResource {
 
         return theme;
     }
+
+    /**
+     * Return science theme search url
+     */
+    public scienceThemeSearchUrl() {
+        if(this.theme() == Themes.SCIENCE_THEME) {
+            return this.data['components'][0].searchURL;
+        }else{
+            return "";
+        }
+    }
 }
 
 /**

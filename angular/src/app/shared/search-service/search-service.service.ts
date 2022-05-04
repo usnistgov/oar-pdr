@@ -129,14 +129,10 @@ export class SearchService {
      * Returns an Observable for the HTTP GET request for the JSON resource.
      * @return {string[]} The Observable for the HTTP request.
      */
-    searchPhrase(): Observable<any> {
-        let url: string;
-
-        // url = "/rmm/records?isPartOf.@id=ark:/88434/mds9911";
-        url = this.portalBase + "rmm/records?isPartOf.proxyFor=ark:/88434/mds9911";
+    searchPhrase(url: string): Observable<any> {
 
         console.log('search url', url);
-        return this.http.get(url);
+        return this.http.get(this.portalBase+url);
     }
 
     /**

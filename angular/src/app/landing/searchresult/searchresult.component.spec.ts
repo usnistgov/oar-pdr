@@ -12,6 +12,7 @@ import { DropdownModule } from "primeng/dropdown";
 import { TreeModule } from 'primeng/tree';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { FormsModule } from '@angular/forms';
+import { testdata } from '../../../environments/environment';
 
 describe('SearchresultComponent', () => {
     let component: SearchresultComponent;
@@ -19,6 +20,7 @@ describe('SearchresultComponent', () => {
     let cfg : AppConfig;
     let plid : Object = "browser";
     let ts : TransferState = new TransferState();
+    let nrd1 = testdata['test1'];
 
     beforeEach(async () => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
@@ -44,6 +46,7 @@ describe('SearchresultComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(SearchresultComponent);
         component = fixture.componentInstance;
+        component.record = nrd1;
         fixture.detectChanges();
     });
 

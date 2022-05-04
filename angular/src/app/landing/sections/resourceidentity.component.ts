@@ -25,6 +25,7 @@ export class ResourceIdentityComponent implements OnChanges {
     primaryRefs: any[] = [];
     editMode: string;
     EDIT_MODES: any;
+    isPartOf: string = "";
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -40,6 +41,10 @@ export class ResourceIdentityComponent implements OnChanges {
 
     ngOnInit(): void {
         this.EDIT_MODES = LandingConstants.editModes;
+
+        if(this.record['isPartOf'] != undefined) {
+            this.isPartOf = "Part of " + this.record['isPartOf'][0].title 
+        }
 
         // Watch current edit mode set by edit controls
         this.editstatsvc.watchEditMode((editMode) => {
