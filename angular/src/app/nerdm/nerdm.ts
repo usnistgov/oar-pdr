@@ -191,6 +191,17 @@ export class NERDResource {
     }
 
     /**
+     * return True if one of the @types assigned to this resource matches the resource
+     * type given
+     * @param type   a resource type label (like "DataPublication" or "ScienceTheme").  The 
+     *               value may include a namespace prefix, which is ignored.
+     * @return boolean   True if the given type matches one of the assigned types
+     */
+    isType(restype: string) : boolean {
+        return NERDResource.objectMatchesTypes(this, restype);
+    }
+
+    /**
      * return an array of the component objects that match any of the given @type labels.
      * The labels should not include namespace qualifiers
      */

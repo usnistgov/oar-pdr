@@ -42,10 +42,6 @@ export class ResourceIdentityComponent implements OnChanges {
     ngOnInit(): void {
         this.EDIT_MODES = LandingConstants.editModes;
 
-        if(this.record['isPartOf'] != undefined) {
-            this.isPartOf = "Part of " + this.record['isPartOf'][0].title 
-        }
-
         // Watch current edit mode set by edit controls
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
@@ -74,7 +70,29 @@ export class ResourceIdentityComponent implements OnChanges {
      */
     useMetadata(): void {
         this.showHomePageLink = this.isExternalHomePage(this.record['landingPage']);
+
         this.recordType = (new NERDResource(this.record)).resourceLabel();
+
+        if (this.record['isPartOf'] && Array.isArray(this.record['isPartOf']) && 
+            this.record['isPartOf'].length > 0 && this.record['isPartOf'][0]['@id'])
+        {
+            // this resource is part of a collection; format a label indicating that
+            let coll = this.record['isPartOf'][0]
+            
+            let article = "";
+            let title = "another collection";
+            let suffix = "";
+            if (coll['title']) {
+                article = "the";
+                title = coll['title']
+                suffix = "Collection";
+                if (NERDResource.objectMatchesTypes(coll, "ScienceTheme"))
+                    suffix = "Science Theme";
+            }
+           
+            this.isPartOf = '<i>Part of ' + artitcle + '<a href="' + cfg.get("locations.landinPageService") +
+                coll['@id'] + '" title="view collection">' + title + "</a> " + suffix + "</i>";
+        }
 
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].substring(4);
