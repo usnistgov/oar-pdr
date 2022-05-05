@@ -86,8 +86,8 @@ export class AboutdatasetComponent implements OnChanges {
             this.isPartOf = "This dataset is part of ";
 
             for(let i = 0; i < this.record["isPartOf"].length; i++) {
-                if(i > 0 && i < this.record["isPartOf"].length-1) this.isPartOf += ", ";
-                if(i == this.record["isPartOf"].length-1) this.isPartOf += " and ";
+                if(this.record["isPartOf"].length > 2 && i > 0 && i < this.record["isPartOf"].length-1) this.isPartOf += ", ";
+                if(this.record["isPartOf"].length > 1 && i == this.record["isPartOf"].length-1) this.isPartOf += " and ";
                 this.isPartOf += this.record["isPartOf"][i].title;
             }
 
