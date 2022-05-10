@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input, ViewChild } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
@@ -25,7 +25,7 @@ export class ResourceIdentityComponent implements OnChanges {
     primaryRefs: any[] = [];
     editMode: string;
     EDIT_MODES: any;
-    isPartOf: string = "";
+    isPartOf: string[] = null;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -55,7 +55,7 @@ export class ResourceIdentityComponent implements OnChanges {
         return this.editMode == this.EDIT_MODES.VIEWONLY_MODE;
     }
 
-    ngOnChanges() {
+    ngOnChanges(changes: SimpleChanges) {
         if (this.recordLoaded())
             this.useMetadata();  // initialize internal component data based on metadata
     }
@@ -77,7 +77,7 @@ export class ResourceIdentityComponent implements OnChanges {
             this.record['isPartOf'].length > 0 && this.record['isPartOf'][0]['@id'])
         {
             // this resource is part of a collection; format a label indicating that
-            let coll = this.record['isPartOf'][0]
+            let coll = this.record['isPartOf'][0];
             
             let article = "";
             let title = "another collection";
@@ -90,8 +90,12 @@ export class ResourceIdentityComponent implements OnChanges {
                     suffix = "Science Theme";
             }
            
-            this.isPartOf = '<i>Part of ' + artitcle + '<a href="' + cfg.get("locations.landinPageService") +
-                coll['@id'] + '" title="view collection">' + title + "</a> " + suffix + "</i>";
+            this.isPartOf = [
+                article,
+                this.cfg.get("locations.landingPageService") + coll['@id'],
+                title,
+                suffix
+            ];
         }
 
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")

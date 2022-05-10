@@ -13,7 +13,9 @@ import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/aut
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { config, testdata } from '../../../environments/environment';
 
-describe('ResourceIdentityComponent', () => {
+import * as _ from 'lodash-es';
+
+fdescribe('ResourceIdentityComponent', () => {
     let component : ResourceIdentityComponent;
     let fixture : ComponentFixture<ResourceIdentityComponent>;
     let cfg : AppConfig = new AppConfig(config);
@@ -42,7 +44,7 @@ describe('ResourceIdentityComponent', () => {
     beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
-        component.ngOnChanges()
+        component.ngOnChanges({})
         fixture.detectChanges();
     }));
 
@@ -58,6 +60,10 @@ describe('ResourceIdentityComponent', () => {
         expect(descs.length).toBe(1);
 
         // expect(component.versionCmp.newer).toBeNull();
+
+        // test record does not include isPartOf
+        el = cmpel.querySelector("#ispartof");
+        expect(el).toBeFalsy();
     });
 
     it('should correctly render special references', () => {
@@ -89,5 +95,54 @@ describe('ResourceIdentityComponent', () => {
         expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['location']);
     });
        
+    it('single isPartOf rendering', () => {
+        let cmpel = fixture.nativeElement;
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [{
+            "@id": "ark:/88888/goober",
+            title: "Uber Research",
+            "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+        }];
+        component.record = member;
+        component.ngOnChanges({});
+        fixture.detectChanges();
+
+        let el = cmpel.querySelector("#ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeFalsy();
+        expect(el.innerHTML.includes(" Collection")).toBeTruthy();
+        let a = el.querySelector("a");
+        expect(a).toBeTruthy();
+        expect(a.href.endsWith("/ark:/88888/goober")).toBeTruthy();
+    });
+
+    it('multiple isPartOf rendering', () => {
+        let cmpel = fixture.nativeElement;
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [
+            {
+                "@id": "ark:/88888/goobler",
+                title: "Uber Research",
+                "@type": [ "nrda:ScienceTheme", "nrd:PublicDataResource" ]
+            },
+            {
+                "@id": "ark:/88888/gomer",
+                title: "Sleepy Research",
+                "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+            }
+        ];
+        component.record = member;
+        component.ngOnChanges({});
+        fixture.detectChanges();
+
+        let el = cmpel.querySelector("#ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeFalsy();
+        expect(el.innerHTML.includes(" Science Theme")).toBeTruthy();
+        let a = el.querySelector("a");
+        expect(a).toBeTruthy();
+        expect(a.href.endsWith("/ark:/88888/goobler")).toBeTruthy();
+    });
+
 });
 
