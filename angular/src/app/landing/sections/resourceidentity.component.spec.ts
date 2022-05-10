@@ -15,7 +15,7 @@ import { config, testdata } from '../../../environments/environment';
 
 import * as _ from 'lodash-es';
 
-fdescribe('ResourceIdentityComponent', () => {
+describe('ResourceIdentityComponent', () => {
     let component : ResourceIdentityComponent;
     let fixture : ComponentFixture<ResourceIdentityComponent>;
     let cfg : AppConfig = new AppConfig(config);
