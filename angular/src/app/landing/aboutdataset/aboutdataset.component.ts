@@ -42,7 +42,7 @@ export class AboutdatasetComponent implements OnChanges {
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
     scienceThemeResourceType = ThemesPrefs.getResourceLabel(Themes.SCIENCE_THEME);
-    isPartOf: string = "";
+    isPartOf: string[][] = null;
     
     private _collapsed: boolean = false;
     @Input() record: NerdmRes;
@@ -82,22 +82,43 @@ export class AboutdatasetComponent implements OnChanges {
                 public gaService: GoogleAnalyticsService) {  }
 
     ngOnInit(): void {
-        if(this.record["isPartOf"] != undefined) {
-            this.isPartOf = "This dataset is part of ";
-
-            for(let i = 0; i < this.record["isPartOf"].length; i++) {
-                if(this.record["isPartOf"].length > 2 && i > 0 && i < this.record["isPartOf"].length-1) this.isPartOf += ", ";
-                if(this.record["isPartOf"].length > 1 && i == this.record["isPartOf"].length-1) this.isPartOf += " and ";
-                this.isPartOf += this.record["isPartOf"][i].title;
-            }
-
-            this.isPartOf += ".";
-        }
-
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
         this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/unconfigured");
         this.citetext = (new NERDResource(this.record)).getCitation();
         this.resourceType = ThemesPrefs.getResourceLabel(this.theme);
+
+        // set the isPartOf rendering, listing all of the collections this dataset is formally
+        // a part of (as indicated by the NERDm isPartOf property.
+        let article: string, title: string, suffix: string; 
+        if (this.record["isPartOf"] && Array.isArray(this.record['isPartOf']) &&
+            this.record['isPartOf'].length > 0)
+        {
+            this.isPartOf = [];
+            for (var coll of this.record["isPartOf"]) {
+                if (! coll['@id'])
+                    continue
+                article = "";
+                title = "another collection";
+                suffix = "";
+                if (coll['title']) {
+                    title = coll['title'];
+                    if (NERDResource.objectMatchesTypes(coll, "ScienceTheme")) {
+                        article = "the";
+                        suffix = " Science Theme";
+                    }
+                }
+                this.isPartOf.push([
+                    article,
+                    this.cfg.get("locations.landingPageService") + coll['@id'],
+                    title,
+                    suffix
+                ]);
+            }
+            if (this.isPartOf.length == 1 && ! this.isPartOf[0][3]) {
+                this.isPartOf[0][0] = "the";
+                this.isPartOf[0][3] = " collection";
+            }
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {

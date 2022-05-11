@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input, ViewChild } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
@@ -25,7 +25,7 @@ export class ResourceIdentityComponent implements OnChanges {
     primaryRefs: any[] = [];
     editMode: string;
     EDIT_MODES: any;
-    isPartOf: string = "";
+    isPartOf: string[] = null;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -42,10 +42,6 @@ export class ResourceIdentityComponent implements OnChanges {
     ngOnInit(): void {
         this.EDIT_MODES = LandingConstants.editModes;
 
-        if(this.record['isPartOf'] != undefined) {
-            this.isPartOf = "Part of " + this.record['isPartOf'][0].title 
-        }
-
         // Watch current edit mode set by edit controls
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
@@ -59,7 +55,7 @@ export class ResourceIdentityComponent implements OnChanges {
         return this.editMode == this.EDIT_MODES.VIEWONLY_MODE;
     }
 
-    ngOnChanges() {
+    ngOnChanges(changes: SimpleChanges) {
         if (this.recordLoaded())
             this.useMetadata();  // initialize internal component data based on metadata
     }
@@ -74,7 +70,33 @@ export class ResourceIdentityComponent implements OnChanges {
      */
     useMetadata(): void {
         this.showHomePageLink = this.isExternalHomePage(this.record['landingPage']);
+
         this.recordType = (new NERDResource(this.record)).resourceLabel();
+
+        if (this.record['isPartOf'] && Array.isArray(this.record['isPartOf']) && 
+            this.record['isPartOf'].length > 0 && this.record['isPartOf'][0]['@id'])
+        {
+            // this resource is part of a collection; format a label indicating that
+            let coll = this.record['isPartOf'][0];
+            
+            let article = "";
+            let title = "another collection";
+            let suffix = "";
+            if (coll['title']) {
+                article = "the";
+                title = coll['title']
+                suffix = "Collection";
+                if (NERDResource.objectMatchesTypes(coll, "ScienceTheme"))
+                    suffix = "Science Theme";
+            }
+           
+            this.isPartOf = [
+                article,
+                this.cfg.get("locations.landingPageService") + coll['@id'],
+                title,
+                suffix
+            ];
+        }
 
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].substring(4);

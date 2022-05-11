@@ -6,7 +6,10 @@
         </span>
         <br>
         <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
-        <div id="ispartof" *ngIf="isPartOf != ''">{{isPartOf}}</div>
+        <div id="ispartof" *ngIf="isPartOf">
+          <i style="font-size: smaller;">Part of {{isPartOf[0]}} <a href="{{isPartOf[1]}}"
+             title="view collection">{{isPartOf[2]}}</a> {{isPartOf[3]}}</i>
+        </div>
         <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
     </div>
     

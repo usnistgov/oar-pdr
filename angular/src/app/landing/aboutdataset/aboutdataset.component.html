@@ -1,9 +1,23 @@
 <!-- About This Dataset section -->
-<!-- is part of -->
-<div id="ispartof" *ngIf="isPartOf != ''">{{isPartOf}}</div>
 
 <!-- Version info -->
 <pdr-version [record]="record"></pdr-version> 
+
+<!-- is part of -->
+<div id="about-ispartof" *ngIf="isPartOf">
+  <div *ngIf="isPartOf.length == 1; else multiIsPartOf">
+    This dataset is part of {{isPartOf[0][0]}}
+    <a href="{{isPartOf[0][1]}}" title="view collection">{{isPartOf[0][2]}}</a> {{isPartOf[0][3]}}. 
+  </div>
+  <ng-template #multiIsPartOf>
+    This dataset is part of the following collections:
+    <ul>
+    <div *ngFor="let coll of isPartOf">
+       <li> {{coll[0]}} <a href="{{coll[1]}}" title="view collection">{{coll[2]}}</a> {{coll[3]}} </li>
+    </div>
+    </ul>
+  </ng-template>
+</div>
 
 <!-- Facilitators -->
 <div *ngIf="theme == scienceTheme" style="width: 100%; margin-bottom: 2em;">
