@@ -90,6 +90,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     modalReference: any;
     windowScrolled: boolean = false;
     btnPosition: any;
+    menuPosition: any;
     menuBottom: string = "1em";
     showMetrics: boolean = false;
     recordType: string = "";
@@ -105,6 +106,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     // metricsinfoComponent: MetricsinfoComponent;
 
     @ViewChild('stickyButton') btnElement: ElementRef;
+    @ViewChild('stickyMenu') menuElement: ElementRef;
 
     /**
      * create the component.
@@ -361,7 +363,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     @HostListener("window:scroll", [])
     onWindowScroll() {
-        this.windowScrolled = (window.pageYOffset > this.btnPosition);
+        if(this.mobileMode)
+            this.windowScrolled = (window.pageYOffset > this.btnPosition);
+        else
+            this.windowScrolled = (window.pageYOffset > this.menuPosition);
+
         this.menuBottom = (window.pageYOffset).toString() + 'px';
     }
 
@@ -443,10 +449,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             .subscribe((state: BreakpointState) => {
                 if (state.matches) {
                     this.mobileMode = false;
+                    this.menuPosition = this.menuElement.nativeElement.offsetTop + 20;
                 } else {
                     this.mobileMode = true;
-                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
-                    console.log("Mobile mode")
+                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
                 }
             });
         }

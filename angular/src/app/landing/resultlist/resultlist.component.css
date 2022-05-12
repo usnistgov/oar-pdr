@@ -3,7 +3,7 @@
     height: 45px;
     border-bottom: 1px solid grey;
     align-items:center;
-    margin-bottom: 2em;
+    margin: -8px 0 2em 0;
     background-color: var(--science-theme-background-blue); 
 }
 
@@ -56,4 +56,20 @@
 .nothing-found-text {
     margin-left: 2em;
     color: var(--science-theme-background-blue); 
+}
+
+#table{ 
+    display: table; 
+    width: 100%;
+    margin-bottom: 1.5em;
+}
+.tr{ 
+    display: table-row; 
+    background-color: var(--science-theme-background-blue); 
+    width: 100%;
+}
+.td{ 
+    display: table-cell; 
+    color: white;
+    text-align: left;
 }

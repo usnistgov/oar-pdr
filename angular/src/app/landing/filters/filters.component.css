@@ -89,7 +89,7 @@
 
 .filter-checkbox {
     width: 100%;
-    min-width: 400px;
+    min-width: 410px;
     overflow: auto;
 }
 
@@ -117,4 +117,12 @@
     border-radius: 100%;
     padding: 2px 6px 2px 2px;
     font-size: small;
+}
+
+:host ::ng-deep .ui-tree {
+    overflow: overlay; /* Changed from auto to overlay */
+}
+
+:host ::ng-deep .ui-tree .ui-tree-container {
+    overflow: initial;
 }

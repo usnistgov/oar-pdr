@@ -98,7 +98,7 @@ export class FiltersComponent implements OnInit {
     displayFields: string[] = [];
     queryAdvSearch: string;
     page: number = 1;
-    isActive: boolean = false;
+    isActive: boolean = true;
     filterClass: string;
     resultsClass: string;
     nodeExpanded: boolean = true;
@@ -368,14 +368,14 @@ export class FiltersComponent implements OnInit {
 
         this.resourceTypeTree = [{
             label: 'Type of Resource  -',
-            "expanded": true,
+            "expanded": false,
             children: this.resourceTypesWithCount
         }];
 
         if (!compNoData) {
             this.componentsTree = [{
                 label: 'Record has -',
-                "expanded": true,
+                "expanded": false,
                 children: this.componentsWithCount,
             }];
         }

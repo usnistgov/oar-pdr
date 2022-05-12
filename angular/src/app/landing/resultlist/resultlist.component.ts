@@ -50,6 +50,7 @@ export class ResultlistComponent implements OnInit {
     showResult: boolean = true;
     PDRAPIURL: string = "https://data.nist.gov/od/id/";
     noSearchResult: boolean = false;
+    expandIcon: string = 'url(assets/images/open_200x200.png)';
 
     //Pagination
     totalResultItems: number = 0;
@@ -62,6 +63,7 @@ export class ResultlistComponent implements OnInit {
     @Input() searchValue: string;
     @Input() searchTaxonomyKey: string;
     @Input() mobWidth: number = 1920;
+    @Input() resultWidth: string = '400px';
     @Input() filterString: string = '';
 
     constructor(private searchService: SearchService, private cfg: AppConfig) { }
@@ -88,12 +90,22 @@ export class ResultlistComponent implements OnInit {
         }
     }
 
+    get resultWidthNum() {
+        if(this.resultWidth == "100%")
+            return 400;
+        else {
+            return this.resultWidth.substring(0, this.resultWidth.length-2)
+        }
+    }
+
     /**
      * Processing search results
      * @param searchResults search results
      */
     onSuccess(searchResults: any[]) {
         searchResults.forEach((object) => {
+            object['DetailsDisplayed'] = false;
+            object['iconurl'] = 'assets/images/open_200x200.png';
             object['active'] = true;
         })
 
@@ -102,7 +114,6 @@ export class ResultlistComponent implements OnInit {
 
         //Init searchResults
         for(let item of this.searchResults) {
-            item.DetailsDisplayed = false;
             item.active = true;
         }
 
@@ -129,21 +140,26 @@ export class ResultlistComponent implements OnInit {
 
         this.pages = [];
         for(let i=1; i <= this.totalPages; i++) {
-            this.pages.push({name:'Page '+i+' of '+this.totalPages, value:i})
+            this.pages.push({name:'Page '+i+'/'+this.totalPages, value:i})
         }
     }
 
     /**
-     * Return the class of the arrow next to the file name.
-     * If the details is hidden, display the "right" arrow. Otherwise "down" arrow.
+     * Return the background image url of the icon next to the file name.
+     * If the details is hidden, display the "open" icon. Otherwise "close" icon.
      * @returns 
      */
-    fileDetailsDisplayClass(resultItem: any) {
+    detailExpandIcon(resultItem: any) {
+        let url;
         if(resultItem.DetailsDisplayed){
-            return 'faa faa-caret-down nist-blue-fc';
+            url = 'url(assets/images/close_200x200.png)';
         }else{
-            return 'faa faa-caret-right nist-blue-fc';
-        }
+            url = 'url(assets/images/open_200x200.png)';
+        }  
+
+        setTimeout(() => {
+            return url;
+        }, 0);
     }
 
     /**
@@ -155,17 +171,16 @@ export class ResultlistComponent implements OnInit {
         //Close current details window if it's open
         if(index != this.currentIndex) {
             this.searchResultsForDisplay[this.currentIndex]['DetailsDisplayed'] = false;
+            this.searchResultsForDisplay[this.currentIndex]['iconurl'] = 'assets/images/open_200x200.png';
         }
         this.currentIndex = index;
 
         if(fileNode.DetailsDisplayed){
             fileNode.DetailsDisplayed = false;
-            // setTimeout(() => {
-            //     fileNode.DetailsDisplayed02 = false;
-            // }, 600);
+            fileNode.iconurl = 'assets/images/open_200x200.png';
         }else{
             fileNode.DetailsDisplayed = true;
-            // fileNode.DetailsDisplayed02 = true;
+            fileNode.iconurl = 'assets/images/close_200x200.png';
         }
     }
 
@@ -321,6 +336,8 @@ export class ResultlistComponent implements OnInit {
     resetResult() {
         if(this.searchResults) {
             this.searchResults.forEach((object) => {
+                object.DetailsDisplayed = false;
+                object.iconurl = 'assets/images/open_200x200.png';
                 object.active = true;
             })
         }

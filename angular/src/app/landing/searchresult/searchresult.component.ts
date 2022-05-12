@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, HostListener } from '@angular/core';
+import { Component, OnInit, Input, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
@@ -21,6 +21,7 @@ export class SearchresultComponent implements OnInit {
     mobWidth: number;
     mobileMode: boolean = false; // set mobile mode to true if window width < 641
     filterWidth: number;
+    filterWidthStr: string;
     filterMode: string = "normal";
     resultWidth: any;
     searchTaxonomyKey: string;
@@ -32,6 +33,9 @@ export class SearchresultComponent implements OnInit {
     prevMouseX: number = 0;
     prevFilterWidth: number = 0;
 
+    @ViewChild('parentDiv')
+    topLevelDiv: ElementRef;
+
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
 
@@ -39,8 +43,14 @@ export class SearchresultComponent implements OnInit {
     }
 
     ngOnInit(): void {
+
+    }
+
+    ngAfterViewInit(): void {
+        //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+        //Add 'implements AfterViewInit' to the class.
         if(this.inBrowser){
-            this.mobWidth = window.innerWidth;
+            this.mobWidth = this.topLevelDiv.nativeElement.offsetWidth;
             this.mobileMode = this.mobWidth < 641;
         }
 
@@ -58,7 +68,8 @@ export class SearchresultComponent implements OnInit {
         if(this.mouseDragging) {
             let diff = this.mouse.x - this.prevMouseX;
             this.filterWidth = this.prevFilterWidth + diff;
-            this.filterWidth = this.filterWidth < 40? 39 : this.filterWidth > 500? 500 : this.filterWidth;
+            this.filterWidth = this.filterWidth < 40? 39 : this.filterWidth > 420? 420 : this.filterWidth;
+            this.filterWidthStr = this.filterWidth + 'px';
         }
 
         this.setResultWidth();
@@ -76,9 +87,8 @@ export class SearchresultComponent implements OnInit {
     }
 
     onResize(event) {
-        this.mobWidth = window.innerWidth;
-        this.mobileMode = this.mobWidth < 641;
-
+        this.mobWidth = this.topLevelDiv.nativeElement.offsetWidth;
+        this.mobileMode = this.mobWidth < 541;
         this.updateWidth();
     }
 
@@ -88,7 +98,6 @@ export class SearchresultComponent implements OnInit {
      */
     updateWidth(filterMode?: string){
         this.filterMode = filterMode? filterMode : this.filterMode;
-
         if(this.filterMode == 'normal'){
             this.filterToggler = 'expanded';
         }else{
@@ -97,14 +106,17 @@ export class SearchresultComponent implements OnInit {
 
         if(!this.mobileMode){
             if(this.filterMode == 'normal'){
-                this.filterWidth = this.mobWidth / 4;
+                this.filterWidth = this.mobWidth / 4;                
                 this.filterToggler = 'expanded';
             }else{
                 this.filterWidth = 39;
                 this.filterToggler = 'collapsed';
             }
+
+            this.filterWidthStr = this.filterWidth + 'px';
         }else{
-            this.filterWidth = this.mobWidth - 40;
+            this.filterWidth = this.mobWidth;
+            this.filterWidthStr = "100%"
         }
 
         this.setResultWidth();
@@ -123,10 +135,10 @@ export class SearchresultComponent implements OnInit {
      * @returns 
      */
     setResultWidth(){
-        if(this.mobWidth <= this.filterWidth){
+        if(this.mobileMode){
             this.resultWidth = "100%";
         }else{
-            this.resultWidth = this.mobWidth - this.filterWidth - 20;
+            this.resultWidth = this.mobWidth - this.filterWidth - 20 + "px";
         }
     }
 }
