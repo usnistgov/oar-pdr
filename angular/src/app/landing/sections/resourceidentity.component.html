@@ -23,14 +23,14 @@
             <div *ngFor="let ref of primaryRefs; let i =index"
                  style="padding-left:20px">
               <span *ngIf="ref.location; else nopreflink" class="primary-ref-entry">
-                  <i class="faa faa-external-link">&nbsp;&nbsp;
-                      <a href={{ref.location}} target="blank"
-                         (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">{{ ref.label }}</a><span *ngIf="i < primaryRefs.length-1">,</span></i>
+                  <span class="faa faa-external-link">&nbsp;&nbsp;
+                    <i><a href={{ref.location}} target="blank"
+                          (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">{{ ref.label }}</a><span *ngIf="i < primaryRefs.length-1">,</span></i></span>
               </span>
               <ng-template #nopreflink>
-                <span class="primary-ref-entry">
+                <i class="primary-ref-entry">
                   {{ ref.label }}<span *ngIf="i < primaryRefs.length-1">,</span>
-                </span>
+                </i>
               </ng-template>
             </div>
         </span>
