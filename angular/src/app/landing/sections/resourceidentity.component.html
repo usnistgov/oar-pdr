@@ -17,14 +17,21 @@
             <a href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
         </span>
         <span class="describedin" *ngIf="primaryRefs.length > 0"><br>
-            <span>Described in article: </span>
-            <div *ngFor="let ref of primaryRefs; let i =index">
-                <span style="padding-left:20px">
-                    <i class="faa faa-external-link">
-                        <a href={{ref.location}} target="blank"
-                            (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">&nbsp;&nbsp;{{ ref.label }}</a></i>
-                    <span *ngIf="i < primaryRefs.length-1">,</span>
+            <span>Described in
+                  <span *ngIf="primaryRefs.length < 2">this article:</span>
+                  <span *ngIf="primaryRefs.length > 1">these articles: </span></span>
+            <div *ngFor="let ref of primaryRefs; let i =index"
+                 style="padding-left:20px">
+              <span *ngIf="ref.location; else nopreflink" class="primary-ref-entry">
+                  <i class="faa faa-external-link">&nbsp;&nbsp;
+                      <a href={{ref.location}} target="blank"
+                         (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">{{ ref.label }}</a><span *ngIf="i < primaryRefs.length-1">,</span></i>
+              </span>
+              <ng-template #nopreflink>
+                <span class="primary-ref-entry">
+                  {{ ref.label }}<span *ngIf="i < primaryRefs.length-1">,</span>
                 </span>
+              </ng-template>
             </div>
         </span>
         <pdr-version [record]="record"></pdr-version>
