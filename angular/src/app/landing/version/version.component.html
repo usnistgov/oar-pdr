@@ -11,11 +11,6 @@
         <strong>{{record.issued.slice(0,10)}}</strong></span>
     <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
         <strong>{{record.modified.slice(0,10)}}</strong></span>
-    <span class="" *ngIf="record.creators" style="padding-right: 10pt;"> Created by:
-        <span *ngFor="let creator of record.creators">
-            <strong>{{creator.fn}}</strong>
-        </span>
-    </span>
 
     <!-- Version history -->
     <div class="card customcard" [collapse]="!closeHistory">

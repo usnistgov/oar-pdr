@@ -141,11 +141,7 @@ export class FiltersComponent implements OnInit {
     ngOnInit(): void {
         this.msgs = [];
         this.searchResultsError = [];
-        if(this.theme == 'ScienceTheme'){
-            this.MoreOptionsDisplayed = true;
-        }else{
-            this.MoreOptionsDisplayed = false;
-        }
+        this.MoreOptionsDisplayed = (this.theme == 'ScienceTheme');
 
         this.setColumnWidth();
     }
@@ -294,14 +290,16 @@ export class FiltersComponent implements OnInit {
     search() {
         this.searching = true;
         let that = this;
-        let url = (new NERDResource(this.md)).scienceThemeSearchUrl();
-        return this.searchService.searchPhrase(url)
-        .subscribe(
-            searchResults => {
-                that.onSuccess(searchResults.ResultData);
-            },
-            error => that.onError(error)
-        );
+        let urls = (new NERDResource(this.md)).scienceThemeSearchUrls();
+        for(let i=0; i < urls.length; i++){
+            return this.searchService.resolveSearchRequest(urls[i])
+            .subscribe(
+                searchResults => {
+                    that.onSuccess(searchResults.ResultData);
+                },
+                error => that.onError(error)
+            );
+        }
     }
 
     /**

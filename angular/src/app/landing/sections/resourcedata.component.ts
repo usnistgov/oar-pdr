@@ -35,6 +35,7 @@ import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 })
 export class ResourceDataComponent implements OnChanges {
     accessPages: NerdmComp[] = [];
+    dynamicResourcePages: NerdmComp[] = [];
     showDescription: boolean = false;
     showRestrictedDescription: boolean = false;
     currentState = 'initial';
@@ -74,7 +75,10 @@ export class ResourceDataComponent implements OnChanges {
     useMetadata(): void {
         this.accessPages = []
         if (this.record['components']){
-            this.accessPages = this.selectAccessPages(this.record['components']);
+            if(this.theme == this.defaultTheme)
+                this.accessPages = this.selectAccessPages(this.record['components']);
+            else
+                this.dynamicResourcePages = this.selectDynamicPages(this.record['components']);
         }
     }
 
@@ -85,12 +89,8 @@ export class ResourceDataComponent implements OnChanges {
      */
     selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
         let use : NerdmComp[];
-        if(this.theme == Themes.SCIENCE_THEME) {
-            use = comps.filter(cmp => cmp['@type'].includes("nrda:DynamicResourceSet"));
-        }else{
-            use = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
-            ! cmp['@type'].includes("nrd:Hidden"));
-        }
+        use = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
+        ! cmp['@type'].includes("nrd:Hidden"));
 
         use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
         return use.map((cmp) => {
@@ -103,6 +103,24 @@ export class ResourceDataComponent implements OnChanges {
         });
     }
 
+
+    /**
+     * return an array of Dynamic Resource components from the given input components array
+     * @param comps the list of NERDm components to select from.  This can be from the 
+     *                  full list from the NERDm Resource record 
+     * @returns an array of Dynamic Resource components
+     */
+    selectDynamicPages(comps : NerdmComp[]) : NerdmComp[] {
+        let use : NerdmComp[] = (new NERDResource(this.record)).selectDynamicResourceComps();
+        return use.map((cmp) => {
+            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
+
+            cmp['showDesc'] = false;
+            cmp['backcolor'] = 'white';
+
+            return cmp;
+        });
+    }
 
     /**
      * Emit download status

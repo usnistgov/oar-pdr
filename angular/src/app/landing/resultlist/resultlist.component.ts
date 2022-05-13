@@ -51,6 +51,7 @@ export class ResultlistComponent implements OnInit {
     PDRAPIURL: string = "https://data.nist.gov/od/id/";
     noSearchResult: boolean = false;
     expandIcon: string = 'url(assets/images/open_200x200.png)';
+    isEmail: boolean = false;
 
     //Pagination
     totalResultItems: number = 0;
@@ -73,15 +74,17 @@ export class ResultlistComponent implements OnInit {
                                    'https://data.nist.gov/od/id/');
 
         let that = this;
-        let url = (new NERDResource(this.md)).scienceThemeSearchUrl();
-        this.searchService.searchPhrase(url)
-        .subscribe(
-            searchResults => {
-                this.resultCount = searchResults['ResultCount'];
-                that.onSuccess(searchResults.ResultData);
-            },
-            error => that.onError(error)
-        );
+        let urls = (new NERDResource(this.md)).scienceThemeSearchUrls();
+        for(let i=0; i < urls.length; i++){
+            this.searchService.resolveSearchRequest(urls[i])
+            .subscribe(
+                searchResults => {
+                    this.resultCount = searchResults['ResultCount'];
+                    that.onSuccess(searchResults.ResultData);
+                },
+                error => that.onError(error)
+            );
+        }
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -110,7 +113,12 @@ export class ResultlistComponent implements OnInit {
         })
 
         this.searchResultsOriginal = JSON.parse(JSON.stringify(searchResults));
-        this.searchResults = JSON.parse(JSON.stringify(searchResults));
+        let srchResults = JSON.parse(JSON.stringify(searchResults));
+
+        if(this.searchResults && this.searchResults.length > 0) 
+            this.searchResults = [...this.searchResults, ...srchResults];
+        else
+            this.searchResults = srchResults;
 
         //Init searchResults
         for(let item of this.searchResults) {
@@ -496,5 +504,39 @@ export class ResultlistComponent implements OnInit {
         setTimeout(() => {
             this.showResult = true;
         }, 0);
+    }
+
+    /**
+     * Determine if a given dataset has contact point email
+     * @param dataset 
+     * @returns 
+     */
+    hasEmail(dataset: any) {
+        if(dataset['contactPoint'])
+            return 'hasEmail' in dataset['contactPoint'];
+        else
+            return false;
+    }
+
+    /**
+     * Get the doi url from the given dataset. If not available, return blank.
+     * @param dataset 
+     * @returns doi url. Return blank if not available.
+     */
+    doiUrl(dataset: any) {
+        if (dataset['doi'] !== undefined && dataset['doi'] !== "")
+            return "https://doi.org/" + dataset['doi'].substring(4);
+        else    
+            return "";
+    }
+
+    lastModified(dataset: any) {
+        let lastDate: Date;
+        if(dataset.modified) {
+            lastDate = new Date(dataset.modified.slice(0,10));
+            return lastDate.toLocaleDateString();
+        }else{
+            return "None";
+        }
     }
 }

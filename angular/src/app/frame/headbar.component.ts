@@ -43,7 +43,6 @@ export class HeadbarComponent {
     public EDIT_MODES: any;
     public CART_CONSTANTS: any = CartConstants.cartConst;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
-    theme: string = "nist";
 
     constructor(
         private el: ElementRef,

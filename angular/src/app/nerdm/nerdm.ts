@@ -308,13 +308,26 @@ export class NERDResource {
     }
 
     /**
-     * Return science theme search url
+     * Returns Nerdm comps that contains DynamicResourceSet
      */
-    public scienceThemeSearchUrl() {
+    public selectDynamicResourceComps() : NerdmComp[] {
+        let use : NerdmComp[];
+        use = this.data['components'].filter(cmp => cmp['@type'].includes("nrda:DynamicResourceSet") &&
+        ! cmp['@type'].includes("nrd:Hidden"));
+
+        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
+
+        return use;
+    }
+
+    /**
+     * Return science theme search urls as a string array
+     */
+    public scienceThemeSearchUrls(): string[] {
         if(this.theme() == Themes.SCIENCE_THEME) {
-            return this.data['components'][0].searchURL;
+            return this.selectDynamicResourceComps().map(a=>a.searchURL);
         }else{
-            return "";
+            return [];
         }
     }
 }

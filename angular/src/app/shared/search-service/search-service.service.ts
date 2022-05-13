@@ -126,46 +126,15 @@ export class SearchService {
     }
 
     /**
-     * Returns an Observable for the HTTP GET request for the JSON resource.
-     * @return {string[]} The Observable for the HTTP request.
+     * Resolve a http request
+     * @param url must be rmm url. e.g. /rmm/records?isPartOf.@id=ark:/88434/mds991122
+     * @returns http response as an observable object
      */
-    searchPhrase(url: string): Observable<any> {
+    resolveSearchRequest(url: string): Observable<any> {
 
         console.log('search url', url);
         return this.http.get(this.portalBase+url);
     }
-
-    /**
-     * Watch current page
-     */
-        watchCurrentPage(): Observable<any> {
-        return this.currentPage.asObservable();
-    }
-    
-    /**
-     * Set curent page
-     * @param page 
-     */
-    setCurrentPage(page: number) {
-        this.currentPage.next(page);
-    }
-
-
-    /**
-     * Watch total items (search result)
-     */
-     watchTotalItems(): Observable<any>{
-        return this.totalItems.asObservable();
-    }
-
-    /**
-     * Set total items (search result)
-     * @param page 
-     */
-    setTotalItems(totalItems: number) {
-        this.totalItems.next(totalItems);
-    }
-
 }
 
 

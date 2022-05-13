@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, HostListener, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
@@ -39,7 +39,7 @@ export class SearchresultComponent implements OnInit {
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
 
-    constructor() {
+    constructor(private cdr: ChangeDetectorRef) {
     }
 
     ngOnInit(): void {
@@ -55,6 +55,7 @@ export class SearchresultComponent implements OnInit {
         }
 
         this.updateWidth();
+        this.cdr.detectChanges();
     }
 
     // The following mouse functions handle drag action

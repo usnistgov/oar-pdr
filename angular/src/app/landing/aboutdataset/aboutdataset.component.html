@@ -20,8 +20,16 @@
 </div>
 
 <!-- Facilitators -->
-<div *ngIf="theme == scienceTheme" style="width: 100%; margin-bottom: 2em;">
+<div *ngIf="theme == scienceTheme" style="width: 100%;" [ngStyle]="{'margin-bottom': record.creators? '15px' : '2em'}">
     <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
+</div>
+
+<!-- Collection creators -->
+<div *ngIf="record.creators" style="padding-right: 10pt; margin-bottom: 1em"> 
+    <b>Collection creators: </b>
+    <span *ngFor="let creator of record.creators; index i">
+        {{creator.fn}} <span *ngIf="i < record.creators.length-1">, </span>
+    </span>
 </div>
 
 <!-- Citation info -->

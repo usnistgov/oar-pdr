@@ -8,6 +8,9 @@ import { SearchService } from '../../shared/search-service/index';
 import { BrowserTransferStateModule } from '@angular/platform-browser';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { FormsModule } from '@angular/forms';
+import { TreeModule } from 'primeng/tree';
+import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { testdata } from '../../../environments/environment';
 
 describe('FiltersComponent', () => {
     let component: FiltersComponent;
@@ -15,6 +18,7 @@ describe('FiltersComponent', () => {
     let plid : Object = "browser";
     let ts : TransferState = new TransferState();
     let cfg : AppConfig = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
+    let nrd1 = testdata['forensics'];
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -23,7 +27,9 @@ describe('FiltersComponent', () => {
                 HttpClientTestingModule, 
                 BrowserTransferStateModule,
                 AutoCompleteModule,
-                FormsModule],
+                FormsModule,
+                TreeModule,
+                BrowserAnimationsModule],
             providers: [
                 SearchService,
                 { provide: AppConfig,       useValue: cfg }
@@ -35,6 +41,7 @@ describe('FiltersComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(FiltersComponent);
         component = fixture.componentInstance;
+        component.md = nrd1;
         fixture.detectChanges();
     });
 
