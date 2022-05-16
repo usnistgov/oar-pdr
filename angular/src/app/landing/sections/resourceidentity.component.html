@@ -16,24 +16,22 @@
         <span *ngIf="!doiUrl"><i> 
             <a href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
         </span>
-        <span class="describedin" *ngIf="primaryRefs.length > 0"><br>
-            <span>Described in
+        <div class="describedin" *ngIf="primaryRefs.length > 0">
+            <div>Described in
                   <span *ngIf="primaryRefs.length < 2">this article:</span>
-                  <span *ngIf="primaryRefs.length > 1">these articles: </span></span>
-            <div *ngFor="let ref of primaryRefs; let i =index"
+                  <span *ngIf="primaryRefs.length > 1">these articles: </span></div>
+            <div *ngFor="let ref of primaryRefs; let i =index" class="primary-ref-entry"
                  style="padding-left:20px">
-              <span *ngIf="ref.location; else nopreflink" class="primary-ref-entry">
-                  <span class="faa faa-external-link">&nbsp;&nbsp;
-                    <i><a href={{ref.location}} target="blank"
-                          (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">{{ ref.label }}</a><span *ngIf="i < primaryRefs.length-1">,</span></i></span>
+              <span *ngIf="ref.location; else nopreflink">
+                  <span class="faa faa-external-link">&nbsp;&nbsp;</span>
+                  <i><a href={{ref.location}} target="blank"
+                        (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">{{ ref.label }}</a><span *ngIf="i < primaryRefs.length-1">,</span></i>
               </span>
               <ng-template #nopreflink>
-                <i class="primary-ref-entry">
-                  {{ ref.label }}<span *ngIf="i < primaryRefs.length-1">,</span>
-                </i>
+                <i>{{ ref.label }}<span *ngIf="i < primaryRefs.length-1">,</span></i>
               </ng-template>
             </div>
-        </span>
+        </div>
         <pdr-version [record]="record"></pdr-version>
     </div>
 
