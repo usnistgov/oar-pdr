@@ -13,7 +13,7 @@ import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/aut
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { config, testdata } from '../../../environments/environment';
 
-fdescribe('ResourceIdentityComponent', () => {
+describe('ResourceIdentityComponent', () => {
     let component : ResourceIdentityComponent;
     let fixture : ComponentFixture<ResourceIdentityComponent>;
     let cfg : AppConfig = new AppConfig(config);
