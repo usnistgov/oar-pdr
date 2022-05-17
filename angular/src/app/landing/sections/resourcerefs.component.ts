@@ -11,7 +11,8 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
     selector:      'pdr-resource-refs',
     templateUrl:   './resourcerefs.component.html',
     styleUrls:   [
-        '../landing.component.css'
+        '../landing.component.css',
+        './resourcerefs.component.css'
     ]
 })
 export class ResourceRefsComponent implements OnChanges {

@@ -69,6 +69,25 @@ describe('ResourceRefsComponent', () => {
         expect(els.length).toBe(0);
     });
 
+    it('should not render ref as a link without location', () => {
+        // remove the locations from the two reference
+        component.record['references'][0]['location'] = null;
+        delete component.record['references'][1].location;
+        component.ngOnChanges({});
+        fixture.detectChanges();
+
+        expect(component).toBeTruthy();
+        let cmpel = fixture.nativeElement;
+        let reflist = cmpel.querySelector("#references");
+        expect(reflist).toBeTruthy();
+
+        // has 2 references
+        let els = cmpel.querySelectorAll(".ref-entry")
+        expect(els.length).toBe(2);
+        els = cmpel.querySelectorAll("a");
+        expect(els.length).toBe(0);
+    });
+
     it('getReferenceText()', () => {
         expect(component).toBeTruthy();
         let ref = { 'location': 'http://example.com/doc.txt' }

@@ -65,6 +65,8 @@ describe('ResourceIdentityComponent', () => {
 
         let el = cmpel.querySelector(".describedin")
         expect(el).toBeTruthy();
+        expect(el.querySelectorAll(".primary-ref-entry").length).toEqual(1);
+        expect(el.querySelectorAll("a").length).toEqual(1);
         el = el.querySelector("a");
         expect(el.textContent).toContain("Solids: In-situ");
 
@@ -85,6 +87,50 @@ describe('ResourceIdentityComponent', () => {
         component.record = tstrec;
         component.useMetadata();
         expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['location']);
+    });
+
+    it('should not render special reference as link without location', () => {
+        // remove the location from the special reference
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        tstrec['references'][0]['location'] = null;
+        component.record = tstrec;
+        component.useMetadata();
+        fixture.detectChanges();
+        
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(1);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
+        expect(el).toBeTruthy();
+        expect(el.querySelectorAll(".primary-ref-entry").length).toEqual(1);
+        expect(el.querySelectorAll("a").length).toEqual(0);
+    });
+
+    it('should correctly render multiple special references', () => {
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        tstrec['references'][1]['refType'] = "IsSupplementTo";
+        tstrec['references'][1]['location'] = null;
+        component.record = tstrec;
+        component.useMetadata();
+        fixture.detectChanges();
+        
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(2);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
+        expect(el).toBeTruthy();
+        expect(el.querySelectorAll("a").length).toEqual(1);
+//        expect(el.textContent.includes(' ,')).toBeFalsy(); // doesn't work
+
+        let entries = el.querySelectorAll(".primary-ref-entry");
+        expect(entries.length).toEqual(2);
+        expect(entries[0].querySelectorAll("a").length).toEqual(1);
+        expect(entries[1].querySelectorAll("a").length).toEqual(0);
+        expect(entries[0].textContent.includes(',')).toBeTruthy();
+        expect(entries[1].textContent.includes(',')).toBeFalsy();
+        expect(entries[0].textContent.includes(' ,')).toBeFalsy();
     });
 
     it('should correctly determine resource type', () => {
