@@ -58,7 +58,7 @@ export class ResultlistComponent implements OnInit {
     totalPages: number = 0;
     itemsPerPage: number = 20;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
-    currentPage: number = 1;
+    currentPage: any = {name:'Page 1', value:1};
 
     @Input() md: NerdmRes = null;
     @Input() searchValue: string;

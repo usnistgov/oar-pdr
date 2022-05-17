@@ -92,6 +92,9 @@ export class ResourceDataComponent implements OnChanges {
         use = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
         ! cmp['@type'].includes("nrd:Hidden"));
 
+        if (this.theme == Themes.SCIENCE_THEME) 
+            use = use.filter(cmp => ! cmp['@type'].includes("nrda:DynamicResourceSet"));
+
         use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
         return use.map((cmp) => {
             if (! cmp['title']) cmp['title'] = cmp['accessURL'];
