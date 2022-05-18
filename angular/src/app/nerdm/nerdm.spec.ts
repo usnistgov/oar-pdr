@@ -220,6 +220,15 @@ describe('NERDResource', function() {
         nrdl.data['@type'][0] = "nrda:ScienceTheme"
         expect(nrdl.resourceLabel()).toEqual("Science Theme")
     });
+
+
+    it('selectAccessPages()', () => {
+        let nrd1 = new nerdm.NERDResource(testdata['test1']);
+
+        let aps = nrd1.selectAccessPages();
+        expect(aps.length).toBe(1);
+        expect(aps[0]['accessURL']).toBeTruthy();
+    });
 });
 
 describe('MetadataTransfer', function() {

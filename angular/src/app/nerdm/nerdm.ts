@@ -323,12 +323,32 @@ export class NERDResource {
     /**
      * Return science theme search urls as a string array
      */
-    public scienceThemeSearchUrls(): string[] {
+    public dynamicSearchUrls(): string[] {
         if(this.theme() == Themes.SCIENCE_THEME) {
             return this.selectDynamicResourceComps().map(a=>a.searchURL);
         }else{
             return [];
         }
+    }
+
+    /**
+     * Return an array of AccessPage components that 
+     * @type contain "nrdp:AccessPage" or "nrdp:SearchPage" but not "nrd:Hidden"
+     */
+    selectAccessPages() : NerdmComp[] {
+        let use : NerdmComp[];
+        use = this.data['components'].filter(cmp => cmp['@type'].includes("nrdp:AccessPage") || cmp['@type'].includes("nrdp:SearchPage") && ! cmp['@type'].includes("nrd:Hidden"));
+
+        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
+
+        return use.map((cmp) => {
+            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
+
+            cmp['showDesc'] = false;
+            cmp['backcolor'] = 'white';
+
+            return cmp;
+        });
     }
 }
 

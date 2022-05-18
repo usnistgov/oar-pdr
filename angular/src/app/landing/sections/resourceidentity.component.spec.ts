@@ -73,6 +73,8 @@ describe('ResourceIdentityComponent', () => {
 
         let el = cmpel.querySelector(".describedin")
         expect(el).toBeTruthy();
+        expect(el.querySelectorAll(".primary-ref-entry").length).toEqual(1);
+        expect(el.querySelectorAll("a").length).toEqual(1);
         el = el.querySelector("a");
         expect(el.textContent).toContain("Solids: In-situ");
 
@@ -94,29 +96,53 @@ describe('ResourceIdentityComponent', () => {
         component.useMetadata();
         expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['location']);
     });
-       
-    it('single isPartOf rendering', () => {
-        let cmpel = fixture.nativeElement;
-        let member = _.cloneDeep(rec);
-        member['isPartOf'] = [{
-            "@id": "ark:/88888/goober",
-            title: "Uber Research",
-            "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
-        }];
-        component.record = member;
-        component.ngOnChanges({});
-        fixture.detectChanges();
 
-        let el = cmpel.querySelector("#ispartof");
+    it('should not render special reference as link without location', () => {
+        // remove the location from the special reference
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        tstrec['references'][0]['location'] = null;
+        component.record = tstrec;
+        component.useMetadata();
+        fixture.detectChanges();
+        
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(1);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
         expect(el).toBeTruthy();
-        expect(el.querySelector("ul")).toBeFalsy();
-        expect(el.innerHTML.includes(" Collection")).toBeTruthy();
-        let a = el.querySelector("a");
-        expect(a).toBeTruthy();
-        expect(a.href.endsWith("/ark:/88888/goober")).toBeTruthy();
+        expect(el.querySelectorAll(".primary-ref-entry").length).toEqual(1);
+        expect(el.querySelectorAll("a").length).toEqual(0);
     });
 
-    it('multiple isPartOf rendering', () => {
+    it('should correctly render multiple special references', () => {
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        tstrec['references'][1]['refType'] = "IsSupplementTo";
+        tstrec['references'][1]['location'] = null;
+        component.record = tstrec;
+        component.useMetadata();
+        fixture.detectChanges();
+        
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(2);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
+        expect(el).toBeTruthy();
+        expect(el.querySelectorAll("a").length).toEqual(1);
+//        expect(el.textContent.includes(' ,')).toBeFalsy(); // doesn't work
+
+        let entries = el.querySelectorAll(".primary-ref-entry");
+        expect(entries.length).toEqual(2);
+        expect(entries[0].querySelectorAll("a").length).toEqual(1);
+        expect(entries[1].querySelectorAll("a").length).toEqual(0);
+        expect(entries[0].textContent.includes(',')).toBeTruthy();
+        expect(entries[1].textContent.includes(',')).toBeFalsy();
+        expect(entries[0].textContent.includes(' ,')).toBeFalsy();
+    });
+
+    it('should correctly determine resource type', () => {
+        expect(component).toBeDefined();
         let cmpel = fixture.nativeElement;
         let member = _.cloneDeep(rec);
         member['isPartOf'] = [

@@ -35,7 +35,6 @@ import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 })
 export class ResourceDataComponent implements OnChanges {
     accessPages: NerdmComp[] = [];
-    dynamicResourcePages: NerdmComp[] = [];
     showDescription: boolean = false;
     showRestrictedDescription: boolean = false;
     currentState = 'initial';
@@ -73,56 +72,14 @@ export class ResourceDataComponent implements OnChanges {
      * input resource metadata
      */
     useMetadata(): void {
-        this.accessPages = []
-        if (this.record['components']){
-            if(this.theme == this.defaultTheme)
-                this.accessPages = this.selectAccessPages(this.record['components']);
-            else
-                this.dynamicResourcePages = this.selectDynamicPages(this.record['components']);
+        this.accessPages = [];
+        if (this.record['components']) {
+            this.accessPages = (new NERDResource(this.record)).selectAccessPages();
+
+            // If this is a science theme and the collection contains one or more components that contain both AccessPage (or SearchPage) and DynamicSourceSet, we want to remove it from accessPages array since it's already displayed in the search result.
+            if(this.theme == this.scienceTheme) 
+                this.accessPages = this.accessPages.filter(cmp => ! cmp['@type'].includes("nrda:DynamicResourceSet"));
         }
-    }
-
-    /**
-     * return an array of AccessPage components from the given input components array
-     * @param comps     the list of NERDm components to select from.  This can be from the 
-     *                  full list from the NERDm Resource record 
-     */
-    selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
-        let use : NerdmComp[];
-        use = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
-        ! cmp['@type'].includes("nrd:Hidden"));
-
-        if (this.theme == Themes.SCIENCE_THEME) 
-            use = use.filter(cmp => ! cmp['@type'].includes("nrda:DynamicResourceSet"));
-
-        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
-        return use.map((cmp) => {
-            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
-
-            cmp['showDesc'] = false;
-            cmp['backcolor'] = 'white';
-
-            return cmp;
-        });
-    }
-
-
-    /**
-     * return an array of Dynamic Resource components from the given input components array
-     * @param comps the list of NERDm components to select from.  This can be from the 
-     *                  full list from the NERDm Resource record 
-     * @returns an array of Dynamic Resource components
-     */
-    selectDynamicPages(comps : NerdmComp[]) : NerdmComp[] {
-        let use : NerdmComp[] = (new NERDResource(this.record)).selectDynamicResourceComps();
-        return use.map((cmp) => {
-            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
-
-            cmp['showDesc'] = false;
-            cmp['backcolor'] = 'white';
-
-            return cmp;
-        });
     }
 
     /**

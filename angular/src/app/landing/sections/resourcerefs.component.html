@@ -2,10 +2,14 @@
     <div class="col-12 col-md-12 col-lg-12 col-sm-12">
         <div *ngIf="hasDisplayableReferences()">
             <div class="section-header"><h3><b>References</b></h3></div>
-            <div style="margin: 0em 0em .5em 1em;" *ngFor="let ref of record['references']">
-                <i class="faa faa-external-link"> &nbsp;
-                    <a href={{ref.location}} target="blank">{{ getReferenceText(ref) }}</a>
-                </i>
+            <div style="margin: 0em 0em .5em 1em;" *ngFor="let ref of record['references']" class="ref-entry">
+              <span *ngIf="ref.location; else noreflink">
+                <span class="faa faa-external-link">&nbsp;</span>
+                <a href={{ref.location}} target="blank">{{ getReferenceText(ref) }}</a>
+              </span>
+              <ng-template #noreflink>
+                <span>{{ getReferenceText(ref) }}</span>
+              </ng-template>
             </div>
         </div>
     </div>

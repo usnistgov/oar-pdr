@@ -67,15 +67,4 @@ describe('ResourceDataComponent', () => {
         // lists files
         expect(cmpel.querySelector("#filelisting")).toBeTruthy();
     });
-
-    it('selectAccessPages()', () => {
-        expect(component).toBeTruthy();
-        expect(component.record).toBeTruthy();
-        expect(component.record['components']).toBeTruthy();
-        expect(component.record['components'].length).toBeGreaterThan(0);
-
-        let aps: NerdmComp[] = component.selectAccessPages(component.record['components']);
-        expect(aps.length).toBe(1);
-        expect(aps[0]['accessURL']).toBeTruthy();
-    });
 });

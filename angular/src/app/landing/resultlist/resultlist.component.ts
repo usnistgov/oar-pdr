@@ -74,7 +74,7 @@ export class ResultlistComponent implements OnInit {
                                    'https://data.nist.gov/od/id/');
 
         let that = this;
-        let urls = (new NERDResource(this.md)).scienceThemeSearchUrls();
+        let urls = (new NERDResource(this.md)).dynamicSearchUrls();
         for(let i=0; i < urls.length; i++){
             this.searchService.resolveSearchRequest(urls[i])
             .subscribe(

@@ -4,6 +4,11 @@
     font-size: 16px;
 }
 
+.primary-ref-entry {
+    line-height: 1.2;
+    margin-bottom: 0.3em;
+}
+
 .home_button {
     float:right;
     margin:.5em 1em .5em 0em;

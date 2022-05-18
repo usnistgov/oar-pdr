@@ -290,7 +290,7 @@ export class FiltersComponent implements OnInit {
     search() {
         this.searching = true;
         let that = this;
-        let urls = (new NERDResource(this.md)).scienceThemeSearchUrls();
+        let urls = (new NERDResource(this.md)).dynamicSearchUrls();
         for(let i=0; i < urls.length; i++){
             return this.searchService.resolveSearchRequest(urls[i])
             .subscribe(

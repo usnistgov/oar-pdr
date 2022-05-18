@@ -82,7 +82,6 @@ export class AboutdatasetComponent implements OnChanges {
                 public gaService: GoogleAnalyticsService) {  }
 
     ngOnInit(): void {
-        console.log("record", this.record["creators"]);
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
         this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/unconfigured");
         this.citetext = (new NERDResource(this.record)).getCitation();
