@@ -223,10 +223,10 @@ describe('NERDResource', function() {
 
 
     it('selectAccessPages()', () => {
-        let nrd1 = new nerdm.NERDResource(testdata['test1']);
+        let nrd1 = new nerdm.NERDResource(testdata['test3']);
 
         let aps = nrd1.selectAccessPages();
-        expect(aps.length).toBe(1);
+        expect(aps.length).toBe(2);
         expect(aps[0]['accessURL']).toBeTruthy();
     });
 });

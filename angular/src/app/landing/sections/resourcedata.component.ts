@@ -74,12 +74,29 @@ export class ResourceDataComponent implements OnChanges {
     useMetadata(): void {
         this.accessPages = [];
         if (this.record['components']) {
-            this.accessPages = (new NERDResource(this.record)).selectAccessPages();
+            this.accessPages = this.selectAccessPages();
 
             // If this is a science theme and the collection contains one or more components that contain both AccessPage (or SearchPage) and DynamicSourceSet, we want to remove it from accessPages array since it's already displayed in the search result.
             if(this.theme == this.scienceTheme) 
                 this.accessPages = this.accessPages.filter(cmp => ! cmp['@type'].includes("nrda:DynamicResourceSet"));
         }
+    }
+
+    /**
+     * select the AccessPage components to display, adding special disply options
+     */
+    selectAccessPages() : NerdmComp[] {
+        let use: NerdmComp[] = (new NERDResource(this.record)).selectAccessPages();
+        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
+
+        return use.map((cmp) => {
+            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
+
+            cmp['showDesc'] = false;
+            cmp['backcolor'] = 'white';
+
+            return cmp;
+        });
     }
 
     /**
