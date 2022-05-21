@@ -35,6 +35,7 @@ import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 })
 export class ResourceDataComponent implements OnChanges {
     accessPages: NerdmComp[] = [];
+    hasDRS: boolean = false;
     showDescription: boolean = false;
     showRestrictedDescription: boolean = false;
     currentState = 'initial';
@@ -79,6 +80,8 @@ export class ResourceDataComponent implements OnChanges {
             // If this is a science theme and the collection contains one or more components that contain both AccessPage (or SearchPage) and DynamicSourceSet, we want to remove it from accessPages array since it's already displayed in the search result.
             if(this.theme == this.scienceTheme) 
                 this.accessPages = this.accessPages.filter(cmp => ! cmp['@type'].includes("nrda:DynamicResourceSet"));
+
+            this.hasDRS = this.hasDynamicResourceSets();
         }
     }
 
@@ -97,6 +100,15 @@ export class ResourceDataComponent implements OnChanges {
 
             return cmp;
         });
+    }
+
+    /**
+     * return true if the components include non-hidden DynamicResourceSets.  If there are, the 
+     * results from the DynamicResourceSet searches will be display in a special in-page 
+     * search results display.
+     */
+    hasDynamicResourceSets(): boolean {
+        return (new NERDResource(this.record)).selectDynamicResourceComps().length > 0;
     }
 
     /**
