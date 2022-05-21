@@ -295,6 +295,7 @@ export const testdata: {} = {
             "nrdp:PublicDataResource"
         ],
         "@id": "ark:/88434/mds0000fbk3",
+        "doi": "doi:10.18434/mds0000fbk3",
         "title": "Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32",
         "contactPoint": {
             "hasEmail": "mailto:patricia.flanagan@nist.gov",
@@ -403,6 +404,20 @@ export const testdata: {} = {
                 "@id": "cmps/NIST_SD32_MEDS-I_html.zip",
                 "_extensionSchemas": [
                     "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
+                ]
+            },
+            {
+                "accessURL": "https://doi.org/10.18434/mds0000fbk",
+                "description": "DOI Access to landing page",
+                "title": "DOI Access to \"Multiple Encounter Dataset (MEDS-I)\"",
+                "@type": [
+                    "nrd:Hidden",
+                    "nrdp:AccessPage",
+                    "dcat:Distribution"
+                ],
+                "@id": "#doi:10.18434/mds0000fbk",
+                "_extensionSchemas": [
+                    "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/"
                 ]
             }
         ],
