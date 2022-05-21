@@ -321,11 +321,7 @@ export class NERDResource {
      * Return science theme search urls as a string array
      */
     public dynamicSearchUrls(): string[] {
-        if(this.theme() == Themes.SCIENCE_THEME) {
-            return this.selectDynamicResourceComps().map(a=>a.searchURL);
-        }else{
-            return [];
-        }
+        return this.selectDynamicResourceComps().map(a=>a.searchURL);
     }
 
     /**

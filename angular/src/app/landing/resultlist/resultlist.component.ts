@@ -75,6 +75,7 @@ export class ResultlistComponent implements OnInit {
 
         let that = this;
         let urls = (new NERDResource(this.md)).dynamicSearchUrls();
+        console.log("ResultlistComponent: Found "+urls.length+" search url(s)");
         for(let i=0; i < urls.length; i++){
             this.searchService.resolveSearchRequest(urls[i])
             .subscribe(
@@ -227,8 +228,8 @@ export class ResultlistComponent implements OnInit {
     /**
      * If search is unsuccessful push the error message
      */
-    onError(error: any[]) {
-
+    onError(error: any) {
+        console.error("Search URL failed to resolve: "+error.error);
     }
 
     /**
