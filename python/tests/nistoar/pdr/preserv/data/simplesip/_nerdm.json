@@ -1,8 +1,8 @@
 {
     "@context": "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
-    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.6#",
     "_extensionSchemas": [
-        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublishedDataResource"
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/PublishedDataResource"
     ],
     "@type": [
         "nrdp:PublishedDataResource"
@@ -58,7 +58,7 @@
             "refType": "IsReferencedBy",
             "location": "https://doi.org/10.1364/OE.24.014100",
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteDocumentReference"
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.6#/definitions/DCiteDocumentReference"
             ]
         }
     ],
@@ -76,7 +76,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
             ]
         },
         {
@@ -89,7 +89,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
             ]
         },
         {
@@ -113,7 +113,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
             ]
         },
         {
@@ -126,7 +126,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
             ]
         },
         {
@@ -139,7 +139,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
             ]
         },
         {
@@ -152,7 +152,7 @@
                 "dcat:Distribution"
             ],
             "_extensionSchemas": [
-                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/DataFile"
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
             ]
         }
     ],
