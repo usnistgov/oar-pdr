@@ -84,7 +84,7 @@
             (dlStatus)="setDownloadStatus($event)">
         </pdr-data-files>
 
-        <div *ngIf="theme == scienceTheme" style="margin-top: 2em;">
+        <div *ngIf="hasDRS" style="margin-top: 2em;">
             <app-searchresult 
                 [record]="record" 
                 [inBrowser]="inBrowser">

@@ -311,24 +311,17 @@ export class NERDResource {
      * Returns Nerdm comps that contains DynamicResourceSet
      */
     public selectDynamicResourceComps() : NerdmComp[] {
-        let use : NerdmComp[];
-        use = this.data['components'].filter(cmp => cmp['@type'].includes("nrda:DynamicResourceSet") &&
-        ! cmp['@type'].includes("nrd:Hidden"));
-
-        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
-
-        return use;
+        let drctypes = ["DynamicResourceSet"];
+        let hidden = ["Hidden"];
+        return this.getComponentsByType(drctypes)
+                   .filter((c) => ! NERDResource.objectMatchesTypes(c, hidden));
     }
 
     /**
      * Return science theme search urls as a string array
      */
     public dynamicSearchUrls(): string[] {
-        if(this.theme() == Themes.SCIENCE_THEME) {
-            return this.selectDynamicResourceComps().map(a=>a.searchURL);
-        }else{
-            return [];
-        }
+        return this.selectDynamicResourceComps().map(a=>a.searchURL);
     }
 
     /**
@@ -336,19 +329,10 @@ export class NERDResource {
      * @type contain "nrdp:AccessPage" or "nrdp:SearchPage" but not "nrd:Hidden"
      */
     selectAccessPages() : NerdmComp[] {
-        let use : NerdmComp[];
-        use = this.data['components'].filter(cmp => cmp['@type'].includes("nrdp:AccessPage") || cmp['@type'].includes("nrdp:SearchPage") && ! cmp['@type'].includes("nrd:Hidden"));
-
-        use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
-
-        return use.map((cmp) => {
-            if (! cmp['title']) cmp['title'] = cmp['accessURL'];
-
-            cmp['showDesc'] = false;
-            cmp['backcolor'] = 'white';
-
-            return cmp;
-        });
+        let accesstypes = ["AccessPage", "SearchPage"];
+        let hidden = ["Hidden"];
+        return this.getComponentsByType(accesstypes)
+                   .filter((c) => ! NERDResource.objectMatchesTypes(c, hidden));
     }
 }
 
