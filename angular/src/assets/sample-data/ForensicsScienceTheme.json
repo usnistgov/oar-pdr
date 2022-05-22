@@ -1,0 +1,107 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "topic": [],
+    "keyword": [
+        "latent",
+        "digital forensics",
+        "biometrics",
+        "forensics"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource",
+        "https://data.nist.gov/od/dm/nerdm-schema/science-initiative-schema/v0.1#/definitions/ResearchInitiative"
+    ],
+    "landingPage": "https://www.nist.gov/forensic-science/research-focus-areas",
+    "title": "NIST scientific research in different aspects of forensics and related fields.",
+    "theme": [
+        "Information Technology",
+        "Forensics",
+        "Materials"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds9911"
+        }
+    ],
+    "description": [
+        "NIST research in several forensic disciplines, including DNA, ballistics, fingerprint analysis, trace evidence, and digital, among others. We provide physical reference standards and data that help forensic laboratories validate their analytical methods and ensure accurate test results"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:barbara.guttman@nist.gov",
+        "fn": "Barbara Guttman"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds9911",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2018-06-14 01:02:03",
+    "ediid": "ark:/88434/mds9911",
+    "versionHistory": [
+        {
+            "issued": "2021-12-25",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds90911",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds9911",
+            "description": "initial release"
+        }
+    ],
+    "Facilitators": [
+        {
+            "middleName": "",
+            "familyName": "Guttman",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Barbara",
+            "@type": "foaf:Person",
+            "fn": "Barbara Guttman",
+            "title": "PI"
+        },
+        {
+            "middleName": "",
+            "familyName": "Fiumara",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Gregory",
+            "@type": "foaf:Person",
+            "fn": "Greg Fiumara",
+            "title": "Project Manager"
+        }
+    ],
+    "@type": [
+        "nrda: Aggregation",
+        "nrdp: PublicDataResource"
+    ],
+    "componenets": [
+        {
+            "@type": [
+                "nrda:DynamicResourceSet"
+            ],
+            "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991122",
+            "name": "NIST forensics aggregation"
+        }
+    ]
+}

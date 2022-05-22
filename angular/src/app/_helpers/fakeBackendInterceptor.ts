@@ -2,48 +2,46 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
-import { TestDataService } from '../shared/testdata-service/testDataService';
-import { DownloadService } from '../shared/download-service/download-service.service';
-import { AuthInfo } from '../landing/editcontrol/auth.service';
-import { UserDetails } from '../landing/editcontrol/interfaces';
 import { userInfo } from 'os';
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
 
-  constructor(private testDataService: TestDataService,
-    private downloadService: DownloadService,
-    private http: HttpClient) { }
+  constructor(private http: HttpClient) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // array in local storage for registered users
 
-    const sampleData: any = require('../../assets/sample2.json');
-    const sampleRecord: any = require('../../assets/sampleRecord2.json');
+    const sampleData: any = require('../../assets/science-theme/BiometricsScienceTheme.json');
+    const sampleRecord: any = require('../../assets/science-theme/DNAScienceTheme.json');
 
-    // Choose one of the following files to simulate different cases:
-    // bundle-plan-complete.json - no error. Bundle plan returns all zip files.
-    // bundle-plan-warning.json - Unable to get part of the requested files.
-    // bundle-plan-error.json - Unable to get all requested files.
-    const bundlePlanRes: any = require('../../assets/bundle-plan-complete.json');
-    // const bundlePlanRes: any = require('../../assets/bundle-plan-warning.json');
-    // const bundlePlanRes: any = require('../../assets/bundle-plan-error.json');
-    // const metricsRecordDetails: any = require('../../assets/metrics_record_details.json');
-    const metricsRecordDetails: any = require('../../assets/metrics_record_details_short.json');
-    const metricsRecordLevel: any = require('../../assets/metrics-record-level.json');
+    const biometricsData1: any  = require('../../assets/science-theme/SDB-300.json');
+    const biometricsData2: any  = require('../../assets/science-theme/SDB-301.json');
+    const biometricsData3: any  = require('../../assets/science-theme/SDB-302.json');
+    const dna1: any  = require('../../assets/science-theme/dna1.json');
+    const dna2: any  = require('../../assets/science-theme/dna2.json');
+    const dna3: any  = require('../../assets/science-theme/dna3.json');
+    const dna4: any  = require('../../assets/science-theme/dna4.json');
+    const dna5: any  = require('../../assets/science-theme/dna5.json');
+
+    const testdata: any = {
+        PageSize: 1,
+        ResultCount: 8,
+        ResultData: [biometricsData1,biometricsData2,biometricsData3,dna1,dna2,dna3,dna4,dna5]
+    }
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
       console.log("request.url", request.url);
-      console.log("request.url.indexOf('usagemetrics')", request.url.indexOf('usagemetrics'));
 
         // metrics
         // if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') {
         //     return of(new HttpResponse({ status: 200, body: metricsRecordDetails }));
         // }
 
-        if (request.url.indexOf('usagemetrics/records') > -1 && request.method === 'GET') {
-            return of(new HttpResponse({ status: 200, body: metricsRecordLevel }));
+        if (request.url.indexOf('isPartOf.@id=ark:/88434/mds9911') > -1 && request.method === 'GET') {
+            // console.log("Getting forensics")
+            return of(new HttpResponse({ status: 200, body: testdata }));
         }
 
         if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') 

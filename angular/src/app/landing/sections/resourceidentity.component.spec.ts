@@ -13,6 +13,8 @@ import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/aut
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { config, testdata } from '../../../environments/environment';
 
+import * as _ from 'lodash-es';
+
 describe('ResourceIdentityComponent', () => {
     let component : ResourceIdentityComponent;
     let fixture : ComponentFixture<ResourceIdentityComponent>;
@@ -33,6 +35,8 @@ describe('ResourceIdentityComponent', () => {
 
         fixture = TestBed.createComponent(ResourceIdentityComponent);
         component = fixture.componentInstance;
+        rec["@type"][0] = "nrdp:PublicDataResource";
+        rec["references"][0]["refType"] = "IsDocumentedBy";
         component.record = rec;
         // fixture.detectChanges();
     }
@@ -40,7 +44,7 @@ describe('ResourceIdentityComponent', () => {
     beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
-        component.ngOnChanges()
+        component.ngOnChanges({})
         fixture.detectChanges();
     }));
 
@@ -56,6 +60,10 @@ describe('ResourceIdentityComponent', () => {
         expect(descs.length).toBe(1);
 
         // expect(component.versionCmp.newer).toBeNull();
+
+        // test record does not include isPartOf
+        el = cmpel.querySelector("#ispartof");
+        expect(el).toBeFalsy();
     });
 
     it('should correctly render special references', () => {
@@ -136,20 +144,31 @@ describe('ResourceIdentityComponent', () => {
     it('should correctly determine resource type', () => {
         expect(component).toBeDefined();
         let cmpel = fixture.nativeElement;
-        
-        let el = cmpel.querySelector(".recordType");
-        expect(el).toBeTruthy();
-        expect(el.textContent).toContain("Public Data Resource");
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [
+            {
+                "@id": "ark:/88888/goobler",
+                title: "Uber Research",
+                "@type": [ "nrda:ScienceTheme", "nrd:PublicDataResource" ]
+            },
+            {
+                "@id": "ark:/88888/gomer",
+                title: "Sleepy Research",
+                "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+            }
+        ];
+        component.record = member;
+        component.ngOnChanges({});
+        fixture.detectChanges();
 
-        let resmd = JSON.parse(JSON.stringify(rec))
-        expect(component.determineResourceLabel(resmd)).toEqual("Public Data Resource")
-        resmd['@type'][0] = "nrdp:DataPublication"
-        expect(component.determineResourceLabel(resmd)).toEqual("Data Publication")
-        resmd['@type'][0] = "nrd:SRD"
-        expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Data")
-        resmd['@type'][0] = "nrd:SRM"
-        expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Material")
+        let el = cmpel.querySelector("#ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeFalsy();
+        expect(el.innerHTML.includes(" Science Theme")).toBeTruthy();
+        let a = el.querySelector("a");
+        expect(a).toBeTruthy();
+        expect(a.href.endsWith("/ark:/88888/goobler")).toBeTruthy();
     });
-        
+
 });
 

@@ -96,7 +96,6 @@ export class MetricsComponent implements OnInit {
 
     ngOnInit() {
         this.distApi = this.cfg.get("locations.portalBase", "/unconfigured")+"od/id/";
-        // console.log('this.distApi', this.distApi);
         this.detectScreenSize();
         this.recordLevelData = new RecordLevelMetrics();
 
@@ -116,7 +115,6 @@ export class MetricsComponent implements OnInit {
                 this.searchService.searchById(this.ediid, true).subscribe(md => {
                     if(md) {
                         this.record = md as NerdmRes;
-                        // console.log("Nerdm record", this.record);
                         this.datasetTitle = md['title'];
 
                         this.createNewDataHierarchy();

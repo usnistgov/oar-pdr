@@ -1,0 +1,13 @@
+.facilitator {
+    width: 100%; 
+    display: table;
+    margin-bottom: -15px;
+}
+
+.facilitator-detail {
+    width: 100%; 
+    padding:.5em;
+    overflow: hidden; 
+    padding-left: 1em;
+    background-color: rgb(243, 248, 253);
+}

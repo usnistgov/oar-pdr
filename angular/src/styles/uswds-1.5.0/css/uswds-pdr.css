@@ -1860,10 +1860,6 @@ a:focus {
   outline-offset: 3px;
 }
 
-a:visited {
-  color: #4c2c92;
-}
-
 .usa-external_link::after {
   background: url("../img/external-link.png") no-repeat 0 0;
   background: url("../img/external-link.svg") no-repeat 0 0;

@@ -12,7 +12,9 @@ import { config, testdata } from '../../../environments/environment';
 import { By } from "@angular/platform-browser";
 import { MetricsData } from "../metrics-data";
 
-describe('MetadataComponent', () => {
+import * as _ from 'lodash-es';
+
+describe('AboutdatasetComponent', () => {
     let component: AboutdatasetComponent;
     let fixture: ComponentFixture<AboutdatasetComponent>;
     let cfg : AppConfig = new AppConfig(config);
@@ -35,6 +37,7 @@ describe('MetadataComponent', () => {
         component.inBrowser = true;
         component.metricsData = new MetricsData();
         component.showJsonViewer = true;
+        component.theme = 'nist';
         component.ngOnChanges({});
         fixture.detectChanges();
     });
@@ -68,9 +71,68 @@ describe('MetadataComponent', () => {
         el = cmpel.querySelector("#metrics");
         expect(el).toBeTruthy();
         expect(el.textContent).toContain("Access Metrics");
+
+        // test record does not include isPartOf
+        el = cmpel.querySelector("#about-ispartof");
+        expect(el).toBeFalsy();
+    });
+
+    it('single isPartOf rendering', () => {
+        let cmpel = fixture.nativeElement;
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [{
+            "@id": "ark:/88888/goober",
+            title: "Uber Research",
+            "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+        }];
+        component.record = member;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        let el = cmpel.querySelector("#about-ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeFalsy();
+        expect(el.innerHTML.includes(" collection.")).toBeTruthy();
+        let a = el.querySelector("a");
+        expect(a).toBeTruthy();
+        expect(a.href.endsWith("/ark:/88888/goober")).toBeTruthy();
+    });
+
+    it('multiple isPartOf rendering', () => {
+        let cmpel = fixture.nativeElement;
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [
+            {
+                "@id": "ark:/88888/goober",
+                title: "Uber Research",
+                "@type": [ "nrda:ScienceTheme", "nrd:PublicDataResource" ]
+            },
+            {
+                "@id": "ark:/88888/gomer",
+                title: "Sleepy Research",
+                "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+            }
+        ];
+        component.record = member;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        let el = cmpel.querySelector("#about-ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeTruthy();
+        expect(el.innerHTML.includes("This dataset is part of")).toBeTruthy();
+        let li = el.querySelectorAll("ul li");
+        expect(li.length).toEqual(2);
+        expect(li[0].innerHTML.includes(" Science Theme ")).toBeTruthy();
+        let html = li[1].innerHTML
+        expect(li[1].innerHTML.includes("Science Theme")).toBeFalsy();
+        expect(li[1].innerHTML.endsWith("collection ")).toBeFalsy();
+        expect(li[0].querySelector("a").href.endsWith("/ark:/88888/goober")).toBeTruthy();
+        expect(li[1].querySelector("a").href.endsWith("/ark:/88888/gomer")).toBeTruthy();
     });
 
     it('getDownloadURL()', () => {
-        expect(component.getDownloadURL()).toEqual("https://data.nist.gov/rmm/records/?@id=ark:/88434/mds0000fbk");
+        let url = component.getDownloadURL().substring(component.getDownloadURL().split("/", 3).join("/").length);
+        expect(url).toEqual("/rmm/records/?@id=ark:/88434/mds0000fbk");
     });
 });

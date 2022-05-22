@@ -417,7 +417,7 @@ a:link {
   text-decoration: none;
 }
 a:visited {
-  color: #551A8B;
+  /* color: #551A8B; */
   background-color: transparent;
   text-decoration: none;
 }

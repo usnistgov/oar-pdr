@@ -1,0 +1,19 @@
+<div #parentDiv style="background-color: white; color: black;align-content: center;width: 100%;"  (window:resize)="onResize($event)">
+    <div style="width: 100%; margin-top: 1em;" [ngStyle]="{'display': mobileMode? 'block':'flex'}">
+        <!-- Left side filters -->
+        <div [@filterStatus]="filterToggler" style="vertical-align: top;" [ngStyle]="{'width': filterWidthStr}">
+                <app-filters [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [mobileMode]="mobileMode" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
+
+        </div>
+
+        <!-- Drag bar to resize the filter panel -->
+        <div *ngIf="!mobileMode" class="splitter" (mousedown)="onMousedown($event)" (mouseup)="onMouseUp($event)">
+            <div id="separator">||</div>
+        </div>
+        
+        <!-- Search result list -->
+        <div style="vertical-align: top;margin-top: -3em;" [ngStyle]="{'width': resultWidth}">
+                <app-resultlist [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [mobWidth]="mobWidth" [resultWidth]="resultWidth" [filterString]="filterString"></app-resultlist>
+        </div>
+    </div>
+</div>

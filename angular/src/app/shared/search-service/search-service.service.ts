@@ -12,7 +12,9 @@ import * as _ from 'lodash-es';
 import { tap } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
 import { MessageBarComponent } from '../../frame/messagebar.component';
+import { BehaviorSubject } from 'rxjs';
 
+export const SEARCH_SERVICE = 'SEARCH_SERVICE';
 /**
  * This class provides the Search service with methods to search for records from tha rmm.
  */
@@ -23,6 +25,10 @@ export class SearchService {
     private landingBackend: string = "";
     private rmmBackend: string;
     editEnabled: any;
+    portalBase: string = "https://data.nist.gov";
+
+    currentPage = new BehaviorSubject<number>(1);
+    totalItems = new BehaviorSubject<number>(1);
 
     @ViewChild(MessageBarComponent, { static: true })
     private msgbar: MessageBarComponent;
@@ -38,6 +44,7 @@ export class SearchService {
         @Inject(PLATFORM_ID) private platformId: Object,
         private cfg: AppConfig) {
         this.landingBackend = cfg.get("mdAPI", "/unconfigured");
+        this.portalBase = cfg.get("locations.portalBase", "data.nist.gov");
 
         if (this.landingBackend == "/unconfigured")
             throw new Error("Metadata service endpoint not configured!");
@@ -116,6 +123,17 @@ export class SearchService {
                     })
                 )
         }
+    }
+
+    /**
+     * Resolve a http request
+     * @param url must be rmm url. e.g. /rmm/records?isPartOf.@id=ark:/88434/mds991122
+     * @returns http response as an observable object
+     */
+    resolveSearchRequest(url: string): Observable<any> {
+
+        console.log('search url', url);
+        return this.http.get(this.portalBase+url);
     }
 }
 

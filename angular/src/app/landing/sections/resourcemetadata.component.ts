@@ -4,6 +4,7 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AboutdatasetComponent } from '../aboutdataset/aboutdataset.component';
 import { MetricsData } from "../metrics-data";
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 /**
  * a component that lays out the "About This Dataset" section of a landing page
@@ -19,6 +20,7 @@ import { MetricsData } from "../metrics-data";
     ]
 })
 export class ResourceMetadataComponent implements OnChanges {
+    resourceType: string;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -29,6 +31,7 @@ export class ResourceMetadataComponent implements OnChanges {
 
     @Input() metricsData: MetricsData;
     @Input() showJsonViewer: boolean = false;
+    @Input() theme: string;
 
     @ViewChild(AboutdatasetComponent, { static: true })
     aboutdatasetComponent: AboutdatasetComponent;
@@ -50,6 +53,6 @@ export class ResourceMetadataComponent implements OnChanges {
      * input resource metadata
      */
     useMetadata(): void {
-        // nothing currently necessary
+        this.resourceType = ThemesPrefs.getResourceLabel(this.theme);
     }
 }

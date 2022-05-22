@@ -4,6 +4,7 @@ import { AppConfig } from '../../config/config';
 import { NerdmRes, NerdmComp, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 /**
  * a component that lays out the "Data Access" section of a landing page.  This includes (as applicable)
@@ -34,14 +35,19 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 })
 export class ResourceDataComponent implements OnChanges {
     accessPages: NerdmComp[] = [];
+    hasDRS: boolean = false;
     showDescription: boolean = false;
     showRestrictedDescription: boolean = false;
     currentState = 'initial';
+    recordType: string = "";
+    scienceTheme = Themes.SCIENCE_THEME;
+    defaultTheme = Themes.DEFAULT_THEME;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
+    @Input() theme: string;
 
     // pass out download status for metrics refresh
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();
@@ -53,6 +59,10 @@ export class ResourceDataComponent implements OnChanges {
                 private gaService: GoogleAnalyticsService)
     { }
 
+    ngOnInit(): void {
+        this.recordType = (new NERDResource(this.record)).resourceLabel();
+    }
+
     ngOnChanges(ch : SimpleChanges) {
         if (this.record)
             this.useMetadata();  // initialize internal component data based on metadata
@@ -63,20 +73,25 @@ export class ResourceDataComponent implements OnChanges {
      * input resource metadata
      */
     useMetadata(): void {
-        this.accessPages = []
-        if (this.record['components'])
-            this.accessPages = this.selectAccessPages(this.record['components']);
+        this.accessPages = [];
+        if (this.record['components']) {
+            this.accessPages = this.selectAccessPages();
+
+            // If this is a science theme and the collection contains one or more components that contain both AccessPage (or SearchPage) and DynamicSourceSet, we want to remove it from accessPages array since it's already displayed in the search result.
+            if(this.theme == this.scienceTheme) 
+                this.accessPages = this.accessPages.filter(cmp => ! cmp['@type'].includes("nrda:DynamicResourceSet"));
+
+            this.hasDRS = this.hasDynamicResourceSets();
+        }
     }
 
     /**
-     * return an array of AccessPage components from the given input components array
-     * @param comps     the list of NERDm components to select from.  This can be from the 
-     *                  full list from the NERDm Resource record 
+     * select the AccessPage components to display, adding special disply options
      */
-    selectAccessPages(comps : NerdmComp[]) : NerdmComp[] {
-        let use : NerdmComp[] = comps.filter(cmp => cmp['@type'].includes("nrdp:AccessPage") &&
-                                       ! cmp['@type'].includes("nrd:Hidden"));
+    selectAccessPages() : NerdmComp[] {
+        let use: NerdmComp[] = (new NERDResource(this.record)).selectAccessPages();
         use = (JSON.parse(JSON.stringify(use))) as NerdmComp[];
+
         return use.map((cmp) => {
             if (! cmp['title']) cmp['title'] = cmp['accessURL'];
 
@@ -87,6 +102,14 @@ export class ResourceDataComponent implements OnChanges {
         });
     }
 
+    /**
+     * return true if the components include non-hidden DynamicResourceSets.  If there are, the 
+     * results from the DynamicResourceSet searches will be display in a special in-page 
+     * search results display.
+     */
+    hasDynamicResourceSets(): boolean {
+        return (new NERDResource(this.record)).selectDynamicResourceComps().length > 0;
+    }
 
     /**
      * Emit download status

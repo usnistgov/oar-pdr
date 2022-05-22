@@ -14,7 +14,7 @@ describe('ResourceMetadataComponent', () => {
     let component: ResourceMetadataComponent;
     let fixture: ComponentFixture<ResourceMetadataComponent>;
     let cfg : AppConfig = new AppConfig(config);
-    let rec : NerdmRes = testdata['test1'];
+    let record : NerdmRes = testdata['test1'];
 
     let makeComp = function() {
         TestBed.configureTestingModule({
@@ -33,7 +33,7 @@ describe('ResourceMetadataComponent', () => {
     beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
-        component.record = JSON.parse(JSON.stringify(rec));
+        component.record = JSON.parse(JSON.stringify(record));
         component.metricsData = new MetricsData();
         component.showJsonViewer = false;
         component.ngOnChanges({});

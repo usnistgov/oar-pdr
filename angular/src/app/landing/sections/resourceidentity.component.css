@@ -18,3 +18,16 @@
     color:white;
     padding-right: 1em;
 }
+
+.version {
+    background-color:var(--science-theme-background-default);
+    margin-left: 0.5em; 
+    color: white;
+    font-size: 10px;
+    vertical-align: top;
+    margin-top: .2em;
+}
+
+#ispartof {
+    margin: -8px 0 10px 0;
+}

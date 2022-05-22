@@ -2,7 +2,7 @@
  * Classes and interfaces to support the NERDm metadata infrastructure
  */
 import { Injectable, InjectionToken } from '@angular/core';
-
+import { Themes, ThemesPrefs } from '../shared/globals/globals';
 import * as _ from 'lodash-es';
 
 /**
@@ -191,6 +191,17 @@ export class NERDResource {
     }
 
     /**
+     * return True if one of the @types assigned to this resource matches the resource
+     * type given
+     * @param type   a resource type label (like "DataPublication" or "ScienceTheme").  The 
+     *               value may include a namespace prefix, which is ignored.
+     * @return boolean   True if the given type matches one of the assigned types
+     */
+    isType(restype: string) : boolean {
+        return NERDResource.objectMatchesTypes(this, restype);
+    }
+
+    /**
      * return an array of the component objects that match any of the given @type labels.
      * The labels should not include namespace qualifiers
      */
@@ -255,6 +266,73 @@ export class NERDResource {
      */
     getPrimaryReferences() : any[] {
         return this.getReferencesByType(["IsDocumentedBy", "IsSupplementTo"]);
+    }
+
+    /**
+     * analyze the NERDm resource metadata and return a label indicating the type of 
+     * the resource described. 
+     * @param resmd Nerdm record
+     * @returns Resource Label
+     */
+    public resourceLabel(): string {
+        if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
+            switch (this.data['@type'][0].replace(/\s/g, '')) {
+                case 'nrd:SRD':
+                    return "Standard Reference Data";
+                case 'nrd:SRM':
+                    return "Standard Reference Material";
+                case 'nrdp:DataPublication':
+                    return "Data Publication";
+                case 'nrdp:PublicDataResource':
+                    return "Public Data Resource";
+                case 'nrda:ScienceTheme':
+                    return "Science Theme";
+            }
+        }
+
+        return "Data Resource";
+    }
+
+    /**
+     * Return theme
+     * @returns the first element of @type. If not exists, return "nist" (default)
+     */
+    public theme(): string {
+        let theme : string = Themes.DEFAULT_THEME;
+
+        if (this.data['@type'] instanceof Array && this.data['@type'].length > 0) {
+            return ThemesPrefs.getTheme(this.data['@type'][0].replace(/\s/g, '').split(":")[1]);
+        }
+
+        return theme;
+    }
+
+    /**
+     * Returns Nerdm comps that contains DynamicResourceSet
+     */
+    public selectDynamicResourceComps() : NerdmComp[] {
+        let drctypes = ["DynamicResourceSet"];
+        let hidden = ["Hidden"];
+        return this.getComponentsByType(drctypes)
+                   .filter((c) => ! NERDResource.objectMatchesTypes(c, hidden));
+    }
+
+    /**
+     * Return science theme search urls as a string array
+     */
+    public dynamicSearchUrls(): string[] {
+        return this.selectDynamicResourceComps().map(a=>a.searchURL);
+    }
+
+    /**
+     * Return an array of AccessPage components that 
+     * @type contain "nrdp:AccessPage" or "nrdp:SearchPage" but not "nrd:Hidden"
+     */
+    selectAccessPages() : NerdmComp[] {
+        let accesstypes = ["AccessPage", "SearchPage"];
+        let hidden = ["Hidden"];
+        return this.getComponentsByType(accesstypes)
+                   .filter((c) => ! NERDResource.objectMatchesTypes(c, hidden));
     }
 }
 

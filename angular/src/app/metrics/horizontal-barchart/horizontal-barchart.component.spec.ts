@@ -44,7 +44,6 @@ describe('HorizontalBarchartComponent', () => {
 
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("svg"); 
-        console.log("svg", el);
         expect(el).not.toBeNull();
 
         // should have the correct height

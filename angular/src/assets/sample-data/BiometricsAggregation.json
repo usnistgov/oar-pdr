@@ -1,0 +1,120 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
+    "topic": [],
+    "keyword": [
+        "latent",
+        "biometrics",
+        "forensics"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource",
+        "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/Aggregation"
+    ],
+    "landingPage": "https://www.nist.gov/itl/iad/image-group",
+    "title": "NIST Research in Biometric forensics.",
+    "theme": [
+        "Information Technology:Biometrics",
+        "Forensics:Biometrics"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds991122"
+        }
+    ],
+    "description": [
+        "This is Biometrics research projects collection. There are many different projects are created here."
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:biometrics@nist.gov",
+        "fn": "NIST Biometrics Group"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds991122",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "doi": "doi:10.18434/T4/1502474",
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2022-01-01 12:01:02",
+    "ediid": "6F1714704711023AE053245706818C1A1936",
+    "versionHistory": [
+        {
+            "issued": "2021-12-31",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds991122",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds991122",
+            "description": "initial release"
+        }
+    ],
+    "@type": [
+        "nrda: ScienceTheme",
+        "nrdp: PublicDataResource"
+    ],
+    "Facilitators": [
+        {
+            "middleName": "",
+            "familyName": "Fiumara",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Gregory",
+            "@type": "foaf:Person",
+            "fn": "Greg Fiumara",
+            "jobTitle" : "PI"
+        }
+    ],
+    "Creators": [
+        {
+            "middleName": "",
+            "familyName": "Brady",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Mary",
+            "@type": "foaf:Person",
+            "fn": "Mary Brady",
+            "jobTitle" : "PI"
+        }
+    ],
+    "componenets": [
+        {
+            "@type": [ "nrda:DynamicResourceSet","nrdp:SearchPage" ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/DynamicResourceSet"
+            ],
+            "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991122",
+            "name": "Biometrics Data"
+        }
+    ],
+    "isPartOf": [
+        {
+            "title": "NIST Forensics Research. ",
+
+            "proxyFor": "ark:/88434/mds9911",
+            "resType": [
+                "nrda:SciecneTheme",
+                "nrdp:PublicDataResource"
+            ]
+        }
+    ]
+}
