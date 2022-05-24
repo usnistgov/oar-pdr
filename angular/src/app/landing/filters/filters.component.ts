@@ -22,6 +22,16 @@ const SEARCH_SERVICE = 'SEARCH_SERVICE';
             state('expanded', style({height: '*'})),
             transition('expanded <=> collapsed', animate('625ms'))
         ]),
+        trigger('expand', [
+            state('closed', style({height: '40px'})),
+            state('expanded', style({height: '*'})),
+            transition('expanded <=> closed', animate('625ms'))
+        ]),
+        trigger('expand', [
+            state('collapsed', style({height: '183px'})),
+            state('closed', style({height: '40px'})),
+            transition('closed <=> collapsed', animate('625ms'))
+        ]),
         trigger('expandOptions', [
             state('collapsed', style({height: '0px'})),
             state('expanded', style({height: '*'})),
