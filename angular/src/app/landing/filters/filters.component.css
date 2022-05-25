@@ -126,3 +126,8 @@
 :host ::ng-deep .ui-tree .ui-tree-container {
     overflow: initial;
 }
+
+.p-dropdown-item.p-ripple {
+    white-space: normal !important;
+    word-wrap: break-word; 
+}

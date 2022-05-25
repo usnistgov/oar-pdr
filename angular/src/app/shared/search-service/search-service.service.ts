@@ -132,7 +132,7 @@ export class SearchService {
      */
     resolveSearchRequest(url: string): Observable<any> {
 
-        console.log('search url', url);
+        // console.log('search url', url);
         return this.http.get(this.portalBase+url);
     }
 }
