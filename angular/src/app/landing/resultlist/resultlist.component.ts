@@ -52,6 +52,7 @@ export class ResultlistComponent implements OnInit {
     noSearchResult: boolean = false;
     expandIcon: string = 'url(assets/images/open_200x200.png)';
     isEmail: boolean = false;
+    expandButtonAlterText: string = "Open dataset details";
 
     //Pagination
     totalResultItems: number = 0;
@@ -187,9 +188,11 @@ export class ResultlistComponent implements OnInit {
         if(fileNode.DetailsDisplayed){
             fileNode.DetailsDisplayed = false;
             fileNode.iconurl = 'assets/images/open_200x200.png';
+            this.expandButtonAlterText = "Open dataset details";
         }else{
             fileNode.DetailsDisplayed = true;
             fileNode.iconurl = 'assets/images/close_200x200.png';
+            this.expandButtonAlterText = "Close dataset details";
         }
     }
 

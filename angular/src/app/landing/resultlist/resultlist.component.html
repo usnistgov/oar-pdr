@@ -58,9 +58,10 @@
                     {{resultItem.title}}
                 </a>
                 <span>
-                    <div style="margin-left: .5em;cursor: pointer;width: 20px;height: 20px;background-size:cover;display: inline-block;"
+                    <div [attr.aria-label]="expandButtonAlterText" style="margin-left: .5em;cursor: pointer;width: 20px;height: 20px;background-size:cover;display: inline-block;"
                         (click)="openDetails(resultItem, i)"
-                        [ngStyle]="{ 'background-image': 'url('+resultItem.iconurl+')','margin-bottom':'-4px'}">
+                        [ngStyle]="{ 'background-image': 'url('+resultItem.iconurl+')','margin-bottom':'-4px'}"
+                        >
                     </div>
                 </span>
             </div>

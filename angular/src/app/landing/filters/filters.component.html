@@ -24,12 +24,12 @@
                 <!-- Forensics Research topics -->
                 <div class="bottom-line" *ngIf="forensicsThemesTree.length > 0">
                     <div class="filter-checkbox">
-                        <div [@expand]="forensicsShowMoreLink ? 'collapsed':'expanded'" >
+                        <div [@expand]="forensicsNodeExpanded? forensicsShowMoreLink ? 'collapsed':'expanded':'closed'" >
                             <p-tree id="forensicsThemes" [value]="forensicsThemesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="forensicsSelectedThemesNode" 
                                 (onNodeUnselect)="filterResults()"
                                 (onNodeSelect)="filterResults()" 
-                                (onNodeExpand)="nodeExpanded = true"
-                                (onNodeCollapse)="nodeExpanded = false">
+                                (onNodeExpand)="forensicsNodeExpanded = true"
+                                (onNodeCollapse)="forensicsNodeExpanded = false">
                                 <ng-template let-node pTemplate="default">
                                     <span *ngIf="node.label.split('-')[1] !=''; else header1" class="invisible-scrollbar"> {{node.label.split("-")[0]}}&nbsp;</span>
                                     <ng-template #header1>
@@ -44,17 +44,17 @@
                         </div>
                     </div>
                     <div class="show-more-less" (click)="$event.preventDefault(); forensicsShowMoreLink = false"
-                        *ngIf="nodeExpanded == true && forensicsShowMoreLink == true && forensicsThemesTree[0]?.children.length > 5">Show More...
+                        *ngIf="forensicsNodeExpanded == true && forensicsShowMoreLink == true && forensicsThemesTree[0]?.children.length > 5">Show More...
                     </div>
                     <div class="show-more-less" (click)="$event.preventDefault();forensicsShowMoreLink = true"
-                        *ngIf="nodeExpanded == true && forensicsShowMoreLink == false && forensicsThemesTree[0]?.children.length > 5">Show Less
+                        *ngIf="forensicsNodeExpanded == true && forensicsShowMoreLink == false && forensicsThemesTree[0]?.children.length > 5">Show Less
                     </div>
                 </div>
 
                 <!-- NIST Research topics -->
                 <div class="bottom-line">
                     <div class="filter-checkbox">
-                        <div [@expand]="showMoreLink ? 'collapsed':'expanded'">
+                        <div [@expand]="nodeExpanded? showMoreLink ? 'collapsed':'expanded':'closed'">
                             <p-tree id="themes" [value]="themesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="selectedThemesNode" 
                                 (onNodeUnselect)="filterResults()"
                                 (onNodeSelect)="filterResults()" 
