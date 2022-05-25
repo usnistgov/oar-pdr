@@ -112,6 +112,7 @@ export class FiltersComponent implements OnInit {
     filterClass: string;
     resultsClass: string;
     nodeExpanded: boolean = true;
+    forensicsNodeExpanded: boolean = true;
     comheight: string = '50px'; // parent div height
     comwidth: string;  // parent div width
 
