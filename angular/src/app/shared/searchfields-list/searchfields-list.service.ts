@@ -32,7 +32,7 @@ export class SearchfieldsListService {
    * @return {string[]} The Observable for the HTTP request.
    */
   get(): Observable<any> {
-      console.log("Getting fields from:", this.RMMAPIURL + 'fields');
+    //   console.log("Getting fields from:", this.RMMAPIURL + 'fields');
    return this.http.get(this.RMMAPIURL + 'records/fields');
   }
   /**

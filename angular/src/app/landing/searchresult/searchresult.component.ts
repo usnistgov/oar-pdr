@@ -69,7 +69,7 @@ export class SearchresultComponent implements OnInit {
         if(this.mouseDragging) {
             let diff = this.mouse.x - this.prevMouseX;
             this.filterWidth = this.prevFilterWidth + diff;
-            this.filterWidth = this.filterWidth < 40? 39 : this.filterWidth > 420? 420 : this.filterWidth;
+            this.filterWidth = this.filterWidth < 40? 39 : this.filterWidth > 500? 500 : this.filterWidth;
             this.filterWidthStr = this.filterWidth + 'px';
         }
 

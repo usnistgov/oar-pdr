@@ -218,7 +218,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             }
             else{
                 this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
-                console.log("Theme (@type):", this.theme);
+                // console.log("Theme (@type):", this.theme);
 
                 if(this.inBrowser){
                     if(this.editEnabled){

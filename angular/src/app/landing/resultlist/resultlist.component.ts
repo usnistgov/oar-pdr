@@ -76,7 +76,7 @@ export class ResultlistComponent implements OnInit {
 
         let that = this;
         let urls = (new NERDResource(this.md)).dynamicSearchUrls();
-        console.log("ResultlistComponent: Found "+urls.length+" search url(s)");
+        // console.log("ResultlistComponent: Found "+urls.length+" search url(s)");
         for(let i=0; i < urls.length; i++){
             this.searchService.resolveSearchRequest(urls[i])
             .subscribe(
