@@ -25,7 +25,7 @@
           <a href="{{globalCartUrl}}" target="_blank" [ngStyle]="{'color':getMenuColor('Cart')}"
             [ngClass]="{'disabled':editEnabled,'enabled':!editEnabled}"><b>Cart</b><i
               class="faa faa-shopping-cart faa-1x" [ngStyle]="{'color':getMenuColor('Cart')}"></i><span
-              class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
+              class="w3-badge badge-pill badge-notify badge-style">&nbsp;{{cartLength}}&nbsp;</span></a>
           <span *ngIf="editEnabled && editstatsvc.userID">
             | <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;"
               data-toggle="tooltip" title="{{editstatsvc.userID}}" (click)="showUserId()"></i>
