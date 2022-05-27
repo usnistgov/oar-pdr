@@ -1,4 +1,4 @@
-<div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 20px 3px; "
+<div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 20px 0px; "
     *ngIf="showResult">
     <div id="table" style="height: 25px !important;padding:0px">
         <div class="tr result-header">
@@ -29,7 +29,8 @@
             <div class="td" style="width: auto;padding-right: 5px;">
                 <span class="p-input-icon-right" style="width: 100%;position:relative;top: -3px;">
                     <i class="pi pi-search" style="top: 25px;"></i>
-                    <input type="text" pInputText [(ngModel)]="searchPhases" placeholder="Search for"
+                    <label for="freeTextSearch" class="sr-only">Free Text Search</label>
+                    <input id="freeTextSearch" type="text" pInputText [(ngModel)]="searchPhases" placeholder="Search for"
                         (input)="filterResults()" [style]="{'text-align': 'left', 'height':'35px','width': '100%','padding-bottom':'0px','padding-top':'0px','margin-bottom':'0px','border-radius':'3px'}">
                 </span>
             </div>
@@ -59,14 +60,14 @@
                 </a>
                 <span>
                     <div [attr.aria-label]="expandButtonAlterText" style="margin-left: .5em;cursor: pointer;width: 20px;height: 20px;background-size:cover;display: inline-block;"
-                        (click)="openDetails(resultItem, i)"
+                        (click)="toggleDetails(resultItem, i)"
                         [ngStyle]="{ 'background-image': 'url('+resultItem.iconurl+')','margin-bottom':'-4px'}"
                         >
                     </div>
                 </span>
             </div>
 
-            <div [@detailExpand]="showFileDetails(resultItem) ? 'expanded' : 'collapsed'" style="overflow: hidden;">
+            <div [@detailExpand]="resultItem.DetailsDisplayed ? 'expanded' : 'collapsed'" style="overflow: hidden;">
                 <div class="ui-grid-row" style="margin-bottom:.5em">
                     {{resultItem.description}}
                 </div>

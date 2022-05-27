@@ -14,7 +14,7 @@
     margin:.5em 1em .5em 0em;
     width:200px;
     height:2em;
-    background-color:#1471AE;
+    background-color:var(--science-theme-background-default);
     color:white;
     padding-right: 1em;
 }
@@ -23,7 +23,7 @@
     background-color:var(--science-theme-background-default);
     margin-left: 0.5em; 
     color: white;
-    font-size: 10px;
+    font-size: 12px;
     vertical-align: top;
     margin-top: .2em;
 }

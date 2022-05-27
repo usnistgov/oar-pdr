@@ -107,6 +107,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     @ViewChild('stickyButton') btnElement: ElementRef;
     @ViewChild('stickyMenu') menuElement: ElementRef;
+    @ViewChild('test') test: ElementRef;
 
     /**
      * create the component.
@@ -218,7 +219,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             }
             else{
                 this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
-                // console.log("Theme (@type):", this.theme);
 
                 if(this.inBrowser){
                     if(this.editEnabled){
@@ -284,7 +284,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
         });
-
     }
 
     /**
@@ -440,6 +439,24 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
+        if(this.inBrowser) {
+            //Set the position of the sticky menu (or menu button)
+            setTimeout(() => {
+                this.setMenuPosition();
+            }, 0);
+        }
+
+        if (this.md && this.inBrowser) {
+            this.useFragment();
+
+            window.history.replaceState({}, '', '/od/id/' + this.reqId);
+        }
+    }
+
+    /**
+     * Set the position of the sticky menu (or menu button)
+     */
+    setMenuPosition() {
         // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
         // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
         // need to set to 768 to be able to change the state at 750px. 
@@ -455,11 +472,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                     this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
                 }
             });
-        }
-
-        if (this.md && this.inBrowser) {
-            this.useFragment();
-            window.history.replaceState({}, '', '/od/id/' + this.reqId);
         }
     }
 

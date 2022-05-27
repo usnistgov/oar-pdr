@@ -14,14 +14,11 @@ import { connectableObservableDescriptor } from 'rxjs/internal/observable/Connec
   styleUrls: ['./resultlist.component.css'],
   animations: [
         trigger('detailExpand', [
+        state('void', style({height: '0px', minHeight: '0'})),
         state('collapsed', style({height: '0px', minHeight: '0'})),
         state('expanded', style({height: '*'})),
         transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-        ]),
-        trigger('detailExpand2', [
-            state('collapsed', style({opacity: 0})),
-            state('expanded', style({opacity: 1})),
-            transition('expanded <=> collapsed', animate('625ms')),
+        transition('expanded <=> void', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
         trigger(
             'enterAnimation', [
@@ -177,9 +174,9 @@ export class ResultlistComponent implements OnInit {
      *  We have to delay the action to let the animation to finish. 
      * @param fileNode       the TreeNode for the file to provide details for
      */
-    openDetails(fileNode: any, index: number) {
+    toggleDetails(fileNode: any, index: number) {
         //Close current details window if it's open
-        if(index != this.currentIndex) {
+        if(index != this.currentIndex && this.searchResultsForDisplay[this.currentIndex]) {
             this.searchResultsForDisplay[this.currentIndex]['DetailsDisplayed'] = false;
             this.searchResultsForDisplay[this.currentIndex]['iconurl'] = 'assets/images/open_200x200.png';
         }
@@ -196,17 +193,6 @@ export class ResultlistComponent implements OnInit {
         }
     }
 
-    /**
-     * Determine if the file details need be displayed
-     * @param fileNode file node in the tree
-     * @returns boolean
-     *      true: display details
-     *      false: hide details
-     */
-    showFileDetails(fileNode: any) {
-        return fileNode.DetailsDisplayed;
-    }
-    
     /**
      * Return class name based on given column number and window size
      * @param column 
@@ -392,12 +378,12 @@ export class ResultlistComponent implements OnInit {
                             
                             if(object.active == true){
                                 object.active = false;
-                            
+
                                 object["topic"].forEach((oTopic) => {
                                     let topics = filter.split("=")[1].split(",");
                                     topics.forEach(topic => {
-                                        if(oTopic["tag"].includes(topic))
-                                        object.active = true;
+                                        if(oTopic["tag"].toLowerCase().includes(topic.toLowerCase()))
+                                            object.active = true;
                                     });
                                 })
                             }

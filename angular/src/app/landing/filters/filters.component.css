@@ -11,6 +11,7 @@
     font-weight: 900;
     text-decoration:none; 
     padding-left: .5em;
+    cursor: pointer;
 }
 
 .spinner {
@@ -41,12 +42,21 @@
 }
 
 .rotatedFilterText {
-    display: block; 
+    position: relative;
+    left: -43px;
+    top: 55px;
+    /* display: block;  */
     color: #fff; 
-    padding: 55px 5px 5px 45px;
+    /* padding: 55px 5px 5px 45px; */
     font-size: larger;
     width: 120px;
-    height: 20px;
+    height: 30px;
+}
+
+.filterIcon {
+    color: #fff;
+    zoom: 130%;
+    padding-top: -3em !important;
 }
 
 .collapsedFilterIcon {
@@ -89,8 +99,8 @@
 
 .filter-checkbox {
     width: 100%;
-    min-width: 410px;
-    overflow: auto;
+    /* min-width: 410px; */
+    overflow-x: hidden;
 }
 
 .bottom-line {
@@ -127,7 +137,11 @@
     overflow: initial;
 }
 
-.p-dropdown-item.p-ripple {
-    white-space: normal !important;
-    word-wrap: break-word; 
+.text-nowrap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    min-width: 1px;
 }
