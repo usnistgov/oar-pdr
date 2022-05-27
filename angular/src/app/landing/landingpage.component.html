@@ -9,6 +9,7 @@
 
 <!-- landing page panel -->
 <div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad">
+<!-- <div *ngIf="!displaySpecialMessage"> -->
     <div [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
         <!-- <div> -->
         <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">

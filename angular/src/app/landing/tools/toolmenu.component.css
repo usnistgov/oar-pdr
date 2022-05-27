@@ -1,5 +1,5 @@
 :host ::ng-deep .rightMenuStyle > .p-menu .p-submenu-header{
-  background-color:#2C8034;
+  background-color:var(--nist-green-default);
   padding: 2%;
   padding-left: 5%;
   font-family: sans-serif;
@@ -76,7 +76,7 @@
 }
 
 :host ::ng-deep .rightMenuStylePop > .p-menu .p-submenu-header {
-  background-color:#2C8034;
+  background-color:var(--nist-green-default);
   padding: 2%;
   padding-left: 5%;
   font-family: sans-serif;
@@ -93,7 +93,7 @@
 
 
 :host ::ng-deep .rightMenuStyleST > .p-menu .p-submenu-header{
-    background-color:#019fbb;
+    background-color:var(--science-theme-background-default);
     padding: 2%;
     padding-left: 5%;
     font-family: sans-serif;
@@ -170,7 +170,7 @@
   }
 
   :host ::ng-deep .rightMenuStylePopST > .p-menu .p-submenu-header {
-    background-color:#019fbb;
+    background-color:var(--science-theme-background-default);
     padding: 2%;
     padding-left: 5%;
     font-family: sans-serif;
