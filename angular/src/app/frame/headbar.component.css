@@ -61,3 +61,11 @@ a:link, a:hover, a:visited{
   background-color: transparent;
   text-decoration: none;
 }
+
+.badge-style {
+    background-color: var(--nist-green-default);
+    color: white;
+    border-radius: 100%;
+    padding: 2px 2px 2px 2px;
+    font-size: small;
+}
