@@ -89,8 +89,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     dialogOpen: boolean = false;
     modalReference: any;
     windowScrolled: boolean = false;
-    btnPosition: any;
-    menuPosition: any;
+    btnPosition: number = 20;
+    menuPosition: number = 20;
     menuBottom: string = "1em";
     showMetrics: boolean = false;
     recordType: string = "";
@@ -466,10 +466,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             .subscribe((state: BreakpointState) => {
                 if (state.matches) {
                     this.mobileMode = false;
-                    this.menuPosition = this.menuElement.nativeElement.offsetTop + 20;
+                    if (this.menuElement)
+                        this.menuPosition = this.menuElement.nativeElement.offsetTop + 20;
                 } else {
                     this.mobileMode = true;
-                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
+                    if (this.btnElement)
+                        this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
                 }
             });
         }
