@@ -5,7 +5,7 @@
  * via the open license at https://angular.io/license). 
  */
 import { NgModule, InjectionToken } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { DOCUMENT } from "@angular/common";
 
 import { MetadataTransfer } from './nerdm';
 import { SchemaLabel } from './nerdmconversion.service';

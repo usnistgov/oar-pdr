@@ -7,7 +7,7 @@
 //     }
 // }
 
-import {Directive, Input, HostBinding,ElementRef, Renderer} from '@angular/core';
+import { Directive, Input, HostBinding, ElementRef, Renderer2 } from '@angular/core';
 
 @Directive({selector: '[collapse]'})
 export class Collapse {
@@ -18,7 +18,7 @@ export class Collapse {
   profileMode: string = 'inline';
   
 
-  constructor( private el: ElementRef, private ren: Renderer) {
+  constructor( private el: ElementRef, private ren: Renderer2) {
   }
  // style
     @HostBinding('style.height')
@@ -62,7 +62,7 @@ export class Collapse {
       
         this.isExpanded = false;
         this.isCollapsed = true;
-        this.ren.setElementStyle(this.el.nativeElement,'display', 'none');
+        this.ren.setStyle(this.el.nativeElement, 'display', 'none');
            
         setTimeout(() => {
             this.height = '0';
@@ -78,7 +78,7 @@ export class Collapse {
 
         this.isExpanded = true;
         this.isCollapsed = false;
-        this.ren.setElementStyle(this.el.nativeElement,'display', 'block');
+        this.ren.setStyle(this.el.nativeElement, 'display', 'block');
             
         setTimeout(() => {
             this.height = 'auto';

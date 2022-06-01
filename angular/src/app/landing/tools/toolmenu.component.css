@@ -1,17 +1,15 @@
-:host /deep/ .rightMenuStyle > .ui-menu .ui-submenu-header{
-  /* background-color: #B8D4E6; */
-  /* background-color:rgb(65, 68, 69); */
-  background-color:#2C8034;
+:host ::ng-deep .rightMenuStyle > .p-menu .p-submenu-header{
+  background-color:var(--nist-green-default);
   padding: 2%;
   padding-left: 5%;
   font-family: sans-serif;
   font-size: 16px;
   font-weight: bold;
   color: white;
- 
+  border-radius: 3px;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+:host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem-link  .p-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
@@ -20,7 +18,7 @@
   font-size: 14px;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem{
+:host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem{
   line-height: 1em;
   min-height: 1em;
   /* background-color:  #e7f0f6; */
@@ -31,33 +29,33 @@
   padding: 0;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu .ui-menuitem-link{
+:host ::ng-deep .rightMenuStyle > .p-menu .p-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-family:  sans-serif;
   font-size: 14px;
 }
-:host /deep/ .rightMenuStyle > .ui-menu{
+:host ::ng-deep .rightMenuStyle > .p-menu{
   width: 100%;
 }
 
-:host /deep/ .rightMenuStyle > .ui-menu  .ui-menuitem-link:hover {
+:host ::ng-deep .rightMenuStyle > .p-menu  .p-menuitem-link:hover {
   background-color: #ffffff;
   color: #000000;
 }
 
-:host /deep/ .rightMenuStylePop  > .ui-menu {
+:host ::ng-deep .rightMenuStylePop  > .p-menu {
   position: absolute;
   width: 12em;
   word-wrap: break-word;
   font-family: sans-serif;
 
 }
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-menuitem-link{
+:host ::ng-deep .rightMenuStylePop > .p-menu .p-menuitem-link{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
 }
 
-:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem{
+:host ::ng-deep .rightMenuStylePop > .p-menu  .p-menuitem{
   line-height: 1em;
   min-height: 1em;
   /* background-color:  #e7f0f6; */
@@ -68,7 +66,7 @@
   padding: 0;
 }
 
-:host /deep/ .rightMenuStylePop > .ui-menu  .ui-menuitem-link  .ui-state-hover{
+:host ::ng-deep .rightMenuStylePop > .p-menu  .p-menuitem-link  .p-state-hover{
   line-height: 1em;
   min-height: 1em;
   background-color: #e7f0f6;
@@ -76,23 +74,118 @@
   font-family: 'Sans-Serif';
   font-size: 14px;
 }
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header {
-  background-color:#2C8034;
+
+:host ::ng-deep .rightMenuStylePop > .p-menu .p-submenu-header {
+  background-color:var(--nist-green-default);
   padding: 2%;
   padding-left: 5%;
   font-family: sans-serif;
   font-size: 16px;
   font-weight: bold;
   color: white;
- 
+  border-radius: 3px;
 }
 
-:host /deep/ .rightMenuStylePop > .ui-menu .ui-submenu-header{
+:host ::ng-deep .rightMenuStylePop > .p-menu .p-submenu-header{
   padding: 0.5em 0.2em 0.5em 0.5em;
   font-size: 14px;
 }
 
-:host /deep/ .ui-menu{
+
+:host ::ng-deep .rightMenuStyleST > .p-menu .p-submenu-header{
+    background-color:var(--science-theme-background-default);
+    padding: 2%;
+    padding-left: 5%;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    border-radius: 3px;
+  }
+  
+  :host ::ng-deep .rightMenuStyleST > .p-menu  .p-menuitem-link  .p-state-hover{
+    line-height: 1em;
+    min-height: 1em;
+    background-color: #e7f0f6;
+    word-wrap: break-word;
+    font-family: 'Sans-Serif';
+    font-size: 14px;
+  }
+  
+  :host ::ng-deep .rightMenuStyleST > .p-menu  .p-menuitem{
+    line-height: 1em;
+    min-height: 1em;
+    /* background-color:  #abd7f5; */
+    background-color: var(--science-theme-background-light);
+    word-wrap: break-word;
+    font-family: sans-serif;
+    font-size: 14px;
+    padding: 0;
+  }
+  
+  :host ::ng-deep .rightMenuStyleST > .p-menu .p-menuitem-link{
+    padding: 0.5em 0.2em 0.5em 0.5em;
+    font-family:  sans-serif;
+    font-size: 14px;
+  }
+  :host ::ng-deep .rightMenuStyleST > .p-menu{
+    width: 100%;
+  }
+  
+  :host ::ng-deep .rightMenuStyleST > .p-menu  .p-menuitem-link:hover {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  :host ::ng-deep .rightMenuStylePopST  > .p-menu {
+    position: absolute;
+    width: 12em;
+    word-wrap: break-word;
+    font-family: sans-serif;
+  
+  }
+  :host ::ng-deep .rightMenuStylePopST > .p-menu .p-menuitem-link{
+    padding: 0.5em 0.2em 0.5em 0.5em;
+    font-size: 14px;
+  }
+  
+  :host ::ng-deep .rightMenuStylePopST > .p-menu  .p-menuitem{
+    line-height: 1em;
+    min-height: 1em;
+    /* background-color:  #e7f0f6; */
+    background-color: #f0f8fa;
+    word-wrap: break-word;
+    font-family: sans-serif;
+    font-size: 14px;
+    padding: 0;
+  }
+  
+  :host ::ng-deep .rightMenuStylePopST > .p-menu  .p-menuitem-link  .p-state-hover{
+    line-height: 1em;
+    min-height: 1em;
+    background-color: #e7f0f6;
+    word-wrap: break-word;
+    font-family: 'Sans-Serif';
+    font-size: 14px;
+  }
+
+  :host ::ng-deep .rightMenuStylePopST > .p-menu .p-submenu-header {
+    background-color:var(--science-theme-background-default);
+    padding: 2%;
+    padding-left: 5%;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    border-radius: 3px;
+  }
+  
+  :host ::ng-deep .rightMenuStylePopST > .p-menu .p-submenu-header{
+    padding: 0.5em 0.2em 0.5em 0.5em;
+    font-size: 14px;
+  }
+
+:host ::ng-deep .p-menu{
   padding: 0;
   border:0;
 }

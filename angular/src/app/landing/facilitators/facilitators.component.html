@@ -1,0 +1,40 @@
+<div class="facilitator">
+    <div class="editable_container">
+        <div *ngIf="record['facilitators']">
+            <div class="editable_field" style="max-width:calc(100% - 4em);"
+                [ngStyle]="getFieldStyle()">
+                <span *ngIf="record['facilitators']">
+                    <b>Facilitator: </b>
+                    <span *ngFor="let facilitator of record.facilitators; let i = index" (click)="openModal()">
+                        {{facilitator.fn.trim()}}<span *ngIf="i < record.facilitators.length-1; else theEnd">,</span><ng-template #theEnd>..</ng-template>
+                    </span>
+                    <i style="margin-left: 0.5rem;" class="faa"
+                        [ngClass]="{'faa-plus-square-o': !clickFacilitators, 'faa-minus-square-o': clickFacilitators}"
+                        aria-hidden="true"
+                        (click)="isCollapsedContent = !isCollapsedContent; clickFacilitators = expandClick();"></i>
+                </span>
+
+                <div [@detailExpand]="!isCollapsedContent ? 'expanded' : 'collapsed'" class="facilitator-detail">
+                    <div class="facilitatorsdetail" *ngIf="record.facilitators">
+                        <div *ngFor="let facilitator of record.facilitators; let i = index" style="padding-left: 1em;">
+                            <div>
+                                <span>{{ facilitator.jobTitle }} : {{facilitator.fn}} </span>
+                                <span *ngIf="facilitator.orcid">&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a href="https://orcid.org/{{ author.orcid }}" target="blank">
+                                    <img src="assets/images/orcid-logo.png" style="width: 20px;">:
+                                    {{ facilitator.orcid }}
+                                    </a>
+                                </span>                            
+                            </div>
+                            <div *ngFor="let aff of facilitator.affiliation" style="padding-left: 1em">
+                                <i>
+                                <div>{{aff.title}}</div>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

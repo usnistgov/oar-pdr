@@ -8,6 +8,7 @@ import { ComboBoxComponent } from './combobox/combo-box.component';
 import { ComboBoxPipe } from './combobox/combo-box.pipe';
 import { ConfirmationDialogService } from './confirmation-dialog/confirmation-dialog.service';
 import { NotificationService } from './notification-service/notification.service';
+import { SearchfieldsListService } from './searchfields-list/index';
 
 /**
  * Do not specify providers for modules that might be imported by a lazy loaded module.
@@ -28,10 +29,10 @@ import { NotificationService } from './notification-service/notification.service
     ]
 })
 export class SharedModule {
-    static forRoot(): ModuleWithProviders {
+    static forRoot(): ModuleWithProviders<SharedModule> {
         return {
             ngModule: SharedModule,
-            providers: [SearchService]
+            providers: [SearchService, SearchfieldsListService]
         };
     }
 }

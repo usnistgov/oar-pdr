@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap' ; 
 import { BundleplanComponent } from './bundleplan.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -18,7 +18,7 @@ describe('BundleplanComponent', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
         cfg.status = "Unit Testing";
@@ -29,7 +29,7 @@ describe('BundleplanComponent', () => {
         schemas: [NO_ERRORS_SCHEMA],
         imports: [
             HttpClientTestingModule,
-            NgbModule.forRoot()
+            NgbModule
         ],
         providers: [
             CartService,

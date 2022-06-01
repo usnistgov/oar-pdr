@@ -1,0 +1,49 @@
+.search-result {
+    vertical-align: top;
+}
+
+.filter {
+    vertical-align: top;
+}
+
+#right_panel {
+    position: absolute;
+    width: 96px;
+    padding-left: 4px;
+    height: 100%;
+    right: 0;
+    background-color: #f0f0ff;
+}
+
+#right_panel::after {
+    content: '';
+    background-color: #ccc;
+    position: absolute;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    cursor: ew-resize;
+}
+
+.rotate {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(45deg);
+    transform: rotate(90deg);
+}
+
+.splitter {
+    width: 20px;
+    font-size:x-large;
+    cursor: col-resize;
+    background-color: var(--background-light-grey);
+}
+
+#separator {
+    margin: 8px 1px 0px 1px;
+    color: var(--science-theme-background-dark);
+    font-size: 20px;
+    text-align: center;
+}

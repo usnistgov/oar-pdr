@@ -1,0 +1,124 @@
+<div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 20px 0px; "
+    *ngIf="showResult">
+    <div id="table" style="height: 25px !important;padding:0px">
+        <div class="tr result-header">
+            <!-- Number of search result -->
+            <div class="td" style="width: 20%;margin-bottom: 0px;">
+                <span style="padding-left: 20px;font-weight: bold;position:relative;top: -3px;">
+                    {{totalResultItems}}
+                    <span *ngIf="resultWidthNum > 830">datasets </span>
+                    <span *ngIf="resultWidthNum > 500">found</span>
+                </span>
+            </div>
+
+            <!-- Pagination -->
+            <div class="td" style="width: 30px;padding-right: 5px;"> 
+                <p-dropdown [options]="pages" [(ngModel)]="currentPage" optionLabel="name"
+                    [style]="{'text-align': 'left', 'height':'35px', 'vertical-align' : 'top','width': resultWidthNum > 500?'120px':'60px','margin-top':'-9px','margin-bottom':'0px'}">
+                </p-dropdown>
+            </div>
+
+            <!-- Sorting -->
+            <div class="td" style="width: 30px;padding-right: 5px;">
+                <p-dropdown [options]="options" [(ngModel)]="optionSelected" optionLabel="name"
+                    (onChange)="onSortByChange($event)" placeholder="Sorted by"
+                    [style]="{'text-align': 'left', 'height':'35px','width': resultWidthNum > 500?'140px':'60px','margin-top':'4px','margin-bottom':'0px'}"></p-dropdown>
+            </div>
+
+            <!-- Search text -->
+            <div class="td" style="width: auto;padding-right: 5px;">
+                <span class="p-input-icon-right" style="width: 100%;position:relative;top: -3px;">
+                    <i class="pi pi-search" style="top: 25px;"></i>
+                    <label for="freeTextSearch" class="sr-only">Free Text Search</label>
+                    <input id="freeTextSearch" type="text" pInputText [(ngModel)]="searchPhases" placeholder="Search for"
+                        (input)="filterResults()" [style]="{'text-align': 'left', 'height':'35px','width': '100%','padding-bottom':'0px','padding-top':'0px','margin-bottom':'0px','border-radius':'3px'}">
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search result -->
+    <div *ngFor="let resultItem of searchResultsForDisplay; let i = index" style="width: 100%; padding: 0px 0px 0px 20px;">
+        <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"
+            style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: 1em; ">
+            <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.5em;"
+                href="{{resultItem.landingPage}}" target="_blank">
+                <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page-forensics"
+                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
+            </a>
+
+            <a *ngIf="!resultItem.landingPage" style="float: right; margin-top: -0.5em;"
+                href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
+                (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
+                <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page-forensics"
+                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
+            </a>
+
+            <div style="width: 80% !important;">
+                <a href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank" class="title">
+                    {{resultItem.title}}
+                </a>
+                <span>
+                    <div [attr.aria-label]="expandButtonAlterText" style="margin-left: .5em;cursor: pointer;width: 20px;height: 20px;background-size:cover;display: inline-block;"
+                        (click)="toggleDetails(resultItem, i)"
+                        [ngStyle]="{ 'background-image': 'url('+resultItem.iconurl+')','margin-bottom':'-4px'}"
+                        >
+                    </div>
+                </span>
+            </div>
+
+            <div [@detailExpand]="resultItem.DetailsDisplayed ? 'expanded' : 'collapsed'" style="overflow: hidden;">
+                <div class="ui-grid-row" style="margin-bottom:.5em">
+                    {{resultItem.description}}
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Point of Contact: </b> <i style="color: gray;">
+                            <a *ngIf="hasEmail(resultItem)"
+                                href="{{resultItem.contactPoint.hasEmail}}" target="_top">
+                                {{resultItem.contactPoint.fn}}</a>
+                            <span *ngIf="!hasEmail(resultItem)">{{resultItem.contactPoint.fn}}</span>
+                        </i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Research Topic: </b> 
+                            <span *ngFor="let topic of resultItem.topic; let i = index">
+                                <i>
+                                    {{topic.tag}}
+                                    <span *ngIf="i < resultItem.topic.length-1">, </span>
+                                </i>
+                            </span>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <div class="ui-grid-col-12"><b>Subject Keywords: </b> 
+                        <i>{{resultItem.keyword.join(', ')}}</i>
+                    </div>
+                </div>
+                <div class="ui-grid-row details">
+                    <span class="ui-grid-col-1"><b>DOI: </b> </span>
+                    <span class="ui-grid-col-11" *ngIf="resultItem.doi != null">
+                        <i> <a href="{{doiUrl(resultItem)}}" target="_blank">{{resultItem.doi}}</a></i>
+                    </span>
+                    <span class="ui-grid-col-11" style="color:#000;" *ngIf="resultItem.doi == null">None</span>
+                </div>
+                <div class="ui-grid-row details">
+                    <span class="ui-grid-col-1"><b>Last modified: </b> </span>
+                    <span class="ui-grid-col-11" *ngIf="resultItem.modified != null">
+                        {{lastModified(resultItem) || ""}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="noSearchResult">
+        <div style="text-align: center;border-bottom: 1px solid grey;">
+            <img id="dog" src="./assets/images/NothingFound2_s.png">
+            <span class="nothing-found-text">Nothing found...</span>
+        </div>
+    </div>
+
+    <div *ngIf="!searchResults">
+        Loading search result...
+    </div>
+</div>

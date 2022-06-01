@@ -6,7 +6,7 @@ describe('ConfirmationDialogService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: ConfirmationDialogService = TestBed.get(ConfirmationDialogService);
+    const service: ConfirmationDialogService = TestBed.inject(ConfirmationDialogService);
     expect(service).toBeTruthy();
   });
 });

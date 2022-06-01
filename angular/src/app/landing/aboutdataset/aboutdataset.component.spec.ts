@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -18,7 +18,7 @@ describe('AboutdatasetComponent', () => {
     let cfg : AppConfig = new AppConfig(config);
     let rec : NerdmRes = testdata['test1'];
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             imports: [ AboutdatasetModule ],
             providers: [
@@ -35,6 +35,7 @@ describe('AboutdatasetComponent', () => {
         component.inBrowser = true;
         component.metricsData = new MetricsData();
         component.showJsonViewer = true;
+        component.theme = 'nist';
         component.ngOnChanges({});
         fixture.detectChanges();
     });
@@ -68,6 +69,64 @@ describe('AboutdatasetComponent', () => {
         el = cmpel.querySelector("#metrics");
         expect(el).toBeTruthy();
         expect(el.textContent).toContain("Access Metrics");
+
+        // test record does not include isPartOf
+        el = cmpel.querySelector("#about-ispartof");
+        expect(el).toBeFalsy();
+    });
+
+    it('single isPartOf rendering', () => {
+        let cmpel = fixture.nativeElement;
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [{
+            "@id": "ark:/88888/goober",
+            title: "Uber Research",
+            "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+        }];
+        component.record = member;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        let el = cmpel.querySelector("#about-ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeFalsy();
+        expect(el.innerHTML.includes(" collection.")).toBeTruthy();
+        let a = el.querySelector("a");
+        expect(a).toBeTruthy();
+        expect(a.href.endsWith("/ark:/88888/goober")).toBeTruthy();
+    });
+
+    it('multiple isPartOf rendering', () => {
+        let cmpel = fixture.nativeElement;
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [
+            {
+                "@id": "ark:/88888/goober",
+                title: "Uber Research",
+                "@type": [ "nrda:ScienceTheme", "nrd:PublicDataResource" ]
+            },
+            {
+                "@id": "ark:/88888/gomer",
+                title: "Sleepy Research",
+                "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+            }
+        ];
+        component.record = member;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        let el = cmpel.querySelector("#about-ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeTruthy();
+        expect(el.innerHTML.includes("This dataset is part of")).toBeTruthy();
+        let li = el.querySelectorAll("ul li");
+        expect(li.length).toEqual(2);
+        expect(li[0].innerHTML.includes(" Science Theme ")).toBeTruthy();
+        let html = li[1].innerHTML
+        expect(li[1].innerHTML.includes("Science Theme")).toBeFalsy();
+        expect(li[1].innerHTML.endsWith("collection ")).toBeFalsy();
+        expect(li[0].querySelector("a").href.endsWith("/ark:/88888/goober")).toBeTruthy();
+        expect(li[1].querySelector("a").href.endsWith("/ark:/88888/gomer")).toBeTruthy();
     });
 
     it('getDownloadURL()', () => {

@@ -2,8 +2,10 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';
-import { TreeNode } from 'primeng/primeng';
 import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
+import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
+import { AppConfig } from '../../config/config';
+import { deepCopy } from '../../utils';
 
 @Component({
     selector: 'app-topic',
@@ -11,14 +13,22 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
     styleUrls: ['../landing.component.css']
 })
 export class TopicComponent implements OnInit {
-    @Input() record: any[];
+    nistTaxonomyTopics: any[] = [];
+    scienceThemeTopics: any[] = [];
+    recordType: string = "";
+    standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
+
+    @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean;   // false if running server-side
     //05-12-2020 Ray asked to read topic data from 'theme' instead of 'topic'
     fieldName = 'theme';
 
     constructor(public mdupdsvc: MetadataUpdateService,
-        private ngbModal: NgbModal,
-        private notificationService: NotificationService) {
+                private ngbModal: NgbModal,
+                private cfg: AppConfig,
+                private notificationService: NotificationService) {
+
+            this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
     }
 
     /**
@@ -30,15 +40,31 @@ export class TopicComponent implements OnInit {
      * a field indicating whether there are no keywords are set.  
      */
     get isEmpty() {
-        if (!this.record[this.fieldName])
-            return true;
-        if (this.record[this.fieldName] instanceof Array &&
-            this.record[this.fieldName].filter(topic => topic.length > 0).length == 0)
-            return true;
-        return false;
+        if(this.recordType == "Science Theme"){
+            return this.scienceThemeTopics.length <= 0 && this.nistTaxonomyTopics.length <= 0;
+        }else{
+            return this.nistTaxonomyTopics.length <= 0;
+        }
     }
 
     ngOnInit() {
+        if(this.record) {
+            this.recordType = (new NERDResource(this.record)).resourceLabel();
+            console.log('this.recordType', this.recordType);
+            if(this.recordType == "Science Theme") {
+                this.fieldName = "topic";
+                this.record['topic'].forEach(topic => {
+                    if(topic['scheme'].includes(this.standardNISTTaxonomyURI)){
+                        this.nistTaxonomyTopics.push(topic.tag);
+                    }else{
+                        this.scienceThemeTopics.push(topic.tag);
+                    }
+                });
+            }else{
+                this.fieldName = "theme";
+                this.nistTaxonomyTopics = this.record[this.fieldName];
+            }
+        }
     }
 
     /**
@@ -63,7 +89,7 @@ export class TopicComponent implements OnInit {
 
         let val: string[] = [];
         if (this.record[this.fieldName])
-            val = JSON.parse(JSON.stringify(this.record[this.fieldName]));
+            val = JSON.parse(JSON.stringify(this.nistTaxonomyTopics.concat(this.scienceThemeTopics)));
 
         modalRef.componentInstance.inputValue = {};
         modalRef.componentInstance.inputValue[this.fieldName] = val;

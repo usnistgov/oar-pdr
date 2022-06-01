@@ -14,7 +14,7 @@ describe('GoogleAnalyticsService', () => {
   });
 
   it('should be created', () => {
-    const service: GoogleAnalyticsService = TestBed.get(GoogleAnalyticsService);
+    const service: GoogleAnalyticsService = TestBed.inject(GoogleAnalyticsService);
 
     expect(service).toBeTruthy();
   });

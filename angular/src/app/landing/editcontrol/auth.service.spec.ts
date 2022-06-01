@@ -20,7 +20,7 @@
 //         TestBed.configureTestingModule({
 //             imports: [ HttpClientModule ]
 //         });
-//         svc = new WebAuthService(cfg, TestBed.get(HttpClient));
+//         svc = new WebAuthService(cfg, TestBed.inject(HttpClient));
 //     });
 
 //     it('init state', () => {
@@ -62,7 +62,7 @@
 //         TestBed.configureTestingModule({
 //             imports: [ HttpClientModule ]
 //         });
-//         httpcli = TestBed.get(HttpClient);
+//         httpcli = TestBed.inject(HttpClient);
 //         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig();
 //     }));
     

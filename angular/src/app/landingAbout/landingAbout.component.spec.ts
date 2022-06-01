@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
@@ -11,7 +11,7 @@ import { LandingAboutComponent } from './landingAbout.component';
     let comp: LandingAboutComponent;
     let de: DebugElement;
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
       TestBed.configureTestingModule({
           declarations: [LandingAboutComponent],
           imports: [ RouterTestingModule ],
@@ -27,7 +27,7 @@ import { LandingAboutComponent } from './landingAbout.component';
     });
 
    // it('should create component', () => expect(comp).toBeDefined());
-   it('should create the comp', async(() => {
+   it('should create the comp', waitForAsync(() => {
     const fixture = TestBed.createComponent(LandingAboutComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();

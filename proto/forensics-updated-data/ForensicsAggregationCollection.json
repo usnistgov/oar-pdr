@@ -1,0 +1,230 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
+    "topic": [
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Ballistics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Digital evidence",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics: Biometrics",
+            "@type": "Concept"
+        },
+
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
+            "tag": "Forensics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Forensics",
+            "@type": "Concept"
+        },
+        {
+            "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+            "tag": "Information Technology: Biometrics",
+            "@type": "Concept"
+        }
+    ],
+    "keyword": [
+        "digital forensics",
+        "biometrics",
+        "forensics"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource",
+        "https://data.nist.gov/od/dm/nerdm-schema/science-initiative-schema/v0.1#/definitions/ResearchInitiative"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/ark:/88434/mds9911",
+    "title": "NIST Forensics Research Data",
+    "theme": [
+        "Information Technology",
+        "Forensics",
+        "Materials"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+        "006:045"
+    ],
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds9911"
+        }
+    ],
+    "description": [
+        "NIST research in several forensic disciplines, including DNA, ballistics, fingerprint analysis, trace evidence, and digital, among others. We provide physical reference standards and data that help forensic laboratories validate their analytical methods and ensure accurate test results"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "contactPoint": {
+        "hasEmail": "mailto:gregory.fiumara@nist.gov",
+        "fn": "Gregory Fiumara"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/mds9911",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "license": "https://www.nist.gov/open/license",
+    "language": [
+        "en"
+    ],
+    "modified": "2018-06-14 01:02:03",
+    "ediid": "ark:/88434/mds9911",
+    "versionHistory": [
+        {
+            "issued": "2021-12-25",
+            "version": "1.0.0",
+            "@id": "ark:/88434/mds90911",
+            "location": "https://data.nist.gov/od/id/ark:/88434/mds9911",
+            "description": "initial release"
+        }
+    ],
+    "facilitators": [
+        {
+            "middleName": "",
+            "familyName": "Guttman",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Barbara",
+            "@type": "foaf:Person",
+            "fn": "Barbara Guttman",
+            "jobTitle": "Program Lead"
+        },
+        {
+            "middleName": "",
+            "familyName": "Fiumara",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics Biometrics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Gregory",
+            "@type": "foaf:Person",
+            "fn": "Gregory Fiumara",
+            "jobTitle": "Program Lead"
+        },
+        {
+            "middleName": "",
+            "familyName": "Navarro",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Marcela",
+            "@type": "foaf:Person",
+            "fn": "Marcela Navarro",
+            "jobTitle": "Program Lead"
+        },
+        {
+            "middleName": "",
+            "familyName": "Vallone",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Peter",
+            "@type": "foaf:Person",
+            "fn": "Peter Vallone",
+            "jobTitle": "Program Lead"
+        },
+        {
+            "middleName": "",
+            "familyName": "Lund",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Steve",
+            "@type": "foaf:Person",
+            "fn": "Steve Lund",
+            "jobTitle": "Program Lead"
+        },
+        {
+            "middleName": "",
+            "familyName": "Taylor",
+            "affiliation": [
+                {
+                    "@type": "org:Organization",
+                    "title": "NIST Forensics division"
+                }
+            ],
+            "orcid": "",
+            "givenName": "Melissa",
+            "@type": "foaf:Person",
+            "fn": "Melissa Taylor",
+            "jobTitle": "Program Lead"
+        }
+    ],
+    "@type": [
+        "nrda: ScienceTheme",
+        "nrda: Aggregation",
+        "nrdp: PublicDataResource"
+    ],
+    "components": [
+        {
+            "@type": [
+                "nrda:DynamicResourceSet", "nrdp:SearchPage"
+            ],
+            "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds9911",
+            "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds9911&alternateView=forensics",
+            "title": "All Forensics Data Collection",
+            "description": "The search URL here queries all the data which is part of Forensics data collection."
+        },
+        {
+            "@type": [
+                "nrda:DynamicResourceSet", "nrdp:SearchPage"
+            ],
+            "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991133",
+            "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991133&alternateView=forensics",
+            "title": "DNA and Biological Evidence data collection",
+            "description": "Search URL for the DNA and Biological evidence data collection."
+        },
+        {
+            "@type": [
+                "nrda:DynamicResourceSet", "nrdp:SearchPage"
+            ],
+            "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991122",
+            "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991122&alternateView=forensics",
+            "title": "Biometrics Data Collection",
+            "description": "Search URL for the biometrics data collection."
+        }
+
+    ]
+}

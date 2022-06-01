@@ -14,7 +14,8 @@
  */
 import { Component, OnInit, OnChanges, AfterViewInit, Output, Input, ViewChild, NgZone, HostListener, Inject,
          PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
-import { TreeNode, TreeTable } from 'primeng/primeng';
+import { TreeNode } from 'primeng/api';
+import { TreeTable } from 'primeng/treetable';
 import { CartService } from '../cart.service';
 import { DownloadService } from '../../shared/download-service/download-service.service';
 import { formatBytes } from '../../utils';
@@ -490,7 +491,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * @param width - width of the column
      */
     headerStyle(width) {
-        return { 'background-color': '#1E6BA1', 'width': width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': '#1E6BA1', 'width': width, 'color': 'white', 'font-size': this.fontSize, 'padding': '3px 10px' };
     }
 
     /**
@@ -498,7 +499,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * @param width - width of the tree table
      */
     bodyStyle(width) {
-        return { 'width': width, 'font-size': this.fontSize };
+        return { 'width': width, 'font-size': this.fontSize, 'padding': '0' };
     }
 
     /**

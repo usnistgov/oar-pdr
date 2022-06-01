@@ -1,6 +1,6 @@
 import { CartConstants } from './cartconstants';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { DataCart } from '../datacart/cart';
 

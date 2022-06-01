@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 
 import { ResourceRefsComponent } from './resourcerefs.component';
 import { SectionsModule } from './sections.module';
@@ -29,7 +29,7 @@ describe('ResourceRefsComponent', () => {
         component = fixture.componentInstance;
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         component.record = JSON.parse(JSON.stringify(rec));
@@ -66,6 +66,25 @@ describe('ResourceRefsComponent', () => {
         expect(cmpel.querySelector("#references")).toBeTruthy();
         expect(cmpel.querySelector("h3")).toBeFalsy();
         let els = cmpel.querySelectorAll("a")
+        expect(els.length).toBe(0);
+    });
+
+    it('should not render ref as a link without location', () => {
+        // remove the locations from the two reference
+        component.record['references'][0]['location'] = null;
+        delete component.record['references'][1].location;
+        component.ngOnChanges({});
+        fixture.detectChanges();
+
+        expect(component).toBeTruthy();
+        let cmpel = fixture.nativeElement;
+        let reflist = cmpel.querySelector("#references");
+        expect(reflist).toBeTruthy();
+
+        // has 2 references
+        let els = cmpel.querySelectorAll(".ref-entry")
+        expect(els.length).toBe(2);
+        els = cmpel.querySelectorAll("a");
         expect(els.length).toBe(0);
     });
 

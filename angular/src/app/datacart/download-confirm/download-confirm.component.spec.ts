@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { DownloadConfirmComponent } from './download-confirm.component';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { config } from '../../../environments/environment';
@@ -9,7 +9,7 @@ describe('DownloadConfirmComponent', () => {
   let fixture: ComponentFixture<DownloadConfirmComponent>;
   let cfg : AppConfig = new AppConfig(config);
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ DownloadConfirmComponent ],
       providers: [{ provide: AppConfig, useValue: cfg }, NgbActiveModal]
@@ -40,20 +40,20 @@ describe('DownloadConfirmComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ContinueDownload()', async(() => {
+  it('ContinueDownload()', waitForAsync(() => {
     spyOn(component.returnValue, 'emit');
     component.ContinueDownload();
     expect(component.returnValue.emit).toHaveBeenCalledWith(true);
   }));
 
-  it('CancelDownload()', async(() => {
+  it('CancelDownload()', waitForAsync(() => {
     spyOn(component.returnValue, 'emit');
 
     component.CancelDownload();
      expect(component.returnValue.emit).toHaveBeenCalledWith(false);
   }));
 
-  it('getBackColor()', async(() => {
+  it('getBackColor()', waitForAsync(() => {
     expect(component.getBackColor(0)).toEqual('white');
     expect(component.getBackColor(1)).toEqual('rgb(231, 231, 231)');
   }));

@@ -1,7 +1,12 @@
 .recordType {
     font-family: Arial, Helvetica, sans-serif; 
     color:#707070; 
-    font-size: 14;
+    font-size: 16px;
+}
+
+.primary-ref-entry {
+    line-height: 1.2;
+    margin-bottom: 0.3em;
 }
 
 .home_button {
@@ -9,7 +14,20 @@
     margin:.5em 1em .5em 0em;
     width:200px;
     height:2em;
-    background-color:#1471AE;
+    background-color:var(--science-theme-background-default);
     color:white;
     padding-right: 1em;
+}
+
+.version {
+    background-color:var(--science-theme-background-default);
+    margin-left: 0.5em; 
+    color: white;
+    font-size: 12px;
+    vertical-align: top;
+    margin-top: .2em;
+}
+
+#ispartof {
+    margin: -8px 0 10px 0;
 }

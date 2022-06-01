@@ -10,10 +10,26 @@
                 <ng-template #hasTopic>
                     <div class="editable_field" style="cursor: pointer;width: calc(100%-1em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
                         <strong>Research Topics: </strong>
-                        <span class="topics" *ngFor="let topic of record['theme']; let i =index">
-                            {{ topic }}
-                            <span *ngIf="i < record['theme'].length-1 ">,</span>
-                        </span> &nbsp; &nbsp;
+                        <span *ngIf="recordType != 'Science Theme'; else scienceTheme" >
+                            <span class="topics" *ngFor="let topic of nistTaxonomyTopics; let i =index">
+                                {{ topic }}
+                                <span *ngIf="i < nistTaxonomyTopics.length-1 ">,</span>
+                            </span> &nbsp; &nbsp;
+                        </span>
+                        <ng-template #scienceTheme>
+                            <div style="margin-left: 1em;" *ngIf="scienceThemeTopics.length > 0">
+                                <span class="topics" *ngFor="let topic of scienceThemeTopics; let i =index">
+                                    <i>{{ topic }}</i>
+                                    <span *ngIf="i < scienceThemeTopics.length-1 ">,</span>
+                                </span> &nbsp; &nbsp;
+                            </div>
+                            <div style="margin-left: 1em;" *ngIf="nistTaxonomyTopics.length > 0">
+                                <span class="topics" *ngFor="let topic of nistTaxonomyTopics; let i =index">
+                                    <i>{{ topic }}</i>
+                                    <span *ngIf="i < nistTaxonomyTopics.length-1 ">,</span>
+                                </span> &nbsp; &nbsp;
+                            </div>
+                        </ng-template>
                     </div>
                 </ng-template>
                 <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal()" aria-label="edit button">

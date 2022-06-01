@@ -1,20 +1,28 @@
-<div id="resourcebody" class="ui-grid ui-grid-responsive ui-grid-pad center" style="border: 0px solid white;">
-    <div class="card landing-body">
-        <div *ngIf="md">
+<div id="resourcebody" style="width: 100%;">
+    <div class="landing-body" style="overflow:visible;">
+        <div *ngIf="md" style="overflow:visible;">
             <!-- sections of the landing page body -->
-
             <!-- identity information -->
-            <a name="identity" #identity></a>
-            <pdr-resource-id [record]="md" [inBrowser]="inBrowser">
-            </pdr-resource-id>
 
-            <!-- description: abstract, keywords, research areas, etc. -->
-            <a name="description" #description></a>
-            <pdr-resource-desc [record]="md" [inBrowser]="inBrowser"></pdr-resource-desc>
+            <a name="identity" #identity></a>
+            <!-- <div style="margin-left: -10px;"> -->
+            <div>
+                <pdr-resource-id [record]="md" [inBrowser]="inBrowser">
+                </pdr-resource-id>
+
+                <!-- description: abstract, keywords, research areas, etc. -->
+                <a name="description" #description></a>
+                <pdr-resource-desc [record]="md" [inBrowser]="inBrowser"></pdr-resource-desc>
+            </div>
 
             <!-- data access, include available files -->
             <a name="dataAccess" #dataAccess></a>
-            <pdr-resource-data [record]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled" (dlStatus)="setDownloadStatus($event)">
+            <pdr-resource-data 
+                [record]="md" 
+                [inBrowser]="inBrowser" 
+                [editEnabled]="editEnabled" 
+                [theme]="theme"
+                (dlStatus)="setDownloadStatus($event)">
             </pdr-resource-data>
 
             <!-- references -->
@@ -24,7 +32,7 @@
             <!-- About This Dataset visualization and export -->
             <a name="about" #about></a>
             <a name="references2" #references2></a>
-            <pdr-resource-md [record]="md" [inBrowser]="inBrowser" [mobileMode]="mobileMode"  [metricsData]="metricsData" [showJsonViewer]='showJsonViewer'>
+            <pdr-resource-md [record]="md" [inBrowser]="inBrowser" [mobileMode]="mobileMode"  [metricsData]="metricsData" [showJsonViewer]='showJsonViewer' [theme]="theme">
             </pdr-resource-md>
         </div>
     </div>

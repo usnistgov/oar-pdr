@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -21,7 +21,7 @@ describe('LandingBodyComponent', () => {
     let component: LandingBodyComponent;
     let fixture: ComponentFixture<LandingBodyComponent>;
     let cfg : AppConfig = new AppConfig(config);
-    let rec : NerdmRes = testdata['test1'];
+    let record1 : NerdmRes = testdata['test1'];
     let authsvc : AuthService = new MockAuthService()
 
     let makeComp = function() {
@@ -40,11 +40,12 @@ describe('LandingBodyComponent', () => {
         component = fixture.componentInstance;
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         component.mobileMode = false;
-        component.md = JSON.parse(JSON.stringify(rec));
+        component.md = JSON.parse(JSON.stringify(record1));
+        component.md["@type"][0] = "nrdp:PublicDataResource";
         component.metricsData = new MetricsData();
         component.editEnabled = false;
         fixture.detectChanges();
@@ -82,6 +83,7 @@ describe('LandingBodyComponent', () => {
         sect = cmpel.querySelector("#about")
         expect(sect).toBeTruthy();
         title = sect.querySelector("h3");
+        console.log("title", title);
         expect(title).toBeTruthy();
         expect(title.textContent).toEqual("About This Dataset");
 

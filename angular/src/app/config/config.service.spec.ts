@@ -65,7 +65,7 @@ describe("config.service newConfigService", function() {
             }
         }
         let ts = new TransferState();
-        ts.set(cfgsvc.CONFIG_TS_KEY, data);
+        ts.set<cfg.LPSConfig>(cfgsvc.CONFIG_TS_KEY, data);
         
         let svc = cfgsvc.newConfigService(plid, ts);
 

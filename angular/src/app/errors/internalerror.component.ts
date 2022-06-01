@@ -14,13 +14,13 @@ import { Response } from 'express';
     styleUrls: [ '../landing/landing.component.css' ],
     template: `
 <div class="card landingcard">
-  <div class="ui-g">
-    <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+  <div class="grid">
+    <div class = "col-12 col-md-12 col-lg-12 col-sm-12">
       <div class="title"><h2 id="internal-error" name="internal-error">Oops!</h2></div>
     </div>
   </div>
-  <div class="ui-g">
-    <div class = "ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+  <div class="grid">
+    <div class = "col-12 col-md-12 col-lg-12 col-sm-12">
       <p>
 We're sorry!  An internal error occurred while preparing your content.  
       </p>

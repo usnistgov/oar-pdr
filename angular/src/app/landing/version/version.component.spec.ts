@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes } from '../../nerdm/nerdm';
@@ -31,7 +31,7 @@ describe('VersionComponent', () => {
         // fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         fixture.detectChanges();
     }));

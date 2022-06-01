@@ -7,7 +7,6 @@ import { Injectable } from '@angular/core';
     providedIn: 'root'
 })
 export class CommonFunctionService {
-
     constructor() { }
 
     /**
@@ -30,6 +29,11 @@ export class CommonFunctionService {
         return v.toFixed(d) + ' ' + e[f];
     }
 
+    /**
+     * Make a deep copy of an object
+     * @param obj 
+     * @returns copy of the input object
+     */
     deepCopy(obj) {
         return JSON.parse(JSON.stringify(obj));
     }

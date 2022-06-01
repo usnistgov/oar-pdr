@@ -1,3 +1,41 @@
 .restrict-public {
     background-color: rgb(238, 238, 238); padding: 20px;
 }
+
+.ui-treetable .ui-state-highlight {
+    background-image: none;
+    background-color: red !important;
+}
+
+tr.p-state-highlight .p-widget-content{
+    color:rgb(255, 0, 0);
+}
+
+body .p-treetable .p-treetable-data tr.p-state-highlight .p-row-editor a {
+    color: #ff0000 !important;
+}
+
+.spinner {
+    color: var(--science-theme-background-default);
+}
+
+#zip-file {
+    color: var(--nist-green-dark);
+    margin-left: 2em;
+}
+
+.green-cart {
+    color: var(--nist-green-default);
+    cursor: pointer;
+}
+
+.blue-cart {
+    color: var(--science-theme-background-dark);
+    cursor: pointer;
+}
+
+#hash-copy {
+    cursor: pointer; 
+    color: var(--science-theme-background-dark);
+    margin-left: 0.5em;
+}

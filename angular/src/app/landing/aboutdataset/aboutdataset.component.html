@@ -3,10 +3,39 @@
 <!-- Version info -->
 <pdr-version [record]="record"></pdr-version> 
 
+<!-- is part of -->
+<div id="about-ispartof" *ngIf="isPartOf">
+  <div *ngIf="isPartOf.length == 1; else multiIsPartOf">
+    This dataset is part of {{isPartOf[0][0]}}
+    <a href="{{isPartOf[0][1]}}" title="view collection">{{isPartOf[0][2]}}</a> {{isPartOf[0][3]}}. 
+  </div>
+  <ng-template #multiIsPartOf>
+    This dataset is part of the following collections:
+    <ul>
+    <div *ngFor="let coll of isPartOf">
+       <li> {{coll[0]}} <a href="{{coll[1]}}" title="view collection">{{coll[2]}}</a> {{coll[3]}} </li>
+    </div>
+    </ul>
+  </ng-template>
+</div>
+
+<!-- Facilitators -->
+<div *ngIf="theme == scienceTheme" style="width: 100%;" [ngStyle]="{'margin-bottom': record.creators? '15px' : '2em'}">
+    <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
+</div>
+
+<!-- Collection creators -->
+<div *ngIf="record.creators" style="padding-right: 10pt; margin-bottom: 1em"> 
+    <b>Collection creators: </b>
+    <span *ngFor="let creator of record.creators; index i">
+        {{creator.fn}} <span *ngIf="i < record.creators.length-1">, </span>
+    </span>
+</div>
+
 <!-- Citation info -->
 <div style="margin: 1em 0em;" id="cite">
-    <div><b style="margin-right: 10px;">Cite this dataset</b>
-        <span style="cursor: pointer; color: #1E6BA1;" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="citeCopied" class="badge"
+    <div><b style="margin-right: 10px;">Cite this {{resourceType.toLowerCase()}}</b>
+        <span id="copy-to-clipboard" (click)="copyToClipboard(citetext)" data-toggle="tooltip" title="Copy to clipboard"><i class="faa faa-clone"></i></span><span [@enterAnimation] *ngIf="citeCopied" class="badge"
         style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">Citation copied to clipboard</span>
     </div>
     <span [ngClass]="{'highlight': citeCopied}" [@enterAnimation]>
@@ -17,7 +46,7 @@
 <!-- Repository metadata -->
 <div style="margin: 0em 0em .5em 0em;" id="metadata">
     <div><b>Repository Metadata</b></div>
-    Machine-readable descriptions of this dataset are available in the following formats:
+    Machine-readable descriptions of this {{resourceType.toLowerCase()}} are available in the following formats:
     <div (click)="showJsonViewer = !showJsonViewer" class="linked-text"><i class="faa faa-caret-right" *ngIf="!showJsonViewer"></i><i class="faa faa-caret-down" *ngIf="showJsonViewer"></i> NERDm</div>
 </div>
 <div *ngIf="showJsonViewer" style="margin: 0 0 .5em 1em;">
@@ -32,7 +61,7 @@
         <!-- JSON export button (right alignment) -->
         <div >
             <a [href]='getDownloadURL()'>
-                <span class="json-export-btn nist-blue-background" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 10px;"></i>Export</span></a>
+                <span class="json-export-btn nist-blue-bc" (click)="onjson()"><i class="faa faa-file-code-o" style="margin-right: 10px;"></i>Export</span></a>
         </div>
 
         <!-- JSON tree navigate buttons (left alignment) -->
@@ -61,8 +90,8 @@
 
 </div>
 
-<!-- Metrics info -->
-<div style="margin: 0em 0em 1em 0em;" id="metrics">
+<!-- Metrics info: for default theme only -->
+<div *ngIf="resourceType != scienceThemeResourceType" style="margin: 0em 0em 1em 0em;" id="metrics">
     <div>
         <b>Access Metrics</b>
     </div>

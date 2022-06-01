@@ -38,6 +38,7 @@ import { DescriptionPopupComponent } from './landing/description/description-pop
 import { AuthorPopupComponent } from './landing/author/author-popup/author-popup.component';
 import { ContactPopupComponent } from './landing/contact/contact-popup/contact-popup.component';
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
+import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 
 enableProdMode();
 
@@ -49,7 +50,7 @@ enableProdMode();
         AppComponent
     ],
     imports: [
-        ConfigModule,        // provider for AppConfig
+        ConfigModule,
         FrameModule,
         ErrorsModule,
         LandingPageModule,
@@ -58,30 +59,23 @@ enableProdMode();
         DirectivesModule,
         DatacartModule,
         MetricsModule,
-        SharedModule.forRoot(), 
-        FragmentPolyfillModule.forRoot({
-            smooth: true
-        }),
-
+        SharedModule.forRoot(),
+        // FragmentPolyfillModule.forRoot({
+        //     smooth: true
+        // }),
         HttpClientModule, FormsModule, ReactiveFormsModule,
         CommonModule, BrowserAnimationsModule, FormsModule,
         ToastrModule.forRoot({
             toastClass: 'toast toast-bootstrap-compatibility-fix'
         }),
-        NgbModule.forRoot()
+        NgbModule
     ],
     exports: [],
     providers: [
         AppErrorHandler,
-        { provide: ErrorHandler,  useClass: AppErrorHandler },
+        { provide: ErrorHandler, useClass: AppErrorHandler },
         GoogleAnalyticsService,
         DatePipe
-    ],
-    entryComponents: [
-        SearchTopicsComponent, 
-        DescriptionPopupComponent, 
-        AuthorPopupComponent,
-        ContactPopupComponent
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })

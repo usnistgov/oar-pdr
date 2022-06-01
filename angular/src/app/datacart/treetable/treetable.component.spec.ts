@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { CartTreeNode, TreetableComponent } from './treetable.component';
 import { DownloadService } from '../../shared/download-service/download-service.service';
@@ -177,7 +177,7 @@ describe('TreetableComponent', () => {
   let component: TreetableComponent;
   let fixture: ComponentFixture<TreetableComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     let dc: DataCart = DataCart.openCart("goob");
     dc._forget();
     dc.addFile("foo", { filePath: "bar/goo",  count: 3, downloadURL: "http://here", resTitle: "fooishness" },
@@ -203,7 +203,7 @@ describe('TreetableComponent', () => {
     .compileComponents();
   }));
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     fixture = TestBed.createComponent(TreetableComponent);
     component = fixture.componentInstance;
     component.cartName = "goob";

@@ -107,7 +107,7 @@ export abstract class CachingConfigService extends ConfigService {
             this.config = new AppConfig(this._useServerSide(cfgdata));
 
             if (this.cache) 
-                this.cache.set(CONFIG_TS_KEY, new AppConfig(this._hideServerSide(cfgdata)))
+                this.cache.set<AppConfig>(CONFIG_TS_KEY, new AppConfig(this._hideServerSide(cfgdata)))
         }
         return this.config;
     }
@@ -174,7 +174,7 @@ export class AngularEnvironmentConfigService extends CachingConfigService {
         if (! this.config) {
             this.config = new AppConfig(this.loadConfig());
             if (isPlatformServer(this.platid))
-                this.cache.set(CONFIG_TS_KEY, this.config);
+                this.cache.set<AppConfig>(CONFIG_TS_KEY, this.config);
         }
         return this.config;
     }
@@ -284,7 +284,7 @@ export class TransferStateConfigService extends ConfigService {
     getConfig() : AppConfig {
         console.log("Loading configuration data delivered from the server.");
 
-        let data : LPSConfig|null = this.cache.get(CONFIG_TS_KEY, null) as LPSConfig;
+        let data : LPSConfig|null = this.cache.get<AppConfig>(CONFIG_TS_KEY, null) as LPSConfig;
         if (! data)
             throw new Error("Missing key from transfer state: " + CONFIG_KEY_NAME)
         data["source"] = this.source;

@@ -1,13 +1,19 @@
-<div class="ui-g" id="identity">
-    <div class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-12">
+<div class="grid" id="identity">
+    <div class="col-12 col-md-12 col-lg-12 col-sm-12">
         <span class="recordType">
             <b>{{recordType}}</b>
+            <span *ngIf="recordType=='Science Theme'" class="badge version"> Beta</span>
         </span>
         <br>
         <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
+        <div id="ispartof" *ngIf="isPartOf">
+          <i style="font-size: smaller;">Part of {{isPartOf[0]}} <a href="{{isPartOf[1]}}"
+             title="view collection">{{isPartOf[2]}}</a> {{isPartOf[3]}}</i>
+        </div>
         <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
     </div>
-    <div class="ui-g-8 ui-md-8 ui-lg-8 ui-sm-12">
+    
+    <div class="col-8 col-md-8 col-lg-8 col-sm-12">
         <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
         <span>Identifier: </span>
@@ -16,26 +22,31 @@
         <span *ngIf="!doiUrl"><i> 
             <a href="{{ cfg.get('landingPageService','/od/id/') }}{{record['@id']}}">{{record["@id"]}}</a></i>
         </span>
-        <span class="describedin" *ngIf="primaryRefs.length > 0"><br>
-            <span>Described in article: </span>
-            <div *ngFor="let ref of primaryRefs; let i =index">
-                <span style="padding-left:20px">
-                    <i class="faa faa-external-link">
-                        <a href={{ref.location}} target="blank"
-                            (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">&nbsp;&nbsp;{{ ref.label }}</a></i>
-                    <span *ngIf="i < primaryRefs.length-1">,</span>
-                </span>
+        <div class="describedin" *ngIf="primaryRefs.length > 0">
+            <div>Described in
+                  <span *ngIf="primaryRefs.length < 2">this article:</span>
+                  <span *ngIf="primaryRefs.length > 1">these articles: </span></div>
+            <div *ngFor="let ref of primaryRefs; let i =index" class="primary-ref-entry"
+                 style="padding-left:20px">
+              <span *ngIf="ref.location; else nopreflink">
+                  <span class="faa faa-external-link">&nbsp;&nbsp;</span>
+                  <i><a href={{ref.location}} target="blank"
+                        (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, ref.location)">{{ ref.label }}</a><span *ngIf="i < primaryRefs.length-1">,</span></i>
+              </span>
+              <ng-template #nopreflink>
+                <i>{{ ref.label }}<span *ngIf="i < primaryRefs.length-1">,</span></i>
+              </ng-template>
             </div>
-        </span>
+        </div>
         <pdr-version [record]="record"></pdr-version>
     </div>
 
-    <div class="ui-g-4 ui-md-4 ui-lg-4 ui-sm-12">
+    <div class="col-4 col-md-4 col-lg-4 col-sm-12">
         <span *ngIf="showHomePageLink" style="float: right;">
             <span *ngIf="inBrowser; else visitHomeOnServer">
                 <a href={{record.landingPage}} target="_blank">
                     <button type="button" pButton type="submit" [disabled]="!inViewMode"
-                        class="home_button ui-button ui-widget ui-state-default ui-corner-all ui-button-text-empty"
+                        class="home_button p-button p-component ui-button-text-empty"
                         (click)="googleAnalytics(record.landingPage, $event, 'Resource title: '+record.title)">
                         <i class="faa faa-external-link"
                             style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>

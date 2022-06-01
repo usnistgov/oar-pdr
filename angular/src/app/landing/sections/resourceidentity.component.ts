@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input, ViewChild } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, ViewChild } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
@@ -25,6 +25,7 @@ export class ResourceIdentityComponent implements OnChanges {
     primaryRefs: any[] = [];
     editMode: string;
     EDIT_MODES: any;
+    isPartOf: string[] = null;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -54,7 +55,7 @@ export class ResourceIdentityComponent implements OnChanges {
         return this.editMode == this.EDIT_MODES.VIEWONLY_MODE;
     }
 
-    ngOnChanges() {
+    ngOnChanges(changes: SimpleChanges) {
         if (this.recordLoaded())
             this.useMetadata();  // initialize internal component data based on metadata
     }
@@ -69,10 +70,37 @@ export class ResourceIdentityComponent implements OnChanges {
      */
     useMetadata(): void {
         this.showHomePageLink = this.isExternalHomePage(this.record['landingPage']);
-        this.recordType = this.determineResourceLabel(this.record);
+
+        this.recordType = (new NERDResource(this.record)).resourceLabel();
+
+        if (this.record['isPartOf'] && Array.isArray(this.record['isPartOf']) && 
+            this.record['isPartOf'].length > 0 && this.record['isPartOf'][0]['@id'])
+        {
+            // this resource is part of a collection; format a label indicating that
+            let coll = this.record['isPartOf'][0];
+            
+            let article = "";
+            let title = "another collection";
+            let suffix = "";
+            if (coll['title']) {
+                article = "the";
+                title = coll['title']
+                suffix = "Collection";
+                if (NERDResource.objectMatchesTypes(coll, "ScienceTheme"))
+                    suffix = "Science Theme";
+            }
+           
+            this.isPartOf = [
+                article,
+                this.cfg.get("locations.landingPageService") + coll['@id'],
+                title,
+                suffix
+            ];
+        }
 
         if (this.record['doi'] !== undefined && this.record['doi'] !== "")
             this.doiUrl = "https://doi.org/" + this.record['doi'].substring(4);
+
         this.primaryRefs = (new NERDResource(this.record)).getPrimaryReferences();
         for (let ref of this.primaryRefs) {
             if (! ref['label'])
@@ -89,28 +117,6 @@ export class ResourceIdentityComponent implements OnChanges {
             return false;
         let pdrhomeurl = /^https?:\/\/(\w+)(\.\w+)*\/od\/id\//
         return ((url.match(pdrhomeurl)) ? false : true);
-    }
-
-    /**
-     * analyze the NERDm resource metadata and return a label indicating the type of 
-     * the resource described.  This is used as a label at the top of the page, just above 
-     * the title.
-     */
-    public determineResourceLabel(resmd: NerdmRes): string {
-        if (resmd['@type'] instanceof Array && resmd['@type'].length > 0) {
-            switch (resmd['@type'][0]) {
-                case 'nrd:SRD':
-                    return "Standard Reference Data";
-                case 'nrd:SRM':
-                    return "Standard Reference Material";
-                case 'nrdp:DataPublication':
-                    return "Data Publication";
-                case 'nrdp:PublicDataResource':
-                    return "Public Data Resource";
-            }
-        }
-
-        return "Data Resource";
     }
 
     /**

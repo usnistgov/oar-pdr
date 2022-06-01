@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync  } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { HorizontalBarchartComponent } from './horizontal-barchart.component';
 import { DebugElement } from '@angular/core';
@@ -44,15 +44,11 @@ describe('HorizontalBarchartComponent', () => {
 
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("svg"); 
-        console.log("svg", el);
         expect(el).not.toBeNull();
 
         // should have the correct height
         // 3 bars x 30/bar + margin top (30) + margin bottom(20) = 140
         expect(el.getAttribute("height")).toBe('140');
-
-        // should have the correct width
-        expect(el.getAttribute("width")).toBe('770');
 
         el = cmpel.querySelectorAll("rect"); 
 

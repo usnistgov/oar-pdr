@@ -7,8 +7,7 @@
       <div class="header-div">
         <span [ngStyle]="{'cursor': getCursor()}" (click)="openRootPage()" title="NIST Public Data Repository"
           class="header__logo-link" rel="home">
-          <img class="Fleft top_bar" src="./assets/images/nist_logo_reverse.png" alt="NIST Public Data Repository"
-            title="NIST Public Data Repository">
+          <img class="Fleft top_bar" src="./assets/images/nist_logo_reverse.png" alt="NIST Public Data Repository">
           <span class="Fleft"
             style="font-weight:bold;line-height: 16.5px;display: table-cell;vertical-align: text-top;color: #FFFFFF;font-size:14px;padding-left: 0.5em">PUBLIC
             <br> DATA REPOSITORY </span>
@@ -26,7 +25,7 @@
           <a href="{{globalCartUrl}}" target="_blank" [ngStyle]="{'color':getMenuColor('Cart')}"
             [ngClass]="{'disabled':editEnabled,'enabled':!editEnabled}"><b>Cart</b><i
               class="faa faa-shopping-cart faa-1x" [ngStyle]="{'color':getMenuColor('Cart')}"></i><span
-              class="w3-badge badge-pill badge-notify">&nbsp;{{cartLength}}&nbsp;</span></a>
+              class="w3-badge badge-pill badge-notify badge-style">&nbsp;{{cartLength}}&nbsp;</span></a>
           <span *ngIf="editEnabled && editstatsvc.userID">
             | <i class="faa faa-user-circle faa-1x icon-white" style="color: white; cursor: pointer;"
               data-toggle="tooltip" title="{{editstatsvc.userID}}" (click)="showUserId()"></i>

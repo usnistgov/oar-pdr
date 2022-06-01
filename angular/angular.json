@@ -10,6 +10,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": ["file-saver"],
             "outputPath": "dist/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -27,22 +28,32 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/primeng/resources/primeng.css",
               "node_modules/primeicons/primeicons.css",
-              "node_modules/primeng/resources/themes/bootstrap/theme.css",
+              "node_modules/primeflex/primeflex.css",
+              "node_modules/primeng/resources/themes/saga-blue/theme.css",
               "src/styles/font-awesome/css/font-awesome.min.css",
               "src/styles/main.css",
               "src/app/content/modal.less",
               "node_modules/ngx-toastr/toastr.css"
             ],
-            "scripts": []
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -53,7 +64,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -103,23 +115,14 @@
             ]
           }
         },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        },
         "server": {
           "builder": "@angular-devkit/build-angular:server",
           "options": {
             "outputPath": "dist/server",
-            "main": "src/main.server.ts",
-            "tsConfig": "src/tsconfig.server.json"
+            "main": "server.ts",
+            "tsConfig": "src/tsconfig.server.json",
+            "sourceMap": true,
+            "optimization": false
           },
           "configurations": {
             "production": {
@@ -129,8 +132,43 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ]
+            ,              "optimization": true
+}
+          },
+          "defaultConfiguration": ""
+        },
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "browserTarget": "oar-lps:build:development",
+              "serverTarget": "oar-lps:server:development"
+            },
+            "production": {
+              "browserTarget": "oar-lps:build:production",
+              "serverTarget": "oar-lps:server:production"
             }
-          }
+          },
+          "defaultConfiguration": "development"
+        },
+        "prerender": {
+          "builder": "@nguniversal/builders:prerender",
+          "options": {
+            "routes": [
+              "/"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "oar-lps:build:production",
+              "serverTarget": "oar-lps:server:production"
+            },
+            "development": {
+              "browserTarget": "oar-lps:build:development",
+              "serverTarget": "oar-lps:server:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     },
@@ -146,15 +184,6 @@
             "protractorConfig": "./protractor.conf.js",
             "devServerTarget": "oar-lps:serve"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
         }
       }
     }
@@ -162,30 +191,29 @@
   "cli": {},
   "schematics": {
     "@schematics/angular:class": {
-      "spec": true
+      "skipTests": false
     },
     "@schematics/angular:component": {
-      "spec": true,
+      "skipTests": false,
       "inlineStyle": false,
       "inlineTemplate": false,
       "prefix": "app",
-      "styleext": "css"
+      "style": "css"
     },
     "@schematics/angular:directive": {
-      "spec": true,
+      "skipTests": false,
       "prefix": "app"
     },
     "@schematics/angular:guard": {
-      "spec": true
+      "skipTests": false
     },
     "@schematics/angular:module": {
-      "spec": true
     },
     "@schematics/angular:pipe": {
-      "spec": true
+      "skipTests": false
     },
     "@schematics/angular:service": {
-      "spec": true
+      "skipTests": false
     }
   }
 }

@@ -10,7 +10,7 @@ const barWidth: number = 30;
   encapsulation: ViewEncapsulation.None
 })
 export class HorizontalBarchartComponent implements OnInit {
-    @ViewChild('chart') private chartContainer: ElementRef;
+    @ViewChild('chart', { static: true }) private chartContainer: ElementRef;
     @Input() inputdata: Array<any> = [];
     @Input() xAxisLabel: string = "";
     @Input() yAxisLabel: string = "";

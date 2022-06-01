@@ -33,7 +33,7 @@ export class HeadbarComponent {
     inBrowser: boolean = false;
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
-    searchLink: string = "";
+    searchLink: string = "localhost:5555";
     status: string = "";
     appVersion: string = "";
     cartLength: number = 0;
@@ -57,6 +57,7 @@ export class HeadbarComponent {
         if (!(cfg instanceof AppConfig))
             throw new Error("HeadbarComponent: Wrong config type provided: " + cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+
         this.contactLink = cfg.get("locations.pdrSearch", "/sdp/") + "#/help/contactus";
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion", "");

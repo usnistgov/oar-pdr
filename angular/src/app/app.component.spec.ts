@@ -1,4 +1,4 @@
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, waitForAsync  } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { RouterModule, Routes } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -20,7 +20,7 @@ describe('AppComponent', () => {
     let plid: Object = "browser";
     let ts: TransferState = new TransferState();
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
 
         TestBed.configureTestingModule({
@@ -32,7 +32,7 @@ describe('AppComponent', () => {
         }).compileComponents();
     }));
 
-    it('should create the app', async(() => {
+    it('should create the app', waitForAsync(() => {
         const fixture = TestBed.createComponent(AppComponent);
         const app = fixture.debugElement.componentInstance;
 
@@ -41,7 +41,7 @@ describe('AppComponent', () => {
         })
     }));
 
-    it(`should have as title 'PDR Resource Landing Page'`, async(() => {
+    it(`should have as title 'PDR Resource Landing Page'`, waitForAsync(() => {
         const fixture = TestBed.createComponent(AppComponent);
         const app = fixture.debugElement.componentInstance;
 
@@ -50,7 +50,7 @@ describe('AppComponent', () => {
         })
     }));
 
-    it(`should contain 'DATA REPOSITORY' in the first span`, async(() => {
+    it(`should contain 'DATA REPOSITORY' in the first span`, waitForAsync(() => {
         const fixture = TestBed.createComponent(AppComponent);
 
         fixture.whenStable().then(() => {

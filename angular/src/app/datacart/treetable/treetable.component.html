@@ -1,6 +1,6 @@
 <div *ngIf="inBrowser" style="display: inline-block; margin: auto;">
     <div class="full-span" style="width: 94%;">
-        <p-treeTable *ngIf="isVisible" #ngtt [resizableColumns]="true" selectionMode="checkbox" sortField="name"
+        <p-treeTable styleClass="p-treetable-sm" *ngIf="isVisible" #ngtt [resizableColumns]="true" selectionMode="checkbox" sortField="name"
                      [value]="dataTree.children" dataKey="key" [(selection)]="selectedData"
                      (onNodeSelect)="onNodeSelect($event)" (onNodeUnselect)="onNodeUnselect($event)"
                      [style]="{'margin':'auto', 'padding-bottom':'3%', 'color':'black'}">
@@ -114,8 +114,8 @@
         <div class="overlay-title">
             File details
         </div>
-        <div class="ui-g filesection">
-            <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+        <div class="grid filesection">
+            <div *ngIf="fileNode" class="col-12 col-md-12 col-lg-12 col-sm-10">
                 <span class="font8" style="color:grey">
                     Selected {{fileNode.filetype}} <br>
                 </span>
@@ -144,8 +144,8 @@
     [style]="{'display':'inline-block','position':'related','left':'50%','top':'80%','max-width':'400px'}"
     appendToBody=true>
     <div class="filecard">
-        <div class="ui-g filesection">
-            <div *ngIf="fileNode" class="ui-g-12 ui-md-12 ui-lg-12 ui-sm-10">
+        <div class="grid filesection">
+            <div *ngIf="fileNode" class="col-12 col-md-12 col-lg-12 col-sm-10">
                 <div class="warning-overlay-title">Message details</div>
                 <div class="long-text">File path: {{fileNode.cartItem.filePath}}</div>
                 <div class="long-text">Download URL: {{fileNode.cartItem.downloadURL}}</div>

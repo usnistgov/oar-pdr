@@ -26,6 +26,7 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 import { MetricsData } from "./metrics-data";
+import { Themes, ThemesPrefs } from '../shared/globals/globals';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -88,9 +89,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     dialogOpen: boolean = false;
     modalReference: any;
     windowScrolled: boolean = false;
-    btnPosition: any;
+    btnPosition: number = 20;
+    menuPosition: number = 20;
     menuBottom: string = "1em";
     showMetrics: boolean = false;
+    recordType: string = "";
+    imageURL: string;
+    theme: string;
+    scienceTheme = Themes.SCIENCE_THEME;
+    defaultTheme = Themes.DEFAULT_THEME;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -99,6 +106,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     // metricsinfoComponent: MetricsinfoComponent;
 
     @ViewChild('stickyButton') btnElement: ElementRef;
+    @ViewChild('stickyMenu') menuElement: ElementRef;
+    @ViewChild('test') test: ElementRef;
 
     /**
      * create the component.
@@ -165,6 +174,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         let metadataError = "";
         this.displaySpecialMessage = false;
         this.CART_ACTIONS = CartActions.cartActions;
+        this.imageURL = 'assets/images/fingerprint.jpg';
 
         // Only listen to storage change if we are not in edit mode
         if(this.inBrowser && !this.editEnabled){
@@ -172,21 +182,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             window.addEventListener("storage", this.cartChangeHandler);
         }
         this.metricsData = new MetricsData();
-
-        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
-        // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
-        // need to set to 768 to be able to change the state at 750px. 
-        this.breakpointObserver
-            .observe(['(min-width: 768px)'])
-            .subscribe((state: BreakpointState) => {
-                if (state.matches) {
-                    this.mobileMode = false;
-                } else {
-                    this.mobileMode = true;
-                    this.btnPosition = this.btnElement.nativeElement.offsetTop + 25;
-                    console.log("Mobile mode")
-                }
-            });
 
         // Clean up cart status storage 
         if(this.inBrowser){
@@ -223,12 +218,16 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
+                this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
+
                 if(this.inBrowser){
                     if(this.editEnabled){
                         this.metricsData.hasCurrentMetrics = false;
                         this.showMetrics = true;
-                    }else
-                        this.getMetrics();
+                    }else{
+                        if(this.theme == Themes.DEFAULT_THEME)
+                            this.getMetrics();
+                    }
                 }
 
                 // proceed with rendering of the component
@@ -285,14 +284,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
         });
-
     }
 
     /**
      * Get metrics data
      */
      getMetrics() {
-        console.log("Retriving metrics data...");
         let ediid = this.md.ediid;
 
         this.metricsService.getFileLevelMetrics(ediid).subscribe(async (event) => {
@@ -365,7 +362,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     @HostListener("window:scroll", [])
     onWindowScroll() {
-        this.windowScrolled = (window.pageYOffset > this.btnPosition);
+        if(this.mobileMode)
+            this.windowScrolled = (window.pageYOffset > this.btnPosition);
+        else
+            this.windowScrolled = (window.pageYOffset > this.menuPosition);
+
         this.menuBottom = (window.pageYOffset).toString() + 'px';
     }
 
@@ -420,6 +421,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }
     }
 
+    setCitationVisible(citationVisible) {
+        this.citationVisible = citationVisible;
+    }
+
     /**
      * Reture record level total download size
      */
@@ -434,9 +439,41 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * apply housekeeping after view has been initialized
      */
     ngAfterViewInit() {
+        if(this.inBrowser) {
+            //Set the position of the sticky menu (or menu button)
+            setTimeout(() => {
+                this.setMenuPosition();
+            }, 0);
+        }
+
         if (this.md && this.inBrowser) {
             this.useFragment();
+
             window.history.replaceState({}, '', '/od/id/' + this.reqId);
+        }
+    }
+
+    /**
+     * Set the position of the sticky menu (or menu button)
+     */
+    setMenuPosition() {
+        // Bootstrap breakpoint observer (to switch between desktop/mobile mode)
+        // The breakpoint for PrimeNG menu is 750. For some reason the following min-width
+        // need to set to 768 to be able to change the state at 750px. 
+        if(this.inBrowser){
+            this.breakpointObserver
+            .observe(['(min-width: 768px)'])
+            .subscribe((state: BreakpointState) => {
+                if (state.matches) {
+                    this.mobileMode = false;
+                    if (this.menuElement)
+                        this.menuPosition = this.menuElement.nativeElement.offsetTop + 20;
+                } else {
+                    this.mobileMode = true;
+                    if (this.btnElement)
+                        this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
+                }
+            });
         }
     }
 
@@ -460,6 +497,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     useMetadata(): void {
         this.metricsData.url = "/metrics/" + this.reqId;
+        this.recordType = (new NERDResource(this.md)).resourceLabel();
+
         // set the document title
         this.setDocumentTitle();
         this.mdupdsvc.setOriginalMetadata(this.md);
@@ -564,5 +603,16 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
         if (this.editMode == this.EDIT_MODES.OUTSIDE_MIDAS_MODE)
             this.message = 'This record is not currently available for editing. <p>Please return to MIDAS and click "Edit Landing Page" to edit.'
+    }
+
+    /**
+     * Setup landing page layout
+     */
+    landingpageClass() {
+        if(this.mobileMode){
+            return "col-12 md:col-12 lg:col-12 sm:flex-nowrap";
+        }else{
+            "col-10 md:col-10 lg:col-10 sm:flex-nowrap";
+        }
     }
 }

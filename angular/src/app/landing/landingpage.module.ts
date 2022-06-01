@@ -20,6 +20,10 @@ import { DownloadstatusComponent } from './downloadstatus/downloadstatus.compone
 import { TaxonomyListService } from '../shared/taxonomy-list'
 import { ErrorComponent, UserErrorComponent } from './error.component';
 import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
+// import { ForensicslandingbodyModule } from './forensicslandingbody/forensicslandingbody.module';
+// import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
+import { SearchresultModule } from './searchresult/searchresult.module';
+
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -30,11 +34,12 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
         CommonModule,
         ButtonModule,
         NgbModule,
-        NerdmModule,    // provider for MetadataService (which depends on AppConfig)
+        NerdmModule,
         EditControlModule,
         ToolsModule,
         CitationModule,
-        SectionsModule
+        SectionsModule,
+        SearchresultModule
     ],
     declarations: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,
@@ -42,9 +47,6 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
     ],
     providers: [
         MetadataUpdateService, TaxonomyListService, DatePipe
-    ],
-    entryComponents: [
-        MetricsinfoComponent
     ],
     exports: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,

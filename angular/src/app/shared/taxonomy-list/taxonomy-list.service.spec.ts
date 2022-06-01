@@ -22,7 +22,7 @@ describe('TaxonomyListService', () => {
       providers: [Location,{ provide: AppConfig, useValue: cfg}]
     })
 
-    const service: TaxonomyListService = TestBed.get(TaxonomyListService);
+    const service: TaxonomyListService = TestBed.inject(TaxonomyListService);
     expect(service).toBeTruthy();
   });
 });

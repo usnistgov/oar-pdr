@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -40,7 +40,7 @@ describe('ResourceDescriptionComponent', () => {
         // fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         fixture.detectChanges();

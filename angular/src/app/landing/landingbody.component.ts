@@ -36,6 +36,7 @@ import { MetricsData } from "./metrics-data";
     ]
 })
 export class LandingBodyComponent {
+    recordType: string = "";
 
     // passed in by the parent component:
     @Input() md: NerdmRes = null;
@@ -49,6 +50,7 @@ export class LandingBodyComponent {
 
     @Input() metricsData: MetricsData;
     @Input() showJsonViewer: boolean = false;
+    @Input() theme: string;
 
     @ViewChild(ResourceMetadataComponent)
     resourceMetadataComponent: ResourceMetadataComponent;
@@ -64,6 +66,9 @@ export class LandingBodyComponent {
     constructor(private cfg: AppConfig)
     { }
 
+    ngOnInit(): void {
+        this.recordType = (new NERDResource(this.md)).resourceLabel();
+    }
     /**
      * scroll the view to the named section.  The available sections are: "top", "description",
      * "dataAccess", "references", and "metadata".  Any other value will be treated as "top".  

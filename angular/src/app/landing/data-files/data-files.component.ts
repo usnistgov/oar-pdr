@@ -76,7 +76,7 @@ interface DataFileItem {
     providers: [ ],
     animations: [
         trigger('detailExpand', [
-          state('collapsed', style({height: '0px', minHeight: '0', display: 'none'})),
+          state('collapsed', style({height: '0px', minHeight: '0'})),
           state('expanded', style({height: '*'})),
           transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
@@ -94,7 +94,6 @@ interface DataFileItem {
                 transition(':leave', [
                     style({height: '100%', opacity: 1}),
                     animate('700ms', style({height: 0, opacity: 0}))
-                //   animate('500ms', style({transform: 'translateY(0)', opacity: 1}))
                 ])
             ]
         )
@@ -130,7 +129,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     showDownloadProgress: boolean = false;
     appWidth: number = 800;   // default value used in server context
     appHeight: number = 900;  // default value used in server context
-    fontSize: string;
+    fontSize: string = "16px";
     EDIT_MODES: any;
     editMode: string;
     mobileMode: boolean = false;
@@ -152,11 +151,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
-        if (this.inBrowser && typeof (window) !== 'undefined') {
-            this.appHeight = (window.innerHeight);
-            this.appWidth = (window.innerWidth);
-            this.setWidth(this.appWidth);
-
+        if (typeof (window) !== 'undefined') {
             window.onresize = (e) => {
                 ngZone.run(() => {
                     this.appWidth = window.innerWidth;
@@ -165,7 +160,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 });
             };
         }
-
+        
         this.EDIT_MODES = LandingConstants.editModes;
     }
 
@@ -186,6 +181,10 @@ export class DataFilesComponent implements OnInit, OnChanges {
         });
 
         if(this.inBrowser){
+            this.appHeight = (window.innerHeight);
+            this.appWidth = (window.innerWidth);
+            this.setWidth(this.appWidth);
+            
             this.globalDataCart = this.cartService.getGlobalCart();
             this.cartLength = this.globalDataCart.size();
             this.globalDataCart.watchForChanges((ev) => { this.cartChanged(); })
@@ -435,14 +434,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.cleanupDisplay();
 
             fileNode.comp.DetailsDisplayed = true;
-
-            if(!fileNode.comp.DetailsDisplayed) {
-                setTimeout(() => {
-                    fileNode.comp.DetailsDisplayed02 = true;
-                }, 600);
-            }else{
-                fileNode.comp.DetailsDisplayed02 = true;
-            }
+            fileNode.comp.DetailsDisplayed02 = true;
     
             this.currentKey = fileNode.key;
         }
@@ -491,11 +483,11 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * @param fileNode file node in the tree
      */
     rowStyle(fileNode: any) {
-        if(fileNode.comp.DetailsDisplayed){
-            return {'background-color': '#e6ffff'};
-        }else{
-            return {'background-color': 'white'};
-        }
+        // if(fileNode.comp.DetailsDisplayed){
+        //     return {'background-color': '#80bfff'};
+        // }else{
+        //     return {'background-color': 'white'};
+        // }
     }
 
     /**
@@ -688,9 +680,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     getDownloadBtnColor(rowData: any) {
         if (rowData.downloadStatus == DownloadStatus.DOWNLOADED)
-            return 'green';
+            return 'var(--nist-green-dark)';
 
-        return '#1E6BA1';
+        return 'var(--science-theme-background-dark)';
     }
 
     /**
@@ -698,9 +690,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     getAddAllToDataCartBtnColor() {
         if (this.allInCart)
-            return 'green';
+            return 'var(--nist-green-dark)';
         else
-            return '#1E6BA1';
+            return 'var(--science-theme-background-dark)';
     }
 
     /**
@@ -717,37 +709,37 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * Following functions set tree table style
      */
     titleStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[0].width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[0].width, 'color': 'white', 'font-size': this.fontSize };
     }
 
     typeStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[1].width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[1].width, 'color': 'white', 'font-size': this.fontSize };
     }
 
     sizeStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[2].width, 'color': 'white', 'font-size': this.fontSize };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[2].width, 'color': 'white', 'font-size': this.fontSize };
     }
 
     statusStyleHeader() {
-        return { 'background-color': '#1E6BA1', 'width': this.cols[3].width, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
+        return { 'background-color': 'var(--science-theme-background-dark)', 'width': this.cols[3].width, 'color': 'white', 'font-size': this.fontSize, 'white-space': 'nowrap' };
     }
 
     titleStyle(rowData: any) {
-        let cursor = this.isLeaf(rowData)? 'pointer' : 'default;';
-        let color = this.isLeaf(rowData)? '#1471AE' : 'black;';
-        return { 'width': this.cols[0].width, 'font-size': this.fontSize, 'margin-left': '10px', 'cursor': cursor, 'color': color };
-    }
+        let cursor = this.isLeaf(rowData)? 'pointer' : 'default';
+        let color = this.isLeaf(rowData)? 'var(--science-theme-background-dark)' : 'black';
+        return { 'width': this.cols[0].width,'height': '10px', 'margin-left': '10px', 'cursor': cursor, 'color': color, 'padding': 0, 'font-size': this.fontSize };
+    }                        
 
     typeStyle() {
-        return { 'width': this.cols[1].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[1].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
     }
 
     sizeStyle() {
-        return { 'width': this.cols[2].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[2].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0};
     }
 
     statusStyle() {
-        return { 'width': this.cols[3].width, 'font-size': this.fontSize };
+        return { 'width': this.cols[3].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
     }
 
     /**

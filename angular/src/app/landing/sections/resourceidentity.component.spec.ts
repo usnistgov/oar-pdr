@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 
 import { ToastrModule } from 'ngx-toastr';
@@ -12,6 +12,8 @@ import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { config, testdata } from '../../../environments/environment';
+
+import * as _ from 'lodash-es';
 
 describe('ResourceIdentityComponent', () => {
     let component : ResourceIdentityComponent;
@@ -33,14 +35,16 @@ describe('ResourceIdentityComponent', () => {
 
         fixture = TestBed.createComponent(ResourceIdentityComponent);
         component = fixture.componentInstance;
+        rec["@type"][0] = "nrdp:PublicDataResource";
+        rec["references"][0]["refType"] = "IsDocumentedBy";
         component.record = rec;
         // fixture.detectChanges();
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
-        component.ngOnChanges()
+        component.ngOnChanges({})
         fixture.detectChanges();
     }));
 
@@ -56,6 +60,10 @@ describe('ResourceIdentityComponent', () => {
         expect(descs.length).toBe(1);
 
         // expect(component.versionCmp.newer).toBeNull();
+
+        // test record does not include isPartOf
+        el = cmpel.querySelector("#ispartof");
+        expect(el).toBeFalsy();
     });
 
     it('should correctly render special references', () => {
@@ -65,6 +73,8 @@ describe('ResourceIdentityComponent', () => {
 
         let el = cmpel.querySelector(".describedin")
         expect(el).toBeTruthy();
+        expect(el.querySelectorAll(".primary-ref-entry").length).toEqual(1);
+        expect(el.querySelectorAll("a").length).toEqual(1);
         el = el.querySelector("a");
         expect(el.textContent).toContain("Solids: In-situ");
 
@@ -87,23 +97,78 @@ describe('ResourceIdentityComponent', () => {
         expect(component.primaryRefs[0]['label']).toEqual(component.primaryRefs[0]['location']);
     });
 
+    it('should not render special reference as link without location', () => {
+        // remove the location from the special reference
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        tstrec['references'][0]['location'] = null;
+        component.record = tstrec;
+        component.useMetadata();
+        fixture.detectChanges();
+        
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(1);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
+        expect(el).toBeTruthy();
+        expect(el.querySelectorAll(".primary-ref-entry").length).toEqual(1);
+        expect(el.querySelectorAll("a").length).toEqual(0);
+    });
+
+    it('should correctly render multiple special references', () => {
+        let tstrec = JSON.parse(JSON.stringify(rec));
+        tstrec['references'][1]['refType'] = "IsSupplementTo";
+        tstrec['references'][1]['location'] = null;
+        component.record = tstrec;
+        component.useMetadata();
+        fixture.detectChanges();
+        
+        expect(component).toBeDefined();
+        expect(component.primaryRefs.length).toEqual(2);
+        let cmpel = fixture.nativeElement;
+
+        let el = cmpel.querySelector(".describedin")
+        expect(el).toBeTruthy();
+        expect(el.querySelectorAll("a").length).toEqual(1);
+//        expect(el.textContent.includes(' ,')).toBeFalsy(); // doesn't work
+
+        let entries = el.querySelectorAll(".primary-ref-entry");
+        expect(entries.length).toEqual(2);
+        expect(entries[0].querySelectorAll("a").length).toEqual(1);
+        expect(entries[1].querySelectorAll("a").length).toEqual(0);
+        expect(entries[0].textContent.includes(',')).toBeTruthy();
+        expect(entries[1].textContent.includes(',')).toBeFalsy();
+        expect(entries[0].textContent.includes(' ,')).toBeFalsy();
+    });
+
     it('should correctly determine resource type', () => {
         expect(component).toBeDefined();
         let cmpel = fixture.nativeElement;
-        
-        let el = cmpel.querySelector(".recordType");
-        expect(el).toBeTruthy();
-        expect(el.textContent).toContain("Public Data Resource");
+        let member = _.cloneDeep(rec);
+        member['isPartOf'] = [
+            {
+                "@id": "ark:/88888/goobler",
+                title: "Uber Research",
+                "@type": [ "nrda:ScienceTheme", "nrd:PublicDataResource" ]
+            },
+            {
+                "@id": "ark:/88888/gomer",
+                title: "Sleepy Research",
+                "@type": [ "nrda:Aggregation", "nrd:PublicDataResource" ]
+            }
+        ];
+        component.record = member;
+        component.ngOnChanges({});
+        fixture.detectChanges();
 
-        let resmd = JSON.parse(JSON.stringify(rec))
-        expect(component.determineResourceLabel(resmd)).toEqual("Public Data Resource")
-        resmd['@type'][0] = "nrdp:DataPublication"
-        expect(component.determineResourceLabel(resmd)).toEqual("Data Publication")
-        resmd['@type'][0] = "nrd:SRD"
-        expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Data")
-        resmd['@type'][0] = "nrd:SRM"
-        expect(component.determineResourceLabel(resmd)).toEqual("Standard Reference Material")
+        let el = cmpel.querySelector("#ispartof");
+        expect(el).toBeTruthy();
+        expect(el.querySelector("ul")).toBeFalsy();
+        expect(el.innerHTML.includes(" Science Theme")).toBeTruthy();
+        let a = el.querySelector("a");
+        expect(a).toBeTruthy();
+        expect(a.href.endsWith("/ark:/88888/goobler")).toBeTruthy();
     });
-        
+
 });
 

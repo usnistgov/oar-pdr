@@ -1,5 +1,4 @@
 import { of, throwError } from 'rxjs';
-
 import { CustomizationService, InMemCustomizationService } from './customization.service';
 
 import { testdata } from '../../../environments/environment';

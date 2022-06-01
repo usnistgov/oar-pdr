@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BehaviorSubject, throwError } from 'rxjs/index';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { AppConfig } from '../../config/config';
 import { ZipData } from './zipData';

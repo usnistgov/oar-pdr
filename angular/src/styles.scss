@@ -1,5 +1,22 @@
 @import "~ngx-toastr/toastr.css";
 
+:root {
+    /* Colors */
+    --science-theme-background-default: #008097;
+    --science-theme-background-dark: #007287;
+    --science-theme-background-light: #f5fbfd;
+    --science-theme-background-light2: #e3f7fd;
+    --science-theme-background-blue: #017abb;
+    --science-theme-background-blue-hover: #2db2fa;
+    --nist-green-default: #257a2d;
+    --nist-green-dark: #1c6022;
+    --nist-green-light: #6bad73;
+    --nist-blue-default: #12659c;
+    --nist-blue-dark: #0c4870;
+    --nist-blue-light: #197dc0;
+    --background-light-grey: #f3f3f3;
+}
+
 .myCustomModalClass .modal-dialog {
   max-width: 1920px;
 }
@@ -18,12 +35,13 @@
 }
 
 a:link {
-  color: #1471AE;
+  color: var(--nist-blue-dark);
   background-color: transparent;
   text-decoration: none;
 }
+
 a:visited {
-  color: #1471AE;
+  color: var(--nist-blue-dark);
 //   color: #551A8B;
   background-color: transparent;
   text-decoration: none;
@@ -31,7 +49,7 @@ a:visited {
 
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #3498db; /* Blue */
+  border-top: 16px solid var(--nist-blue-light); /* Blue */
   border-radius: 50%;
   width: 120px;
   height: 120px;
@@ -51,13 +69,12 @@ a:visited {
 .flex-container > div {
   width: 100px;
   line-height: 15px;
-  // margin: 10px;
-  // text-align: center;
 }
 
 .login-panel .ui-inputtext:focus {
   border-width: 2px 2px 2px 2px;
-  border-color: #1471AE;}
+  border-color: var(--nist-blue-default);
+}
 
 h2 {
   color: black;
@@ -68,7 +85,7 @@ h2 {
 }
 
 .dialogHeader {
-  background-color:#153971;
+  background-color:var(--nist-blue-dark);
   height: 4em; 
   color:white;
   text-align: center;
@@ -78,11 +95,6 @@ h2 {
 .toast-bootstrap-compatibility-fix {
   opacity:1;
 }
-
-// .toast-info {
-//   background-color: #2F96B4 !important;
-//   padding: 0 1em 0 1em;
-// }
 
 .toast-success {
   color: white;
@@ -118,7 +130,7 @@ a {
 }
 
 .popup-tool-bar {
-    background-color:#153971;
+    background-color:var(--nist-blue-dark);
     height: 3.3em; 
     color:white;
     padding: .5em .5em .5em 2em
@@ -151,10 +163,6 @@ a {
     margin: 1em auto;
 }
 
-.nist-blue-background {
-    background-color: #1E6BA1;
-}
-
 .section-header {
     margin-top: 1em;
     margin-bottom: 1em;
@@ -163,11 +171,28 @@ a {
 
 .linked-text {
     cursor: pointer; 
-    color:#1471AE;
+    color:var(--nist-blue-default);
     margin-left: 1em;
 }
 
 .highlight {
-    background-color: #4e6fff;
+    background-color: var(--nist-blue-light);
     color: white;
 }
+
+.nist-green-fc {
+    color: var(--nist-green-default);
+}
+
+.nist-green-bc {
+    background-color: var(--nist-green-default);
+}
+
+.nist-blue-fc {
+    color: var(--nist-blue-default);
+}
+
+.nist-blue-bc {
+    background-color: var(--nist-blue-default);
+}
+

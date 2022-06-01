@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -16,6 +16,7 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { CartService } from '../../datacart/cart.service';
 
 import { config, testdata } from '../../../environments/environment';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 describe('ResourceDataComponent', () => {
     let component: ResourceDataComponent;
@@ -38,10 +39,11 @@ describe('ResourceDataComponent', () => {
         component = fixture.componentInstance;
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
         component.record = JSON.parse(JSON.stringify(rec));
+        component.theme = Themes.DEFAULT_THEME;
         component.ngOnChanges({});
         fixture.detectChanges();
     }));
@@ -64,16 +66,5 @@ describe('ResourceDataComponent', () => {
 
         // lists files
         expect(cmpel.querySelector("#filelisting")).toBeTruthy();
-    });
-
-    it('selectAccessPages()', () => {
-        expect(component).toBeTruthy();
-        expect(component.record).toBeTruthy();
-        expect(component.record['components']).toBeTruthy();
-        expect(component.record['components'].length).toBeGreaterThan(0);
-
-        let aps: NerdmComp[] = component.selectAccessPages(component.record['components']);
-        expect(aps.length).toBe(1);
-        expect(aps[0]['accessURL']).toBeTruthy();
     });
 });

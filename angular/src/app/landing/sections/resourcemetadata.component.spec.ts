@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, ComponentFixtureAutoDetect } from '@angular/core/testing';
+import { ComponentFixture, TestBed, ComponentFixtureAutoDetect, waitForAsync  } from '@angular/core/testing';
 
 import { ResourceMetadataComponent } from './resourcemetadata.component';
 import { SectionsModule } from './sections.module';
@@ -14,7 +14,7 @@ describe('ResourceMetadataComponent', () => {
     let component: ResourceMetadataComponent;
     let fixture: ComponentFixture<ResourceMetadataComponent>;
     let cfg : AppConfig = new AppConfig(config);
-    let rec : NerdmRes = testdata['test1'];
+    let record : NerdmRes = testdata['test1'];
 
     let makeComp = function() {
         TestBed.configureTestingModule({
@@ -30,10 +30,10 @@ describe('ResourceMetadataComponent', () => {
         component = fixture.componentInstance;
     }
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
-        component.record = JSON.parse(JSON.stringify(rec));
+        component.record = JSON.parse(JSON.stringify(record));
         component.metricsData = new MetricsData();
         component.showJsonViewer = false;
         component.ngOnChanges({});

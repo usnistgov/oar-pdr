@@ -6,10 +6,10 @@ import { EditStatusComponent } from './editstatus.component';
 import { AuthService, createAuthService } from './auth.service';
 import { ConfirmationDialogModule } from '../../shared/confirmation-dialog/confirmation-dialog.module';
 import { FrameModule } from '../../frame/frame.module';
-import { ButtonModule } from 'primeng/primeng';
+import { ButtonModule } from 'primeng/button';
 import { AppConfig } from '../../config/config';
 import { HttpClient } from '@angular/common/http';
-import { TreeModule, FieldsetModule, DialogModule, OverlayPanelModule } from 'primeng/primeng';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 @NgModule({
     declarations: [ EditControlComponent, EditStatusComponent ],
