@@ -105,10 +105,10 @@ describe("config.service newConfigService", function() {
         expect(ac.get("APIs.resolver")).toBe("gurn");
         expect(ac.get("APIs.serverSide")).toBeUndefined();
 
-        let saved = ts.get(cfgsvc.CONFIG_TS_KEY, null);
+        let saved : any = ts.get(cfgsvc.CONFIG_TS_KEY, null);
         expect(saved instanceof cfg.AppConfig).toBe(true);
-        expect(saved.get("APIs.resolver")).toBe("goob");
-        expect(saved.get("APIs.serverSide")).toBeUndefined();
+        expect((saved as cfg.AppConfig).get("APIs.resolver")).toBe("goob");
+        expect((saved as cfg.AppConfig).get("APIs.serverSide")).toBeUndefined();
     });
 
 });
