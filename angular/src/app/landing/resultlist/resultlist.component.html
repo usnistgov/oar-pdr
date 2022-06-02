@@ -1,6 +1,6 @@
 <div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 20px 0px; "
     *ngIf="showResult">
-    <div id="table" style="height: 25px !important;padding:0px">
+    <div id="table" style="height: 25px !important;padding:0px" *ngIf="searchResultsForDisplay">
         <div class="tr result-header">
             <!-- Number of search result -->
             <div class="td" style="width: 20%;margin-bottom: 0px;">
@@ -118,7 +118,7 @@
         </div>
     </div>
 
-    <div *ngIf="!searchResults">
-        Loading search result...
+    <div class="spinner" *ngIf="!searchResults">
+        <i class="faa faa-spinner faa-spin faa-stack-2x" style="color:#1E6BA1;" aria-hidden="true"></i>
     </div>
 </div>

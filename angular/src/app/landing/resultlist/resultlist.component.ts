@@ -428,7 +428,7 @@ export class ResultlistComponent implements OnInit {
                                 object["keyword"].forEach((keyword) => {
                                     //Loop through each search keyword from keyword filter
                                     filter.split("=")[1].split(",").forEach(kw => {
-                                        if(keyword.includes(kw)){
+                                        if(keyword.toLowerCase().includes(kw)){
                                             object.active = true;
                                         }
                                     })   

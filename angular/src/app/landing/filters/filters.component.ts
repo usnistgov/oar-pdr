@@ -581,14 +581,14 @@ export class FiltersComponent implements OnInit {
      * @param event - search query that user typed into the keyword filter box
      */
      updateSuggestedKeywords(event: any) {
-        let keyword = event.query;
+        let keyword = event.query.toLowerCase();
         this.suggestedKeywords = [];
         this.suggestedKeywordsLkup = {};
 
         // Handle current keyword: update suggested keywords and lookup
         for (let i = 0; i < this.keywords.length; i++) {
-            let keyw = this.keywords[i].trim();
-            if (keyw.toLowerCase().indexOf(keyword.toLowerCase()) >= 0) {
+            let keyw = this.keywords[i].trim().toLowerCase();
+            if (keyw.indexOf(keyword) >= 0) {
                 this.suggestedKeywords.push(this.shortenKeyword(keyw));
                 this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
             }
@@ -597,8 +597,8 @@ export class FiltersComponent implements OnInit {
         // Handle selected keyword: update suggested keywords lookup. Lookup array must cover all selected keywords.
         this.selectedKeywords.forEach(kw => {
             for (let i = 0; i < this.keywords.length; i++) {
-                let keyw = this.keywords[i].trim();
-                if (keyw.toLowerCase().indexOf(kw.toLowerCase()) >= 0) {
+                let keyw = this.keywords[i].trim().toLowerCase();
+                if (keyw.indexOf(kw.toLowerCase()) >= 0) {
                     this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
                 }
             }
