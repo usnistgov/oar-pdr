@@ -332,20 +332,25 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                             if(hasFile){
                                 //Now check if there is any metrics data
                                 this.metricsData.totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
-                    
+                
                                 this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].total_size : 0;
                     
                                 this.metricsData.totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
                         
-                                this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;
+                                this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;                                    
                             }
+
+                            this.metricsData.dataReady = true;
                         }
                     },
                     (err) => {
                         console.error("Failed to retrieve dataset metrics: ", err);
                         this.metricsData.hasCurrentMetrics = false;
                         this.showMetrics = true;
+                        this.metricsData.dataReady = true;
                     });  
+                }else{
+                    this.metricsData.dataReady = true;
                 }
                 this.showMetrics = true;
             }
@@ -354,6 +359,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             console.error("Failed to retrieve file metrics: ", err);
             this.metricsData.hasCurrentMetrics = false;
             this.showMetrics = true;
+            this.metricsData.dataReady = true; // ready to display message
         });                    
     }
 

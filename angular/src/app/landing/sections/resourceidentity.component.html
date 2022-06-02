@@ -47,6 +47,7 @@
                 <a href={{record.landingPage}} target="_blank">
                     <button type="button" pButton type="submit" [disabled]="!inViewMode"
                         class="home_button p-button p-component ui-button-text-empty"
+                        [ngStyle]="{'background-color': visitHomePageBtnStyle()}"
                         (click)="googleAnalytics(record.landingPage, $event, 'Resource title: '+record.title)">
                         <i class="faa faa-external-link"
                             style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>

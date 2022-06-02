@@ -1,5 +1,9 @@
 @import "~ngx-toastr/toastr.css";
 
+* {
+    font-family: sans-serif;
+}
+
 :root {
     /* Colors */
     --science-theme-background-default: #008097;
