@@ -302,7 +302,8 @@ export function compare_dates(a: string, b: string): number {
  */
 export function compare_histories(a, b) {
     let out = 0;
-    if (a.issued && b.issued)
+    let normalversion = /^\d+(\.\d+)*/;
+    if ((! normalversion.exec(a) || ! normalversion.exec(b)) && a.issued && b.issued)
         out = compare_dates(a.issued, b.issued);
     if (out == 0)
         out = compare_versions(a.version, b.version);
