@@ -12,6 +12,10 @@ import { config, testdata } from '../../../environments/environment';
 import { By } from "@angular/platform-browser";
 import { MetricsData } from "../metrics-data";
 
+function cloneDeep(rec: any) : any {
+    return JSON.parse(JSON.stringify(rec));
+}
+
 describe('AboutdatasetComponent', () => {
     let component: AboutdatasetComponent;
     let fixture: ComponentFixture<AboutdatasetComponent>;
@@ -77,7 +81,7 @@ describe('AboutdatasetComponent', () => {
 
     it('single isPartOf rendering', () => {
         let cmpel = fixture.nativeElement;
-        let member = _.cloneDeep(rec);
+        let member = cloneDeep(rec);
         member['isPartOf'] = [{
             "@id": "ark:/88888/goober",
             title: "Uber Research",
@@ -98,7 +102,7 @@ describe('AboutdatasetComponent', () => {
 
     it('multiple isPartOf rendering', () => {
         let cmpel = fixture.nativeElement;
-        let member = _.cloneDeep(rec);
+        let member = cloneDeep(rec);
         member['isPartOf'] = [
             {
                 "@id": "ark:/88888/goober",
