@@ -20,8 +20,7 @@ const routes: Routes = [
     { path: 'lps',
       children: [
           { path: '',                component: NoidComponent          },
-          { path: ':id',             component: LandingPageComponent   },
-          { path: 'ark:/88434/:id',  component: LandingPageComponent   }
+          { path: '**',              component: LandingPageComponent   }  // ** = id to display
       ]
     },
     { path: 'nerdm',                 component: NerdmComponent         },

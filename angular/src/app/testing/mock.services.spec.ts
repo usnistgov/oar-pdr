@@ -25,11 +25,13 @@ describe('SimpleParamMap', function() {
 describe('MockActivatedRouteSnapshot', function() {
     it('construction', function() {
         let snapshot : mocksv.Map =
-            new mocksv.MockActivatedRouteSnapshot("/goober/hank", { id: "hank"}, {c: ["1", "2"]});
+            new mocksv.MockActivatedRouteSnapshot("/goober;pid=w/hank", { id: "hank"}, {c: ["1", "2"]});
 
-        expect(snapshot.url.length).toBe(1);
-        expect(snapshot.url[0].path).toBe("/goober/hank");
-        expect(snapshot.url[0].parameterMap.get("id")).toBe("hank");
+        expect(snapshot.url.length).toBe(3);
+        expect(snapshot.url[0].path).toBe("");
+        expect(snapshot.url[1].path).toBe("goober");
+        expect(snapshot.url[2].path).toBe("hank");
+        expect(snapshot.url[1].parameterMap.get("pid")).toBe("w");
         expect(snapshot.params["id"]).toBe("hank");
         expect(snapshot.paramMap.get("id")).toBe("hank");
         expect(snapshot.queryParams["c"]).toEqual(["1", "2"]);
@@ -39,11 +41,13 @@ describe('MockActivatedRouteSnapshot', function() {
 describe('MockActivatedRoute', function() {
     it('construction', function() {
         let route : mocksv.Map =
-            new mocksv.MockActivatedRoute("/goober/hank", { id: "hank"}, {c: ["1", "2"]});
+            new mocksv.MockActivatedRoute("/goober;pid=w/hank", { id: "hank"}, {c: ["1", "2"]});
 
-        expect(route.snapshot.url.length).toBe(1);
-        expect(route.snapshot.url[0].path).toBe("/goober/hank");
-        expect(route.snapshot.url[0].parameterMap.get("id")).toBe("hank");
+        expect(route.snapshot.url.length).toBe(3);
+        expect(route.snapshot.url[0].path).toBe("");
+        expect(route.snapshot.url[1].path).toBe("goober");
+        expect(route.snapshot.url[2].path).toBe("hank");
+        expect(route.snapshot.url[1].parameterMap.get("pid")).toBe("w");
         expect(route.snapshot.params["id"]).toBe("hank");
         expect(route.snapshot.paramMap.get("id")).toBe("hank");
         expect(route.snapshot.queryParams["c"]).toEqual(["1", "2"]);

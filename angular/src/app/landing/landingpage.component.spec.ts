@@ -41,8 +41,7 @@ describe('LandingPageComponent', () => {
     // let title : mock.MockTitle;
 
     let routes : Routes = [
-        { path: 'od/id/:id', component: LandingPageComponent },
-        { path: 'od/id/ark:/88434/:id', component: LandingPageComponent }
+        { path: '**', component: LandingPageComponent }
     ];
 
     beforeEach(() => {
@@ -61,10 +60,10 @@ describe('LandingPageComponent', () => {
         }
         */
         mdt = new MetadataTransfer();
-        mdt.set("goober", nrd10)
+        mdt.set("goober/gurn", nrd10)
         mds = new TransferMetadataService(mdt);
 
-        let r : unknown = new mock.MockActivatedRoute("/id/goober", {id: "goober"});
+        let r : unknown = new mock.MockActivatedRoute("goober/gurn", {});
         route = r as ActivatedRoute;
     });
 

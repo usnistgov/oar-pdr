@@ -131,7 +131,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 public metricsService: MetricsService,
                 public breakpointObserver: BreakpointObserver) 
     {
-        this.reqId = this.route.snapshot.paramMap.get('id');
+        this.reqId = this.requestedIDfromRoute(this.route);
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
@@ -162,6 +162,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this._showContent = showContent;
             });
         }
+    }
+
+    protected requestedIDfromRoute(route : ActivatedRoute) : string {
+        return route.snapshot.url.map(u => u.toString()).join('/');
     }
 
     /**
