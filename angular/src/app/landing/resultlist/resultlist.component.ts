@@ -419,13 +419,19 @@ export class ResultlistComponent implements OnInit {
 
                         break;
                     case "keyword":
+                        // Loop through each keyword in each search result. Display those that match
+                        // the keywords from keyword filter
                         this.searchResults.forEach((object) => {
                             if(object.active == true){
                                 object.active = false;
                             
                                 object["keyword"].forEach((keyword) => {
-                                        if(keyword.includes(filter.split("=")[1]))
-                                        object.active = true;
+                                    //Loop through each search keyword from keyword filter
+                                    filter.split("=")[1].split(",").forEach(kw => {
+                                        if(keyword.includes(kw)){
+                                            object.active = true;
+                                        }
+                                    })   
                                 })
                             }
                         });
