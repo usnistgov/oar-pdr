@@ -6,6 +6,7 @@ import { VersionComponent } from '../version/version.component';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
 import { LandingConstants } from '../../landing/constants';
+import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 /**
  * a component that lays out the "identity" section of a landing page
@@ -26,10 +27,13 @@ export class ResourceIdentityComponent implements OnChanges {
     editMode: string;
     EDIT_MODES: any;
     isPartOf: string[] = null;
+    scienceTheme = Themes.SCIENCE_THEME;
+    defaultTheme = Themes.DEFAULT_THEME;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
+    @Input() theme: string;
 
     /**
      * create an instance of the Identity section
@@ -127,6 +131,15 @@ export class ResourceIdentityComponent implements OnChanges {
      */
     googleAnalytics(url: string, event, title) {
         this.gaService.gaTrackEvent('homepage', event, title, url);
+    }
+
+    visitHomePageBtnStyle() {
+        if(this.theme == this.scienceTheme) {
+            return "var(--science-theme-background-default)";
+        }else{
+            return "var(--nist-green-default)"
+        }
+
     }
 
     /*
