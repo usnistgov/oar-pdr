@@ -589,8 +589,11 @@ export class FiltersComponent implements OnInit {
         for (let i = 0; i < this.keywords.length; i++) {
             let keyw = this.keywords[i].trim().toLowerCase();
             if (keyw.indexOf(keyword) >= 0) {
-                this.suggestedKeywords.push(this.shortenKeyword(keyw));
-                this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
+                //Avoid duplicate
+                if(this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] == undefined) {
+                    this.suggestedKeywords.push(this.shortenKeyword(keyw));
+                    this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
+                }
             }
         }
 
@@ -599,7 +602,9 @@ export class FiltersComponent implements OnInit {
             for (let i = 0; i < this.keywords.length; i++) {
                 let keyw = this.keywords[i].trim().toLowerCase();
                 if (keyw.indexOf(kw.toLowerCase()) >= 0) {
-                    this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
+                    if(this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] == undefined) {
+                        this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
+                    }
                 }
             }
         })
@@ -630,16 +635,17 @@ export class FiltersComponent implements OnInit {
 
             keywordAbbr = keyword.substring(0, keyword.split(' ', wordCount).join(' ').length);
             if(keywordAbbr.trim().length < keyword.length) keywordAbbr = keywordAbbr + "...";
+
+            let i = 1;
+            let tmpKeyword = keywordAbbr;
+            while(Object.keys(this.suggestedKeywordsLkup).indexOf(tmpKeyword) >= 0 
+                    && this.suggestedKeywordsLkup[tmpKeyword] != keyword && i < 100){
+                tmpKeyword = keywordAbbr + "(" + i + ")";
+                i++;
+            }
+            keywordAbbr = tmpKeyword;
         }else    
             keywordAbbr = keyword;
-
-        let i = 1;
-        let tmpKeyword = keywordAbbr;
-        while(Object.keys(this.suggestedKeywordsLkup).indexOf(tmpKeyword) >= 0 && i < 100){
-            tmpKeyword = keywordAbbr + "(" + i + ")";
-            i++;
-        }
-        keywordAbbr = tmpKeyword;
 
         return keywordAbbr;
     }
