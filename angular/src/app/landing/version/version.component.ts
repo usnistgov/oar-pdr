@@ -103,9 +103,7 @@ export class VersionComponent implements OnChanges {
     }
     renderRelAsLink(relinfo, linktext) {
         let out: string = linktext;
-        if (relinfo.location)
-            out = '<a href="' + relinfo.location + '">' + linktext + '</a>';
-        else if (relinfo['@id']) {
+        if (relinfo['@id']) {
             if (relinfo['@id'].startsWith("doi:"))
                 out = '<a href="https://doi.org/' + relinfo['@id'].substring(4) + '">' + linktext + '</a>';
             else if (relinfo['@id'].startsWith("ark:/"))
@@ -113,6 +111,8 @@ export class VersionComponent implements OnChanges {
             else if (relinfo['@id'].match(/^https?:\/\//))
                 out = '<a href="'+ relinfo['@id'] + '">' + linktext + '</a>';
         }
+        else if (relinfo.location)
+            out = '<a href="' + relinfo.location + '">' + linktext + '</a>';
         return out;
     }
 
