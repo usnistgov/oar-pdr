@@ -303,10 +303,20 @@ export function compare_dates(a: string, b: string): number {
 export function compare_histories(a, b) {
     let out = 0;
     let normalversion = /^\d+(\.\d+)*/;
-    if ((! normalversion.exec(a) || ! normalversion.exec(b)) && a.issued && b.issued)
-        out = compare_dates(a.issued, b.issued);
-    if (out == 0)
+    if (normalversion.exec(a.version) && normalversion.exec(b.version)) {
+        // normal version format: prefer a comparison based on the version
         out = compare_versions(a.version, b.version);
+        if (out == 0 && a.issued && b.issued)
+            out = compare_dates(a.issued, b.issued);
+    }
+    else {
+        // the versions are non-standard; prefer a comparison of the issue dates
+        if (a.issued && b.issued) 
+            out = compare_dates(a.issued, b.issued);
+        if (out == 0)
+            out = compare_versions(a.version, b.version);
+    }
+
     return out;
 }
 

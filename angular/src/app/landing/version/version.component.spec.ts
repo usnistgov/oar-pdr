@@ -140,7 +140,7 @@ describe('VersionComponent', () => {
 
 });
 
-describe("version compare functions", () => {
+fdescribe("version compare functions", () => {
 
     it('compare_version', () => {
         expect(compare_versions("8", "15")).toBeLessThan(0);
@@ -266,13 +266,15 @@ describe("version compare functions", () => {
         expect(compare_histories(ha, hb)).toBe(0);
         expect(compare_histories(hb, ha)).toBe(0);
 
-        ha.version = "2.0.8";
-        expect(compare_histories(ha, hb)).toBeLessThan(0);
-        expect(compare_histories(hb, ha)).toBeGreaterThan(0);
-
+        // when the version strings are the same, the date will differentiate them
         ha.issued = "2020-01-15";
         expect(compare_histories(hb, ha)).toBeLessThan(0);
         expect(compare_histories(ha, hb)).toBeGreaterThan(0);
+
+        // a difference in the version overrides the date
+        ha.version = "2.0.8";
+        expect(compare_histories(ha, hb)).toBeLessThan(0);
+        expect(compare_histories(hb, ha)).toBeGreaterThan(0);
     });
 });
 
