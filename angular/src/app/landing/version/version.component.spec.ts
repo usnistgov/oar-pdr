@@ -140,7 +140,7 @@ describe('VersionComponent', () => {
 
 });
 
-fdescribe("version compare functions", () => {
+describe("version compare functions", () => {
 
     it('compare_version', () => {
         expect(compare_versions("8", "15")).toBeLessThan(0);
