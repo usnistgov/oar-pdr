@@ -24,7 +24,7 @@ export class SearchService {
 
     private rmmBackend: string;
     editEnabled: any;
-    portalBase: string = "https://data.nist.gov";
+    portalBase: string;
 
     currentPage = new BehaviorSubject<number>(1);
     totalItems = new BehaviorSubject<number>(1);
@@ -45,6 +45,7 @@ export class SearchService {
         this.rmmBackend = cfg.get("APIs.mdSearch", "/unconfigured");
         if (this.rmmBackend == "/unconfigured")
             throw new Error("APIs.mdSearch endpoint not configured!");
+        this.portalBase = cfg.get("locations.portalBase", "/unconfigured");
     }
 
     searchById(searchValue: string, browserside: boolean = false) {
