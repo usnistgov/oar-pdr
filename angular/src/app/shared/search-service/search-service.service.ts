@@ -44,7 +44,7 @@ export class SearchService {
     {
         this.rmmBackend = cfg.get("APIs.mdSearch", "/unconfigured");
         if (this.rmmBackend == "/unconfigured")
-            throw new Error("mdService endpoint not configured!");
+            throw new Error("APIs.mdSearch endpoint not configured!");
     }
 
     searchById(searchValue: string, browserside: boolean = false) {
