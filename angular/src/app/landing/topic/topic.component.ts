@@ -62,7 +62,8 @@ export class TopicComponent implements OnInit {
                 });
             }else{
                 this.fieldName = "theme";
-                this.nistTaxonomyTopics = this.record[this.fieldName];
+                if(this.record[this.fieldName] != undefined)
+                    this.nistTaxonomyTopics = this.record[this.fieldName];
             }
         }
     }
