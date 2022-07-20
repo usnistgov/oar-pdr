@@ -1,28 +1,32 @@
 <div *ngIf="showMetrics" >
     <div class="metrics-header">
-        Dataset Metrics
+        Dataset Metrics 
+        <!-- Display spinner while loading metrics data -->
+        <span *ngIf="!metricsData.dataReady" class="metrics-spinner" style="color:#ffffff;width: 1em;float: right;"><i class="faa faa-spinner faa-spin faa-stack-1x"  aria-hidden="true"></i></span>
     </div>
 
     <div class="metrics-info">
-        <div *ngIf="metricsData.hasCurrentMetrics; else noMetrics">
-            <ul style="font-size: 14px;">
-                <li>
-                    {{metricsData.totalDatasetDownload}} dataset downloads
-                </li>
-                <li>
-                    {{totalUsers}}
-                </li>
-                <li>
-                    {{totalDownloadSize}} downloaded
-                </li>
-            </ul>
-            <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
-                <a *ngIf="metricsData.hasCurrentMetrics" href="{{metricsData.url}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data"><i class="faa faa-bar-chart" style="margin-right: 5px;"></i>More...</span></a>
+        <div *ngIf="metricsData.dataReady">
+            <div *ngIf="metricsData.hasCurrentMetrics; else noMetrics">
+                <ul style="font-size: 14px;">
+                    <li>
+                        {{metricsData.totalDatasetDownload}} dataset downloads
+                    </li>
+                    <li>
+                        {{totalUsers}}
+                    </li>
+                    <li>
+                        {{totalDownloadSize}} downloaded
+                    </li>
+                </ul>
+                <div style="width: 100%;text-align: right;margin-top: -15px;font-size: small;">
+                    <a *ngIf="metricsData.hasCurrentMetrics" href="{{metricsData.url}}" target="_blank"><span data-toggle="tooltip" title="More Metrics Data"><i class="faa faa-bar-chart" style="margin-right: 5px;"></i>More...</span></a>
+                </div>
             </div>
+            <ng-template #noMetrics>
+                <span style="font-size: 14px;">Metrics not availabl</span>e
+            </ng-template>
         </div>
-        <ng-template #noMetrics>
-            Metrics not available
-        </ng-template>
     </div>
 </div>
 

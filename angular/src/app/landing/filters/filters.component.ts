@@ -114,7 +114,7 @@ export class FiltersComponent implements OnInit {
     forensicsNodeExpanded: boolean = true;
     comheight: string = '50px'; // parent div height
     comwidth: string;  // parent div width
-    maxDropdownLabelLength: number = 30;
+    dropdownLabelLengthLimit: number = 30;
 
     filterStyle = {'width':'100%', 'background-color': '#FFFFFF','font-weight': '400','font-style': 'italic'};
 
@@ -580,42 +580,68 @@ export class FiltersComponent implements OnInit {
      * suggestedKeywordsLkup - stores the real ketwords
      * @param event - search query that user typed into the keyword filter box
      */
-    updateSuggestedKeywords(event: any) {
-        let keyword = event.query;
-        let keywordAbbr: string;
+     updateSuggestedKeywords(event: any) {
+        let keyword = event.query.toLowerCase();
         this.suggestedKeywords = [];
         this.suggestedKeywordsLkup = {};
 
+        // Handle current keyword: update suggested keywords and lookup
         for (let i = 0; i < this.keywords.length; i++) {
-            let keyw = this.keywords[i].trim();
-            if (keyw.toLowerCase().indexOf(keyword.toLowerCase()) >= 0) {
-                //If the keyword length is greater than the maximum length, we want to truncate
-                //it so that the length is close the maximum length.
-                if(keyw.length > this.maxDropdownLabelLength){
-                    let wordCount = 1;
-                    while(keyw.split(' ', wordCount).join(' ').length < this.maxDropdownLabelLength) {
-                        wordCount++;
-                    }
-
-                    keywordAbbr = keyw.substring(0, keyw.split(' ', wordCount).join(' ').length);
-                    if(keywordAbbr.trim().length < keyw.length) keywordAbbr = keywordAbbr + "...";
-                }else    
-                    keywordAbbr = keyw;
-
-                let i = 1;
-                let tmpKeyword = keywordAbbr;
-                while(Object.keys(this.suggestedKeywordsLkup).indexOf(tmpKeyword) >= 0 && i < 100){
-                    tmpKeyword = keywordAbbr + "(" + i + ")";
-                    i++;
-                }
-                keywordAbbr = tmpKeyword;
-
-                this.suggestedKeywords.push(keywordAbbr);
-                this.suggestedKeywordsLkup[keywordAbbr] = keyw;
+            let keyw = this.keywords[i].trim().toLowerCase();
+            if (keyw.indexOf(keyword) >= 0) {
+                this.suggestedKeywords.push(this.shortenKeyword(keyw));
+                this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
             }
         }
 
+        // Handle selected keyword: update suggested keywords lookup. Lookup array must cover all selected keywords.
+        this.selectedKeywords.forEach(kw => {
+            for (let i = 0; i < this.keywords.length; i++) {
+                let keyw = this.keywords[i].trim().toLowerCase();
+                if (keyw.indexOf(kw.toLowerCase()) >= 0) {
+                    this.suggestedKeywordsLkup[this.shortenKeyword(keyw)] = keyw;
+                }
+            }
+        })
+
         this.suggestedKeywords = this.sortAlphabetically(this.suggestedKeywords);
+    }
+
+    /**
+     * Some keywords are very long. They cause problem when display both in suggested keyword list or 
+     * selected keyword list. This function returns the first few words of the input keyword. The length 
+     * of the return string is based on this.dropdownLabelLengthLimit but not exactly. 
+     * If the length of the input keyword is less than dropdownLabelLengthLimit, the input keyword will be returned.
+     * Otherwise, It selects the first few words whose total length is just exceed the length limit followed by "...".
+     * @param keyword 
+     * @returns Keyword abbreviate
+     */
+     shortenKeyword(keyword: string) {
+        let keywordAbbr: string;
+
+        //If the keyword length is greater than the maximum length, we want to truncate
+        //it so that the length is close the maximum length.
+
+        if(keyword.length > this.dropdownLabelLengthLimit){
+            let wordCount = 1;
+            while(keyword.split(' ', wordCount).join(' ').length < this.dropdownLabelLengthLimit) {
+                wordCount++;
+            }
+
+            keywordAbbr = keyword.substring(0, keyword.split(' ', wordCount).join(' ').length);
+            if(keywordAbbr.trim().length < keyword.length) keywordAbbr = keywordAbbr + "...";
+        }else    
+            keywordAbbr = keyword;
+
+        let i = 1;
+        let tmpKeyword = keywordAbbr;
+        while(Object.keys(this.suggestedKeywordsLkup).indexOf(tmpKeyword) >= 0 && i < 100){
+            tmpKeyword = keywordAbbr + "(" + i + ")";
+            i++;
+        }
+        keywordAbbr = tmpKeyword;
+
+        return keywordAbbr;
     }
 
     /**

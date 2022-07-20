@@ -50,7 +50,7 @@ export class TopicComponent implements OnInit {
     ngOnInit() {
         if(this.record) {
             this.recordType = (new NERDResource(this.record)).resourceLabel();
-            console.log('this.recordType', this.recordType);
+
             if(this.recordType == "Science Theme") {
                 this.fieldName = "topic";
                 this.record['topic'].forEach(topic => {
@@ -62,7 +62,8 @@ export class TopicComponent implements OnInit {
                 });
             }else{
                 this.fieldName = "theme";
-                this.nistTaxonomyTopics = this.record[this.fieldName];
+                if(this.record[this.fieldName] != undefined)
+                    this.nistTaxonomyTopics = this.record[this.fieldName];
             }
         }
     }

@@ -1,5 +1,9 @@
 @import "~ngx-toastr/toastr.css";
 
+* {
+    font-family: sans-serif;
+}
+
 :root {
     /* Colors */
     --science-theme-background-default: #008097;
@@ -196,3 +200,8 @@ a {
     background-color: var(--nist-blue-default);
 }
 
+.spinner {
+    position: relative;
+    width: 100%;
+    margin-top: 2em;
+}
