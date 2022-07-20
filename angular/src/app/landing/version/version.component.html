@@ -30,8 +30,7 @@
     </div>
     <p style="margin-top: 10px;" *ngIf="newer && newer.location">
         <b>There is a more recent release of this resource available: &nbsp;&nbsp;
-            <a href="{{resolverForId(newer['@id'])}}"
-                (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, newer.label)">{{newer.label}}</a></b>
+            <a href="{{resolverForId(newer['@id'])}}">{{newer.label}}</a></b>
     </p>
 </div>
 
