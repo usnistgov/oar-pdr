@@ -103,19 +103,24 @@ export class VersionComponent implements OnChanges {
     }
     renderRelAsLink(relinfo, linktext) {
         let out: string = linktext;
-        if (relinfo['@id']) {
-            if (relinfo['@id'].startsWith("doi:"))
-                out = '<a href="https://doi.org/' + relinfo['@id'].substring(4) + '">' + linktext + '</a>';
-            else if (relinfo['@id'].startsWith("ark:/"))
-                out = '<a href="'+ this.lpssvc + relinfo['@id'] + '">' + linktext + '</a>';
-            else if (relinfo['@id'].match(/^https?:\/\//))
-                out = '<a href="'+ relinfo['@id'] + '">' + linktext + '</a>';
-        }
+        if (relinfo['@id']) 
+            out = '<a href="' + this.resolverForId(relinfo['@id']) + '">' + linktext + '</a>';
         else if (relinfo.location)
             out = '<a href="' + relinfo.location + '">' + linktext + '</a>';
         return out;
     }
+    resolverForId(id) {
+        let out: string = null;
+        if (id.startsWith("doi:"))
+            out = "https://doi.org/" + id.substring(4);
+        else if (id.startsWith("ark:"))
+            out = this.lpssvc + id
+        else if (id.match(/^https?:\//))
+            out = id
+        return out
+    }
 
+        
     /**
      * return a rendering of a release's ID.  If possible, the ID will be 
      * rendered as a link.  If there is no ID, a link with the text "View..." 
