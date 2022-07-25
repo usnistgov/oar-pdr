@@ -392,15 +392,19 @@ export class ResultlistComponent implements OnInit {
                         break;
                     case "components.@type":
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
-                            
-                                object["components"].forEach((component) => {
-                                    component["@type"].forEach((cType) => {
-                                        if(cType.includes(filter.split("=")[1]))
-                                        object.active = true;
+                            if(object["components"] != undefined) {
+                                if(object.active == true){
+                                    object.active = false;
+    
+                                    object["components"].forEach((component) => {
+                                        component["@type"].forEach((cType) => {
+                                            if(cType.includes(filter.split("=")[1]))
+                                                object.active = true;
+                                        })
                                     })
-                                })
+                                }
+                            }else {
+                                object.active = false;
                             }
                         });
 
@@ -410,10 +414,8 @@ export class ResultlistComponent implements OnInit {
                             if(object.active == true){
                                 object.active = false;
                             
-                                // object["contactPoint"].forEach((contactPoint) => {
-                                    if(object["contactPoint"]["fn"].includes(filter.split("=")[1]))
-                                        object.active = true;
-                                // })
+                                if(object["contactPoint"]["fn"].includes(filter.split("=")[1]))
+                                    object.active = true;
                             }
                         });
 

@@ -473,11 +473,6 @@ export class FiltersComponent implements OnInit {
             if(lFilterString != '') lFilterString += "&";
             lFilterString += "topic.tag=";
 
-            // if(!hasDefaultTheme)
-            //     lFilterString += "topic.tag=";
-            // else
-            //     lFilterString += ",";
-
             for (let theme of this.forensicsSelectedThemesNode) {
                 if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data !== 'undefined') {
                     themeSelected = true;
