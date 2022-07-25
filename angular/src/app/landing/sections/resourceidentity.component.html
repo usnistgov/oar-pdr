@@ -11,6 +11,11 @@
              title="view collection">{{isPartOf[2]}}</a> {{isPartOf[3]}}</i>
         </div>
         <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
+
+        <!-- Facilitators -->
+        <div *ngIf="theme == scienceTheme" style="width: 100%;" [ngStyle]="{'margin-bottom': record.creators? '15px' : '1.5em'}">
+            <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
+        </div>
     </div>
     
     <div class="col-8 col-md-8 col-lg-8 col-sm-12">
