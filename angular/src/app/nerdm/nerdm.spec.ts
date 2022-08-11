@@ -218,7 +218,7 @@ describe('NERDResource', function() {
         expect(nrdl.resourceLabel()).toEqual("Public Data Resource")
 
         nrdl.data['@type'][0] = "nrda:ScienceTheme"
-        expect(nrdl.resourceLabel()).toEqual("Science Theme")
+        expect(nrdl.resourceLabel()).toEqual("Science Theme Collection")
     });
 
 

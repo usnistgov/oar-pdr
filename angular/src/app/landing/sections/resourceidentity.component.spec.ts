@@ -164,7 +164,7 @@ describe('ResourceIdentityComponent', () => {
         let el = cmpel.querySelector("#ispartof");
         expect(el).toBeTruthy();
         expect(el.querySelector("ul")).toBeFalsy();
-        expect(el.innerHTML.includes(" Science Theme")).toBeTruthy();
+        expect(el.innerHTML.includes(" Collection")).toBeTruthy();
         let a = el.querySelector("a");
         expect(a).toBeTruthy();
         expect(a.href.endsWith("/ark:/88888/goobler")).toBeTruthy();

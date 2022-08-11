@@ -125,7 +125,7 @@ describe('AboutdatasetComponent', () => {
         expect(el.innerHTML.includes("This dataset is part of")).toBeTruthy();
         let li = el.querySelectorAll("ul li");
         expect(li.length).toEqual(2);
-        expect(li[0].innerHTML.includes(" Science Theme ")).toBeTruthy();
+        expect(li[0].innerHTML.includes(" Collection ")).toBeTruthy();
         let html = li[1].innerHTML
         expect(li[1].innerHTML.includes("Science Theme")).toBeFalsy();
         expect(li[1].innerHTML.endsWith("collection ")).toBeFalsy();
