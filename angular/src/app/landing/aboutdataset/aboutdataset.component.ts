@@ -104,7 +104,7 @@ export class AboutdatasetComponent implements OnChanges {
                     title = coll['title'];
                     if (NERDResource.objectMatchesTypes(coll, "ScienceTheme")) {
                         article = "the";
-                        suffix = " Science Theme";
+                        suffix = " Collection";
                     }
                 }
                 this.isPartOf.push([
