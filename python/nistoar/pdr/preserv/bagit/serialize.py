@@ -6,6 +6,7 @@ from cStringIO import StringIO
 import logging, os
 
 from .exceptions import BagSerializationError
+from ...exceptions import StateException
 from .. import sys as _sys
 
 def _exec(cmd, dir, log):
