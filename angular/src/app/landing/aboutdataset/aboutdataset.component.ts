@@ -83,7 +83,7 @@ export class AboutdatasetComponent implements OnChanges {
 
     ngOnInit(): void {
         this.nerdmRecord["Native JSON (NERDm)"] = this.record;
-        this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/unconfigured");
+        this.nerdmDocUrl = this.cfg.get("locations.nerdmAbout", "/od/dm/nerdm");
         this.citetext = (new NERDResource(this.record)).getCitation();
         this.resourceType = ThemesPrefs.getResourceLabel(this.theme);
 
@@ -137,16 +137,11 @@ export class AboutdatasetComponent implements OnChanges {
      * return the URL that will download the NERDm metadata for the current resource
      */
     getDownloadURL() : string {
-        let out = this.cfg.get("locations.mdService", "/unconfigured");
-        if (out.search("/rmm/") >= 0) {
-            if(!out.endsWith("records/")){
-                out += "records/";
-            }
-            out += "?@id=" + this.record['@id'];
-        }else {
-            if (out.slice(-1) != '/') out += '/';
-            out += this.record['ediid'];
-        }
+        let out = this.cfg.get("locations.mdService", "/od/id/");
+
+        // We're now assuming use of resolver service; force NERDm JSON format
+        if (out.slice(-1) != '/') out += '/';
+        out += this.record['@id'] + "?format=nerdm";
 
         return out;
     }

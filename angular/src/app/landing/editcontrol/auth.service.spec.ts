@@ -25,7 +25,7 @@
 
 //     it('init state', () => {
 //         expect(svc.userID).toBeNull();
-//         expect(svc.endpoint).toBe(cfg.get('customizationAPI'));
+//         expect(svc.endpoint).toBe(cfg.get('APIs.customization'));
 //         expect(svc.authToken).toBeNull();
 //         expect(svc.isAuthorized()).toBeFalsy();
 //     });

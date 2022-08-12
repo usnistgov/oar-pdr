@@ -20,22 +20,27 @@ export const context = {
 export const config: LPSConfig = {
     locations: {
         orgHome: "https://nist.gov/",
-        portalBase: "https://oardev.nist.gov/",
-        pdrHome: "https://oardev.nist.gov/pdr/",
-        pdrSearch: "https://oardev.nist.gov/sdp/",
-        mdService:   "https://oardev.nist.gov/rmm/",
-        taxonomyService: "https://oardev.nist.gov/rmm/taxonomy"
+        portalBase: "https://data.nist.gov/",
+        pdrHome: "https://data.nist.gov/pdr/",
+        pdrSearch: "https://data.nist.gov/sdp/",
+        mdService:   "https://data.nist.gov/od/id/",
+        taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
-    mdAPI: "https://oardev.nist.gov/rmm/records/",
-    metricsAPI: "https://data.nist.gov/rmm/usagemetrics/",
-    // customizationAPI: "https://testdata.nist.gov/customization/",
-    customizationAPI: "https://datapubtest.nist.gov/customization/",
+    APIs: {
+        customization: "https://data.nist.gov/customization",
+        // customization: "https://testdata.nist.gov/customization",
+        // distService: "https://data.nist.gov/od/ds/",
+        distService: "https://testdata.nist.gov/od/ds/",
+        mdService: "https://data.nist.gov/od/id/",
+        mdSearch:  "https://data.nist.gov/rmm/",
+        metrics:   "https://data.nist.gov/rmm/usagemetrics",
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy"
+    },
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.3.X",
     production: context.production,
-    editEnabled: false,
-    distService: "https://testdata.nist.gov/od/ds/",
+    editEnabled: true,
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
@@ -68,22 +73,35 @@ export const testdata: {} = {
         "ediid": "26DEA39AD677678AE0531A570681F32C1449",
         "landingPage": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
         "version": "1.0.1",
-        "versionHistory": [
+        "firstIssued": "2019-03-27 00:00:00",
+        "revised": "2019-03-28 12:24:31",
+        "annotated": "2019-03-29 12:24:31",
+        "releaseHistory": {
+            "@id": "ark:/88434/mds0000fbk/pdr:v",
+            "@type": [ "nrdr:ReleaseHistory" ],
+            "hasRelease": [
             {
                 "version": "1.0.0",
                 "issued": "2019-03-27 00:00:00",
-                "@id": "ark:/88434/mds0000fbk",
-                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "@id": "ark:/88434/mds0000fbk/pdr:v/1.0.0",
+                "location": "https://data.nist.gov/od/id/mds0000fbk/pdr:v/1.0.0",
                 "description": "initial release"
             },
             {
-                "version": "1.0.2",
+                "version": "1.1.0",
                 "issued": "2019-03-28 12:24:31",
-                "@id": "ark:/88434/mds0000fbkmds1103vzr",
-                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "@id": "ark:/88434/mds0000fbk/pdr:v/1.1.0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0",
+                "description": "data file update"
+            },
+            {
+                "version": "1.1.2",
+                "issued": "2019-03-29 12:24:31",
+                "@id": "ark:/88434/mds0000fbk/pdr:v/1.1.2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.1.2",
                 "description": "metadata update"
             }
-        ],
+            ]},
         "description": [
             "Multiple Encounter Dataset (MEDS-I) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence."
         ],

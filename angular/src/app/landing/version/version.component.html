@@ -1,35 +1,36 @@
 <div style="display: table;" *ngIf="record">
-    <span class="" *ngIf="record.version" style="padding-right: 10pt;"> Version: <strong>{{record.version}}</strong></span>
-    <span class="" *ngIf="record.versionHistory" style="padding-right: 15pt;">...
+    <span class="" *ngIf="record.version" style="padding-right: 10pt;">
+          Version: <strong>{{majorVersion(record.version)}}</strong></span>
+    <span class="" *ngIf="record.versionHistory || record.releaseHistory" style="padding-right: 15pt;">...
         <i style="cursor: pointer;" class="faa" aria-hidden="true"
             [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
             (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
     </span>
+    <span class="" *ngIf="record.firstIssued" style="padding-right: 10pt;">
+       First Released: <strong>{{record.firstIssued.slice(0,10)}}</strong></span>
+    <span class="" *ngIf="record.revised; else issueddate" style="padding-right: 10pt;">
+       Revised: <strong>{{record.revised.slice(0,10)}}</strong></span>
+    <ng-template #issuedate>
+       Issued: <strong>{{record.issued.slice(0,10)}}</strong></ng-template>
 
-    <!-- Releases, Last modified and creators -->
-    <span class="" *ngIf="record.issued" style="padding-right: 10pt;"> Released:
-        <strong>{{record.issued.slice(0,10)}}</strong></span>
-    <span class="" *ngIf="record.modified" style="padding-right: 10pt;"> Last modified:
-        <strong>{{record.modified.slice(0,10)}}</strong></span>
-
-    <!-- Version history -->
     <div class="card customcard" [collapse]="!closeHistory">
-        <b>Version History:</b>
-        <span *ngFor="let release of record.versionHistory">
+        <div class="" *ngIf="record.annotated; else issueddate" style="padding-right: 10pt;">
+             Description Last Updated: <strong>{{record.annotated.slice(0,10)}}</strong></div>
+        <div><b>Release History:</b>
+        <span *ngFor="let release of getReleases()">
             <br> <b [innerHTML]="renderRelVer(release, record.version)"></b> &nbsp;&nbsp;
             <span *ngIf="release.issued">Released: {{release.issued}}</span>
-            <span *ngIf="release.location || release.refid"> &nbsp;&nbsp;
+            <span *ngIf="release.location"> &nbsp;&nbsp;
                 <i [innerHTML]="renderRelId(release, record.version)"></i>
             </span>
             <span *ngIf="release.description"> <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <i>{{release.description}}</i>
             </span>
-        </span>
+        </span></div>
     </div>
     <p style="margin-top: 10px;" *ngIf="newer && newer.location">
         <b>There is a more recent release of this resource available: &nbsp;&nbsp;
-            <a href="{{newer.location}}"
-                (click)="gaService.gaTrackEvent('outbound', $event, 'Resource title: ' + record.title, newer.label)">{{newer.label}}</a></b>
+            <a href="{{resolverForId(newer['@id'])}}">{{newer.label}}</a></b>
     </p>
 </div>
 

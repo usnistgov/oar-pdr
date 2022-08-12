@@ -12,7 +12,9 @@ import { config, testdata } from '../../../environments/environment';
 import { By } from "@angular/platform-browser";
 import { MetricsData } from "../metrics-data";
 
-import * as _ from 'lodash-es';
+function cloneDeep(rec: any) : any {
+    return JSON.parse(JSON.stringify(rec));
+}
 
 describe('AboutdatasetComponent', () => {
     let component: AboutdatasetComponent;
@@ -79,7 +81,7 @@ describe('AboutdatasetComponent', () => {
 
     it('single isPartOf rendering', () => {
         let cmpel = fixture.nativeElement;
-        let member = _.cloneDeep(rec);
+        let member = cloneDeep(rec);
         member['isPartOf'] = [{
             "@id": "ark:/88888/goober",
             title: "Uber Research",
@@ -100,7 +102,7 @@ describe('AboutdatasetComponent', () => {
 
     it('multiple isPartOf rendering', () => {
         let cmpel = fixture.nativeElement;
-        let member = _.cloneDeep(rec);
+        let member = cloneDeep(rec);
         member['isPartOf'] = [
             {
                 "@id": "ark:/88888/goober",
@@ -132,7 +134,6 @@ describe('AboutdatasetComponent', () => {
     });
 
     it('getDownloadURL()', () => {
-        let url = component.getDownloadURL().substring(component.getDownloadURL().split("/", 3).join("/").length);
-        expect(url).toEqual("/rmm/records/?@id=ark:/88434/mds0000fbk");
+        expect(component.getDownloadURL()).toEqual("https://data.nist.gov/od/id/ark:/88434/mds0000fbk?format=nerdm");
     });
 });

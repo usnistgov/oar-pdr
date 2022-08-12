@@ -22,10 +22,9 @@ export const SEARCH_SERVICE = 'SEARCH_SERVICE';
 @Injectable()
 export class SearchService {
 
-    private landingBackend: string = "";
     private rmmBackend: string;
     editEnabled: any;
-    portalBase: string = "https://data.nist.gov";
+    portalBase: string;
 
     currentPage = new BehaviorSubject<number>(1);
     totalItems = new BehaviorSubject<number>(1);
@@ -38,51 +37,31 @@ export class SearchService {
      * @param {Http} http - The injected Http.
      * @constructor
      */
-    constructor(
-        private http: HttpClient, 
-        private transferState: TransferState,
-        @Inject(PLATFORM_ID) private platformId: Object,
-        private cfg: AppConfig) {
-        this.landingBackend = cfg.get("mdAPI", "/unconfigured");
-        this.portalBase = cfg.get("locations.portalBase", "data.nist.gov");
-
-        if (this.landingBackend == "/unconfigured")
-            throw new Error("Metadata service endpoint not configured!");
-
-        this.rmmBackend = cfg.get("locations.mdService", "/unconfigured");
+    constructor(private http: HttpClient, 
+                private transferState: TransferState,
+                @Inject(PLATFORM_ID) private platformId: Object,
+                private cfg: AppConfig)
+    {
+        this.rmmBackend = cfg.get("APIs.mdSearch", "/unconfigured");
         if (this.rmmBackend == "/unconfigured")
-            throw new Error("mdService endpoint not configured!");
+            throw new Error("APIs.mdSearch endpoint not configured!");
+        this.portalBase = cfg.get("locations.portalBase", "/unconfigured");
     }
 
-    /**
-     * Create  a local service to test
-     */
-    testdata(): Observable<any> {
-        //"http://localhost:4200/assets/sampledata.json"
-        console.log("Test service here:" + this.landingBackend);
-        return this.http.get(this.landingBackend);
-    }
-    
     searchById(searchValue: string, browserside: boolean = false) {
-        var backend: string = this.landingBackend;
+        let backend: string = this.rmmBackend
+        if (! backend.endsWith("/")) backend += "/"
 
-        if(browserside){
-            backend = this.rmmBackend;
-        }
-
-        if (_.includes(backend, 'rmm') && _.includes(searchValue, 'ark'))
+        if (searchValue.startsWith('ark:'))
             backend += 'records?@id=';
-        else if (_.includes(backend, 'rmm')) {
-            if(!_.includes(backend, 'records'))
-                backend += 'records/';
-        }
+        else 
+            backend += 'records/';
 
         // console.log("Querying backend:", backend + searchValue);
         return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
     }
 
     getAllRecords(): Observable<any> {
-        // if (_.includes(this.landingBackend, 'rmm'))
         return this.http.get(this.rmmBackend + 'records?');
     }
 

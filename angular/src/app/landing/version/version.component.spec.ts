@@ -41,21 +41,21 @@ describe('VersionComponent', () => {
         let cmpel = fixture.nativeElement;
         let spans = cmpel.querySelectorAll("span"); 
         expect(spans[0].textContent).toContain("Version:");
-        expect(spans[0].textContent).toContain("1.0.1");
-        expect(spans[2].textContent).toContain("Released:");
-        expect(spans[2].textContent).toContain("2019-04-05");
-        expect(spans[3].textContent).toContain("Last modified:");
-        expect(spans[3].textContent).toContain("2019-03-27");
+        expect(spans[0].textContent).toContain("1.0");
+        expect(spans[2].textContent).toContain("First Released:");
+        expect(spans[2].textContent).toContain("2019-03-27");
+        expect(spans[3].textContent).toContain("Revised:");
+        expect(spans[3].textContent).toContain("2019-03-28");
     });
 
     it('test renderRelAsLink()', () => {
-        let rel = JSON.parse(JSON.stringify(rec.versionHistory[0]));
+        let rel = JSON.parse(JSON.stringify(rec.releaseHistory.hasRelease[0]));
         let html = component.renderRelAsLink(rel, "one version");
-        expect(html).toContain('od/id/ark:/88434/mds0000fbk">one version</a>');
+        expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0">one version</a>');
 
-        rel.location = undefined;
+        rel['@id'] = undefined;
         html = component.renderRelAsLink(rel, "one version");
-        expect(html).toContain('od/id/mds0000fbk">one version</a>');
+        expect(html).toContain('<a href="https://data.nist.gov/od/id/mds0000fbk/pdr:v/1.0.0">one version</a>');
 
         rel['@id'] = "doi:10.88434/mine";
         html = component.renderRelAsLink(rel, "one version");
@@ -67,22 +67,22 @@ describe('VersionComponent', () => {
     });
 
     it('test renderRelVer()', () => {
-        let rel = JSON.parse(JSON.stringify(rec.versionHistory[0]));
+        let rel = JSON.parse(JSON.stringify(rec.releaseHistory.hasRelease[0]));
         let html = component.renderRelVer(rel, "1.2.1");
-        expect(html).toContain('od/id/ark:/88434/mds0000fbk">v1.0.0</a>');
+        expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0">v1.0.0</a>');
 
         html = component.renderRelVer(rel, "1.0.0");
         expect(html).toBe('v1.0.0');
     });
 
     it('test renderRelId()', () => {
-        let rel = JSON.parse(JSON.stringify(rec.versionHistory[0]));
+        let rel = JSON.parse(JSON.stringify(rec.releaseHistory.hasRelease[0]));
         let html = component.renderRelId(rel, "1.2.1");
-        expect(html).toContain('od/id/ark:/88434/mds0000fbk">ark:/88434/mds0000fbk</a>');
+        expect(html).toContain('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0">ark:/88434/mds0000fbk/pdr:v/1.0.0</a>');
 
         component.editMode = EDIT_MODES.editMode;
         html = component.renderRelId(rel, "1.2.1");
-        expect(html).toBe('ark:/88434/mds0000fbk');
+        expect(html).toBe('ark:/88434/mds0000fbk/pdr:v/1.0.0');
         component.editMode = EDIT_MODES.VIEWONLY_MODE;
         
         html = component.renderRelId(rel, "1.0.0");
@@ -90,7 +90,7 @@ describe('VersionComponent', () => {
 
         rel['@id'] = undefined; 
         html = component.renderRelId(rel, "1.1.1");
-        expect(html).toBe('<a href="https://data.nist.gov/od/id/ark:/88434/mds0000fbk">View...</a>');
+        expect(html).toBe('<a href="https://data.nist.gov/od/id/mds0000fbk/pdr:v/1.0.0">View...</a>');
 
         component.editMode = EDIT_MODES.editMode;
         html = component.renderRelId(rel, "1.1.1");
@@ -106,14 +106,14 @@ describe('VersionComponent', () => {
         component.record['version'] = "1.0.0";
         component.assessNewer();
         expect(component.newer).not.toBeNull();
-        expect(component.newer['version']).toBe("1.0.2");
+        expect(component.newer['version']).toBe("1.1.2");
 
         fixture.detectChanges();
         cmpel = fixture.nativeElement;
         ps = cmpel.querySelectorAll("p"); 
         expect(ps.length).toBe(1);
         expect(ps[0].textContent).toContain("more recent release");
-        expect(ps[0].textContent).toContain("1.0.2");
+        expect(ps[0].textContent).toContain("1.1.2");
     });
 
     it('test expandHistory()', () => {
@@ -121,7 +121,7 @@ describe('VersionComponent', () => {
         expect(component.visibleHistory).toBeFalsy();
         let cmpel = fixture.nativeElement;
         let divs = cmpel.querySelectorAll("div"); 
-        expect(divs.length).toBe(2);
+        expect(divs.length).toBe(4);
         expect(divs[1].style.display).toBe("none");
 
         component.expandHistory();
@@ -131,8 +131,9 @@ describe('VersionComponent', () => {
          * can't figure out how to trigger rerendering within unit test
          *
         fixture.detectChanges();
+        component.ngOnChanges();
         divs = cmpel.querySelectorAll("div"); 
-        expect(divs.length).toBe(2);
+        expect(divs.length).toBe(4);
         expect(divs[1].style.display).not.toBe("none");
          */
     });
@@ -265,13 +266,15 @@ describe("version compare functions", () => {
         expect(compare_histories(ha, hb)).toBe(0);
         expect(compare_histories(hb, ha)).toBe(0);
 
-        ha.version = "2.0.8";
-        expect(compare_histories(ha, hb)).toBeLessThan(0);
-        expect(compare_histories(hb, ha)).toBeGreaterThan(0);
-
+        // when the version strings are the same, the date will differentiate them
         ha.issued = "2020-01-15";
         expect(compare_histories(hb, ha)).toBeLessThan(0);
         expect(compare_histories(ha, hb)).toBeGreaterThan(0);
+
+        // a difference in the version overrides the date
+        ha.version = "2.0.8";
+        expect(compare_histories(ha, hb)).toBeLessThan(0);
+        expect(compare_histories(hb, ha)).toBeGreaterThan(0);
     });
 });
 

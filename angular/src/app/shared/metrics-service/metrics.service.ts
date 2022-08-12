@@ -13,7 +13,7 @@ export class MetricsService {
         private cfg: AppConfig,
         private http: HttpClient, ) { 
 
-        this.metricsBackend = cfg.get("metricsAPI", "/unconfigured");
+        this.metricsBackend = cfg.get("APIs.metrics", "/unconfigured");
     }
 
     getFileLevelMetrics(ediid: string): Observable<any> {

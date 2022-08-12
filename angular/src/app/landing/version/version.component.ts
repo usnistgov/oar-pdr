@@ -41,8 +41,7 @@ export class VersionComponent implements OnChanges {
      */
     constructor(private cfg : AppConfig,
         public editstatsvc: EditStatusService) {
-        this.lpssvc = this.cfg.get('locations.landingPageService',
-                                   'https://data.nist.gov/od/id/');
+        this.lpssvc = this.cfg.get('locations.landingPageService', '/od/id/');
     }
 
     ngOnInit(): void {
@@ -66,6 +65,32 @@ export class VersionComponent implements OnChanges {
     }
 
     /**
+     * convert a full (3-field) version into an abbreviated version string 
+     * having just the first two fields
+     */
+    majorVersion(version: string) : string {
+        let ver = version.split('.');
+        if (ver.length < 2) return version;
+        return ver.slice(0, 2).join('.');
+    }
+
+    /**
+     * return a list of releases.  I
+     */
+    getReleases() {
+        if (! this.record)
+            return [];
+        let out = null;
+        if (this.record.releaseHistory) 
+            out = this.record.releaseHistory.hasRelease;
+        if (! out && this.record.versionHistory)
+            out = this.record.versionHistory;
+        if (! out)
+            out = [];
+        return out;
+    }
+
+    /**
      * create an HTML rendering of a version string for a NERDm VersionRelease.  
      * If there is information available for linking to version's home page, a 
      * link is returned.  Otherwise, just the version is returned (prepended 
@@ -78,20 +103,24 @@ export class VersionComponent implements OnChanges {
     }
     renderRelAsLink(relinfo, linktext) {
         let out: string = linktext;
-        if (relinfo.location)
+        if (relinfo['@id']) 
+            out = '<a href="' + this.resolverForId(relinfo['@id']) + '">' + linktext + '</a>';
+        else if (relinfo.location)
             out = '<a href="' + relinfo.location + '">' + linktext + '</a>';
-        else if (relinfo['@id']) {
-            if (relinfo['@id'].startsWith("doi:"))
-                out = '<a href="https://doi.org/' + relinfo['@id'].substring(4) + '">' + linktext + '</a>';
-            else if (relinfo['@id'].startsWith("ark:/88434/"))
-                out = '<a href="'+ this.lpssvc + relinfo['@id'].substring("ark:/88434/".length) +
-                      '">' + linktext + '</a>';
-            else if (relinfo['@id'].match(/^https?:\/\//))
-                out = '<a href="'+ relinfo['@id'] + '">' + linktext + '</a>';
-        }
         return out;
     }
+    resolverForId(id) {
+        let out: string = null;
+        if (id.startsWith("doi:"))
+            out = "https://doi.org/" + id.substring(4);
+        else if (id.startsWith("ark:"))
+            out = this.lpssvc + id
+        else if (id.match(/^https?:\//))
+            out = id
+        return out
+    }
 
+        
     /**
      * return a rendering of a release's ID.  If possible, the ID will be 
      * rendered as a link.  If there is no ID, a link with the text "View..." 
@@ -115,7 +144,7 @@ export class VersionComponent implements OnChanges {
      * <ol>
      *   <li> the 'isReplacedBy' property </li>
      *   <li> as a 'isPreviousVersionOf' reference in the references list.
-     *   <li> in the 'versionHistory' property </li>
+     *   <li> within the 'releaseHistory' (or 'versionHistory') property </li>
      * </ol>
      * The checks for last two places may be removed in a future release. 
      */
@@ -145,8 +174,8 @@ export class VersionComponent implements OnChanges {
         }
 
         // look at the version history to see if there is a newer version listed
-        if (this.record['version'] && this.record['versionHistory']) {
-            let history = this.record['versionHistory'];
+        if (this.record['version'] && (this.record['releaseHistory'] || this.record['versionHistory'])) {
+            let history = this.getReleases();
             history.sort(compare_histories);
 
             var thisversion = this.record['version'];
@@ -278,10 +307,21 @@ export function compare_dates(a: string, b: string): number {
  */
 export function compare_histories(a, b) {
     let out = 0;
-    if (a.issued && b.issued)
-        out = compare_dates(a.issued, b.issued);
-    if (out == 0)
+    let normalversion = /^\d+(\.\d+)*/;
+    if (normalversion.exec(a.version) && normalversion.exec(b.version)) {
+        // normal version format: prefer a comparison based on the version
         out = compare_versions(a.version, b.version);
+        if (out == 0 && a.issued && b.issued)
+            out = compare_dates(a.issued, b.issued);
+    }
+    else {
+        // the versions are non-standard; prefer a comparison of the issue dates
+        if (a.issued && b.issued) 
+            out = compare_dates(a.issued, b.issued);
+        if (out == 0)
+            out = compare_versions(a.version, b.version);
+    }
+
     return out;
 }
 

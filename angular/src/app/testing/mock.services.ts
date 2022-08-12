@@ -57,8 +57,19 @@ export class MockActivatedRouteSnapshot {
         this.params = uparams;
         this.queryParams = qparams
         this.paramMap = new SimpleParamMap(uparams);
-        
-        this.url = [new UrlSegment(path_info, uparams)];
+        this.url = path_info.split('/').map(this.toSegment);
+    }
+
+    private toSegment(pathfield: string) : UrlSegment {
+        let parts : string[] = pathfield.split(';');
+        let props : Properties = {};
+        let kv : string[];
+        for (let p of parts.slice(1)) {
+            kv = p.split("=");
+            if (kv.length < 2) kv.push('');
+            props[kv[0]] = kv[1];
+        }
+        return new UrlSegment(parts[0], props)
     }
 }
 
@@ -86,10 +97,10 @@ export class MockActivatedRoute {
      * @param params         the parameters configured into the URL
      */
     constructor(path_info : string, public uparams?: Properties, public qparams? : QProperties) {
-        this.url = path_info;
+        this.snapshot = new MockActivatedRouteSnapshot(path_info, uparams, qparams);
+        this.url = this.snapshot.url;
         this.setParamMap(uparams);
         this.setQueryParamMap(qparams);
-        this.snapshot = new MockActivatedRouteSnapshot(path_info, uparams, qparams);
     }
 
     /** Set the paramMap observables's next value */

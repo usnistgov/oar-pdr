@@ -8,57 +8,131 @@
 import { Injectable } from '@angular/core';
 
 /**
- * URLs to remote locations used as links in templates
+ * URLs to key repository destinations.  These are URLs accessed via HTML links when the 
+ * user actively clicks on a link in the page.  Because these locations appear in HTML, and 
+ * therefore accessed browser-side exclusively, they must publicly-accessible URLs.
+ *
+ * These values can also serve as defaults for infering URLs--including API endpoints--that
+ * are not explicitly set.
  */
 export interface WebLocations {
 
     /**
      * the institutional home page (e.g. NIST)
      */
-    orgHome: string,
+    orgHome: string;
 
     /**
      * the science portal base URL.  
      */
-    portalBase?: string,
+    portalBase?: string;
 
     /**
      * the home page for the PDR
      */
-    pdrHome?: string,
+    pdrHome?: string;
 
     /**
      * the PDR search page (i.e. the SDP search page)
      */
-    pdrSearch?: string,
+    pdrSearchPortal?: string;
 
     /**
-     * the base URL for the distribution service
+     * the base URL for generating view of search results from a search query
      */
-    distService?: string,
+    pdrSearchResults?: string;
 
     /**
-     * the base URL for the (public) metadata service
+     * the base URL for the distribution service and downloading dataset files
      */
-    mdService?: string,
+    distService?: string;
+
+    /**
+     * the base URL for the ID-to-metadata resolving service
+     */
+    mdService?: string;
+
+    /**
+     * the base URL for generating a search resutls
+    mdSearch?: string;
+     */
 
     /**
      * the URL to fetch taxonomy list
+    taxonomyService?: string;
      */
-    taxonomyService?: string,
 
     /**
-     * the base URL for the landing page service
+     * the base URL for generating the landing page for a given ID
      */
-    landingPageService?: string,
+    landingPageService?: string;
 
     /**
      * the NERDm info page
      */
-    nerdmAbout?: string
+    nerdmAbout?: string;
 
     /**
      * other locations are allowed
+     */
+    [locName: string]: any;
+}
+
+/**
+ * API endpoint URLs.  These base URLs are intended for services accessed via 
+ * Typescript code (as opposed to those that appear in HTML links).
+ * 
+ * The proper API URL to use can depend on whether the code is running server-side
+ * or browser-side.  One should set server-side URLs under "serverSide"; these will 
+ * automatically over-ride the ones above them on the serverSide (via the ConfigService).
+ * Thus, always access the URL parameters via their normal names.  
+ *
+ * For example, the metadata resolver service API, "mdService", needs to be accessed 
+ * via Typescript code, set the browser-side version of the URL as "APIs.mdSearch", 
+ * and set the service-side as "APIs.serverSide.mdSearch"; regardless, always access 
+ * the parameter via "APIs.mdSearch" to get the appropriate version.  
+ */
+export interface APIEndpoints {
+
+    /**
+     * the (RMM) metadata search endpoint.  This URL is expected to be appended with a 
+     * search query for returning arbitrary metadata.  Note that the mdService is intended 
+     * for resolving an ID into a specific metadata record.
+     */
+    mdSearch?: string;
+
+    /**
+     * the base URL for the ID-to-metadata resolving service
+     */
+    mdService?: string;
+
+    /**
+     * the metrics data API.
+     */
+    metrics?: string;
+
+    /**
+     * the endpoint for retrieving the theme taxonomy terms
+     */
+    taxonomy?: string;
+
+    /**
+     * the base URL for the distribution service API (including data bundling)
+     */
+    distService?: string;
+
+    /**
+     * Base URL for customization service to use
+     */
+    customization?: string;
+
+    /**
+     * the server-side versions of the above URLs
+     */
+    serverSide?: APIEndpoints;
+
+    /**
+     * other API URLs are allowed
      */
     [locName: string]: any;
 }
@@ -69,24 +143,14 @@ export interface WebLocations {
 export interface LPSConfig {
 
     /**
-     * URLs used in links plugged into templates
+     * URLs used in links plugged into HTML templates
      */
     locations: WebLocations;
 
     /**
-     * Base URL for metadata service to use
+     * Endpoint URLs for APIs accessed from code
      */
-    mdAPI?: string;
-
-    /**
-     * Base URL for metrics service to use
-     */
-    metricsAPI?: string;
-
-    /**
-     * Base URL for customization service to use
-     */
-    customizationAPI?: string;
+    APIs: APIEndpoints;
 
     /**
      * True if editing widgets should be made available in the landing page.
@@ -130,13 +194,11 @@ export interface LPSConfig {
 export class AppConfig implements LPSConfig {
 
     locations: WebLocations;
-    mdAPI: string;
-    customizationAPI: string;
+    APIs: APIEndpoints;
     editEnabled: boolean;
     status: string;
     appVersion: string;
     gaCode     : string;
-    metricsAPI: string;
 
     /**
      * create an AppConfig directly from an LPSConfig object
@@ -153,31 +215,49 @@ export class AppConfig implements LPSConfig {
     * set.  
     */
     private inferMissingValues(): void {
-        if (!this.locations.portalBase) {
-        this.locations.portalBase = this.locations.orgHome;
-        if (!this.locations.portalBase.endsWith('/'))
-            this.locations.portalBase += '/';
-        this.locations.portalBase += 'data/';
+        // set the default locations URLs
+        if (! this.locations.portalBase) {
+            this.locations.portalBase = this.locations.orgHome;
+            if (! this.locations.portalBase.endsWith('/'))
+                this.locations.portalBase += '/';
+            this.locations.portalBase += 'data/';
         }
 
-        if (!this.locations.pdrHome)
-        this.locations.pdrHome = this.locations.portalBase + "pdr/";
-        if (!this.locations.pdrSearch)
-        this.locations.pdrSearch = this.locations.portalBase + "sdp/";
-        if (!this.locations.distService)
-        this.locations.distService = this.locations.portalBase + "od/ds/";
-        if (!this.locations.mdService)
-        this.locations.mdService = this.locations.portalBase + "rmm/";
-        if(!this.locations.taxonomyService)
-            this.locations.taxonomyService = this.locations.portalBase + "rmm/taxonomy";
-        if (!this.locations.landingPageService)
-        this.locations.landingPageService = this.locations.portalBase + "od/id/";
-        if (!this.locations.nerdmAbout)
-        this.locations.nerdmAbout = this.locations.portalBase + "od/dm/nerdm/";
+        if (! this.locations.pdrHome)
+            this.locations.pdrHome = this.locations.portalBase + "pdr/";
+        if (! this.locations.pdrSearch)
+            this.locations.pdrSearch = this.locations.portalBase + "sdp/";
+        if (! this.locations.distService)
+            this.locations.distService = this.locations.portalBase + "od/ds/";
+        if (! this.locations.mdService)
+            this.locations.mdService = this.locations.portalBase + "od/id/";
 
-        if (!this.mdAPI) this.mdAPI = this.locations.mdService;
-        if (!this.customizationAPI) this.customizationAPI = this.locations.mdService;
-        if (!this.metricsAPI) this.metricsAPI = this.locations.mdService + "usagemetrics/";
+        /*
+        if(! this.locations.taxonomyService)
+            this.locations.taxonomyService = this.locations.portalBase + "rmm/taxonomy";
+        */
+        
+        if (! this.locations.landingPageService)
+            this.locations.landingPageService = this.locations.portalBase + "od/id/";
+        if (! this.locations.nerdmAbout)
+            this.locations.nerdmAbout = this.locations.portalBase + "od/dm/nerdm/";
+
+        // set the default API URLs
+
+        if (! this.APIs)
+            this.APIs = {}
+        if (! this.APIs.mdSearch)
+            this.APIs.mdSearch = this.locations.portalBase + "rmm/"
+        if (! this.APIs.mdService)
+            this.APIs.mdService = this.locations.mdService;
+        if (! this.APIs.distService)
+            this.APIs.distService = this.locations.distService;
+        if (! this.APIs.customization)
+            this.APIs.customization = this.locations.portalBase + "customization/";
+        if (! this.APIs.metrics)
+            this.APIs.metrics = this.APIs.mdSearch + "usagemetrics/";
+        if (! this.APIs.taxonomy)
+            this.APIs.taxonomy = this.APIs.mdSearch + "taxonomy/";
 
         // Set default Google Analytic code to dev
         if (! this.gaCode) this.gaCode = "UA-115121490-8";
@@ -190,7 +270,7 @@ export class AppConfig implements LPSConfig {
      * 
      * This function accomplishes two things:  first, it provides a bit of syntactic 
      * sugar for getting at deep values in the parameter hierarchy.  That is, 
-     * `cfg.get("location.orgHome")` is equivalent to both `cfg.location.orgHome` and
+     * `cfg.get("locations.orgHome")` is equivalent to both `cfg.locations.orgHome` and
      * `cfg["location"]["orgHome"]`.  If any of the property names are not one that is 
      * predefined as a class property, only the latter of the alternatives works.  
      *
@@ -204,9 +284,9 @@ export class AppConfig implements LPSConfig {
         let names: string[] = param.split(".");
         let val: any = this;
         for (var i = 0; i < names.length; i++) {
-        if (typeof val != "object")
-            return defval;
-        val = val[names[i]];
+            if (typeof val != "object")
+                return defval;
+            val = val[names[i]];
         }
         return (val != undefined) ? val : defval;
     }

@@ -17,11 +17,10 @@ const routes: Routes = [
 
     // app paths
     { path: 'about',         component: LandingAboutComponent },
-    { path: 'od/id',
+    { path: 'lps',
       children: [
           { path: '',                component: NoidComponent          },
-          { path: ':id',             component: LandingPageComponent   },
-          { path: 'ark:/88434/:id',  component: LandingPageComponent   }
+          { path: '**',              component: LandingPageComponent   }  // ** = id to display
       ]
     },
     { path: 'nerdm',                 component: NerdmComponent         },
