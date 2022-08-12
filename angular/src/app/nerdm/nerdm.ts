@@ -286,7 +286,7 @@ export class NERDResource {
                 case 'nrdp:PublicDataResource':
                     return "Public Data Resource";
                 case 'nrda:ScienceTheme':
-                    return "Science Theme";
+                    return "Science Theme Collection";
             }
         }
 

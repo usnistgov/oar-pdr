@@ -91,7 +91,7 @@ export class ResourceIdentityComponent implements OnChanges {
                 title = coll['title']
                 suffix = "Collection";
                 if (NERDResource.objectMatchesTypes(coll, "ScienceTheme"))
-                    suffix = "Science Theme";
+                    suffix = "Collection";
             }
            
             this.isPartOf = [
