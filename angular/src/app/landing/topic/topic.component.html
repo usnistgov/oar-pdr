@@ -12,8 +12,15 @@
                         <strong>Research Topics: </strong>
                         <span *ngIf="recordType != 'Science Theme'; else scienceTheme" >
                             <span class="topics" *ngFor="let topic of nistTaxonomyTopics; let i =index">
-                                {{ topic }}
-                                <span *ngIf="i < nistTaxonomyTopics.length-1 ">,</span>
+                                <!-- If a comma starts in a new line, UI will display a space in front of
+                                the comma.  -->
+                                <span *ngIf="i < nistTaxonomyTopics.length-1; else lastone ">
+                                    {{ topic }},
+                                </span>
+                                <ng-template #lastone>
+                                    {{ topic }}
+                                </ng-template>
+                                
                             </span> &nbsp; &nbsp;
                         </span>
                         <ng-template #scienceTheme>

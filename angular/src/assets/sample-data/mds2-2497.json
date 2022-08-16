@@ -1,0 +1,1934 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.6#",
+    "@context": [
+        "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+        {
+            "@base": "ark:/88434/mds2-2497"
+        }
+    ],
+    "@type": [
+        "nrdp:DataPublication",
+        "nrdp:PublicDataResource",
+        "dcat:Dataset"
+    ],
+    "_extensionSchemas": [
+        "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/PublicDataResource"
+    ],
+    "@id": "ark:/88434/mds2-2497",
+    "ediid": "ark:/88434/mds2-2497",
+    "version": "1.0.0",
+    "doi": "doi:10.18434/mds2-2497",
+    "title": "MAM Consortium Interlaboratory Study Raw Data",
+    "contactPoint": {
+        "fn": "Trina Mouchahoir",
+        "hasEmail": "mailto:trina.mouchahoir@nist.gov",
+        "@type": "vcard:Contact"
+    },
+    "modified": "2021-10-18",
+    "status": "available",
+    "landingPage": "https://data.nist.gov/od/id/mds2-2497",
+    "description": [
+        "These LC-MS and LC-MS/MS raw data were collected for purposes of an interlaboratory study evaluating the multi-attribute method (MAM).  Tryptic digests of native NISTmAb (the \"Reference\" and the \"Unknown\" samples), degraded NISTmAb (the \"pH Stress\" sample) and NISTmAb spiked with 15 heavy-labeled synthetic peptides (the \"Spike\" sample) were sent to each participating laboratory.  One injection of each digest was acquired in MS-only mode, while a second injection was acquired in MS/MS mode.  Three injections of a mixture of 15 heavy-labeled synthetic peptides (\"Calibration\" sample) were also analyzed as a means of evaluating instrument performance.  Although all data were collected using the same C18 column and LC method, the instrumentation used by each laboratory differed.  Additional details regarding the samples, their preparation, the LC method used, and an evaluation of the results pertaining to the new peak detection aspect of MAM can be found in \"New Peak Detection Performance Metrics from the MAM Consortium Interlaboratory Study\" (https://pubs.acs.org/doi/10.1021/jasms.0c00415).  Evaluation of the results pertaining to the attribute analytics aspect of MAM can be found in \"Interlaboratory Attribute Analytics Metrics from the MAM Consortium Round Robin Study\" (link to be provided). Raw data that was optionally submitted by sixteen participating laboratories are provided here.  To preserve the integrity of the data, the files are provided in their original vendor format."
+    ],
+    "keyword": [
+        "attribute analytics",
+        "interlaboratory study",
+        "multi-attribute method",
+        "MAM Consortium",
+        "mass spectrometry",
+        "new peak detection",
+        "NPD",
+        "purity testing",
+        "round robin",
+        "targeted analytics",
+        "NISTmAb"
+    ],
+    "theme": [
+        "Bioscience:Chemistry"
+    ],
+    "topic": [
+        {
+            "@type": "Concept",
+            "tag": "Bioscience:Chemistry"
+        }
+    ],
+    "references": [
+        {
+            "@type": [
+                "deo:BibliographicReference"
+            ],
+            "@id": "#ref:doi/10.1021/jasms.0c00415",
+            "refType": "IsSupplementTo",
+            "location": "https://pubs.acs.org/doi/10.1021/jasms.0c00415",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.5#/definitions/DCiteReference"
+            ]
+        }
+    ],
+    "accessLevel": "public",
+    "license": "https://www.nist.gov/open/license",
+    "publisher": {
+        "name": "National Institute of Standards and Technology",
+        "@type": "org:Organization"
+    },
+    "language": [
+        "en"
+    ],
+    "bureauCode": [
+        "006:55"
+    ],
+    "programCode": [
+        "006:052"
+    ],
+    "_editStatus": "done",
+    "components": [
+        {
+            "@id": "cmps/MAM_Data_08.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_08.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_08.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_08.zip",
+            "description": "SHA-256 checksum value for MAM_Data_08.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_11.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_11.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_11.zip",
+            "mediaType": "application/zip",
+            "size": 22238716037,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/README_2022-07-12.txt",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "README_2022-07-12.txt",
+            "downloadURL": "https://datapub.nist.gov/midas//mds2-2497/README_2022-07-12.txt",
+            "mediaType": "text/plain",
+            "format": {
+                "description": "txt"
+            },
+            "description": "Information regarding raw data files.",
+            "title": "Read Me",
+            "size": 15146,
+            "checksum": {
+                "hash": "b6c946f63b6cc4cc98e70e8505383f36890eb12a0463aa397672363a3e959d99",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            }
+        },
+        {
+            "@id": "cmps/MAM_Data_12.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_12.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_12.zip",
+            "mediaType": "application/zip",
+            "size": 9335217539,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_02.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_02.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_02.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_02.zip",
+            "description": "SHA-256 checksum value for MAM_Data_02.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_10.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_10.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_10.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_10.zip",
+            "description": "SHA-256 checksum value for MAM_Data_10.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "fd9f78f9f31a371b6ab5b3a9350811c2bb471bdc130fffb16d932be662f7038f",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_11.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_11.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_11.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_11.zip",
+            "description": "SHA-256 checksum value for MAM_Data_11.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_13.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_13.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_13.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_13.zip",
+            "description": "SHA-256 checksum value for MAM_Data_13.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_09.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_09.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_09.zip",
+            "mediaType": "application/zip",
+            "size": 7872452621,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_15.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_15.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_15.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_15.zip",
+            "description": "SHA-256 checksum value for MAM_Data_15.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_03.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_03.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_03.zip",
+            "mediaType": "application/zip",
+            "size": 5642518129,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_14.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_14.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_14.zip",
+            "mediaType": "application/zip",
+            "size": 2995542377,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_15.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_15.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_15.zip",
+            "mediaType": "application/zip",
+            "size": 8036690499,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_08.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_08.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_08.zip",
+            "mediaType": "application/zip",
+            "size": 2647128533,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_01.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_01.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_01.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_01.zip",
+            "description": "SHA-256 checksum value for MAM_Data_01.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "2f01881c00dbea4098a90dd4d2e722ec34f7b1771ef8bc3d9d6df835255efe09",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_13.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_13.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_13.zip",
+            "mediaType": "application/zip",
+            "size": 16963909562,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_10.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_10.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_10.zip",
+            "mediaType": "application/zip",
+            "size": 8112492407,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_07.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_07.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_07.zip",
+            "mediaType": "application/zip",
+            "size": 29219577370,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_16.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_16.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_16.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_16.zip",
+            "description": "SHA-256 checksum value for MAM_Data_16.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_05.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_05.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_05.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_05.zip",
+            "description": "SHA-256 checksum value for MAM_Data_05.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "b7efc82d2df5e51887b406e735a0806149843b485d07830e54dafcb8502d9c08",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_02.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_02.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_02.zip",
+            "mediaType": "application/zip",
+            "size": 32351855824,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_06.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_06.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_06.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_06.zip",
+            "description": "SHA-256 checksum value for MAM_Data_06.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "03e3386856d0cc11b33b458045d6f3c330c2fe044511165e55265fb9e060c6a1",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_06.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_06.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_06.zip",
+            "mediaType": "application/zip",
+            "size": 98435272177,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/FASTA Sequence.fasta",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "FASTA Sequence.fasta",
+            "downloadURL": "https://datapub.nist.gov/midas//mds2-2497/FASTA%20Sequence.fasta",
+            "mediaType": "application/octet-stream",
+            "format": {
+                "description": "FASTA"
+            },
+            "description": "Amino acid sequences relevant to raw data",
+            "title": "FASTA Sequence",
+            "size": 1259,
+            "checksum": {
+                "hash": "c1f2ef9e9645c906e8b6fad38e5b88339f3dd5814660ded6376310bd7fbf5eba",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            }
+        },
+        {
+            "@id": "cmps/MAM_Data_01.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_01.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_01.zip",
+            "mediaType": "application/zip",
+            "size": 8012009680,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_16.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_16.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_16.zip",
+            "mediaType": "application/zip",
+            "size": 3490861748,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_04.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_04.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_04.zip",
+            "mediaType": "application/zip",
+            "size": 4336034667,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_04.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_04.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_04.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_04.zip",
+            "description": "SHA-256 checksum value for MAM_Data_04.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "bc21168c4fd4646fd66f95c965d78255dfd000beb902d609e7e3311e4156ae16",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_05.zip",
+            "@type": [
+                "nrdp:DataFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/DataFile"
+            ],
+            "filepath": "MAM_Data_05.zip",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_05.zip",
+            "mediaType": "application/zip",
+            "size": 5661651883,
+            "__status": "in progress"
+        },
+        {
+            "@id": "cmps/MAM_Data_12.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_12.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_12.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_12.zip",
+            "description": "SHA-256 checksum value for MAM_Data_12.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_07.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_07.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_07.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_07.zip",
+            "description": "SHA-256 checksum value for MAM_Data_07.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "bd4b677517eed05fc276bf75c02c22710d69f8abb3aad9eabe9c2b3235c0cd57",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_14.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_14.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_14.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_14.zip",
+            "description": "SHA-256 checksum value for MAM_Data_14.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "__status": "in progress",
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_03.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_03.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_03.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_03.zip",
+            "description": "SHA-256 checksum value for MAM_Data_03.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "1a2e1a2e8de30fc4d2dbfb59f00b3d5e85c4b1a04e2ded81ab7873cc52b65bb7",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        },
+        {
+            "@id": "cmps/MAM_Data_09.zip.sha256",
+            "@type": [
+                "nrdp:ChecksumFile",
+                "nrdp:DownloadableFile",
+                "dcat:Distribution"
+            ],
+            "filepath": "MAM_Data_09.zip.sha256",
+            "downloadURL": "https://datapub.nist.gov/midas//ark:/88434/mds2-2497/MAM_Data_09.zip.sha256",
+            "algorithm": {
+                "tag": "sha256",
+                "@type": "Thing"
+            },
+            "describes": "cmps/MAM_Data_09.zip",
+            "description": "SHA-256 checksum value for MAM_Data_09.zip",
+            "_extensionSchemas": [
+                "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.6#/definitions/ChecksumFile"
+            ],
+            "mediaType": "text/plain",
+            "size": 64,
+            "checksum": {
+                "hash": "a523c7d9dd96b83d04701ef633e99790ba46b97f5743dc743c52b05c91d036d9",
+                "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                }
+            },
+            "valid": false
+        }
+    ],
+    "authors": [
+        {
+            "familyName": "Mouchahoir",
+            "givenName": "Trina",
+            "fn": "Trina Mouchahoir",
+            "orcid": "0000-0002-6790-830X",
+            "affiliation": [
+                {
+                    "title": "National Institute of Standards and Technology",
+                    "subunit": [
+                        "Biomolecular Measurement Division"
+                    ],
+                    "@id": "ror:05xpvk416"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Schiel",
+            "givenName": "John",
+            "middleName": "E.",
+            "fn": "John E. Schiel",
+            "orcid": "0000-0001-5353-3343",
+            "affiliation": [
+                {
+                    "title": "National Institute of Standards and Technology",
+                    "subunit": [
+                        "Biomolecular Measurement Division"
+                    ],
+                    "@id": "ror:05xpvk416"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Rogers",
+            "givenName": "Rich",
+            "fn": "Rich Rogers",
+            "affiliation": [
+                {
+                    "title": "Just-Evotech Biologics, Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Heckert",
+            "givenName": "Alan",
+            "fn": "Alan Heckert",
+            "orcid": "0000-0002-8430-6757",
+            "affiliation": [
+                {
+                    "title": "National Institute of Standards and Technology",
+                    "subunit": [
+                        "Statistical Engineering Division"
+                    ],
+                    "@id": "ror:05xpvk416"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Place",
+            "givenName": "Benjamin",
+            "middleName": "J.",
+            "fn": "Benjamin J. Place",
+            "orcid": "0000-0003-0953-5215",
+            "affiliation": [
+                {
+                    "title": "National Institute of Standards and Technology",
+                    "subunit": [
+                        "Chemical Sciences Division"
+                    ],
+                    "@id": "ror:05xpvk416"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Ammerman",
+            "givenName": "Aaron",
+            "fn": "Aaron Ammerman",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Li",
+            "givenName": "Xiaoxiao",
+            "fn": "Xiaoxiao Li",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Robinson",
+            "givenName": "Tom",
+            "fn": "Tom Robinson",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Schmidt",
+            "givenName": "Brian",
+            "fn": "Brian Schmidt",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Chumsae",
+            "givenName": "Chris",
+            "middleName": "M.",
+            "fn": "Chris M. Chumsae",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Li",
+            "givenName": "Xinbi",
+            "fn": "Xinbi Li",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Manuilov",
+            "givenName": "Anton",
+            "middleName": "V.",
+            "fn": "Anton V. Manuilov",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Yan",
+            "givenName": "Bo",
+            "fn": "Bo Yan",
+            "affiliation": [
+                {
+                    "title": "AbbVie"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Staples",
+            "givenName": "Gregory",
+            "middleName": "O.",
+            "fn": "Gregory O. Staples",
+            "affiliation": [
+                {
+                    "title": "Agilent Technologies"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Ren",
+            "givenName": "Da",
+            "fn": "Da Ren",
+            "affiliation": [
+                {
+                    "title": "Amgen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Veach",
+            "givenName": "Alexander",
+            "middleName": "J.",
+            "fn": "Alexander J. Veach",
+            "affiliation": [
+                {
+                    "title": "Amgen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wang",
+            "givenName": "Dongdong",
+            "fn": "Dongdong Wang",
+            "affiliation": [
+                {
+                    "title": "BioAnalytix"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Yared",
+            "givenName": "Wael",
+            "fn": "Wael Yared",
+            "affiliation": [
+                {
+                    "title": "BioAnalytix"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Sosic",
+            "givenName": "Zoran",
+            "fn": "Zoran Sosic",
+            "affiliation": [
+                {
+                    "title": "Biogen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wang",
+            "givenName": "Yan",
+            "fn": "Yan Wang",
+            "affiliation": [
+                {
+                    "title": "Biogen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Zang",
+            "givenName": "Li",
+            "fn": "Li Zang",
+            "affiliation": [
+                {
+                    "title": "Biogen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Leone",
+            "givenName": "Anthony",
+            "middleName": "M.",
+            "fn": "Anthony M. Leone",
+            "affiliation": [
+                {
+                    "title": "Bristol-Myers Squibb"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Liu",
+            "givenName": "Peiran",
+            "fn": "Peiran Liu",
+            "affiliation": [
+                {
+                    "title": "Bristol-Myers Squibb"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Ludwig",
+            "givenName": "Richard",
+            "fn": "Richard Ludwig",
+            "affiliation": [
+                {
+                    "title": "Bristol-Myers Squibb"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Tao",
+            "givenName": "Li",
+            "fn": "Li Tao",
+            "orcid": "0000-0002-9343-7011",
+            "affiliation": [
+                {
+                    "title": "Bristol-Myers Squibb"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wu",
+            "givenName": "Wei",
+            "fn": "Wei Wu",
+            "affiliation": [
+                {
+                    "title": "Bristol-Myers Squibb"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Cansizoglu",
+            "givenName": "Ahmet",
+            "fn": "Ahmet Cansizoglu",
+            "affiliation": [
+                {
+                    "title": "Charles River Laboratories"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Hanneman",
+            "givenName": "Andrew",
+            "fn": "Andrew Hanneman",
+            "affiliation": [
+                {
+                    "title": "Charles River Laboratories"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Adams",
+            "givenName": "Greg",
+            "middleName": "W.",
+            "fn": "Greg W. Adams",
+            "affiliation": [
+                {
+                    "title": "FUJIFILM Diosynth Biotechnologies"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Perdivara",
+            "givenName": "Irina",
+            "fn": "Irina Perdivara",
+            "affiliation": [
+                {
+                    "title": "FUJIFILM Diosynth Biotechnologies"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Walker",
+            "givenName": "Hunter",
+            "fn": "Hunter Walker",
+            "affiliation": [
+                {
+                    "title": "FUJIFILM Diosynth Biotechnologies"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wilson",
+            "givenName": "Margo",
+            "fn": "Margo Wilson",
+            "affiliation": [
+                {
+                    "title": "FUJIFILM Diosynth Biotechnologies"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Brandenburg",
+            "givenName": "Arnd",
+            "fn": "Arnd Brandenburg",
+            "affiliation": [
+                {
+                    "title": "Genedata"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "DeGraan-Weber",
+            "givenName": "Nick",
+            "fn": "Nick DeGraan-Weber",
+            "affiliation": [
+                {
+                    "title": "Genedata"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Gotta",
+            "givenName": "Stefano",
+            "fn": "Stefano Gotta",
+            "affiliation": [
+                {
+                    "title": "Genedata"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Shambaugh",
+            "givenName": "Joe",
+            "fn": "Joe Shambaugh",
+            "affiliation": [
+                {
+                    "title": "Genedata"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Alvarez",
+            "givenName": "Melissa",
+            "fn": "Melissa Alvarez",
+            "affiliation": [
+                {
+                    "title": "Genentech"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Yu",
+            "givenName": "X.",
+            "middleName": "Christopher",
+            "fn": "X. Christopher Yu",
+            "affiliation": [
+                {
+                    "title": "Genentech"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Cao",
+            "givenName": "Li",
+            "fn": "Li Cao",
+            "affiliation": [
+                {
+                    "title": "GSK"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Shao",
+            "givenName": "Chun",
+            "fn": "Chun Shao",
+            "affiliation": [
+                {
+                    "title": "GSK"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Mahan",
+            "givenName": "Andrew",
+            "fn": "Andrew Mahan",
+            "affiliation": [
+                {
+                    "title": "Janssen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Nanda",
+            "givenName": "Hirsh",
+            "fn": "Hirsh Nanda",
+            "affiliation": [
+                {
+                    "title": "Janssen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Nields",
+            "givenName": "Kristen",
+            "fn": "Kristen Nields",
+            "affiliation": [
+                {
+                    "title": "Janssen"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Nightlinger",
+            "givenName": "Nancy",
+            "fn": "Nancy Nightlinger",
+            "affiliation": [
+                {
+                    "title": "Just-Evotech Biologics, Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Niu",
+            "givenName": "Ben",
+            "fn": "Ben Niu",
+            "affiliation": [
+                {
+                    "title": "AstraZeneca"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wang",
+            "givenName": "Jihong",
+            "fn": "Jihong Wang",
+            "affiliation": [
+                {
+                    "title": "AstraZeneca"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Xu",
+            "givenName": "Wei",
+            "fn": "Wei Xu",
+            "affiliation": [
+                {
+                    "title": "AstraZeneca"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Leo",
+            "givenName": "Gabriella",
+            "fn": "Gabriella Leo",
+            "affiliation": [
+                {
+                    "title": "EMD Serono"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Sepe",
+            "givenName": "Nunzio",
+            "fn": "Nunzio Sepe",
+            "affiliation": [
+                {
+                    "title": "EMD Serono"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Liu",
+            "givenName": "Yan-Hui",
+            "fn": "Yan-Hui Liu",
+            "affiliation": [
+                {
+                    "title": "Merck & Co., Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Patel",
+            "givenName": "Bhumit",
+            "middleName": "A.",
+            "fn": "Bhumit A. Patel",
+            "orcid": "0000-0002-7970-7759",
+            "affiliation": [
+                {
+                    "title": "Merck & Co., Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Richardson",
+            "givenName": "Douglas",
+            "fn": "Douglas Richardson",
+            "orcid": "0000-0001-8488-6758",
+            "affiliation": [
+                {
+                    "title": "Merck & Co., Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wang",
+            "givenName": "Yi",
+            "fn": "Yi Wang",
+            "affiliation": [
+                {
+                    "title": "Merck & Co., Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Tizabi",
+            "givenName": "Daniela",
+            "fn": "Daniela Tizabi",
+            "affiliation": [
+                {
+                    "title": "National Institute of Standards and Technology",
+                    "subunit": [
+                        "Biomolecular Measurement Division"
+                    ],
+                    "@id": "ror:05xpvk416"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Borisov",
+            "givenName": "Oleg",
+            "middleName": "V.",
+            "fn": "Oleg V. Borisov",
+            "affiliation": [
+                {
+                    "title": "Novavax, Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Lu",
+            "givenName": "Yali",
+            "fn": "Yali Lu",
+            "affiliation": [
+                {
+                    "title": "Novavax, Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Maynard",
+            "givenName": "Ernest",
+            "middleName": "L.",
+            "fn": "Ernest L. Maynard",
+            "orcid": "0000-0002-6303-8570",
+            "affiliation": [
+                {
+                    "title": "Novavax, Inc."
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Gruhler",
+            "givenName": "Albrecht",
+            "fn": "Albrecht Gruhler",
+            "affiliation": [
+                {
+                    "title": "Novo Nordisk"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Haselmann",
+            "givenName": "Kim",
+            "middleName": "F.",
+            "fn": "Kim F. Haselmann",
+            "affiliation": [
+                {
+                    "title": "Novo Nordisk"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Krogh",
+            "givenName": "Thomas",
+            "middleName": "N.",
+            "fn": "Thomas N. Krogh",
+            "affiliation": [
+                {
+                    "title": "Novo Nordisk"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "S\u00f6nksen",
+            "givenName": "Carsten",
+            "middleName": "P.",
+            "fn": "Carsten P. S\u00f6nksen",
+            "affiliation": [
+                {
+                    "title": "Novo Nordisk"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Letarte",
+            "givenName": "Simon",
+            "fn": "Simon Letarte",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Shen",
+            "givenName": "Sean",
+            "fn": "Sean Shen",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Boggio",
+            "givenName": "Kristin",
+            "fn": "Kristin Boggio",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Johnson",
+            "givenName": "Keith",
+            "fn": "Keith Johnson",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Ni",
+            "givenName": "Wenqin",
+            "fn": "Wenqin Ni",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Patel",
+            "givenName": "Himakshi",
+            "fn": "Himakshi Patel",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Ripley",
+            "givenName": "David",
+            "fn": "David Ripley",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Rouse",
+            "givenName": "Jason",
+            "middleName": "C.",
+            "fn": "Jason C. Rouse",
+            "orcid": "0000-0002-2721-7264",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Zhang",
+            "givenName": "Ying",
+            "fn": "Ying Zhang",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Daniels",
+            "givenName": "Carly",
+            "fn": "Carly Daniels",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Dawdy",
+            "givenName": "Andrew",
+            "fn": "Andrew Dawdy",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Friese",
+            "givenName": "Olga",
+            "fn": "Olga Friese",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Powers",
+            "givenName": "Thomas",
+            "middleName": "W.",
+            "fn": "Thomas W. Powers",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Sperry",
+            "givenName": "Justin",
+            "middleName": "B.",
+            "fn": "Justin B. Sperry",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Woods",
+            "givenName": "Josh",
+            "fn": "Josh Woods",
+            "affiliation": [
+                {
+                    "title": "Pfizer"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Carlson",
+            "givenName": "Eric",
+            "fn": "Eric Carlson",
+            "affiliation": [
+                {
+                    "title": "Protein Metrics Inc"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Sen",
+            "givenName": "K.",
+            "middleName": "Ilker",
+            "fn": "K. Ilker Sen",
+            "orcid": "0000-0003-0756-9518",
+            "affiliation": [
+                {
+                    "title": "Protein Metrics Inc"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Skilton",
+            "givenName": "St",
+            "middleName": "John",
+            "fn": "St John Skilton",
+            "affiliation": [
+                {
+                    "title": "Protein Metrics Inc"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Busch",
+            "givenName": "Michelle",
+            "fn": "Michelle Busch",
+            "affiliation": [
+                {
+                    "title": "Sanofi"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Lund",
+            "givenName": "Anders",
+            "fn": "Anders Lund",
+            "affiliation": [
+                {
+                    "title": "Sanofi"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Stapels",
+            "givenName": "Martha",
+            "fn": "Martha Stapels",
+            "affiliation": [
+                {
+                    "title": "Sanofi"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Guo",
+            "givenName": "Xu",
+            "fn": "Xu Guo",
+            "affiliation": [
+                {
+                    "title": "SCIEX"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Heidelberger",
+            "givenName": "Sibylle",
+            "fn": "Sibylle Heidelberger",
+            "affiliation": [
+                {
+                    "title": "SCIEX"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Kaluarachchi",
+            "givenName": "Harini",
+            "fn": "Harini Kaluarachchi",
+            "affiliation": [
+                {
+                    "title": "SCIEX"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "McCarthy",
+            "givenName": "Sean",
+            "fn": "Sean McCarthy",
+            "affiliation": [
+                {
+                    "title": "SCIEX"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Kim",
+            "givenName": "John",
+            "fn": "John Kim",
+            "affiliation": [
+                {
+                    "title": "Teva"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Zhen",
+            "givenName": "Jing",
+            "fn": "Jing Zhen",
+            "affiliation": [
+                {
+                    "title": "Teva"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Zhou",
+            "givenName": "Ying",
+            "fn": "Ying Zhou",
+            "affiliation": [
+                {
+                    "title": "Teva"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Rogstad",
+            "givenName": "Sarah",
+            "fn": "Sarah Rogstad",
+            "orcid": "0000-0002-8998-053X",
+            "affiliation": [
+                {
+                    "title": "U.S. Food and Drug Administration"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Wang",
+            "givenName": "Xiaoshi",
+            "fn": "Xiaoshi Wang",
+            "affiliation": [
+                {
+                    "title": "U.S. Food and Drug Administration"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Fang",
+            "givenName": "Jing",
+            "fn": "Jing Fang",
+            "affiliation": [
+                {
+                    "title": "Waters"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Chen",
+            "givenName": "Weibin",
+            "fn": "Weibin Chen",
+            "affiliation": [
+                {
+                    "title": "Waters"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Yu",
+            "givenName": "Ying",
+            "middleName": "Qing",
+            "fn": "Ying Qing Yu",
+            "affiliation": [
+                {
+                    "title": "Waters"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Hoogerheide",
+            "givenName": "John",
+            "middleName": "G.",
+            "fn": "John G. Hoogerheide",
+            "affiliation": [
+                {
+                    "title": "Zoetis"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Scott",
+            "givenName": "Rebecca",
+            "fn": "Rebecca Scott",
+            "affiliation": [
+                {
+                    "title": "Zoetis"
+                }
+            ],
+            "@type": "foaf:Person"
+        },
+        {
+            "familyName": "Yuan",
+            "givenName": "Hua",
+            "fn": "Hua Yuan",
+            "affiliation": [
+                {
+                    "title": "Zoetis"
+                }
+            ],
+            "@type": "foaf:Person"
+        }
+    ]
+}
