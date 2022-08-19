@@ -1,4 +1,4 @@
-<div>
+<div style="margin-bottom: .5em;">
     <div style="display: inline-block; width: fit-content; max-width: 95%;">
         <span style="display: table;">
             <div class="editable_container">
@@ -8,31 +8,17 @@
                     </div>
                 </div>
                 <ng-template #hasTopic>
-                    <div class="editable_field" style="cursor: pointer;width: calc(100%-1em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
-                        <strong>Research Topics: </strong>
-                        <span *ngIf="recordType != 'Science Theme'; else scienceTheme" >
-                            <span class="topics" *ngFor="let topic of nistTaxonomyTopics; let i =index">
-                                {{ topic }}
-                                <span *ngIf="i < nistTaxonomyTopics.length-1 ">,</span>
-                            </span> &nbsp; &nbsp;
-                        </span>
-                        <ng-template #scienceTheme>
-                            <div style="margin-left: 1em;" *ngIf="scienceThemeTopics.length > 0">
-                                <span class="topics" *ngFor="let topic of scienceThemeTopics; let i =index">
-                                    <i>{{ topic }}</i>
-                                    <span *ngIf="i < scienceThemeTopics.length-1 ">,</span>
-                                </span> &nbsp; &nbsp;
-                            </div>
-                            <div style="margin-left: 1em;" *ngIf="nistTaxonomyTopics.length > 0">
-                                <span class="topics" *ngFor="let topic of nistTaxonomyTopics; let i =index">
-                                    <i>{{ topic }}</i>
-                                    <span *ngIf="i < nistTaxonomyTopics.length-1 ">,</span>
-                                </span> &nbsp; &nbsp;
-                            </div>
-                        </ng-template>
+                    <div class="editable_field" style="cursor: pointer;width: calc(100%-1em);"
+                        [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
+                        <strong>General Research Topics: </strong>
+                        <span class="topics" *ngFor="let topic of nistTaxonomyTopics; let i =index">
+                            <i>{{ topic }}</i>
+                            <span *ngIf="i < nistTaxonomyTopics.length-1 ">, </span>
+                        </span> &nbsp; &nbsp;
                     </div>
                 </ng-template>
-                <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal()" aria-label="edit button">
+                <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal()"
+                    aria-label="edit button">
                     <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit topic"></i>
                 </button>
                 <button class="undo_button" *ngIf="mdupdsvc.isEditMode" type="button" [disabled]="!updated"
@@ -41,7 +27,17 @@
                         data-toggle="tooltip" title="Undo topic"></i>
                 </button>
             </div>
+
+            <div *ngIf="scienceThemeTopics.length > 0">
+                <strong>Forensics Research Topics: </strong>
+                <span class="topics" *ngFor="let topic of scienceThemeTopics; let i =index">
+                    <i>{{ topic }}</i>
+                    <span *ngIf="i < scienceThemeTopics.length-1 ">, </span>
+                </span> &nbsp; &nbsp;
+            </div>
         </span>
     </div>
-    <div *ngIf="mdupdsvc.isEditMode" style="color: rgb(173, 0, 0); display: inline-block;width: fit-content; max-width:5%;vertical-align: top;text-align: left; padding-left: .5em;">*</div>
+    <div *ngIf="mdupdsvc.isEditMode"
+        style="color: rgb(173, 0, 0); display: inline-block;width: fit-content; max-width:5%;vertical-align: top;text-align: left; padding-left: .5em;">
+        *</div>
 </div>
