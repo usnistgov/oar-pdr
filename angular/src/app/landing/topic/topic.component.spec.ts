@@ -55,7 +55,7 @@ describe('TopicComponent', () => {
     it('Research Topics should contains Manufacturing: Factory communications', () => {
         let cmpel = fixture.nativeElement;
         let aels = cmpel.querySelectorAll(".topics");
-        expect(aels.length).toEqual(3);
+        expect(aels.length).toEqual(6);
         expect(aels[0].innerText).toContain('Manufacturing: Factory communications');
       });
     

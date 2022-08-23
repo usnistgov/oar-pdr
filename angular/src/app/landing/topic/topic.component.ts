@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';
@@ -48,23 +48,36 @@ export class TopicComponent implements OnInit {
     }
 
     ngOnInit() {
-        if(this.record) {
-            this.recordType = (new NERDResource(this.record)).resourceLabel();
+        this.updateResearchTopics();
+    }
 
-            if(this.recordType == "Science Theme") {
-                this.fieldName = "topic";
-                this.record['topic'].forEach(topic => {
-                    if(topic['scheme'].includes(this.standardNISTTaxonomyURI)){
-                        this.nistTaxonomyTopics.push(topic.tag);
-                    }else{
+    /**
+     * Once input record changed, refresh the topic list 
+     * @param changes 
+     */
+    ngOnChanges(changes: SimpleChanges): void {
+        this.updateResearchTopics();
+    }
+
+    /**
+     * Update the research topic lists
+     */
+    updateResearchTopics() {
+        if(this.record) {
+            this.scienceThemeTopics = [];
+            this.nistTaxonomyTopics = [];
+
+            this.record['topic'].forEach(topic => {
+                if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0){
+                    if(this.scienceThemeTopics.indexOf(topic.tag) < 0)
                         this.scienceThemeTopics.push(topic.tag);
-                    }
-                });
-            }else{
-                this.fieldName = "theme";
-                if(this.record[this.fieldName] != undefined)
-                    this.nistTaxonomyTopics = this.record[this.fieldName];
-            }
+                }
+            });
+
+            this.record['theme'].forEach(topic => {
+                if(this.nistTaxonomyTopics.indexOf(topic) < 0)
+                    this.nistTaxonomyTopics.push(topic);
+            });
         }
     }
 
@@ -90,7 +103,7 @@ export class TopicComponent implements OnInit {
 
         let val: string[] = [];
         if (this.record[this.fieldName])
-            val = JSON.parse(JSON.stringify(this.nistTaxonomyTopics.concat(this.scienceThemeTopics)));
+            val = JSON.parse(JSON.stringify(this.nistTaxonomyTopics));
 
         modalRef.componentInstance.inputValue = {};
         modalRef.componentInstance.inputValue[this.fieldName] = val;
@@ -98,14 +111,17 @@ export class TopicComponent implements OnInit {
         modalRef.componentInstance['title'] = "Research Topics";
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
+            console.log("returnValue", returnValue);
             if (returnValue) {
                 var postMessage: any = {};
                 postMessage[this.fieldName] = returnValue[this.fieldName];
                 this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
                     // console.log("###DBG  update sent; success: "+updateSuccess.toString());
-                    if (updateSuccess)
+                    if (updateSuccess) {
                         this.notificationService.showSuccessWithTimeout("Research topics updated.", "", 3000);
-                    else
+
+                        this.updateResearchTopics();
+                    } else
                         console.error("acknowledge topic update failure");
                 });
             }
@@ -117,9 +133,11 @@ export class TopicComponent implements OnInit {
      */
     undoEditing() {
         this.mdupdsvc.undo(this.fieldName).then((success) => {
-            if (success)
+            if (success) {
                 this.notificationService.showSuccessWithTimeout("Reverted changes to research topic.", "", 3000);
-            else
+
+                this.updateResearchTopics();
+            } else
                 console.error("Failed to undo research topic")
         });
     }
