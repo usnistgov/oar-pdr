@@ -8,6 +8,7 @@ import * as _ from 'lodash-es';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { SearchService } from '../../shared/search-service';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
+import { AppConfig } from '../../config/config';
 
 const SEARCH_SERVICE = 'SEARCH_SERVICE';
 
@@ -72,6 +73,7 @@ export class FiltersComponent implements OnInit {
     themesTree: TreeNode[] = [];
     showMoreLink: boolean = false;
     selectedThemesNode: any[] = [];
+    standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
 
 //  Forensics
     forensicsThemes: SelectItem[] = [];
@@ -146,8 +148,11 @@ export class FiltersComponent implements OnInit {
     constructor(
         public taxonomyListService: TaxonomyListService,
         public searchFieldsListService: SearchfieldsListService,
-        public searchService: SearchService
-    ) { }
+        public searchService: SearchService,
+        private cfg: AppConfig
+    ) { 
+        this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
+    }
 
     ngOnInit(): void {
         this.msgs = [];
@@ -907,39 +912,30 @@ export class FiltersComponent implements OnInit {
 
         let topicLabel: string;
         let data: string;
+
         this.themesAllArray = [];
         this.forensicsThemesAllArray = [];
         this.unspecifiedCount = 0;
-
+        
         for (let resultItem of searchResults) {
             if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
                 for (let topic of resultItem.topic) {
                     let topics = topic.tag.split(":");
-                    let collectDefaultTheme: boolean = false;
 
-                    if(topics[0].trim().toLowerCase() == 'forensics') {
-                        topicLabel = topic.tag.substring(this.findNthOccurence(topic.tag, 1, ":")+1).trim();
-                        data = topic.tag.substring(this.findNthOccurence(topic.tag, 1, ":")+1).trim();
+                    if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
+                        topicLabel = topics[0];
+                        data = topic.tag;
 
-                        let thirdTopic = this.findNthOccurence(topic.tag, 2, ":");
-                        if(thirdTopic > 0){
-                            topicLabel = topicLabel.substring(0, thirdTopic)
+                        if(topics.length > 1){
+                            topicLabel = topics[0] + ":" + topics[1];
                         }
 
                         if (forensicsThemesArray.indexOf(topicLabel) < 0) {
                             forensicsThemes.push({ label: topicLabel, value: data });
                             forensicsThemesArray.push(topicLabel);
-                        }
-
-                        if(topics.length > 1){
-                            collectDefaultTheme = true;
-                        }
+                        } 
                     }else{
-                        collectDefaultTheme = true;
-                    }
-
-                    if(collectDefaultTheme) {
-                        topicLabel = _.split(topic.tag, ':')[0];
+                        topicLabel = topics[0];
                         topic = topic.tag;
 
                         if (themesArray.indexOf(topicLabel) < 0) {
@@ -952,7 +948,7 @@ export class FiltersComponent implements OnInit {
                 this.unspecifiedCount += 1;
             }
         }
-        
+
         for (let resultItem of searchResults) {
             this.uniqueThemes = [];
             this.forensicsUniqueThemes = [];
