@@ -906,16 +906,17 @@ export class FiltersComponent implements OnInit {
 
         let topicLabel: string;
         let data: string;
+
         this.themesAllArray = [];
         this.forensicsThemesAllArray = [];
         this.unspecifiedCount = 0;
-
+        
         for (let resultItem of searchResults) {
             if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
-                resultItem.topic.forEach(topic => {
-                    if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0){
-                        let topics = topic.tag.split(":");
+                for (let topic of resultItem.topic) {
+                    let topics = topic.tag.split(":");
 
+                    if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
                         topicLabel = topics[0];
                         data = topic.tag;
 
@@ -926,16 +927,17 @@ export class FiltersComponent implements OnInit {
                         if (forensicsThemesArray.indexOf(topicLabel) < 0) {
                             forensicsThemes.push({ label: topicLabel, value: data });
                             forensicsThemesArray.push(topicLabel);
-                        }                          
+                        } 
+                    }else{
+                        topicLabel = topics[0];
+                        topic = topic.tag;
+
+                        if (themesArray.indexOf(topicLabel) < 0) {
+                            themes.push({ label: topicLabel, value: topic });
+                            themesArray.push(topicLabel);
+                        }
                     }
-                });
-    
-                resultItem.theme.forEach(topic => {
-                    if (themesArray.indexOf(topicLabel) < 0) {
-                        themes.push({ label: topicLabel, value: topic });
-                        themesArray.push(topicLabel);
-                    }
-                });
+                }
             } else {
                 this.unspecifiedCount += 1;
             }
