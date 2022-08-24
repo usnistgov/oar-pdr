@@ -91,8 +91,8 @@ export class NERDResource {
                     out += author.familyName + ', ';
                 if (author.givenName !== null && author.givenName !== undefined)
                     out += author.givenName;
-                if (author.middleName !== null && author.middleName !== undefined)
-                    out += ' ' + author.middleName;
+                if (author.middleName !== null && author.middleName !== undefined && author.middleName.trim() != "")
+                    out += ' ' + author.middleName.trim();
                 if (i != this.data['authors'].length - 1)
                     out += ', ';
             }

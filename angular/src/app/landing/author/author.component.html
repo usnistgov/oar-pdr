@@ -6,39 +6,55 @@
             </div>
         </div>
         <ng-template #hasAuthors>
-            <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
+            <div class="editable_field" style="max-width:calc(100% - 4em);"
+                [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
                 <div class="authorsbrief" *ngIf="record['authors']">
                     <span *ngFor="let author of record.authors; let i = index" (click)="openModal()">
-                        {{ author.fn }}         
-                        <span *ngIf="author.orcid">
-                          <a href="https://orcid.org/{{ author.orcid }}" target="blank">
-                             <img src="assets/images/orcid-logo.png" style="width: 20px;">
-                          </a>
-                        </span>                            
-                        <span *ngIf="i < record.authors.length-1 ">,</span>
+                        <!-- If comma starts in a new line, the UI will display a space before the comma.
+                        So we have to do it this way. -->
+                        <span *ngIf="i < record.authors.length-1; else lastone">
+                            <span *ngIf="author.orcid; else noorcid">
+                                {{author.fn}}
+                                <a href="https://orcid.org/{{ author.orcid }}" target="blank">
+                                   <img src="assets/images/orcid-logo.png" style="width: 20px;">
+                                </a>,
+                            </span>
+                            <ng-template #noorcid>
+                                {{author.fn}},
+                            </ng-template>
+                        </span>
+                        <ng-template #lastone>
+                            {{author.fn}}
+                            <span *ngIf="author.orcid">
+                                <a href="https://orcid.org/{{ author.orcid }}" target="blank">
+                                   <img src="assets/images/orcid-logo.png" style="width: 20px;">
+                                </a>
+                              </span> 
+                        </ng-template>
                     </span>
                     <i style="margin-left: 0.5rem;" class="faa"
                         [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
                         aria-hidden="true"
                         (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                 </div>
-                <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard" style="width: fit-content; padding:.5em;">
+                <div [collapse]="!isCollapsedContent" class="card card-block card-header customcard"
+                    style="width: fit-content; padding:.5em;">
                     <div class="authorsdetail" *ngIf="record.authors" (click)="openModal()">
                         <span><b>Authors:</b></span>
                         <div *ngFor="let author of record.authors; let i = index">
-                        <div>
-                          <span>{{ author.fn}}</span>
-                          <span *ngIf="author.orcid">&nbsp;&nbsp;&nbsp;&nbsp;
-                            <a href="https://orcid.org/{{ author.orcid }}" target="blank">
-                               <img src="assets/images/orcid-logo.png" style="width: 20px;">:
-                               {{ author.orcid }}
-                            </a>
-                          </span>                            
-                         </div>
+                            <div>
+                                <span>{{ author.fn}}</span>
+                                <span *ngIf="author.orcid">&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a href="https://orcid.org/{{ author.orcid }}" target="blank">
+                                        <img src="assets/images/orcid-logo.png" style="width: 20px;">:
+                                        {{ author.orcid }}
+                                    </a>
+                                </span>
+                            </div>
                             <div *ngFor="let aff of author.affiliation" style="padding-left: 1em">
                                 <i>
-                                <div>{{aff.title}}</div>
-                                <div *ngIf="aff.subunits">{{getSubunites(aff.subunits)}}</div>
+                                    <div>{{aff.title}}</div>
+                                    <div *ngIf="aff.subunits">{{getSubunites(aff.subunits)}}</div>
                                 </i>
                             </div>
                         </div>
