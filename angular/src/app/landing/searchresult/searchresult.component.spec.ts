@@ -53,4 +53,10 @@ describe('SearchresultComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('Should have title', () => {
+        expect(fixture.nativeElement.querySelectorAll('#datasetlist-heading').length).toEqual(1);
+        expect(fixture.nativeElement.querySelector('#datasetlist-heading').innerText)
+            .toEqual('Datasets in this collection');
+    });
 });
