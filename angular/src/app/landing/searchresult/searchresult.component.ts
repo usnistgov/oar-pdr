@@ -20,7 +20,7 @@ export class SearchresultComponent implements OnInit {
     mobHeight: number;
     mobWidth: number;
     mobileMode: boolean = false; // set mobile mode to true if window width < 641
-    filterWidth: number;
+    filterWidth: number = 30;
     filterWidthStr: string;
     filterMode: string = "normal";
     resultWidth: any;

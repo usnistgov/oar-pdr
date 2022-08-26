@@ -20,7 +20,7 @@ export class SearchfieldsListService {
   constructor(private http: HttpClient,
     private appConfig: AppConfig,
     private cfg: AppConfig) {
-      this.RMMAPIURL = cfg.get("locations.mdService", "/unconfigured");
+      this.RMMAPIURL = cfg.get("API.mdSearch", "/unconfigured");
     }
 
     ngOnInit(): void {
