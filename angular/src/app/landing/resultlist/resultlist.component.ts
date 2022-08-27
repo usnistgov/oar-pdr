@@ -81,7 +81,7 @@ export class ResultlistComponent implements OnInit {
                     this.resultCount = searchResults['ResultCount'];
                     that.onSuccess(searchResults.ResultData);
                 },
-                error => that.onError(error)
+                error => that.onError(urls[i], error)
             );
         }
     }
@@ -217,8 +217,8 @@ export class ResultlistComponent implements OnInit {
     /**
      * If search is unsuccessful push the error message
      */
-    onError(error: any) {
-        console.error("Search URL failed to resolve: "+error.error);
+    onError(url: string, error: any) {
+        console.error("Search URL ("+url+") failed to resolve: "+error.message);
     }
 
     /**

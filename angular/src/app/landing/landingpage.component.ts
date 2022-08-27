@@ -131,7 +131,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 public metricsService: MetricsService,
                 public breakpointObserver: BreakpointObserver) 
     {
-        this.reqId = this.requestedIDfromRoute(this.route);
+        this.reqId = this.requestedIDfromRoute(this.route).replace('ark:/88434/', '');
         this.inBrowser = isPlatformBrowser(platformId);
         this.editEnabled = cfg.get('editEnabled', false) as boolean;
         this.editMode = this.EDIT_MODES.VIEWONLY_MODE;
