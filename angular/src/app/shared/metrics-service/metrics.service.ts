@@ -14,6 +14,10 @@ export class MetricsService {
         private http: HttpClient, ) { 
 
         this.metricsBackend = cfg.get("APIs.metrics", "/unconfigured");
+        if (this.metricsBackend == "/unconfigured")
+        throw new Error("APIs.metrics endpoint not configured!");
+
+        if (! this.metricsBackend.endsWith("/")) this.metricsBackend += "/"
     }
 
     getFileLevelMetrics(ediid: string): Observable<any> {
