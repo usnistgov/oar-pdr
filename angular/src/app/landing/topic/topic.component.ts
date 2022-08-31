@@ -67,17 +67,23 @@ export class TopicComponent implements OnInit {
             this.scienceThemeTopics = [];
             this.nistTaxonomyTopics = [];
 
-            this.record['topic'].forEach(topic => {
-                if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0){
-                    if(this.scienceThemeTopics.indexOf(topic.tag) < 0)
-                        this.scienceThemeTopics.push(topic.tag);
-                }
-            });
+            if (this.record['topic']) {
+                this.record['topic'].forEach(topic => {
+                    if (topic['scheme']) {
+                        if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0){
+                            if(this.scienceThemeTopics.indexOf(topic.tag) < 0)
+                                this.scienceThemeTopics.push(topic.tag);
+                        }
+                    }
+                });
+            }
 
-            this.record['theme'].forEach(topic => {
-                if(this.nistTaxonomyTopics.indexOf(topic) < 0)
-                    this.nistTaxonomyTopics.push(topic);
-            });
+            if (this.record['theme']) {
+                this.record['theme'].forEach(topic => {
+                    if(this.nistTaxonomyTopics.indexOf(topic) < 0)
+                        this.nistTaxonomyTopics.push(topic);
+                });
+            }
         }
     }
 
