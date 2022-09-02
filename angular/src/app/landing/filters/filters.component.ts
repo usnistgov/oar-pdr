@@ -71,7 +71,7 @@ export class FiltersComponent implements OnInit {
     uniqueThemes: string[] = [];
     themesWithCount: TreeNode[] = [];
     themesTree: TreeNode[] = [];
-    showMoreLink: boolean = false;
+    showMoreLink: boolean = true;
     selectedThemesNode: any[] = [];
     standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
 
@@ -1053,12 +1053,6 @@ export class FiltersComponent implements OnInit {
                 label: sortable[key][0] + "-" + sortable[key][1],
                 data: sortable[key][0]
             });
-        }
-
-        if (sortable.length > 5) {
-            this.forensicsShowMoreLink = true;
-        } else {
-            this.forensicsShowMoreLink = false;
         }
     }
 
