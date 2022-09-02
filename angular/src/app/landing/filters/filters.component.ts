@@ -19,7 +19,7 @@ const SEARCH_SERVICE = 'SEARCH_SERVICE';
     providers: [TaxonomyListService, SearchfieldsListService],
     animations: [
         trigger('expand', [
-            state('closed', style({height: '40px'})),
+            state('closed', style({height: '50px'})),
             state('collapsed', style({height: '183px'})),
             state('expanded', style({height: '*'})),
             transition('expanded <=> collapsed', animate('625ms')),
@@ -112,7 +112,7 @@ export class FiltersComponent implements OnInit {
     isActive: boolean = true;
     filterClass: string;
     resultsClass: string;
-    nodeExpanded: boolean = true;
+    nodeExpanded: boolean = false;
     forensicsNodeExpanded: boolean = true;
     comheight: string = '50px'; // parent div height
     comwidth: string;  // parent div width
@@ -370,7 +370,7 @@ export class FiltersComponent implements OnInit {
 
         this.themesTree = [{
             label: 'NIST Research Topics -',
-            "expanded": true,
+            "expanded": false,
             children: this.themesWithCount
         }];
 
