@@ -2,9 +2,9 @@
     <span class="" *ngIf="record.version" style="padding-right: 10pt;">
           Version: <strong>{{majorVersion(record.version)}}</strong></span>
     <span class="" *ngIf="record.versionHistory || record.releaseHistory" style="padding-right: 15pt;">...
-        <i style="cursor: pointer;" class="faa" aria-hidden="true"
-            [ngClass]="{'faa-plus-square-o': !clickHistory, 'faa-minus-square-o': clickHistory}"
-            (click)="closeHistory = !closeHistory; clickHistory = expandHistory();"></i>
+        <i style="cursor: pointer; margin-left: .5em;" class="faa" aria-hidden="true"
+        data-toggle="tooltip" [title]="expandButtonAlterText" [aria-label]="expandButtonAlterText"
+            [ngClass]="expandIconClass" (click)="expandHistory()"></i>
     </span>
     <span class="" *ngIf="record.firstIssued" style="padding-right: 10pt;">
        First Released: <strong>{{record.firstIssued.slice(0,10)}}</strong></span>
@@ -13,7 +13,7 @@
     <ng-template #issuedate>
        Issued: <strong>{{record.issued.slice(0,10)}}</strong></ng-template>
 
-    <div class="card customcard" [collapse]="!closeHistory">
+    <div class="card customcard" [collapse]="!visibleHistory">
         <div class="" *ngIf="record.annotated; else issueddate" style="padding-right: 10pt;">
              Description Last Updated: <strong>{{record.annotated.slice(0,10)}}</strong></div>
         <div><b>Release History:</b>

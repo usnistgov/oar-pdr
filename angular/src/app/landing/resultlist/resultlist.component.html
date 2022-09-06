@@ -58,16 +58,14 @@
                 <a href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank" class="title">
                     {{resultItem.title}}
                 </a>
-                <span>
-                    <div [attr.aria-label]="expandButtonAlterText" style="margin-left: .5em;cursor: pointer;width: 20px;height: 20px;background-size:cover;display: inline-block;"
-                        (click)="toggleDetails(resultItem, i)"
-                        [ngStyle]="{ 'background-image': 'url('+resultItem.iconurl+')','margin-bottom':'-4px'}"
-                        >
-                    </div>
+                <span style="margin-left: 5px;">
+                    <i [ngClass]="resultItem.expandIcon"
+                        style="cursor: pointer;color: #1471AE;" data-toggle="tooltip"
+                        [title]="expandButtonAlterText(resultItem)" [aria-label]="expandButtonAlterText(resultItem)" (click)="toggleDetails(resultItem, i)"></i>
                 </span>
             </div>
 
-            <div [@detailExpand]="resultItem.DetailsDisplayed ? 'expanded' : 'collapsed'" style="overflow: hidden;">
+            <div [@detailExpand]="resultItem.isExpanded ? 'expanded' : 'collapsed'" style="overflow: hidden;">
                 <div class="ui-grid-row" style="margin-bottom:.5em">
                     {{resultItem.description}}
                 </div>

@@ -33,6 +33,9 @@ export class VersionComponent implements OnChanges {
     public EDIT_MODES: any = LandingConstants.editModes;
     editMode: string;
 
+    expandButtonAlterText: string = "Open version history";
+    expandIconClass: string = "faa-caret-right";
+
     @Input() record: NerdmRes = null;
 
     /**
@@ -61,7 +64,8 @@ export class VersionComponent implements OnChanges {
      */
     expandHistory() {
         this.visibleHistory = !this.visibleHistory;
-        return this.visibleHistory;
+        this.expandIconClass = this.visibleHistory? "faa-caret-down" : "faa-caret-right";
+        this.expandButtonAlterText = this.visibleHistory? "Close version history" : "Open version history";
     }
 
     /**
