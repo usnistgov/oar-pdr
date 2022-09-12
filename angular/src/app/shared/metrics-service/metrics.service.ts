@@ -14,15 +14,17 @@ export class MetricsService {
         private http: HttpClient, ) { 
 
         this.metricsBackend = cfg.get("APIs.metrics", "/unconfigured");
+
         if (this.metricsBackend == "/unconfigured")
         throw new Error("APIs.metrics endpoint not configured!");
 
         if (! this.metricsBackend.endsWith("/")) this.metricsBackend += "/"
+
     }
 
     getFileLevelMetrics(ediid: string): Observable<any> {
         let url = this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid;
-
+        console.log("metrics url", url)
         const request = new HttpRequest(
             "GET", url, 
             { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
