@@ -71,6 +71,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     displaySpecialMessage: boolean = false;
     citationDialogWith: number = 550; // Default width
     recordLevelMetrics : RecordLevelMetrics;
+    fileLevelData: any;
+    datasetSize: number = 0;
 
     loadingMessage = '<i class="faa faa-spinner faa-spin"></i> Loading...';
 
@@ -336,11 +338,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                                 //Now check if there is any metrics data
                                 this.metricsData.totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
                 
-                                this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].total_size : 0;
+                                this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download * this.datasetSize : 0;
                     
                                 this.metricsData.totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
                         
-                                this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;                                    
+                                this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;  
                             }
 
                             this.metricsData.dataReady = true;
@@ -505,6 +507,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      *  * set the page's title (as displayed in the browser title bar).
      */
     useMetadata(): void {
+        //Calculate the size of the dataset
+        this.md.components.forEach( (comp) => {
+            if(comp.size != undefined){
+                this.datasetSize += comp.size;
+            }
+        })
+
         this.metricsData.url = "/metrics/" + this.reqId;
 
         // set the document title

@@ -14,8 +14,12 @@ export class MetricsService {
         private http: HttpClient, ) { 
 
         this.metricsBackend = cfg.get("APIs.metrics", "/unconfigured");
-        //If last character is not '/', add it. Otherwise all url will fail.
-        if(this.metricsBackend.slice(-1) != '/') this.metricsBackend += '/';
+
+        if (this.metricsBackend == "/unconfigured")
+        throw new Error("APIs.metrics endpoint not configured!");
+
+        if (! this.metricsBackend.endsWith("/")) this.metricsBackend += "/"
+
     }
 
     getFileLevelMetrics(ediid: string): Observable<any> {
