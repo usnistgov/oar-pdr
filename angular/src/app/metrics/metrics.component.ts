@@ -509,22 +509,30 @@ export class MetricsComponent implements OnInit {
      * Get total recordset level download size
      */
     get totalDownloadSize() {
-        if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.commonFunctionService.formatBytes(this.recordLevelData.DataSetMetrics[0].total_size, 2);
-        }else{
-            return ""
-        }
+        return this.commonFunctionService.formatBytes(this.totalDownloadSizeInByte, 2);
+        // if(this.recordLevelData.DataSetMetrics[0] != undefined){
+        //     return this.commonFunctionService.formatBytes(this.recordLevelData.DataSetMetrics[0].total_size, 2);
+        // }else{
+        //     return ""
+        // }
     }
 
     /**
      * Get total recordset level download size in bytes
      */
     get totalDownloadSizeInByte() {
-        if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.recordLevelData.DataSetMetrics[0].total_size;
-        }else{
-            return ""
+        let totalDownload = 0;
+        if(this.fileLevelData != undefined) {
+            this.fileLevelData.FilesMetrics.forEach( (file) => {
+                totalDownload += file.success_get * file.download_size;
+            });
         }
+
+        if(this.recordLevelData != undefined) {
+            totalDownload += this.recordLevelData.DataSetMetrics[0].record_download * this.totalFileSize;
+        }
+
+        return totalDownload;
     }
 
      /**
