@@ -69,12 +69,11 @@
                         This icon will be invisible if the author is already at the bottom.
                       -->
                     <img *ngIf="i > 0" src="assets/images/arrow-alt-from-bottom.svg" (click)="moveAuthorUp(author, i)"
-                        style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
-                        title="Move author up" [ngClass]="getTitleImgClass(author)">
+                        style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip" title="Move author up" alt="Move author up" [ngClass]="getTitleImgClass(author)">
                     <img *ngIf="i < inputValue.authors.length-1" src="assets/images/arrow-alt-from-top.svg"
                         (click)="moveAuthorDown(author, i)"
                         style="float:left; width:.8em; cursor:pointer; margin: .2em 0em 0em .5em" data-toggle="tooltip"
-                        title="Move author down" [ngClass]="getTitleImgClass(author)">
+                        title="Move author down" alt="Move author down" [ngClass]="getTitleImgClass(author)">
                 </td>
             </tr>
 
@@ -151,7 +150,7 @@
                 <td>
                     <input type="text" [(ngModel)]="author.orcid" id="orcid-input" (blur)="validateOrcid(author)" (keyup.enter)="validateOrcid(author)" placeholder="####-####-####-####"/>
                     <a href="https://orcid.org" target="blank"><img src="assets/images/orcid-logo.png"
-                            style="width: 20px;"></a>
+                            style="width: 20px;" alt="orcid"></a>
                     <div *ngIf="!author.orcidValid" id="orcid-warning">Please enter valid ORCID. Examples: 0000-1832-8812-1125, 0030-0422-1347-101X</div>
                 </td>
             </tr>
