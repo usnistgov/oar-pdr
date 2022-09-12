@@ -46,7 +46,7 @@
                             (scroll)="goToSection($event)">
                         </tools-menu>
 
-                        <app-metricsinfo *ngIf="recordType!='Science Theme'" [inBrowser]="inBrowser" [record]="md"
+                        <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
                             [metricsData]="metricsData" [showMetrics]="showMetrics">
                         </app-metricsinfo>
 
