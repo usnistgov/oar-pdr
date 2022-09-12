@@ -33,7 +33,7 @@
                         </ng-template>
                     </span>
                     <i style="margin-left: 0.5rem;" class="faa"
-                        [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
+                        [ngClass]="{'faa-caret-right': !clickAuthors, 'faa-caret-down': clickAuthors}"
                         aria-hidden="true"
                         (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                 </div>

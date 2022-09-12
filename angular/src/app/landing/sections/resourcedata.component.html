@@ -37,7 +37,7 @@
         <div *ngIf="accessPages.length > 0">
             <b>Data and related material can be found at the following locations:</b>
             <br>
-            <div [ngStyle]="{'margin-top': '10px', 'background-color': apage['backcolor']}"
+            <div [ngStyle]="{'padding-top': '10px', 'background-color': apage['backcolor']}"
                 *ngFor="let apage of accessPages" (mouseover)="apage['backcolor'] = '#f2f2f2'"
                 (mouseout)="apage['backcolor'] = 'white'">
                 <div class="indent-content"
@@ -53,13 +53,13 @@
                                                                 'Resource title: ' + record.title,
                                                                 apage['accessURL'])">&nbsp;&nbsp;{{apage['title']}}</a>
                             </ng-template>
-                        </span></i>
-                    <div *ngIf="apage['description']">
-                        <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]"><i
-                                class="faa faa-caret-right" *ngIf="!apage[showDesc]"></i><i class="faa faa-caret-down"
-                                *ngIf="apage[showDesc]"></i> About this link
-                        </div>
-                        <div class="description" *ngIf="apage[showDesc]" [@enterAnimation]>{{apage['description']}}
+                        </span>
+                    </i>
+                    <i style="margin-left: 0.5rem; cursor: pointer;" (click)="apage['showDesc'] = !apage['showDesc']" class="faa" [ngClass]="{'faa-caret-right': !apage['showDesc'], 'faa-caret-down': apage['showDesc']}" data-toggle="tooltip" [title]="expandButtonAlterText(apage)" [aria-label]="expandButtonAlterText(apage)">
+                    </i>
+
+                    <div *ngIf="apage['description']" class="description" >
+                        <div [@detailExpand]="apage['showDesc'] ? 'expanded' : 'collapsed'" style="overflow: hidden;">{{apage['description']}}
                         </div>
                     </div>
                 </div>
