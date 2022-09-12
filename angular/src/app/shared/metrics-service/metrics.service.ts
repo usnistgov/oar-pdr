@@ -24,7 +24,7 @@ export class MetricsService {
 
     getFileLevelMetrics(ediid: string): Observable<any> {
         let url = this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid;
-        console.log("metrics url", url)
+
         const request = new HttpRequest(
             "GET", url, 
             { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
