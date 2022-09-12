@@ -11,7 +11,7 @@ import { connectableObservableDescriptor } from 'rxjs/internal/observable/Connec
 @Component({
   selector: 'app-resultlist',
   templateUrl: './resultlist.component.html',
-  styleUrls: ['./resultlist.component.css'],
+  styleUrls: ['../landing.component.css', './resultlist.component.css'],
   animations: [
         trigger('detailExpand', [
         state('void', style({height: '0px', minHeight: '0'})),
@@ -44,12 +44,13 @@ export class ResultlistComponent implements OnInit {
     optionSelected: string;
     searchPhases: string = "";
     searchFields: string[] = ["title", "description", "keyword"];
-    showResult: boolean = true;
-    PDRAPIURL: string = "https://data.nist.gov/od/id/";
-    noSearchResult: boolean = false;
-    expandIcon: string = 'url(assets/images/open_200x200.png)';
+    PDRAPIURL: string = "https://data.nist.gov/lps/";
     isEmail: boolean = false;
-    expandButtonAlterText: string = "Open dataset details";
+
+    //Result display
+    showResult: boolean = true;
+    noSearchResult: boolean = false;
+    // expandButtonAlterText: string = "Open dataset details";
 
     //Pagination
     totalResultItems: number = 0;
@@ -106,8 +107,8 @@ export class ResultlistComponent implements OnInit {
      */
     onSuccess(searchResults: any[]) {
         searchResults.forEach((object) => {
-            object['DetailsDisplayed'] = false;
-            object['iconurl'] = 'assets/images/open_200x200.png';
+            object['expandIcon'] = "faa faa-caret-right";
+            object['isExpanded'] = false;
             object['active'] = true;
         })
 
@@ -152,47 +153,41 @@ export class ResultlistComponent implements OnInit {
     }
 
     /**
-     * Return the background image url of the icon next to the file name.
-     * If the details is hidden, display the "open" icon. Otherwise "close" icon.
-     * @returns 
-     */
-    detailExpandIcon(resultItem: any) {
-        let url;
-        if(resultItem.DetailsDisplayed){
-            url = 'url(assets/images/close_200x200.png)';
-        }else{
-            url = 'url(assets/images/open_200x200.png)';
-        }  
-
-        setTimeout(() => {
-            return url;
-        }, 0);
-    }
-
-    /**
      *  Expand the row to display file details. It's little tricky when hiding the details. 
      *  We have to delay the action to let the animation to finish. 
      * @param fileNode       the TreeNode for the file to provide details for
      */
     toggleDetails(fileNode: any, index: number) {
+        let currentFileNode = this.searchResultsForDisplay[this.currentIndex];
         //Close current details window if it's open
-        if(index != this.currentIndex && this.searchResultsForDisplay[this.currentIndex]) {
-            this.searchResultsForDisplay[this.currentIndex]['DetailsDisplayed'] = false;
-            this.searchResultsForDisplay[this.currentIndex]['iconurl'] = 'assets/images/open_200x200.png';
+        if(index != this.currentIndex && currentFileNode != undefined) {
+            currentFileNode.expandIcon = "faa faa-caret-right";
+            currentFileNode.isExpanded = false;
         }
+
         this.currentIndex = index;
 
-        if(fileNode.DetailsDisplayed){
-            fileNode.DetailsDisplayed = false;
-            fileNode.iconurl = 'assets/images/open_200x200.png';
-            this.expandButtonAlterText = "Open dataset details";
+        if(fileNode.isExpanded){
+            fileNode.isExpanded = false;
+            fileNode.expandIcon = "faa faa-caret-right";
         }else{
-            fileNode.DetailsDisplayed = true;
-            fileNode.iconurl = 'assets/images/close_200x200.png';
-            this.expandButtonAlterText = "Close dataset details";
+            fileNode.isExpanded = true;
+            fileNode.expandIcon = "faa faa-caret-down";            
         }
     }
 
+    /**
+     * This function returns alter text/tooltip text for the expand symbol next to the given treenode title
+     * @param fileNode the TreeNode
+     * @returns 
+     */
+    expandButtonAlterText(fileNode: any) {
+        if(fileNode.isExpanded)
+            return "Close dataset details";
+        else
+            return "Open dataset details";
+    }
+    
     /**
      * Return class name based on given column number and window size
      * @param column 
@@ -334,8 +329,8 @@ export class ResultlistComponent implements OnInit {
     resetResult() {
         if(this.searchResults) {
             this.searchResults.forEach((object) => {
-                object.DetailsDisplayed = false;
-                object.iconurl = 'assets/images/open_200x200.png';
+                object.expandIcon = "faa faa-caret-right";
+                object.isExpanded = false;
                 object.active = true;
             })
         }

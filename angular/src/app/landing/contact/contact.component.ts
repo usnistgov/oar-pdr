@@ -15,6 +15,9 @@ export class ContactComponent implements OnInit {
     @Input() record: any[];
     @Input() inBrowser: boolean;   // false if running server-side
     fieldName = 'contactPoint';
+    contactExpanded = false;
+    expandButtonAlterText: string = "Expand contact details";
+    expandIconClass: string = "faa-caret-right";
 
     tempInput: any = {};
     isEmail = false;
@@ -47,6 +50,12 @@ export class ContactComponent implements OnInit {
     ngOnInit() {
         if ("hasEmail" in this.record['contactPoint'])
             this.isEmail = true;
+    }
+
+    toggleExpand() {
+        this.contactExpanded = !this.contactExpanded;
+        this.expandIconClass = this.contactExpanded? "faa-caret-down" : "faa-caret-right";
+        this.expandButtonAlterText = this.contactExpanded? "Collapse contact details" : "Expand contact details";
     }
 
     getFieldStyle() {
