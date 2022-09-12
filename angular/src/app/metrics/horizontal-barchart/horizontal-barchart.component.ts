@@ -40,7 +40,6 @@ export class HorizontalBarchartComponent implements OnInit {
 
             this.createChart();
             if (this.data) {
-                console.log("Updating chart...");
                 this.updateChart();
             }
         }
