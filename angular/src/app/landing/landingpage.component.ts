@@ -95,7 +95,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     menuPosition: number = 20;
     menuBottom: string = "1em";
     showMetrics: boolean = false;
-    recordType: string = "";
     imageURL: string;
     theme: string;
     scienceTheme = Themes.SCIENCE_THEME;
@@ -516,7 +515,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         })
 
         this.metricsData.url = "/metrics/" + this.reqId;
-        this.recordType = (new NERDResource(this.md)).resourceLabel();
 
         // set the document title
         this.setDocumentTitle();
