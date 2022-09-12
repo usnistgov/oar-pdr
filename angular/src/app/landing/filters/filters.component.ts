@@ -19,7 +19,7 @@ const SEARCH_SERVICE = 'SEARCH_SERVICE';
     providers: [TaxonomyListService, SearchfieldsListService],
     animations: [
         trigger('expand', [
-            state('closed', style({height: '40px'})),
+            state('closed', style({height: '50px'})),
             state('collapsed', style({height: '183px'})),
             state('expanded', style({height: '*'})),
             transition('expanded <=> collapsed', animate('625ms')),
@@ -71,7 +71,7 @@ export class FiltersComponent implements OnInit {
     uniqueThemes: string[] = [];
     themesWithCount: TreeNode[] = [];
     themesTree: TreeNode[] = [];
-    showMoreLink: boolean = false;
+    showMoreLink: boolean = true;
     selectedThemesNode: any[] = [];
     standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
 
@@ -112,7 +112,7 @@ export class FiltersComponent implements OnInit {
     isActive: boolean = true;
     filterClass: string;
     resultsClass: string;
-    nodeExpanded: boolean = true;
+    nodeExpanded: boolean = false;
     forensicsNodeExpanded: boolean = true;
     comheight: string = '50px'; // parent div height
     comwidth: string;  // parent div width
@@ -370,7 +370,7 @@ export class FiltersComponent implements OnInit {
 
         this.themesTree = [{
             label: 'NIST Research Topics -',
-            "expanded": true,
+            "expanded": false,
             children: this.themesWithCount
         }];
 
@@ -1053,12 +1053,6 @@ export class FiltersComponent implements OnInit {
                 label: sortable[key][0] + "-" + sortable[key][1],
                 data: sortable[key][0]
             });
-        }
-
-        if (sortable.length > 5) {
-            this.forensicsShowMoreLink = true;
-        } else {
-            this.forensicsShowMoreLink = false;
         }
     }
 

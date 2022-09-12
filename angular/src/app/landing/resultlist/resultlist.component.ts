@@ -361,8 +361,11 @@ export class ResultlistComponent implements OnInit {
                                 object.active = false;
 
                                 object["@type"].forEach((oType) => {
-                                    if(oType.includes(filter.split("=")[1]))
-                                        object.active = true;
+                                    let types = filter.split("=")[1].split(",");
+                                    types.forEach(type => {
+                                        if(oType.toLowerCase().includes(type.toLowerCase()))
+                                            object.active = true;
+                                    });
                                 })
                             } 
                         });
@@ -393,8 +396,11 @@ export class ResultlistComponent implements OnInit {
     
                                     object["components"].forEach((component) => {
                                         component["@type"].forEach((cType) => {
-                                            if(cType.includes(filter.split("=")[1]))
-                                                object.active = true;
+                                            let types = filter.split("=")[1].split(",");
+                                            types.forEach(type => {
+                                                if(cType.toLowerCase().includes(type.toLowerCase()))
+                                                    object.active = true;
+                                            });
                                         })
                                     })
                                 }
