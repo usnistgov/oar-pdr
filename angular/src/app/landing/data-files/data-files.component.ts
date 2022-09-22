@@ -1,4 +1,4 @@
-import { Component, Input, Output, NgZone, OnInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
+import { Component, Input, Output, NgZone, OnInit, OnChanges, SimpleChanges, EventEmitter, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { TreeNode } from 'primeng/api';
 import { CartService } from '../../datacart/cart.service';
 import { AppConfig } from '../../config/config';
@@ -14,6 +14,9 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 declare var _initAutoTracker: Function;
+const MaxTreeTableHeight = 200;
+const MinTreeTableHeight = 25;
+const FileCountForVirtualScroll = 25;
 
 /**
  * the structure used as the data item in a TreeNode displaying a file or collection component
@@ -134,9 +137,18 @@ export class DataFilesComponent implements OnInit, OnChanges {
     editMode: string;
     mobileMode: boolean = false;
     hashCopied: boolean = false;
+    treeTableHeight: number = 25; //Default height of the tree table
+    virtualScroll: boolean = false;
+    mouse: any = {x:0, y:0};
+    mouseDragging: boolean = false;
+    prevMouseY: number = 0;
+    prevTreeTableHeight: number = 0;
+    searchText: string = "";
 
     // The key of treenode whose details is currently displayed
     currentKey: string = '';
+
+    @ViewChild('tt', { read: ElementRef }) public treeTable: ElementRef<any>;
 
     constructor(private cfg: AppConfig,
                 private cartService: CartService,
@@ -191,8 +203,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
         }
-        if (this.record)
-            this.useMetadata();
+        // if (this.record)
+        //     this.useMetadata();
     }
 
     /**
@@ -216,9 +228,44 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.useMetadata();
     }
 
+    // The following mouse functions handle drag action
+    @HostListener('window:mousemove', ['$event'])
+    onMouseMove(event: MouseEvent){
+        this.mouse = {
+            x: event.clientX,
+            y: event.clientY
+        }
+
+        if(this.mouseDragging) {
+            let diff = this.mouse.y - this.prevMouseY;
+            this.treeTableHeight = this.prevTreeTableHeight + diff;
+            this.treeTableHeight = this.treeTableHeight < 26? 25 : this.treeTableHeight > 500? 500 : this.treeTableHeight;
+            // this.filterWidthStr = this.filterWidth + 'px';
+        }
+
+        // this.setResultWidth();
+    }
+
+    onMousedown(event) {
+        this.prevMouseY = this.mouse.y;
+        this.prevTreeTableHeight = this.treeTableHeight;
+        this.mouseDragging = true;
+    }
+
+    @HostListener('window:mouseup', ['$event'])
+    onMouseUp(event) {
+        this.mouseDragging = false;
+    }
+
     useMetadata() {
         this.ediid = this.record['ediid']
         this.buildTree();
+
+        // If total file count > virtual scrolling threshold, set virtual scrolling to true. 
+        this.virtualScroll = this.fileCount > FileCountForVirtualScroll? true : false;
+
+        // If number of top level elements > 5, set table height to MaxTreeTableHeight, otherwise set it to actual rows * 25 pixels
+        this.treeTableHeight = this.files.length > 5 ? MaxTreeTableHeight : this.files.length * 25;
     }
 
     /**
@@ -231,6 +278,10 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 this.updateStatusFromCart();
             }, 0);
         }
+    }
+
+    ttFilter(event: any) {
+        this.treeTable.nativeElement.filterGlobal(event.target.value, 'contains');
     }
 
     /**
@@ -281,7 +332,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
         let makeNodeData = (name: string, parentKey: string, comp: NerdmComp, isLeaf: boolean = false) => {
             let key = (parentKey) ? parentKey + '/' + name : name;
-            let out = { name: name, key: key, comp: null, size: '', mediaType: '',
+            let out = { name: name, key: key, comp: null, size: '', mediaType: '', visible: true,
                         isInCart: false, downloadStatus: DownloadStatus.NO_STATUS, downloadProgress: 0   };
             if (comp) {
                 out['comp'] = comp;
@@ -307,12 +358,12 @@ export class DataFilesComponent implements OnInit, OnChanges {
             // anscestor node does not exist yet
             if (levels.length > 1) {
                 // haven't found leaf yet
-                let child = { data: makeNodeData(levels[0], tree.data.key, null), children: [] };
+                let child = { data: makeNodeData(levels[0], tree.data.key, null), children: [], parent: tree };
                 tree.children.push(child);
                 return _insertComp(levels.slice(1), comp, child);
             }
             else {
-                let child = { data: makeNodeData(levels[0], tree.data.key, comp), children: [] };
+                let child = { data: makeNodeData(levels[0], tree.data.key, comp), children: [], parent: tree };
                 tree.children.push(child);
                 return child;
             }
@@ -339,18 +390,93 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
         this.files = [...root.children];
         this.fileCount = count;
+
         this.updateStatusFromCart();
     }
 
+    /**
+     * Set tree table height when user expands/collapses a folder
+     * @param event 
+     * @returns 
+     */
+    treeTableToggled(event: any) {
+        if(this.files[0].expanded){
+            if(this.treeTableHeight == MaxTreeTableHeight) return;
+
+            this.treeTableHeight = MaxTreeTableHeight;
+            this.isExpanded = true;
+        }else{
+            if(this.treeTableHeight == MinTreeTableHeight) return;
+
+            this.treeTableHeight = MinTreeTableHeight;
+            this.isExpanded = false;
+        }
+    }
+
+    /**
+     * Set visible and expand states of a given tree
+     * @param tree The tree to be set
+     * @param nodesProp node property, in this case 'children'.
+     * @param prop property of the nodesprop, in this case 'data'.
+     * @param visible visibility of this tree
+     * @param expand expand state of this tree
+     */
+    setTree(tree, nodesProp, prop, visible, expand) {
+        tree.forEach(treenode => {
+            if (typeof tree === 'object') { // standard tree node (one root)
+                treenode["data"]["visible"] = visible;
+            }
+
+            // if this is not maching node, search nodes, children (if prop exist and it is not empty)
+            if (treenode[nodesProp] !== undefined && treenode[nodesProp].length > 0) { 
+                treenode["expanded"] = expand;
+                return this.setTree(treenode[nodesProp], nodesProp, prop, visible, expand);
+            }
+        })
+    }
+
+    /**
+     * Reset the tree to it's original state: collapsed and visible.
+     */
+    resetTree(){
+        this.searchText = "";
+        this.setTree(this.files, 'children', 'name', true, false);
+    }
+
+    /**
+     * Expand or collapse the tree
+     * @param expand Indicating if the action is expand
+     */
+    toogleTree(expand = false, refresh = false) {
+        this.setTree(this.files, 'children', 'name', true, expand);
+        this.treeTableHeight = expand? MaxTreeTableHeight : MinTreeTableHeight;
+        this.isExpanded = expand;
+        if(refresh)
+            this.refreshTreeTable()
+    }
+
+    refreshTreeTable(){
+        this.visible = false;
+        setTimeout(() => {
+            this.visible = true;
+        }, 0);
+    }
+    
     /**
      * Function to expand tree display to certain level
      * @param dataFiles - file tree
      * @param expanded - expand flag 
      * @param targetLevel 
      */
-    expandToLevel(dataFiles: any, expanded: boolean, targetLevel: any) {
-        this.expandAll(dataFiles, expanded, 0, targetLevel)
-    }
+    // expandToLevel(dataFiles: any, expanded: boolean, targetLevel: any) {
+    //     this.expandAll(dataFiles, expanded, 0, targetLevel);
+
+    //     if(expanded){
+    //         this.treeTableHeight = MaxTreeTableHeight;
+    //     }else{
+    //         this.treeTableHeight = MinTreeTableHeight;
+    //     }
+    // }
 
     /**
      * Function to expand tree display to certain level - used by expandToLevel()
@@ -359,26 +485,22 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * @param level 
      * @param targetLevel 
      */
-    expandAll(dataFiles: any, expanded: boolean, level: any, targetLevel: any) {
-        let currentLevel = level + 1;
-        for (let i = 0; i < dataFiles.length; i++) {
-            dataFiles[i].expanded = expanded;
-            if (targetLevel != null) {
-                if (dataFiles[i].children.length > 0 && currentLevel < targetLevel) {
-                    this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
-                }
-            } else {
-                if (dataFiles[i].children.length > 0) {
-                    this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
-                }
-            }
-        }
-        this.isExpanded = expanded;
-        this.visible = false;
-        setTimeout(() => {
-            this.visible = true;
-        }, 0);
-    }
+    // expandAll(dataFiles: any, expanded: boolean, level: any, targetLevel: any) {
+    //     let currentLevel = level + 1;
+    //     for (let i = 0; i < dataFiles.length; i++) {
+    //         dataFiles[i].expanded = expanded;
+    //         if (targetLevel != null) {
+    //             if (dataFiles[i].children.length > 0 && currentLevel < targetLevel) {
+    //                 this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
+    //             }
+    //         } else {
+    //             if (dataFiles[i].children.length > 0) {
+    //                 this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
+    //             }
+    //         }
+    //     }
+    //     this.isExpanded = expanded;
+    // }
 
     /**
      * Function to reset the download status and incart status.
