@@ -13,9 +13,13 @@ import { LandingConstants } from '../../landing/constants';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
-declare var _initAutoTracker: Function;
+// Define the maximum and minimum height for the virtual scroll window of the tree table.
+// We set maximum window size because the bigger the size the slower the performance.
 const MaxTreeTableHeight = 200;
 const MinTreeTableHeight = 25;
+
+// Define the threshold on when to use virtual scrolling. That is, if the total file count of the 
+// dataset is greater than FileCountForVirtualScroll, the virtual scrolling display will be turned on.
 const FileCountForVirtualScroll = 25;
 
 /**
@@ -203,8 +207,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
             this.dataCartStatus = DataCartStatus.openCartStatus();
         }
-        // if (this.record)
-        //     this.useMetadata();
     }
 
     /**
@@ -228,7 +230,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.useMetadata();
     }
 
-    // The following mouse functions handle drag action
+    // The following mouse functions handle drag action (for virtual scrolling window of the tree table)
     @HostListener('window:mousemove', ['$event'])
     onMouseMove(event: MouseEvent){
         this.mouse = {
@@ -240,10 +242,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             let diff = this.mouse.y - this.prevMouseY;
             this.treeTableHeight = this.prevTreeTableHeight + diff;
             this.treeTableHeight = this.treeTableHeight < 26? 25 : this.treeTableHeight > 500? 500 : this.treeTableHeight;
-            // this.filterWidthStr = this.filterWidth + 'px';
         }
-
-        // this.setResultWidth();
     }
 
     onMousedown(event) {
@@ -256,6 +255,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
     onMouseUp(event) {
         this.mouseDragging = false;
     }
+
+    // --- end of mouse drag functions
 
     useMetadata() {
         this.ediid = this.record['ediid']
@@ -278,10 +279,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 this.updateStatusFromCart();
             }, 0);
         }
-    }
-
-    ttFilter(event: any) {
-        this.treeTable.nativeElement.filterGlobal(event.target.value, 'contains');
     }
 
     /**
@@ -395,7 +392,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Set tree table height when user expands/collapses a folder
+     * Set tree table height when user expands/collapses the top level
      * @param event 
      * @returns 
      */
@@ -414,7 +411,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
-     * Set visible and expand states of a given tree
+     * Set visible and expand status of a given tree
      * @param tree The tree to be set
      * @param nodesProp node property, in this case 'children'.
      * @param prop property of the nodesprop, in this case 'data'.
@@ -455,52 +452,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.refreshTreeTable()
     }
 
+    /**
+     * Refresh the tree table display by turning the visibility off and on. 
+     */
     refreshTreeTable(){
         this.visible = false;
         setTimeout(() => {
             this.visible = true;
         }, 0);
     }
-    
-    /**
-     * Function to expand tree display to certain level
-     * @param dataFiles - file tree
-     * @param expanded - expand flag 
-     * @param targetLevel 
-     */
-    // expandToLevel(dataFiles: any, expanded: boolean, targetLevel: any) {
-    //     this.expandAll(dataFiles, expanded, 0, targetLevel);
-
-    //     if(expanded){
-    //         this.treeTableHeight = MaxTreeTableHeight;
-    //     }else{
-    //         this.treeTableHeight = MinTreeTableHeight;
-    //     }
-    // }
-
-    /**
-     * Function to expand tree display to certain level - used by expandToLevel()
-     * @param dataFiles - file tree
-     * @param expanded 
-     * @param level 
-     * @param targetLevel 
-     */
-    // expandAll(dataFiles: any, expanded: boolean, level: any, targetLevel: any) {
-    //     let currentLevel = level + 1;
-    //     for (let i = 0; i < dataFiles.length; i++) {
-    //         dataFiles[i].expanded = expanded;
-    //         if (targetLevel != null) {
-    //             if (dataFiles[i].children.length > 0 && currentLevel < targetLevel) {
-    //                 this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
-    //             }
-    //         } else {
-    //             if (dataFiles[i].children.length > 0) {
-    //                 this.expandAll(dataFiles[i].children, expanded, currentLevel, targetLevel);
-    //             }
-    //         }
-    //     }
-    //     this.isExpanded = expanded;
-    // }
 
     /**
      * Function to reset the download status and incart status.
@@ -563,6 +523,18 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /**
+     * Set the background color to light blue if the given row is expanded. 
+     * @param fileNode file node in the tree
+     */
+         rowStyle(fileNode: any) {
+            // if(fileNode.comp.DetailsDisplayed){
+            //     return {'background-color': '#80bfff'};
+            // }else{
+            //     return {'background-color': 'white'};
+            // }
+        }
+
+    /**
      * Determine if the file details need be displayed
      * @param fileNode file node in the tree
      * @returns boolean
@@ -598,18 +570,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 }, 600);
             }
         }
-    }
-
-    /**
-     * Set the background color to light blue if the given row is expanded. 
-     * @param fileNode file node in the tree
-     */
-    rowStyle(fileNode: any) {
-        // if(fileNode.comp.DetailsDisplayed){
-        //     return {'background-color': '#80bfff'};
-        // }else{
-        //     return {'background-color': 'white'};
-        // }
     }
 
     /**
