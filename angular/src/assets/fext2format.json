@@ -78,6 +78,6 @@
     "zip": "compressed file archive",
     "7z": "compressed file archive",
     "tgz": "compressed file archive",
-    "gz": "compressed file archive",
+    "gz": "compressed data",
     "tar": "file archive"
 }

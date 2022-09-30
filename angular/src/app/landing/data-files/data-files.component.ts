@@ -148,7 +148,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
-            { field: 'mediaType', header: 'Media Type', width: 'auto' },
+            { field: 'mediaType', header: 'File Type', width: 'auto' },
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
