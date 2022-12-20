@@ -22,6 +22,9 @@ const MinTreeTableHeight = 25;
 // dataset is greater than FileCountForVirtualScroll, the virtual scrolling display will be turned on.
 const FileCountForVirtualScroll = 25;
 
+declare var _initAutoTracker: Function;
+const MediaTypeMapping: any  = require('../../../assets/fext2format.json');
+
 /**
  * the structure used as the data item in a TreeNode displaying a file or collection component
  */
@@ -163,7 +166,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     {
         this.cols = [
             { field: 'name', header: 'Name', width: '60%' },
-            { field: 'mediaType', header: 'Media Type', width: 'auto' },
+            { field: 'mediaType', header: 'File Type', width: 'auto' },
             { field: 'size', header: 'Size', width: 'auto' },
             { field: 'download', header: 'Status', width: 'auto' }];
 
@@ -813,15 +816,15 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }                        
 
     typeStyle() {
-        return { 'width': this.cols[1].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
+        return { 'width': this.cols[1].width,'padding-left':'5px','height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
     }
 
     sizeStyle() {
-        return { 'width': this.cols[2].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0};
+        return { 'width': this.cols[2].width,'padding-left':'5px','height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0};
     }
 
     statusStyle() {
-        return { 'width': this.cols[3].width,'height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
+        return { 'width': this.cols[3].width,'padding-left':'5px','height': '10px', 'font-size': this.fontSize, 'color': 'black', 'padding': 0 };
     }
 
     /**
@@ -881,5 +884,16 @@ export class DataFilesComponent implements OnInit, OnChanges {
             this.hashCopied = false;
         }, 2000);
 
+    }
+
+    /**
+     * Map file extension to standard media type using a lookup json file. Default value is blank.
+     * @param rowData tree node 
+     * @returns mapped media type
+     */
+    mediaTypeLookup(rowData: any): string {
+        let ext = rowData.comp.filepath.substr(rowData.comp.filepath.lastIndexOf('.') + 1)
+        let mType: string = MediaTypeMapping[ext];
+        return mType == undefined ? "" : mType;
     }
 }

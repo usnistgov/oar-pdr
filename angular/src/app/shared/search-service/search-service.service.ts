@@ -45,12 +45,13 @@ export class SearchService {
         this.rmmBackend = cfg.get("APIs.mdSearch", "/unconfigured");
         if (this.rmmBackend == "/unconfigured")
             throw new Error("APIs.mdSearch endpoint not configured!");
+
+        if (! this.rmmBackend.endsWith("/")) this.rmmBackend += "/"
         this.portalBase = cfg.get("locations.portalBase", "/unconfigured");
     }
 
     searchById(searchValue: string, browserside: boolean = false) {
         let backend: string = this.rmmBackend
-        if (! backend.endsWith("/")) backend += "/"
 
         if (searchValue.startsWith('ark:'))
             backend += 'records?@id=';

@@ -96,7 +96,7 @@ export class MetricsComponent implements OnInit {
 
     ngOnInit() {
         this.lps = this.cfg.get("locations.landingPageService", "/od/id/");
-        console.log('Landing page base: ', this.lps);
+
         this.detectScreenSize();
         this.recordLevelData = new RecordLevelMetrics();
 
@@ -122,14 +122,13 @@ export class MetricsComponent implements OnInit {
                         if (this.files.length != 0){
                             this.files = <TreeNode[]>this.files[0].data;
 
-                            // Get metrics details (file level)
+                            // Get file level metrics data
                             this.metricsService.getFileLevelMetrics(this.ediid).subscribe(async (event) => {
                                 // Some large dataset might take a while to download. Only handle the response
                                 // when it finishes downloading
                                 if(event.type == HttpEventType.Response){
                                     let response = await event.body.text();
                                     this.fileLevelData = JSON.parse(response);
-                                    console.log("File level metrics", this.fileLevelData);
 
                                     if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
                                         this.totalFileLevelSuccessfulGet = 0;
@@ -175,12 +174,12 @@ export class MetricsComponent implements OnInit {
                     }
                 })
 
+                // Get record level metrics data
                 this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(async (event) => {
                     switch (event.type) {
                         case HttpEventType.Response:
                             // this.recordLevelData = JSON.parse(JSON.stringify(event.body));
                             this.recordLevelData = JSON.parse(await event.body.text());
-                            console.log("Record level metrics", this.recordLevelData);
 
                             if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
                                 this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y");
@@ -247,13 +246,13 @@ export class MetricsComponent implements OnInit {
     }
 
     /**
-     * Remove outdated data from the metrics
+     * Remove outdated data and sha files from the metrics
      */
     cleanupFileLevelData(files: TreeNode[]){
         let metricsData: any[] = [];
 
         for(let node of files){
-            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length).trim() == node.data.filePath.trim());
+            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length).trim() == node.data.filePath.trim() && !x.filepath.endsWith('sha256'));
             if(found){
                 metricsData.push(found);
                 node.data.success_get = found.success_get;
@@ -509,22 +508,30 @@ export class MetricsComponent implements OnInit {
      * Get total recordset level download size
      */
     get totalDownloadSize() {
-        if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.commonFunctionService.formatBytes(this.recordLevelData.DataSetMetrics[0].total_size, 2);
-        }else{
-            return ""
-        }
+        return this.commonFunctionService.formatBytes(this.totalDownloadSizeInByte, 2);
+        // if(this.recordLevelData.DataSetMetrics[0] != undefined){
+        //     return this.commonFunctionService.formatBytes(this.recordLevelData.DataSetMetrics[0].total_size, 2);
+        // }else{
+        //     return ""
+        // }
     }
 
     /**
      * Get total recordset level download size in bytes
      */
     get totalDownloadSizeInByte() {
-        if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.recordLevelData.DataSetMetrics[0].total_size;
-        }else{
-            return ""
+        let totalDownload = 0;
+        if(this.fileLevelData != undefined) {
+            this.fileLevelData.FilesMetrics.forEach( (file) => {
+                totalDownload += file.success_get * file.download_size;
+            });
         }
+
+        if(this.recordLevelData != undefined) {
+            totalDownload += this.recordLevelData.DataSetMetrics[0].record_download * this.totalFileSize;
+        }
+
+        return totalDownload;
     }
 
      /**
@@ -614,7 +621,8 @@ export class MetricsComponent implements OnInit {
         var tempfiletest = "";
 
         paths.forEach((path) => {
-            if (path.filepath && !path['@type'].includes('nrd:Hidden')) {
+            //Remove hidden type files and sha files 
+            if (path.filepath && !path['@type'].includes('nrd:Hidden') && !path.filepath.endsWith('sha256')) {
                 if (!path.filepath.startsWith("/"))
                     path.filepath = "/" + path.filepath;
 

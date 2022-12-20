@@ -15,11 +15,10 @@
                         {{record.contactPoint.fn}}</a>
                     <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
                 </strong>..
-                <i style="cursor: pointer;" class="faa"
-                    [ngClass]="{'faa-plus-square-o': !clickContact, 'faa-minus-square-o': clickContact}"
-                    aria-hidden="true"
-                    (click)="closeContent = !closeContent; clickContact=expandContact();"></i>
-                <div [collapse]="!closeContent" class="card card-body bg-faded">
+                <i style="cursor: pointer; margin-left: 5px;" class="faa"
+                    [ngClass]="expandIconClass"
+                    aria-hidden="true" data-toggle="tooltip" [title]="expandButtonAlterText" [aria-label]="expandButtonAlterText" (click)="toggleExpand()"></i>
+                <div [collapse]="!contactExpanded" class="card card-body bg-faded">
                     <span class="" *ngIf="record.contactPoint.fn">
                         <span>{{record.contactPoint.fn}}</span>
                     </span>

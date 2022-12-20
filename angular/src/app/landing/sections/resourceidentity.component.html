@@ -2,7 +2,7 @@
     <div class="col-12 col-md-12 col-lg-12 col-sm-12">
         <span class="recordType">
             <b>{{recordType}}</b>
-            <span *ngIf="recordType=='Science Theme Collection'" class="badge version"> Beta</span>
+            <span *ngIf="theme == scienceTheme" class="badge version"> Beta</span>
         </span>
         <br>
         <app-title [record]="record" [inBrowser]="inBrowser"></app-title>

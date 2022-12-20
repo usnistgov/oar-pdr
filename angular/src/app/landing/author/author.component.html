@@ -16,7 +16,7 @@
                             <span *ngIf="author.orcid; else noorcid">
                                 {{author.fn}}
                                 <a href="https://orcid.org/{{ author.orcid }}" target="blank">
-                                   <img src="assets/images/orcid-logo.png" style="width: 20px;">
+                                   <img src="assets/images/orcid-logo.png" style="width: 20px;" alt="Author's orcid">
                                 </a>,
                             </span>
                             <ng-template #noorcid>
@@ -27,13 +27,13 @@
                             {{author.fn}}
                             <span *ngIf="author.orcid">
                                 <a href="https://orcid.org/{{ author.orcid }}" target="blank">
-                                   <img src="assets/images/orcid-logo.png" style="width: 20px;">
+                                   <img src="assets/images/orcid-logo.png" style="width: 20px;" alt="Author's orcid">
                                 </a>
                               </span> 
                         </ng-template>
                     </span>
                     <i style="margin-left: 0.5rem;" class="faa"
-                        [ngClass]="{'faa-plus-square-o': !clickAuthors, 'faa-minus-square-o': clickAuthors}"
+                        [ngClass]="{'faa-caret-right': !clickAuthors, 'faa-caret-down': clickAuthors}"
                         aria-hidden="true"
                         (click)="isCollapsedContent = !isCollapsedContent; clickAuthors = expandClick();"></i>
                 </div>
@@ -46,7 +46,7 @@
                                 <span>{{ author.fn}}</span>
                                 <span *ngIf="author.orcid">&nbsp;&nbsp;&nbsp;&nbsp;
                                     <a href="https://orcid.org/{{ author.orcid }}" target="blank">
-                                        <img src="assets/images/orcid-logo.png" style="width: 20px;">:
+                                        <img src="assets/images/orcid-logo.png" style="width: 20px;" alt="orcid">:
                                         {{ author.orcid }}
                                     </a>
                                 </span>

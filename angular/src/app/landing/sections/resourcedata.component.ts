@@ -18,19 +18,13 @@ import { Themes, ThemesPrefs } from '../../shared/globals/globals';
         '../landing.component.css'
     ],
     animations: [
-        trigger(
-          'enterAnimation', [
-            transition(':enter', [
-              style({height: '0px', opacity: 0}),
-              animate('500ms', style({height: '100%', opacity: 1}))
-            ]),
-            transition(':leave', [
-              style({height: '100%', opacity: 1}),
-              animate('500ms', style({height: 0, opacity: 0}))
-            //   animate('500ms', style({transform: 'translateY(0)', opacity: 1}))
+        trigger('detailExpand', [
+            state('void', style({height: '0px', minHeight: '0px'})),
+            state('collapsed', style({height: '0px', minHeight: '0px'})),
+            state('expanded', style({height: '*'})),
+            transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+            transition('expanded <=> void', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
             ])
-          ]
-        )
     ]
 })
 export class ResourceDataComponent implements OnChanges {
@@ -61,6 +55,18 @@ export class ResourceDataComponent implements OnChanges {
 
     ngOnInit(): void {
         this.recordType = (new NERDResource(this.record)).resourceLabel();
+    }
+
+    /**
+     * This function returns alter text/tooltip text for the expand symbol next to the given treenode title
+     * @param fileNode the TreeNode
+     * @returns 
+     */
+    expandButtonAlterText(accessPage: any) {
+        if(accessPage['showDesc'])
+            return "Close access page description";
+        else
+            return "Open access page description";
     }
 
     ngOnChanges(ch : SimpleChanges) {

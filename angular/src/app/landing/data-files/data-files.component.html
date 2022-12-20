@@ -105,7 +105,7 @@
                                 <i [ngClass]='fileDetailsDisplayClass(rowData)'></i></span>
                             <span *ngIf="showZipFilesNames" class="zip-file">{{rowData.zipFile || ''}}</span>
                         </td>
-                        <td [ngStyle]="typeStyle()">{{rowData.mediaType}}</td>
+                        <td [ngStyle]="typeStyle()">{{mediaTypeLookup(rowData)}}</td>
                         <td [ngStyle]="sizeStyle()"><span *ngIf="rowData.size">{{rowData.size}}</span>
                         </td>
                         <td [ngStyle]="statusStyle()">
