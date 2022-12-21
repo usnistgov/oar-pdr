@@ -39,3 +39,34 @@ body .p-treetable .p-treetable-data tr.p-state-highlight .p-row-editor a {
     color: var(--science-theme-background-dark);
     margin-left: 0.5em;
 }
+
+.btn-labeled {
+    padding-top: 0;
+    padding-bottom: 0;
+    width:100px; 
+    height: 2.5em;
+    margin: 0.5em 0em .5em 0em;
+}
+
+.splitter {
+    width: 100%;
+    height: 20px;
+    font-size:x-large;
+    background-color: var(--background-light-grey);
+    cursor: row-resize;
+}
+
+#separator {
+    width: 100%;
+    margin: auto;
+    color: var(--science-theme-background-dark);
+    font-size: 15px;
+    text-align: center;
+}
+
+#dog {
+    width:100px;margin: auto;
+    clear: both;
+    margin-top: 2em;
+    fill: var(--science-theme-background-blue); 
+}

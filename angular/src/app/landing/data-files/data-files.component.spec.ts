@@ -62,7 +62,7 @@ describe('DataFilesComponent', () => {
     component = fixture.componentInstance;
     component.record = record;
     component.inBrowser = true;
-    component.ngOnChanges({});
+    component.ngOnChanges({record: record});
     fixture.detectChanges();
   });
 
@@ -103,8 +103,11 @@ describe('DataFilesComponent', () => {
     let pel = fixture.nativeElement.querySelector('p');  // Should be null
     if (pel)
         expect(pel.textContent.includes("oading file list...")).toBeFalsy();
+
     component.inBrowser = false;
     fixture.detectChanges();
+    expect(component.inBrowser).toBeFalsy();
+    
     pel = fixture.nativeElement.querySelector('p');
     expect(pel).toBeTruthy();
     expect(pel.textContent.includes("oading file list...")).toBeTruthy();
