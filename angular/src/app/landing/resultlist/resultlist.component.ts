@@ -7,6 +7,7 @@ import { timeout } from 'rxjs-compat/operator/timeout';
 import { ThisReceiver } from '@angular/compiler';
 import * as e from 'express';
 import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
+import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
 @Component({
   selector: 'app-resultlist',
@@ -66,7 +67,9 @@ export class ResultlistComponent implements OnInit {
     @Input() resultWidth: string = '400px';
     @Input() filterString: string = '';
 
-    constructor(private searchService: SearchService, private cfg: AppConfig) { }
+    constructor(private searchService: SearchService, 
+        private cfg: AppConfig,
+        public gaService: GoogleAnalyticsService) { }
 
     ngOnInit(): void {
         this.PDRAPIURL = this.cfg.get('locations.landingPageService',

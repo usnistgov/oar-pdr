@@ -10,6 +10,7 @@ import { DropdownModule } from "primeng/dropdown";
 import { FormsModule } from '@angular/forms';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { testdata } from '../../../environments/environment';
+import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 
 describe('ResultlistComponent', () => {
   let component: ResultlistComponent;
@@ -30,6 +31,7 @@ describe('ResultlistComponent', () => {
         declarations: [ ResultlistComponent ],
         providers: [
             SearchService,
+            GoogleAnalyticsService,
             { provide: AppConfig,       useValue: cfg }
         ]
     })
