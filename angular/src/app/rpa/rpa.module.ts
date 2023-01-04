@@ -9,16 +9,16 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CardModule } from 'primeng/card';
 import { ChipModule } from 'primeng/chip';
 import { ButtonModule } from "primeng/button";
-import { RPDRequestFormComponent } from "./components/request-form.component";
+import { RPARequestFormComponent } from "./components/request-form.component";
 import { TermsComponent } from "./components/terms.component";
 import { AgreementComponent } from "./components/agreement.component";
-import { RPDSMEComponent } from "./components/rpd-sme.component";
+import { RPASMEComponent } from "./components/rpa-sme.component";
 
 @NgModule({
     imports: [CommonModule, ReactiveFormsModule, PanelModule, MessagesModule, MessageModule, DropdownModule, FormsModule, CardModule, ChipModule, ButtonModule],
-    declarations: [RPDRequestFormComponent, TermsComponent, AgreementComponent, RPDSMEComponent],
+    declarations: [RPARequestFormComponent, TermsComponent, AgreementComponent, RPASMEComponent],
     exports: []
 })
-export class RPDModule {
+export class RPAModule {
 
 }

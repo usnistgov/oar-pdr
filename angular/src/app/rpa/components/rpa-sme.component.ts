@@ -3,22 +3,22 @@ import {MessageService} from 'primeng/api';
 
 import { ActivatedRoute } from '@angular/router';
 import { ConfigurationService } from '../services/config.service';
-import { RPDService } from '../services/rpd.service';
+import { RPAService } from '../services/rpa.service';
 import { Record } from '../models/record.model';
 
 @Component({
-    selector:    'rpd-sme',
-    templateUrl: './rpd-sme.component.html',
+    selector:    'rpa-sme',
+    templateUrl: './rpa-sme.component.html',
     styleUrls: ['./request-form.component.css'],
-    providers:  [MessageService, ConfigurationService, RPDService]
+    providers:  [MessageService, ConfigurationService, RPAService]
   })
-export class RPDSMEComponent implements OnInit {
+export class RPASMEComponent implements OnInit {
 
     recordId: string;
     status: string;
     record: Record;
 
-    constructor(private route: ActivatedRoute, private rpdService: RPDService) {     }
+    constructor(private route: ActivatedRoute, private rpaService: RPAService) {     }
 
     ngOnInit(): void {
         this.status = "pending";
@@ -26,7 +26,7 @@ export class RPDSMEComponent implements OnInit {
             this.recordId = params['id'];
             if (!params['status']) {
                 this.status = "pending";
-                this.rpdService.getRecord(this.recordId).subscribe(data => {
+                this.rpaService.getRecord(this.recordId).subscribe(data => {
                     this.record = data.record;
                     console.log(this.record)
                 })

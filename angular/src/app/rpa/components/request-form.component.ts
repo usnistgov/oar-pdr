@@ -1,24 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms'
 import { MessageService } from 'primeng/api';
-import { ConfigurationService } from './services/config.service';
-import { Dataset } from './models/dataset.model';
-import { UserInfo } from './form-data.model';
-import { FormTemplate } from './form-template.model';
-import { RPDService } from './rpd.service';
 
 import { SelectItem } from 'primeng/api';
 import { SelectItemGroup } from 'primeng/api';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { RPAService } from '../services/rpa.service';
+import { ConfigurationService } from '../services/config.service';
+import { Dataset } from '../models/dataset.model';
+import { FormTemplate } from '../models/form-template.model';
+import { UserInfo } from '../models/form-data.model';
 
 @Component({
   selector: 'rpd-request-form',
   templateUrl: './request-form.component.html',
   styleUrls: ['./request-form.component.css'],
-  providers: [MessageService, ConfigurationService, RPDService]
+  providers: [MessageService, ConfigurationService, RPAService]
 })
-export class RPDRequestFormComponent implements OnInit {
+export class RPARequestFormComponent implements OnInit {
   datasets: Dataset[] = [];
   selectedDataset: Dataset;
   selectedFormTemplate: FormTemplate;
@@ -49,7 +49,7 @@ export class RPDRequestFormComponent implements OnInit {
 
   domparser = new DOMParser();
 
-  constructor(private messageService: MessageService, private configService: ConfigurationService, private rpdService: RPDService, private router: Router, private httpClient: HttpClient) { }
+  constructor(private messageService: MessageService, private configService: ConfigurationService, private rpaService: RPAService, private router: Router, private httpClient: HttpClient) { }
 
   ngOnInit() {
     this.getDatasets('config.yaml');
@@ -99,7 +99,7 @@ export class RPDRequestFormComponent implements OnInit {
       userInfo.zipCode = this.requestForm.controls.zipCode.value;
       userInfo.country = this.requestForm.controls.country.value;
       userInfo.receiveEmails = this.requestForm.controls.receiveEmails.value;
-      this.rpdService.createRecord(userInfo).subscribe((data: {}) => {
+      this.rpaService.createRecord(userInfo).subscribe((data: {}) => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Your request was submitted successfully!' });
         this.router.navigate(['/rpd-request']);
       });

@@ -9,8 +9,8 @@ import { NotFoundComponent, InternalErrorComponent } from './errors/errors.modul
 import { DoneComponent } from './landing/done/done.component';
 import { DatacartRoutes } from './datacart/datacart.routes';
 import { MetricsComponent } from './metrics/metrics.component';
-import { RPDRequestFormComponent } from './rpa/components/request-form.component';
-import { RPDSMEComponent } from './rpa/components/rpd-sme.component';
+import { RPARequestFormComponent } from './rpa/components/request-form.component';
+import { RPASMEComponent } from './rpa/components/rpa-sme.component';
 
 const routes: Routes = [
     ...DatacartRoutes,
@@ -42,8 +42,8 @@ const routes: Routes = [
       ]
     },
     { path: 'metrics/:id',         component: MetricsComponent },
-    { path: 'rpd-request',         component: RPDRequestFormComponent     },
-    { path: 'rpd-sme',             component: RPDSMEComponent     },
+    { path: 'rpa-request',         component: RPARequestFormComponent     },
+    { path: 'rpa-sme',             component: RPASMEComponent     },
     { path: '**',                  component: NotFoundComponent      }
     
 ];

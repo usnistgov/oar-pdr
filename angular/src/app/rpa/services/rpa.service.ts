@@ -6,7 +6,7 @@ import { UserInfo } from "../models/form-data.model";
 import { Record, RecordWrapper } from "../models/record.model";
 
 @Injectable()
-export class RPDService {
+export class RPAService {
 
     apiURL = 'http://localhost:9090';
 

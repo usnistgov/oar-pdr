@@ -40,7 +40,7 @@ import { ContactPopupComponent } from './landing/contact/contact-popup/contact-p
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 import { PanelModule } from 'primeng/panel';
-import { RPDModule } from './rpa/rpd.module';
+import { RPAModule } from './rpa/rpa.module';
 
 enableProdMode();
 
@@ -61,7 +61,7 @@ enableProdMode();
         DirectivesModule,
         DatacartModule,
         MetricsModule,
-        RPDModule,
+        RPAModule,
         SharedModule.forRoot(),
         // FragmentPolyfillModule.forRoot({
         //     smooth: true
