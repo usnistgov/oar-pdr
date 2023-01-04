@@ -39,6 +39,8 @@ import { AuthorPopupComponent } from './landing/author/author-popup/author-popup
 import { ContactPopupComponent } from './landing/contact/contact-popup/contact-popup.component';
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
+import { PanelModule } from 'primeng/panel';
+import { RPDModule } from './rpa/rpd.module';
 
 enableProdMode();
 
@@ -59,6 +61,7 @@ enableProdMode();
         DirectivesModule,
         DatacartModule,
         MetricsModule,
+        RPDModule,
         SharedModule.forRoot(),
         // FragmentPolyfillModule.forRoot({
         //     smooth: true
@@ -68,6 +71,7 @@ enableProdMode();
         ToastrModule.forRoot({
             toastClass: 'toast toast-bootstrap-compatibility-fix'
         }),
+        PanelModule,
         NgbModule
     ],
     exports: [],

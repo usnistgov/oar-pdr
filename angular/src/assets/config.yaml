@@ -1,0 +1,144 @@
+datasets:
+  - name: NIST Special Database 18
+    description: NIST Special Database 18 is being distributed for use in development and testing of automated mugshot identification systems. The database consists of a total of 3248 images of variable size using PNG formatting with metadata TXT files corresponding to each per image. There are images of 1573 individuals (cases) 1495 male and 78 female. The database contains both <a href=https://www.nist.gov/property-fieldsection/faceimg>front and side</a> (profile) views when available. Separating front views and profiles, there are 131 cases with two or more front views and 1418 with only one front view. Profiles have 89 cases with two or more profiles and 1268 with only one profile. Cases with both fronts and profiles have 89 cases with two or more of both fronts and profiles, 27 with two or more fronts and one profile, and 1217 with only one front and one profile.<br><br>This NIST Special Database has the following features:<ul><li>3248 segmented 8-bit gray scale mugshot images (varying sizes) of 1573 individuals</li><li>1333 cases with both front and profile views (see statistics above)</li><li>131 cases with two or more front views and 89 cases with two or more profiles</li><li>images scanned at 19.7 pixels per mm</li></ul><br><br>Suitable for automated mugshot identification research, the database can be used for:<ul><li>algorithm development</li><li>system training and testing</li></ul> 
+    url: https://www.nist.gov/srd/nist-special-database-18
+    terms:
+      - The database is to be used for biometrics related research, development and education.
+      - he database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
+      - There should be no attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database should be deleted and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
+      - NIST should be acknowledged in any publication of results generated using the data.
+    requiresApproval: true
+    formTemplate: demo
+  - name: NIST Special Database 32
+    description: NIST Special Database 32 - Multiple Encounter Dataset (MEDS) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence.
+    url: https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds
+    terms:
+      - The database is to be used for biometrics related research, development and education.
+      - he database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
+      - There should be no attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database should be deleted and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
+      - NIST should be acknowledged in any publication of results generated using the data.
+    requiresApproval: true
+    formTemplate: demo
+  - name: Special Database 300
+    description: NIST, working with the FBI, has digitized 888 inked fingerprint arrest cards that were in various physical conditions, from pristine to badly damaged and faded, and were collected during law enforcement professional's duties. The database contains images of the 10 rolled fingerprint impressions, the two four-finger slap impressions (finger positions 13 and 14), the two thumb slap impressions (finger positions 11 and 12) and the segmented impressions from the slap images (13, 14). The database also includes the coordinates that were used to segment the impressions from the slap fingerprint images.
+    url: https://www.nist.gov/itl/iad/image-group/nist-special-database-300
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+    requiresApproval: true
+    formTemplate: demo
+  - name: Special Database 301
+    description: In April 2017, the Intelligence Advanced Research Projects Activity (IARPA) held a dry run for the data collection portion of its Nail to Nail (N2N) Fingerprint Challenge. This data collection event was designed to ensure that the real data collection event held in September 2017 would be successful. To this end, real biometric data from unhabituated individuals needed to be collected. The National Institute of Standards and Technology (NIST), on behalf of IARPA, has released a dataset of the biometric images obtained during the N2N Fingerprint Challenge dryrun. The image distribution, entitled Special Database (SD) 301, can be freely downloaded for research from the NIST website.
+    url: https://www.nist.gov/itl/iad/image-group/nist-special-database-301
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+      - You agree to acknowledge the Nail to Nail Fingerprint Capture Challenge in any publication of results generated using the data from the database.
+    requiresApproval: true
+    formTemplate: demo
+  - name: Special Database 302
+    description: In September 2017, the Intelligence Advanced Research Projects Activity (IARPA) held a data collection as part of its Nail to Nail (N2N) Fingerprint Challenge. Participating Challengers deployed devices designed to collect an image of the full nail to nail surface area of a fingerprint---equivalent to a rolled fingerprint---from an unacclimated user, without assistance from a trained operator. Traditional operator-assisted live-scan rolled fingerprints were also captured, along with assorted other friction ridge live-scan and latent captures. The collection of images collected during the N2N Fingerprint Challenge, entitled Special Database (SD) 302, can be  freely downloaded for research purposes from the National Institute of Standards and Technology (NIST) website.
+    url: https://www.nist.gov/itl/iad/image-group/nist-special-database-302
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+      - You agree to acknowledge the Nail to Nail Fingerprint Capture Challenge in any publication of results generated using the data from the database.
+    requiresApproval: true
+    formTemplate: demo
+  - name: Slap Fingerprint Segmentation Evaluation (SlapSeg) III Validation Dataset
+    description: Developers of Slap Fingerprint Segmentation Evaluation (SlapSeg) III algorithms must request this dataset to run the SlapSeg III validation program. The dataset itself is a mixture of images from Special Database (SD) 300 and SD 302.
+    url: https://www.nist.gov/itl/iad/image-group/slap-fingerprint-segmentation-evaluation-iii
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+      - You agree to acknowledge the Nail to Nail Fingerprint Capture Challenge in any publication of results generated using the data from the database.
+    requiresApproval: true
+    formTemplate: demo
+  - name: Proprietary Fingerprint Template (PFT) III Validation Dataset
+    description: Developers of Proprietary Fingerprint Template (PFT) III algorithms must request this dataset to run the PFT III validation program. The dataset itself is a mixture of images from Special Database (SD) 300 and SD 302.
+    url: https://www.nist.gov/itl/iad/image-group/proprietary-fingerprint-template-pft-iii
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+      - You agree to acknowledge the Nail to Nail Fingerprint Capture Challenge in any publication of results generated using the data from the database.
+    requiresApproval: true
+    formTemplate: demo
+  - name: NIST Fingerprint Image Quality (NFIQ) 2 Conformance Test Set
+    description: When compiling the NIST NFIQ 2 source code or developing their own alternate NFIQ 2 implementation, a developer shall ensure that the images contained within this dataset generate equivalent quality scores. Images to compare quality scores are included in this package.
+    url: https://www.nist.gov/services-resources/software/nfiq-2
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+      - You agree to acknowledge the Nail to Nail Fingerprint Capture Challenge in any publication of results generated using the data from the database.
+    requiresApproval: true
+    formTemplate: demo
+  - name: IARPA Janus Benchmark
+    description: In cooperation with IARPA, NIST is currently running three challenges related to processing of unconstrained in-the-wild face images.  These are intended to drive research and development into face detection, verification, identification, and identity clustering.  A secondary goal is to establish definitive evaluation metrics and reporting.<br><br><b>NOTE:</b><font color=red> The complete distribution contains all three IJB challenges (images + protocols) published to date (IJB-A, IJB-B, and IJB-C).  It is ~325GB in size and can take up to 24 hours to download from our server.  Please allocate proper hardware resource and time requirements for download prior to requesting the dataset.</font>
+    url: https://www.nist.gov/programs-projects/face-challenges
+    terms:
+      - 'The Receiving Entity shall insert the following statement in any product, report, publication, presentation, and/or other document that references the data: This product contains or makes use of the following data made available by the Intelligence Advanced Research Projects Activity (IARPA): IARPA Janus Benchmark C (IJB-C) data detailed at <a href=https://www.nist.gov/programs-projects/face-challenges>Face Challenges homepage</a>.'
+      - 'No further distribution of the data without express written permission from NIST.  Instead, third parties should be directed to the NIST Face Challenges website to download the dataset directly.'
+      - 'Comply with the <a href=http://nigos.nist.gov/facechallenges/data/IJBC/IJBC_LICENSES.TXT>licensing terms</a> of the IJB-C dataset. <br><br><b>IJB-A, IJB-B, IJB-C LICENSING:</b><br>NIST makes this Standard Reference Database available with attribution to sources.  Each piece of media is associated with one of these <a href=http://nigos.nist.gov/facechallenges/data/IJBA/ijba_sources.txt>IJB-A</a>, <a href=http://nigos.nist.gov/facechallenges/data/IJBB/ijbb_licenses_and_sources.xlsx>IJB-B</a>, <a href=http://nigos.nist.gov/facechallenges/data/IJBC/ijbc_license_info.csv>IJB-C</a> licenses.  Should one or more samples be alternatively licensed then the owner or legal representative should contact NIST via <a href=mailto:FaceChallenges@nist.gov?subject=IJB-A%20Dataset%20Request&amp;body=>FaceChallenges@nist.gov</a> and identify particular images.<br><br>Users and prospective users of this database should:<br>a) note binding licensing terms at <a href=https://creativecommons.org/licenses>https://creativecommons.org/licenses </a><br>b) understand that the Database is subject to change at any time <br>c) understand that the U.S. Government makes no guarantee or warranty of non-infringement <br>d) note that the U.S. Government is relying on the stated and represented due diligence of contractors who in part prepared this Database<br><br><b>NOTE: <font color=red> The complete distribution contains all three IJB challenges (images + protocols) published to date (IJB-A, IJB-B, and IJB-C).  It is ~325GB in size and can take up to 24 hours to download from our server.  Please allocate proper hardware resource and time requirements for download prior to requesting the dataset.</font></b>'
+    requiresApproval: true
+    formTemplate: demo
+  - name: Evaluation of Latent Friction Ridge Technology (ELFT) Validation Dataset
+    description: Developers of Evaluation of Latent Friction Ridge Technology (ELFT) algorithms must request this dataset to run the ELFT validation program. The dataset itself is a subset of images from Special Database (SD) 302.
+    url: https://www.nist.gov/itl/iad/image-group/evaluation-latent-friction-ridge-technology
+    terms:
+      - The database is to be used for biometrics related research, development and training.
+      - The database will not be further distributed, published, copied, or disseminated externally by you or your organization in any way or form whatsoever, whether for profit or not.
+      - If you are accepting the agreement on behalf of an organization, you may distribute the database only internally to other organization members that agree to these terms, including that the use of the database is limited to biometrics related research, development and training. Subsets of the database may be used for purposes consistent with the terms of this Agreement.
+      - You agree that there shall not be any attempts to defeat the de-identification of the data provided.
+      - If requested by NIST, certain images in the database or the entire database shall be deleted by you or your organization and no copies retained.
+      - The researcher, at NIST's sole option, may be notified periodically when new data sets are available. Such information may also be posted on the relevant NIST website.
+      - You agree to acknowledge the Nail to Nail Fingerprint Capture Challenge in any publication of results generated using the data from NIST Special Database 302.
+    requiresApproval: true
+    formTemplate: no-disclaimer
+
+formTemplates:
+- id: demo
+  disclaimers: 
+    - Purchase is not required for data downloading. Users must complete registration form to download data. The data and readme files are specific to the SRM NIST product. NIST does not guarantee the accuracy or completeness of the information. The only official source for specific values and uncertainties is the certificate, information sheet, or report.
+  agreements: 
+    - I agree to the defined terms and conditions of this dataset.
+    - I have read and understood the disclaimer set out above.
+    - I acknowledge that all requests are reviewed by a NIST employee or other individual acting on behalf of NIST. I represent that I have provided all requested information. I understand that if I have not provided all information I will not receive the dataset.
+  blacklist:
+    emails:
+    countries:
+- id: no-disclaimer
+  disclaimers: 
+  agreements: 
+    - I agree to the defined terms and conditions of this dataset.
+    - I acknowledge that all requests are reviewed by a NIST employee or other individual acting on behalf of NIST. I represent that I have provided all requested information. I understand that if I have not provided all information I will not receive the dataset.
+  blacklist:
+    emails:
+    countries:

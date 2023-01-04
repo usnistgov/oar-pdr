@@ -1,0 +1,267 @@
+<div class="rpdform-main-wrapper">
+    <div class="rpdform-form-wrapper">
+
+        <label for="datasetsDropdown" class="rpdform-form-label">
+            Select a datatset:
+        </label>
+        <p-dropdown [options]="datasets" [(ngModel)]="selectedDataset" optionLabel="name"
+            (onChange)="onChangeDataset($event)" autoWidth="false" [style]="{'width':'100%'}"></p-dropdown>
+        <div class="divider"></div>
+
+        <div class="divider"></div>
+        <form [formGroup]="requestForm" (ngSubmit)="submitForm()" *ngIf="selectedDataset && selectedFormTemplate">
+            <div class="rpdform-form-title">
+                <h2 class="">Restricted Public Data (Access Request Form)</h2>
+
+                <div class="divider"></div>
+
+                <p-messages severity="warn">
+                    <ng-template pTemplate>
+                        <i class="pi pi-info-circle"></i>
+                        <span class="ml-2">Required fields are marked with an asterisk (<span
+                                style="color:red">*</span>).</span>
+                    </ng-template>
+                </p-messages>
+                <div class="divider"></div>
+                <h4 class="rpdform-form-terms-title">Dataset: <span
+                        *ngIf="selectedDataset">{{selectedDataset.name}}</span></h4>
+                <div class="rpdform-form-text">
+                    Thank you for your interest in this dataset. More information about this dataset can be
+                    found on the <a *ngIf="selectedDataset" href="{{selectedDataset.url}}">dataset's webpage</a>.
+
+                    If you are a qualified researcher and you would like a copy of the dataset for your work, please
+                    fill out all fields below. A temporary link to the dataset will be sent to the email address you
+                    provide.
+                </div>
+                <!-- <h4 id="terms_and_conditions" class="rpdform-form-terms-title">Terms and Conditions</h4> -->
+                <!-- <div class="rpdform-form-text">
+                    <p>By submitting this form and receiving the dataset, you hereby agree to be bound by the following
+                        terms and conditions:</p>
+                    <ol class="rpdform-form-terms-list">
+                        <li>The Receiving Entity shall insert the following statement in any product, report,
+                            publication,
+                            presentation, and/or other document that references the data: This product contains or makes
+                            use of the restricted data made available by... </li>
+                        <li>No further distribution of the data without express written permission from NIST. Instead,
+                            third
+                            parties should be directed to the NIST Face Challenges website to download the dataset
+                            directly.
+                        </li>
+                        <li>Comply with the licensing terms of the dataset.</li>
+                    </ol>
+                </div> -->
+                <rpd-request-form-terms [terms]="selectedDataset.terms"></rpd-request-form-terms>
+            </div>
+
+
+            <div class="rpdform-mb-3">
+                <label for="fullName" class="rpdform-form-label required">
+                    Full name
+                </label>
+                <input type="text" name="fullName" id="fullName" class="rpdform-form-input" placeholder="Your Full Name"
+                    formControlName="fullName" />
+            </div>
+            <!-- <div>
+                    <label for="lastname" class="rpdform-form-label required"> Last name </label>
+                    <input type="text" name="lastname" id="lastname" class="rpdform-form-input"
+                        placeholder="Your Last Name" formControlName="lastname" />
+                </div> -->
+
+            <div class="rpdform-input-flex">
+                <div>
+                    <label for="email" class="rpdform-form-label required"> Email </label>
+                    <input type="email" name="email" id="email" class="rpdform-form-input"
+                        placeholder="Your Company (NOT Personal) Email" formControlName="email" />
+                </div>
+                <div>
+                    <label for="phone" class="rpdform-form-label"> Phone number </label>
+                    <input type="text" name="phone" id="phone" class="rpdform-form-input"
+                        placeholder="Your Work (NOT Personal) Phone Number" formControlName="phone" />
+                </div>
+            </div>
+
+            <div class="rpdform-mb-3">
+                <label for="organization" class="rpdform-form-label required">
+                    Organization
+                </label>
+                <input type="text" name="organization" id="organization" class="rpdform-form-input"
+                    placeholder="Your Company Name" formControlName="organization" />
+            </div>
+
+            <div class="rpdform-mb-3">
+                <label for="purposeOfUse" class="rpdform-form-label required">
+                    Purpose of Use
+                </label>
+                <textarea type="text" name="purposeOfUse" rows="5" class="rpdform-form-input"
+                    placeholder="Reason(s) you would like access to this dataset"
+                    formControlName="purposeOfUse"></textarea>
+                <!-- <input type="text" name="purposeOfUse" id="purposeOfUse" class="rpdform-form-input" / -->
+            </div>
+
+
+
+            <div class="rpdform-mb-3">
+                <label for="address1" class="rpdform-form-label required">
+                    Address Line 1
+                </label>
+                <input type="text" name="address1" id="address1" class="rpdform-form-input"
+                    placeholder="100 Bureau Drive" formControlName="address1" />
+            </div>
+
+            <div class="rpdform-mb-3">
+                <label for="address2" class="rpdform-form-label required">
+                    Address Line 2
+                </label>
+                <input type="text" name="address2" id="address2" class="rpdform-form-input" placeholder="Mailstop 1234"
+                    formControlName="address2" />
+            </div>
+
+            <div class="rpdform-mb-3">
+                <label for="address3" class="rpdform-form-label">
+                    Address Line 3
+                </label>
+                <input type="text" name="address3" id="address3" class="rpdform-form-input"
+                    placeholder="Gaithersburg, MD 20899" formControlName="address3" />
+            </div>
+
+            <div class="rpdform-input-flex">
+                <div>
+                    <label for="state" class="rpdform-form-label"> State/Province </label>
+                    <input type="text" name="state" id="state" class="rpdform-form-input" placeholder="Maryland"
+                        formControlName="stateOrProvince" />
+                </div>
+                <div>
+                    <label for="post" class="rpdform-form-label"> Post/Zip code </label>
+                    <input type="text" name="post" id="post" class="rpdform-form-input" placeholder="20899"
+                        formControlName="zipCode" />
+                </div>
+
+            </div>
+
+            <div class="rpdform-input-flex">
+                <div>
+                    <label for="country" class="rpdform-form-label required"> Country </label>
+                    <input type="text" name="country" id="country" class="rpdform-form-input"
+                        placeholder="United States" formControlName="country" />
+                </div>
+            </div>
+            <div class="rpdform-input-flex">
+                <!-- <p-dropdown [options]="countries" [(ngModel)]="selectedCountry" placeholder="Select a Country" [showClear]="true"></p-dropdown> -->
+                <!-- <p-dropdown [options]="countries" [(ngModel)]="selectedCountry" optionLabel="name" [filter]="true"
+                    filterBy="name" [showClear]="true" placeholder="Select a Country">
+                    <ng-template pTemplate="selectedItem">
+                        <div class="country-item country-item-value" *ngIf="selectedCountry">
+                            <div>{{selectedCountry.name}}</div>
+                        </div>
+                    </ng-template>
+                    <ng-template let-country pTemplate="item">
+                        <div class="country-item">
+                            <div>{{country.name}}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown> -->
+            </div>
+
+
+
+            <div class="rpdform-mb-3">
+                <label for="receiveEmailsCheckbox" class="rpdform-checkbox-label">
+                    <div class="rpdform-relative">
+                        <input type="checkbox" id="receiveEmailsCheckbox" name="receiveEmailsCheckbox"
+                            class="rpdform-input-checkbox" formControlName="receiveEmails" />
+                        <div class="rpdform-checkbox-inner">
+                            <span class="rpdform-opacity-0">
+                                <svg width="11" height="8" viewBox="0 0 11 8" fill="currentColor"
+                                    class="rpdform-stroke-current">
+                                    <path
+                                        d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z"
+                                        stroke-width="0.6"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    I would like to receive email notifications.
+                </label>
+            </div>
+            <div class="divider"></div>
+            <div class="rpdform-mb-3 disclaimer-box" *ngIf="selectedFormTemplate">
+                <label for="disclaimer" class="rpdform-form-label required" *ngIf="selectedFormTemplate.disclaimers">
+                    Disclaimers
+                </label>
+                <p *ngFor="let disclaimer of selectedFormTemplate.disclaimers" class="disclaimer-text">{{disclaimer}}
+                </p>
+            </div>
+
+            <div class="rpdform-checkbox-wrapper">
+                <label for="termsCheckbox" class="rpdform-checkbox-label required">
+                    <div class="rpdform-relative">
+                        <input type="checkbox" id="termsCheckbox" name="termsCheckbox" class="rpdform-input-checkbox"
+                            formControlName="termsAndConditionsAgreenement" />
+                        <div class="rpdform-checkbox-inner">
+                            <span class="rpdform-opacity-0">
+                                <svg width="11" height="8" viewBox="0 0 11 8" fill="currentColor"
+                                    class="rpdform-stroke-current">
+                                    <path
+                                        d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z"
+                                        stroke-width="0.6"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    I agree to the defined terms and conditions of this dataset.
+                </label>
+            </div>
+            <div class="rpdform-checkbox-wrapper">
+                <label for="disclaimerCheckbox" class="rpdform-checkbox-label required">
+                    <div class="rpdform-relative">
+                        <input type="checkbox" id="disclaimerCheckbox" name="disclaimerCheckbox"
+                            formControlName="disclaimerAgreenement" class="rpdform-input-checkbox" />
+                        <div class="rpdform-checkbox-inner">
+                            <span class="rpdform-opacity-0">
+                                <svg width="11" height="8" viewBox="0 0 11 8" fill="currentColor"
+                                    class="rpdform-stroke-current">
+                                    <path
+                                        d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z"
+                                        stroke-width="0.6"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    I have read and understood the disclaimer set out above.
+                </label>
+            </div>
+            <div class="rpdform-checkbox-wrapper">
+                <label for="vettingCheckbox" class="rpdform-checkbox-label required">
+                    <div class="rpdform-relative">
+                        <input type="checkbox" id="vettingCheckbox" name="vettingCheckbox"
+                            class="rpdform-input-checkbox" formControlName="vettingAgreenement" />
+                        <div class="rpdform-checkbox-inner">
+                            <span class="rpdform-opacity-0">
+                                <svg width="11" height="8" viewBox="0 0 11 8" fill="currentColor"
+                                    class="rpdform-stroke-current">
+                                    <path
+                                        d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z"
+                                        stroke-width="0.6"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    I acknowledge that all requests are reviewed by a NIST employee or other individual acting on behalf
+                    of NIST. I represent that I have provided all requested information. I understand that if I have not
+                    provided all information I will not receive the dataset.
+                </label>
+            </div>
+            <div class="divider"></div>
+
+            <button class="rpdform-btn" type="submit">Submit</button>
+            <p-messages [enableService]="true"></p-messages>
+            <!-- <p-messages *ngIf="!isFormValid" severity="error">
+                <ng-template pTemplate>
+                    <ul>
+                        <li *ngFor="let error of errors;">Field {{error.field}} <span *ngIf="error.error.required"> is required.</span></li>
+                    </ul>
+                </ng-template>
+            </p-messages> -->
+        </form>
+    </div>
+</div>

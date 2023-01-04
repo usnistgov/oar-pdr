@@ -53,3 +53,5 @@ m2repo
 */node_modules
 */.idea**
 
+
+angular/.angular/cache

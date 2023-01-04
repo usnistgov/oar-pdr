@@ -6,10 +6,11 @@ import { NoidComponent } from './landing/noid.component';
 import { NerdmComponent } from './landing/nerdm.component';
 // import { SearchResolve } from './landing/search-service.resolve';
 import { NotFoundComponent, InternalErrorComponent } from './errors/errors.module';
-import { DatacartComponent } from './datacart/datacart.component';
 import { DoneComponent } from './landing/done/done.component';
 import { DatacartRoutes } from './datacart/datacart.routes';
 import { MetricsComponent } from './metrics/metrics.component';
+import { RPDRequestFormComponent } from './rpa/components/request-form.component';
+import { RPDSMEComponent } from './rpa/components/rpd-sme.component';
 
 const routes: Routes = [
     ...DatacartRoutes,
@@ -30,22 +31,25 @@ const routes: Routes = [
     // error paths
     { path: 'not-found', 
       children: [
-          { path: '',                component: NotFoundComponent      },
-          { path: ':id',             component: NotFoundComponent      }
+          { path: '',              component: NotFoundComponent      },
+          { path: ':id',           component: NotFoundComponent      }
       ]
     },
     { path: 'int-error', 
       children: [
-          { path: '',                component: InternalErrorComponent },
-          { path: ':id',             component: InternalErrorComponent }
+          { path: '',              component: InternalErrorComponent },
+          { path: ':id',           component: InternalErrorComponent }
       ]
     },
     { path: 'metrics/:id',         component: MetricsComponent },
-    { path: '**',                    component: NotFoundComponent      }
+    { path: 'rpd-request',         component: RPDRequestFormComponent     },
+    { path: 'rpd-sme',             component: RPDSMEComponent     },
+    { path: '**',                  component: NotFoundComponent      }
+    
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { initialNavigation: 'enabled', relativeLinkResolution: 'corrected' })],
+  imports: [RouterModule.forRoot(routes, { initialNavigation: 'enabled', relativeLinkResolution: 'corrected'})],
   exports: [RouterModule],
   // providers: [ SearchResolve ]
 })

@@ -1,0 +1,40 @@
+# The datasets config file can have the following structure:
+
+datasets:
+- id: string
+  name: string
+  type: string
+  terms: [string, string, ...]
+  approvers:
+  - name: string
+    email: email
+  - name: string
+    email: email
+    ...
+  formTemplate: string # if we support multiple templates for request form
+- name: string
+  ...
+- name: string
+  ...
+
+collections:
+- id: string
+  formTemplate: string
+  approvers:
+  - name: string
+    email: email
+  - name: string
+    email: email
+    ...
+  
+formTemplates:
+- id: string
+  disclaimers: 
+  - description: string
+  agreements: 
+  - text: string
+  blacklist:
+    emails: [string, string, ..]
+    countries: [string, string, ..]
+
+
