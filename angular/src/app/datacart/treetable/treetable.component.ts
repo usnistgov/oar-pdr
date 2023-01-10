@@ -240,7 +240,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     // Display
     isExpanded: boolean = true;
-    isVisible: boolean = true;
+    isVisible: boolean = false;
     showZipFilesNames: boolean = true;
     titleWidth: string;
     typeWidth: string;
@@ -253,6 +253,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     defaultExpandLevel: number = 3;
 
     @Input() cartName: string;
+    @Input() forceReload: boolean = false; //Handle RPA, force reload after data cart is ready
 
     @ViewChild("ngtt")
     tt : TreeTable;
@@ -288,13 +289,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         if(this.inBrowser){
-            this.dataCartStatus = DataCartStatus.openCartStatus();
-
-            this.dataCart = this.cartService.getCart(this.cartName);
-
-            this.loadDataTree();
-
-            this.dataCart.watchForChanges(this.cartChanged.bind(this));
+            this.cartInit();
         }
     }
 
@@ -302,6 +297,24 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * @param changes 
      */
     ngOnChanges(changes: SimpleChanges) {
+        if(changes.forceReload.currentValue){
+            this.cartInit();
+            this.propagateSelections();
+        }
+    }
+
+    cartInit() {
+        if(this.cartName) {
+            console.log("this.cartName", this.cartName);
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+
+            this.dataCart = this.cartService.getCart(this.cartName);
+            this.loadDataTree();
+
+            this.dataCart.watchForChanges(this.cartChanged.bind(this));
+
+            this.isVisible = true;
+        }
     }
 
     ngAfterViewInit() {
@@ -321,8 +334,9 @@ export class TreetableComponent implements OnInit, AfterViewInit {
         if (this.tt) {
             let selcount = this.selectedData.length;
             for (let selnode of this.selectedData) {
-                if (selnode.children && selnode.children.length == 0)
+                if (selnode.children && selnode.children.length == 0){
                     this.tt.propagateSelectionUp(selnode, true);
+                }
             }
             if (this.tt.selection.length != selcount)
                 this.dataTree.children = [...this.dataTree.children];
@@ -337,6 +351,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     cartChanged(which) {
         console.log("Updating view for change in cart contents");
 
+        console.log("this.dataTree", this.dataTree);
         // update selections due to cart additions or changes to item data
         let node: CartTreeNode = null;
         for (let item of this.dataCart.getFiles()) {
@@ -348,7 +363,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
                 this.tt.propagateSelectionUp(node, item.isSelected);
             }
         }
-
+        console.log("this.selectedData", this.selectedData);
         // remove deleted items and adjust selection view accordingly
         this.dataTree.cleanNodes(this.dataCart,
                                  (node) => {
@@ -389,12 +404,13 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     loadDataTree() {
         let node: CartTreeNode = null;
         this.selectedData = []
+        console.log("this.dataCart", this.dataCart);
         for (let item of this.dataCart.getFiles()) {
             node = this.dataTree.upsertNodeFor(item);
             if (item.isSelected) 
                 this.selectedData.push(node);
         }
-
+        console.log("this.selectedData----------", this.selectedData);
         // tweak the top level: set name to the resource title, open first level
         for (let child of this.dataTree.children) {
             if (child.data.resTitle) child.data.name = child.data.resTitle
@@ -409,6 +425,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * respond to the user's selection of a file or collection
      */
     onNodeSelect(ev) {
+        console.log('ev', ev)
         if (ev.node && ev.node.data) {
             let parts = this._keySplit(ev.node.data.key);
             this.dataCart.setSelected(parts[0], parts[1], false, true);

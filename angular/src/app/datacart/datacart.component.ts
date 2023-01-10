@@ -35,6 +35,8 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     zipData: ZipData[] = [];
 
     overallStatus: string = "";
+    datacartName: string = "";
+    forceReload: boolean = false;
 
     @ViewChild('bundler', { static: true })
     bundler : BundleplanComponent;
@@ -50,18 +52,60 @@ export class DatacartComponent implements OnInit, AfterViewInit {
         @Inject(PLATFORM_ID) private platformId: Object ) 
     {
         this.inBrowser = isPlatformBrowser(platformId);
+
+        this.route.params.subscribe(params => {
+            let cartName = params['cartname'];
+            if(cartName == 'rpa'){
+                console.log("Loading rpa")
+                this.cartService.getRpaCart("localhost:4200//datacart/rpa", cartName).subscribe((result: DataCart) => {
+                    console.log("result", result)
+                    let dataCart01 = result;
+                    this.dataCart = this.cartService.getCart(cartName);
+                    this.dataCart.contents = dataCart01.contents;
+                    this.datacartName =  cartName;
+                    this.forceReload = true;
+
+                    //Trigger propagateSelectionUp and propagateSelectionDown
+                    //so all check boxes will be checked
+                    setTimeout(() => {
+                        this.dataCart.save();
+                    }, 0);
+                })
+                // this.cartService._getRpaCart("localhost:4200//datacart/rpa").subscribe((result) => {
+                //     console.log("result.contents", result)
+                //     let data = {};
+                //     result.metadata.forEach((d) =>{
+                //         let key = cartName+'/'+d.filePath;
+                //         d['key'] = key;
+                //         d["isSelected"] = true;
+                //         data[key] = d;
+                //     })
+
+                //     let dataCart01 = new DataCart(cartName, data);
+                //     dataCart01.save();
+                //     this.dataCart = this.cartService.getCart(cartName);
+                //     this.datacartName =  cartName;
+                //     this.forceReload = true;
+
+                //     //Trigger propagateSelectionUp and propagateSelectionDown
+                //     //so all check boxes will be checked
+                //     setTimeout(() => {
+                //         this.dataCart.save();
+                //     }, 0);
+                // })
+            }else{
+                this.datacartName = cartName;
+                this.dataCart = this.cartService.getCart(cartName);
+                this.datacartName =  this.dataCart.getName();
+            }
+        });
     }
 
     /**
      * Get the params OnInit
      */
     ngOnInit(): void {
-        let currentUrl = this.router.url;
 
-        this.route.params.subscribe(params => {
-            let cartName = params['cartname'];
-            this.dataCart = this.cartService.getCart(cartName);
-        });
     }
 
     /**

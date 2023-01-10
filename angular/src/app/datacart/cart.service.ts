@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { DataCart } from '../datacart/cart';
+import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
 
 interface CartLookup {
     /**
@@ -20,7 +21,7 @@ export class CartService {
     public CART_CONSTANTS: any = CartConstants.cartConst;
     carts : CartLookup = {};
 
-    constructor() { }
+    constructor(private http: HttpClient) { }
 
     /**
      * return the cart instance with the given name.  This is normally an EDIID for a 
@@ -30,6 +31,34 @@ export class CartService {
         if (! this.carts[name])
             this.carts[name] = DataCart.openCart(name);
         return this.carts[name];
+    }
+
+    public getRpaCart(url: string, cartName: string) : Observable<any> {
+        return new Observable<any>(subscriber => {
+            return this._getRpaCart(url).subscribe(
+                (result) => {
+                    let data = {};
+                    result.metadata.forEach((d) =>{
+                        let key = cartName+'/'+d.filePath;
+                        d['key'] = key;
+                        d["isSelected"] = true;
+                        data[key] = d;
+                    })
+                    let out: DataCart = new DataCart(cartName, data, null, 0);
+                    subscriber.next(out);
+                    subscriber.complete();
+                }, (err) =>{
+                    console.log("err", err);
+                    subscriber.next(null);
+                    subscriber.complete();
+                }
+            )
+        })
+    }
+
+    public _getRpaCart(url: string) : Observable<any> {
+        console.log("Http call to", url)
+        return this.http.get(url);
     }
 
     /**

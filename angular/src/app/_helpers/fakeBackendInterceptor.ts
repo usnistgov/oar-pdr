@@ -12,37 +12,45 @@ export class FakeBackendInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // array in local storage for registered users
 
-    const sampleData: any = require('../../assets/science-theme/BiometricsScienceTheme.json');
-    const sampleRecord: any = require('../../assets/science-theme/DNAScienceTheme.json');
+    // const sampleData: any = require('../../assets/science-theme/BiometricsScienceTheme.json');
+    // const sampleRecord: any = require('../../assets/science-theme/DNAScienceTheme.json');
 
-    const biometricsData1: any  = require('../../assets/science-theme/SDB-300.json');
-    const biometricsData2: any  = require('../../assets/science-theme/SDB-301.json');
-    const biometricsData3: any  = require('../../assets/science-theme/SDB-302.json');
-    const dna1: any  = require('../../assets/science-theme/dna1.json');
-    const dna2: any  = require('../../assets/science-theme/dna2.json');
-    const dna3: any  = require('../../assets/science-theme/dna3.json');
-    const dna4: any  = require('../../assets/science-theme/dna4.json');
-    const dna5: any  = require('../../assets/science-theme/dna5.json');
+    // const biometricsData1: any  = require('../../assets/science-theme/SDB-300.json');
+    // const biometricsData2: any  = require('../../assets/science-theme/SDB-301.json');
+    // const biometricsData3: any  = require('../../assets/science-theme/SDB-302.json');
+    // const dna1: any  = require('../../assets/science-theme/dna1.json');
+    // const dna2: any  = require('../../assets/science-theme/dna2.json');
+    // const dna3: any  = require('../../assets/science-theme/dna3.json');
+    // const dna4: any  = require('../../assets/science-theme/dna4.json');
+    // const dna5: any  = require('../../assets/science-theme/dna5.json');
+    const rpa: any  = require('../../assets/sample-data/rpa.json');
+    // const rpa: any  = require('../../assets/sample-data/global_cart.json');
 
-    const testdata: any = {
-        PageSize: 1,
-        ResultCount: 8,
-        ResultData: [biometricsData1,biometricsData2,biometricsData3,dna1,dna2,dna3,dna4,dna5]
-    }
+    // const testdata: any = {
+    //     PageSize: 1,
+    //     ResultCount: 8,
+    //     ResultData: [biometricsData1,biometricsData2,biometricsData3,dna1,dna2,dna3,dna4,dna5]
+    // }
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
       console.log("request.url", request.url);
+
+        // RPA
+        if (request.url.indexOf('/rpa') > -1 && request.method === 'GET') {
+            console.log("Return rpa", rpa);
+            return of(new HttpResponse({ status: 200, body: rpa }));
+        }
 
         // metrics
         // if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') {
         //     return of(new HttpResponse({ status: 200, body: metricsRecordDetails }));
         // }
 
-        if (request.url.indexOf('isPartOf.@id=ark:/88434/mds9911') > -1 && request.method === 'GET') {
-            // console.log("Getting forensics")
-            return of(new HttpResponse({ status: 200, body: testdata }));
-        }
+        // if (request.url.indexOf('isPartOf.@id=ark:/88434/mds9911') > -1 && request.method === 'GET') {
+        //     // console.log("Getting forensics")
+        //     return of(new HttpResponse({ status: 200, body: testdata }));
+        // }
 
         if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') 
         {
