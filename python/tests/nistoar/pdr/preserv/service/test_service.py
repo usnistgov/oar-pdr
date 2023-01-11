@@ -58,7 +58,7 @@ class TestThreadedPreservationService(test.TestCase):
         shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
 
         with open(os.path.join(datadir, "bagger_conf.yml")) as fd:
-            baggercfg = yaml.load(fd)
+            baggercfg = yaml.safe_load(fd)
             
         self.config = {
             "working_dir": self.workdir,
@@ -175,6 +175,7 @@ class TestThreadedPreservationService(test.TestCase):
         self.assertEqual(hndlr.state, status.FORGOTTEN)
         self.assertTrue(hndlr.isready())
         self.assertEqual(hndlr.state, status.READY)
+        self.assertFalse(os.path.exists(hndlr._status._cachefile))
         (stat, thrd) = self.svc._launch_handler(hndlr, 0)
 
         try:
@@ -325,7 +326,7 @@ class TestMultiprocPreservationService(test.TestCase):
         shutil.copytree(self.sipdata, os.path.join(self.revdir, "1491"))
 
         with open(os.path.join(datadir, "bagger_conf.yml")) as fd:
-            baggercfg = yaml.load(fd)
+            baggercfg = yaml.safe_load(fd)
             
         self.config = {
             "working_dir": self.workdir,
