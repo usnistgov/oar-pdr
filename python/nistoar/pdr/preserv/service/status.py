@@ -113,9 +113,11 @@ class SIPStatusFile(object):
         """
         release = self.acquire(LOCK_READ)
         self._fd.seek(0)
-        out = json.load(self._fd, object_pairs_hook=OrderedDict)
-        if release:
-            self.release()
+        try:
+            out = json.load(self._fd, object_pairs_hook=OrderedDict)
+        finally:
+            if release:
+                self.release()
         return out
         
     def write_data(self, data):
