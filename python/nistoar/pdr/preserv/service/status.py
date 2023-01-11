@@ -114,7 +114,11 @@ class SIPStatusFile(object):
         release = self.acquire(LOCK_READ)
         self._fd.seek(0)
         try:
-            out = json.load(self._fd, object_pairs_hook=OrderedDict)
+            out = self._fd.read()
+            out = json.loads(out, object_pairs_hook=OrderedDict)
+        except ValueError as ex:
+            print "Failed to parse status file: \n"+out
+            raise
         finally:
             if release:
                 self.release()
