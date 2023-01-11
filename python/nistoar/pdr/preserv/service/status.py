@@ -2,11 +2,12 @@
 This module provides tools for managing and retrieving the status of a 
 preservation efforts across multiple processes.  
 """
-import json, os, time, fcntl, re
+import json, os, time, fcntl, re, time, warnings
 from collections import OrderedDict
 from copy import deepcopy
 
 from ...exceptions import StateException
+from ...utils import read_json, write_json
 from .. import sys as preservsys
 
 NOT_FOUND   = "not found"
@@ -40,6 +41,7 @@ LOCK_READ  = fcntl.LOCK_SH
 class SIPStatusFile(object):
     """
     a class used to manage locked access to the status data file
+    .. deprecated:: 1.8.1
     """
     LOCK_WRITE = fcntl.LOCK_EX
     LOCK_READ  = fcntl.LOCK_SH
@@ -52,6 +54,7 @@ class SIPStatusFile(object):
                               be either LOCK_READ or LOCK_WRITE.
                               If None, no lock is acquired.  
         """
+        warnings.warn("Use of SIPStatusFile is deprecated", DeprecationWarning, stacklevel=2)
         self._file = filepath
         self._fd = None
         self._type = None
@@ -94,7 +97,10 @@ class SIPStatusFile(object):
 
     def release(self):
         if self._fd:
-            self._fd.seek(0, os.SEEK_END)
+            if self._type == self.LOCK_WRITE:
+                self._fd.flush()
+            else:
+                self._fd.seek(0, os.SEEK_END)
             fcntl.flock(self._fd, fcntl.LOCK_UN)
             self._fd.close()
             self._fd = None
@@ -113,9 +119,19 @@ class SIPStatusFile(object):
         """
         release = self.acquire(LOCK_READ)
         self._fd.seek(0)
-        out = json.load(self._fd, object_pairs_hook=OrderedDict)
-        if release:
-            self.release()
+        try:
+            out = self._fd.read()
+            if not out and release:
+                # should not need to do this; locking problem?
+                self.release()
+                time.sleep(0.1)
+                release = self.acquire(LOCK_READ)
+            out = json.loads(out, object_pairs_hook=OrderedDict)
+        except ValueError as ex:
+            raise
+        finally:
+            if release:
+                self.release()
         return out
         
     def write_data(self, data):
@@ -199,7 +215,7 @@ class SIPStatus(object):
         if _data:
             self._data = deepcopy(_data)
         elif os.path.exists(self._cachefile):
-            self._data = SIPStatusFile.read(self._cachefile)
+            self._data = read_json(self._cachefile)
         else:
             self._data = OrderedDict([
                 ('sys', {}),
@@ -263,7 +279,8 @@ class SIPStatus(object):
 
         self._data['user']['update_time'] = time.time()
         self._data['user']['updated'] = time.asctime()
-        SIPStatusFile.write(self._cachefile, self._data)
+#        SIPStatusFile.write(self._cachefile, self._data)
+        write_json(self._data, self._cachefile)
         
     def update(self, label, message=None, cache=True):
         """
@@ -331,7 +348,7 @@ class SIPStatus(object):
         Read the cached status data and replace the data in memory.
         """
         if os.path.exists(self._cachefile):
-            self._data = SIPStatusFile.read(self._cachefile)
+            self._data = read_json(self._cachefile)
 
     def user_export(self):
         """
