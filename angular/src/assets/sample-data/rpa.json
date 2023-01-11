@@ -1,0 +1,48 @@
+{
+    "randomId": "TZOMSDOVXYh2Tseh4KpR",
+    "metadata": [
+        {
+            "resTitle": "Test dataset for 1.1.7rc8 release: NGC 55",
+            "size": 915840,
+            "filePath": "ngc0055_3.con.fits",
+            "downloadURL": "http://localhost:8083/od/ds/restricted/TZOMSDOVXYh2Tseh4KpR/ngc0055+3.con.fits",
+            "checksum": "a816a435ed9ea4aa848592a6066cac67966d0d094129b279bfad0391c6b0a1cd",
+            "mediaType": "image/fits",
+            "checksumAlgorithm": "sha256",
+            "ediid": "849E1CC6FBE2C4C7E053B3570681FE987034",
+            "aipid": "849E1CC6FBE2C4C7E053B3570681FE987034",
+            "resId": "ark:/88434/mds10r7k82",
+            "version": "1.0.0",
+            "isSelected": true,
+            "sinceDate": "2023-01-04T20:35:29.646Z"
+        },
+        {
+            "resTitle": "Test dataset for 1.1.7rc8 release: NGC 55",
+            "size": 4844,
+            "filePath": "ngc0055.HI.gif",
+            "downloadURL": "http://localhost:8083/od/ds/restricted/TZOMSDOVXYh2Tseh4KpR/ngc0055.HI.gif",
+            "checksum": "c1bab2d6ae81ca788e9f7eecd126df33591a6acb5b255ecf29091af7c32673be",
+            "mediaType": "image/gif",
+            "checksumAlgorithm": "sha256",
+            "ediid": "849E1CC6FBE2C4C7E053B3570681FE987034",
+            "aipid": "849E1CC6FBE2C4C7E053B3570681FE987034",
+            "resId": "ark:/88434/mds10r7k82",
+            "version": "1.0.0",
+            "sinceDate": "2023-01-04T20:35:30.153Z"
+        },
+        {
+            "resTitle": "Test dataset for 1.1.7rc8 release: NGC 55",
+            "size": 26023,
+            "filePath": "ngc0055_3.con.gif",
+            "downloadURL": "http://localhost:8083/od/ds/restricted/TZOMSDOVXYh2Tseh4KpR/ngc0055+3.con.gif",
+            "checksum": "820775ec76ed610fa775e49ffe8173eee9a169c53253d41928b3d7256e96f77c",
+            "mediaType": "image/gif",
+            "checksumAlgorithm": "sha256",
+            "ediid": "849E1CC6FBE2C4C7E053B3570681FE987034",
+            "aipid": "849E1CC6FBE2C4C7E053B3570681FE987034",
+            "resId": "ark:/88434/mds10r7k82",
+            "version": "1.0.0",
+            "sinceDate": "2023-01-04T20:35:30.616Z"
+        }
+    ]
+}

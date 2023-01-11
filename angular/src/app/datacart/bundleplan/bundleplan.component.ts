@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, Inject, PLATFORM_ID, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, Inject, PLATFORM_ID, EventEmitter, SimpleChanges } from '@angular/core';
 import { ZipData } from '../../shared/download-service/zipData';
 import { TreeNode } from 'primeng/api';
 import { DownloadService } from '../../shared/download-service/download-service.service';
@@ -100,12 +100,7 @@ export class BundleplanComponent implements OnInit {
     }
 
     ngOnInit() {
-        if(this.inBrowser) {
-            this.dataCartStatus = DataCartStatus.openCartStatus();
-
-            this.dataCart = this.cartService.getCart(this.cartName);
-            // watch this cart?
-        }
+        this.cartInit();
 
         this.downloadService.watchDownloadProcessStatus().subscribe(
             value => {
@@ -114,6 +109,23 @@ export class BundleplanComponent implements OnInit {
                 }
             }
         );
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
+        //Add '${implements OnChanges}' to the class.
+        if (changes.cartName) {
+            this.cartInit();
+        }
+    }
+
+    cartInit() {
+        if(this.inBrowser) {
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+
+            this.dataCart = this.cartService.getCart(this.cartName);
+            // watch this cart?
+        }
     }
 
     /**

@@ -8,6 +8,8 @@ import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TestDataService } from '../../shared/testdata-service/testDataService';
 import { TreeTableModule } from 'primeng/treetable';
+import { AppConfig } from '../../config/config';
+import { config, testdata } from '../../../environments/environment';
 
 describe('CartTreeNode', () => {
     it('constructor', () => {
@@ -176,6 +178,7 @@ describe('CartTreeNode', () => {
 describe('TreetableComponent', () => {
   let component: TreetableComponent;
   let fixture: ComponentFixture<TreetableComponent>;
+  let cfg : AppConfig = new AppConfig(config);
 
   beforeEach(waitForAsync(() => {
     let dc: DataCart = DataCart.openCart("goob");
@@ -198,7 +201,8 @@ describe('TreetableComponent', () => {
         CartService,
         DownloadService,
         TestDataService,
-        GoogleAnalyticsService]
+        GoogleAnalyticsService,
+        { provide: AppConfig, useValue: cfg }]
     })
     .compileComponents();
   }));

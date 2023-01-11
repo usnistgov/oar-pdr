@@ -1,13 +1,13 @@
 <!-- Top control panel -->
-<app-cartcontrol [cartName]="dataCart.getName()" (onDownloadSelected)="downloadSelectedFiles($event)"
+<app-cartcontrol [cartName]="datacartName" (onDownloadSelected)="downloadSelectedFiles($event)"
                  (onRemoveSelected)="removeSelectedFiles($event)"
                  (onRemoveDownloaded)="remvoeDownloadedFiles($event)">
 </app-cartcontrol>
 
 <!-- Bundle plan -->
-<app-bundleplan #bundler [cartName]="dataCart.getName()" 
+<app-bundleplan #bundler [cartName]="datacartName" 
                 (outputOverallStatus)="updateCartOperationalStatus($event)">
 </app-bundleplan>
 
 <!-- Tree table -->
-<app-treetable [cartName]="dataCart.getName()"></app-treetable>
+<app-treetable [cartName]="datacartName" [forceReload]="forceReload"></app-treetable>
