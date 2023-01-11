@@ -55,10 +55,14 @@ export class DatacartComponent implements OnInit, AfterViewInit {
 
         this.route.params.subscribe(params => {
             let cartName = params['cartname'];
+            let id: string = "";
             if(cartName == 'rpa'){
-                console.log("Loading rpa")
-                this.cartService.getRpaCart("localhost:4200//datacart/rpa", cartName).subscribe((result: DataCart) => {
-                    console.log("result", result)
+                this.route.queryParams.subscribe(params => {
+                    console.log("param", params);
+                    id = params["id"];
+                })
+
+                this.cartService.getRpaCart(id, cartName).subscribe((result: DataCart) => {
                     let dataCart01 = result;
                     this.dataCart = this.cartService.getCart(cartName);
                     this.dataCart.contents = dataCart01.contents;
@@ -71,28 +75,6 @@ export class DatacartComponent implements OnInit, AfterViewInit {
                         this.dataCart.save();
                     }, 0);
                 })
-                // this.cartService._getRpaCart("localhost:4200//datacart/rpa").subscribe((result) => {
-                //     console.log("result.contents", result)
-                //     let data = {};
-                //     result.metadata.forEach((d) =>{
-                //         let key = cartName+'/'+d.filePath;
-                //         d['key'] = key;
-                //         d["isSelected"] = true;
-                //         data[key] = d;
-                //     })
-
-                //     let dataCart01 = new DataCart(cartName, data);
-                //     dataCart01.save();
-                //     this.dataCart = this.cartService.getCart(cartName);
-                //     this.datacartName =  cartName;
-                //     this.forceReload = true;
-
-                //     //Trigger propagateSelectionUp and propagateSelectionDown
-                //     //so all check boxes will be checked
-                //     setTimeout(() => {
-                //         this.dataCart.save();
-                //     }, 0);
-                // })
             }else{
                 this.datacartName = cartName;
                 this.dataCart = this.cartService.getCart(cartName);
@@ -105,7 +87,6 @@ export class DatacartComponent implements OnInit, AfterViewInit {
      * Get the params OnInit
      */
     ngOnInit(): void {
-
     }
 
     /**

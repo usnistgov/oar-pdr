@@ -38,7 +38,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         // RPA
         if (request.url.indexOf('/rpa') > -1 && request.method === 'GET') {
-            console.log("Return rpa", rpa);
             return of(new HttpResponse({ status: 200, body: rpa }));
         }
 

@@ -13,7 +13,7 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: false,
+    useMetadataService: true,
     useCustomizationService: true
 };
 
@@ -34,13 +34,14 @@ export const config: LPSConfig = {
         mdService: "https://data.nist.gov/od/id/",
         mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
-        taxonomy:   "https://data.nist.gov/rmm/taxonomy"
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy",
+        rpaBackend: "https://data.nist.gov/rpa/"
     },
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.3.X",
     production: context.production,
-    editEnabled: true,
+    editEnabled: false,
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,

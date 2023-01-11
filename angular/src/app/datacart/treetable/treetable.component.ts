@@ -305,7 +305,6 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     cartInit() {
         if(this.cartName) {
-            console.log("this.cartName", this.cartName);
             this.dataCartStatus = DataCartStatus.openCartStatus();
 
             this.dataCart = this.cartService.getCart(this.cartName);
@@ -351,7 +350,6 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     cartChanged(which) {
         console.log("Updating view for change in cart contents");
 
-        console.log("this.dataTree", this.dataTree);
         // update selections due to cart additions or changes to item data
         let node: CartTreeNode = null;
         for (let item of this.dataCart.getFiles()) {
@@ -363,7 +361,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
                 this.tt.propagateSelectionUp(node, item.isSelected);
             }
         }
-        console.log("this.selectedData", this.selectedData);
+
         // remove deleted items and adjust selection view accordingly
         this.dataTree.cleanNodes(this.dataCart,
                                  (node) => {
@@ -404,13 +402,12 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     loadDataTree() {
         let node: CartTreeNode = null;
         this.selectedData = []
-        console.log("this.dataCart", this.dataCart);
         for (let item of this.dataCart.getFiles()) {
             node = this.dataTree.upsertNodeFor(item);
             if (item.isSelected) 
                 this.selectedData.push(node);
         }
-        console.log("this.selectedData----------", this.selectedData);
+
         // tweak the top level: set name to the resource title, open first level
         for (let child of this.dataTree.children) {
             if (child.data.resTitle) child.data.name = child.data.resTitle
@@ -425,7 +422,6 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * respond to the user's selection of a file or collection
      */
     onNodeSelect(ev) {
-        console.log('ev', ev)
         if (ev.node && ev.node.data) {
             let parts = this._keySplit(ev.node.data.key);
             this.dataCart.setSelected(parts[0], parts[1], false, true);

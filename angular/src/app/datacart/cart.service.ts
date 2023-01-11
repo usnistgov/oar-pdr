@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { DataCart } from '../datacart/cart';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
+import { AppConfig } from '../config/config';
 
 interface CartLookup {
     /**
@@ -20,8 +21,19 @@ interface CartLookup {
 export class CartService {
     public CART_CONSTANTS: any = CartConstants.cartConst;
     carts : CartLookup = {};
+    rpaBackend: string;
+    portalBase: string;
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private http: HttpClient,
+        private cfg: AppConfig,) { 
+            this.rpaBackend = cfg.get("APIs.rpaBackend", "/unconfigured");
+            if (this.rpaBackend == "/unconfigured")
+                throw new Error("APIs.rpaBackend endpoint not configured!");
+    
+            if (! this.rpaBackend.endsWith("/")) this.rpaBackend += "/"
+            this.portalBase = cfg.get("locations.portalBase", "/unconfigured");
+        }
 
     /**
      * return the cart instance with the given name.  This is normally an EDIID for a 
@@ -33,9 +45,11 @@ export class CartService {
         return this.carts[name];
     }
 
-    public getRpaCart(url: string, cartName: string) : Observable<any> {
+    public getRpaCart(id: string, cartName: string) : Observable<any> {
+        let backend: string = this.rpaBackend + "datacart?id=" + id;
+
         return new Observable<any>(subscriber => {
-            return this._getRpaCart(url).subscribe(
+            return this._getRpaCart(backend).subscribe(
                 (result) => {
                     let data = {};
                     result.metadata.forEach((d) =>{
@@ -57,7 +71,6 @@ export class CartService {
     }
 
     public _getRpaCart(url: string) : Observable<any> {
-        console.log("Http call to", url)
         return this.http.get(url);
     }
 
