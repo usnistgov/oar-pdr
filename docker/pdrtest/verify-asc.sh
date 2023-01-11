@@ -25,4 +25,5 @@ gpg --batch --verify $2 $1 || {
     exit 2
 }
 
-[ -e "$GNUPGHOME" ] && rm -r "$GNUPGHOME"
+sleep 1
+[ -e "$GNUPGHOME" ] && { rm -r "$GNUPGHOME" || true; }
