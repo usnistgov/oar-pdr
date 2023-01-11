@@ -1,50 +1,24 @@
 datasets:
-  - name: Demo Dataset for Testing Purposes
-    ediid: 849E1CC6FBE2C4C7E053B3570681FE987034
-    description: Demo Dataset for Testing Purposes
-    url: ''
-    terms:
-      - The database is to be used for demo related research, development and education.
-      - The database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
-      - There should be no attempts to defeat the de-identification of the data provided.
-      - If requested by NIST, certain images in the database or the entire database should be deleted and no copies retained.
-      - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
-      - NIST should be acknowledged in any publication of results generated using the data.
-    requiresApproval: true
-    formTemplate: demo
   - name: NIST Mugshot Identification Database (MID) - NIST Special Database 18
-    ediid: ark:/88434/mds00sxbvh
+    id: ark:/88434/mds00sxbvh
     description: NIST Special Database 18 is being distributed for use in development and testing of automated mugshot identification systems. The database consists of a total of 3248 images of variable size using PNG formatting with metadata TXT files corresponding to each per image. There are images of 1573 individuals (cases) 1495 male and 78 female. The database contains both <a href=https://www.nist.gov/property-fieldsection/faceimg>front and side</a> (profile) views when available. Separating front views and profiles, there are 131 cases with two or more front views and 1418 with only one front view. Profiles have 89 cases with two or more profiles and 1268 with only one profile. Cases with both fronts and profiles have 89 cases with two or more of both fronts and profiles, 27 with two or more fronts and one profile, and 1217 with only one front and one profile.<br><br>This NIST Special Database has the following features:<ul><li>3248 segmented 8-bit gray scale mugshot images (varying sizes) of 1573 individuals</li><li>1333 cases with both front and profile views (see statistics above)</li><li>131 cases with two or more front views and 89 cases with two or more profiles</li><li>images scanned at 19.7 pixels per mm</li></ul><br><br>Suitable for automated mugshot identification research, the database can be used for:<ul><li>algorithm development</li><li>system training and testing</li></ul> 
     url: https://www.nist.gov/srd/nist-special-database-18
     terms:
       - The database is to be used for biometrics related research, development and education.
-      - The database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
+      - he database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
       - There should be no attempts to defeat the de-identification of the data provided.
       - If requested by NIST, certain images in the database or the entire database should be deleted and no copies retained.
       - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
       - NIST should be acknowledged in any publication of results generated using the data.
     requiresApproval: true
     formTemplate: demo
-  - name: Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32
-    ediid: ark:/88434/mds0000fbk
+  - name: NIST Special Database 32
+    id: ask why there are 2 parts of this datasets
     description: NIST Special Database 32 - Multiple Encounter Dataset (MEDS) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence.
     url: https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds
     terms:
       - The database is to be used for biometrics related research, development and education.
-      - The database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
-      - There should be no attempts to defeat the de-identification of the data provided.
-      - If requested by NIST, certain images in the database or the entire database should be deleted and no copies retained.
-      - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
-      - NIST should be acknowledged in any publication of results generated using the data.
-    requiresApproval: true
-    formTemplate: demo
-  - name: Multiple Encounter Dataset (MEDS-II) - NIST Special Database 32
-    ediid: ark:/88434/mds00wpckz
-    description: NIST Special Database 32 - Multiple Encounter Dataset (MEDS) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence.
-    url: https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds
-    terms:
-      - The database is to be used for biometrics related research, development and education.
-      - The database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
+      - he database is not intended to be further distributed, published, copied, or disseminated in any way or form whatsoever, whether for profit or not.
       - There should be no attempts to defeat the de-identification of the data provided.
       - If requested by NIST, certain images in the database or the entire database should be deleted and no copies retained.
       - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
@@ -52,7 +26,7 @@ datasets:
     requiresApproval: true
     formTemplate: demo
   - name: NIST Special Database 300 Uncompressed Plain and Rolled Images from Fingerprint Cards
-    ediid: ark:/88434/mds1068c0v
+    id: ark:/88434/mds1068c0v
     description: NIST, working with the FBI, has digitized 888 inked fingerprint arrest cards that were in various physical conditions, from pristine to badly damaged and faded, and were collected during law enforcement professional's duties. The database contains images of the 10 rolled fingerprint impressions, the two four-finger slap impressions (finger positions 13 and 14), the two thumb slap impressions (finger positions 11 and 12) and the segmented impressions from the slap images (13, 14). The database also includes the coordinates that were used to segment the impressions from the slap fingerprint images.
     url: https://www.nist.gov/itl/iad/image-group/nist-special-database-300
     terms:
@@ -65,7 +39,7 @@ datasets:
     requiresApproval: true
     formTemplate: demo
   - name: NIST Special Database 301 Nail to Nail (N2N) Fingerprint Challenge Dry Run
-    ediid: ark:/88434/mds11ckbd2
+    id: ark:/88434/mds11ckbd2
     description: In April 2017, the Intelligence Advanced Research Projects Activity (IARPA) held a dry run for the data collection portion of its Nail to Nail (N2N) Fingerprint Challenge. This data collection event was designed to ensure that the real data collection event held in September 2017 would be successful. To this end, real biometric data from unhabituated individuals needed to be collected. The National Institute of Standards and Technology (NIST), on behalf of IARPA, has released a dataset of the biometric images obtained during the N2N Fingerprint Challenge dryrun. The image distribution, entitled Special Database (SD) 301, can be freely downloaded for research from the NIST website.
     url: https://www.nist.gov/itl/iad/image-group/nist-special-database-301
     terms:
@@ -79,7 +53,7 @@ datasets:
     requiresApproval: true
     formTemplate: demo
   - name: NIST Special Database 302 Nail to Nail (N2N) Fingerprint Challenge
-    ediid: ark:/88434/mds10274c2
+    id: ark:/88434/mds10274c2
     description: In September 2017, the Intelligence Advanced Research Projects Activity (IARPA) held a data collection as part of its Nail to Nail (N2N) Fingerprint Challenge. Participating Challengers deployed devices designed to collect an image of the full nail to nail surface area of a fingerprint---equivalent to a rolled fingerprint---from an unacclimated user, without assistance from a trained operator. Traditional operator-assisted live-scan rolled fingerprints were also captured, along with assorted other friction ridge live-scan and latent captures. The collection of images collected during the N2N Fingerprint Challenge, entitled Special Database (SD) 302, can be  freely downloaded for research purposes from the National Institute of Standards and Technology (NIST) website.
     url: https://www.nist.gov/itl/iad/image-group/nist-special-database-302
     terms:

@@ -1,14 +1,16 @@
-export interface UserInfo {
+export interface RequestFormData {
     fullName: string;
-    email: string
-    phone?: string;
     organization: string;
-    purposeOfUse: string;
+    email: string;
+    phone: string;
     address1: string;
-    address2?: string;
-    address3?: string;
-    stateOrProvince?: string;
-    zipCode?: number;
+    address2: string;
+    address3: string;
+    stateOrProvince: string;
+    zipCode: number;
     country: string;
-    receiveEmails: boolean;
-}
+    receiveEmails: string;
+    purposeOfUse: string;
+  }
+  
+  

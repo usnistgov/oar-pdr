@@ -13,10 +13,11 @@ import { RPARequestFormComponent } from "./components/request-form.component";
 import { TermsComponent } from "./components/terms.component";
 import { AgreementComponent } from "./components/agreement.component";
 import { RPASMEComponent } from "./components/rpa-sme.component";
+import { RPASMEApprovedComponent } from "./components/rpa-sme-approved.component";
 
 @NgModule({
     imports: [CommonModule, ReactiveFormsModule, PanelModule, MessagesModule, MessageModule, DropdownModule, FormsModule, CardModule, ChipModule, ButtonModule],
-    declarations: [RPARequestFormComponent, TermsComponent, AgreementComponent, RPASMEComponent],
+    declarations: [RPARequestFormComponent, TermsComponent, AgreementComponent, RPASMEComponent, RPASMEApprovedComponent],
     exports: []
 })
 export class RPAModule {

@@ -20,3 +20,8 @@ export interface Record {
   export interface RecordWrapper {
     record: Record;
   }
+
+  export interface ApprovalResponse {
+    recordId: string;
+    approvalStatus: string;
+  }

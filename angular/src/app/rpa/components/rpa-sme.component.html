@@ -1,37 +1,60 @@
-<ng-template [ngIf]="status == 'pending'">
-    <div class="rpdform-main-wrapper">
+<div class="rpdform-main-wrapper">
+    <ng-template [ngIf]="loaded && status.toLowerCase() == 'pending'">
         <div class="rpdform-form-wrapper">
-            <h3 class="mb-4">Pending approval</h3>
-    
+            <h3 class="mb-4">Pending approval - Case Number: {{record?.caseNum}} </h3>
             <div>You have received a request with the following information:
                 <div class="divider"></div>
                 <ul>
                     <li>Case Number: <b>{{record?.caseNum}}</b></li>
-                    <li>Requester: <b>{{record?.userInfo.fullName}}</b></li>
+                    <li>Requester's Full Name: <b>{{record?.userInfo.fullName}}</b></li>
+                    <li>Requester's Organization: <b>{{record?.userInfo.organization}}</b></li>
+                    <li>Requester's Email: <b>{{record?.userInfo.email}}</b></li>
                     <li>Organization: <b>{{record?.userInfo.organization}}</b></li>
                     <li>Country: <b>{{record?.userInfo.country}}</b></li>
+                    <li>Description: <br><b [innerText]="record?.userInfo.description"></b></li>
                 </ul>
                 <div class="divider"></div>
-            Please approve or decline this request as soon as possible. Thank you!
+                This request is still <b>{{record?.userInfo.approvalStatus.toLowerCase()}}</b>. Please approve or
+                decline this request as soon as possible. Thank you!
             </div>
             <button class="rpdform-btn success" (click)="onApprove()">Approve</button>
-            <button class="rpdform-btn ml-4 danger">Decline</button>
+            <button class="rpdform-btn ml-4 danger" (click)="onDecline()">Decline</button>
         </div>
-    </div>
-</ng-template>
-<ng-template [ngIf]="status == 'approved'">
-    <div class="rpdform-main-wrapper">
+    </ng-template>
+    <ng-template [ngIf]="loaded && status.toLowerCase() == 'approved'">
+
         <div class="rpdform-form-wrapper">
             <h3 class="mb-4">Request approved </h3>
-            <div>This request has been approved already.</div>
+            <div>This request has been approved already. Following are details about this request:</div>
+            <div class="divider"></div>
+                <ul>
+                    <li>Case Number: <b>{{record?.caseNum}}</b></li>
+                    <li>Requester's Full Name: <b>{{record?.userInfo.fullName}}</b></li>
+                    <li>Requester's Organization: <b>{{record?.userInfo.organization}}</b></li>
+                    <li>Requester's Email: <b>{{record?.userInfo.email}}</b></li>
+                    <li>Organization: <b>{{record?.userInfo.organization}}</b></li>
+                    <li>Country: <b>{{record?.userInfo.country}}</b></li>
+                    <li>Description: <br><b [innerText]="record?.userInfo.description"></b></li>
+                </ul>
+                <div class="divider"></div>
         </div>
-    </div>
-</ng-template>
-<ng-template [ngIf]="status == 'declined'">
-    <div class="rpdform-main-wrapper">
+    </ng-template>
+    <ng-template [ngIf]="loaded && status.toLowerCase() == 'declined'">
         <div class="rpdform-form-wrapper">
             <h3 class="mb-4">Request declined </h3>
-            <div>This request has been declined.</div>
+            <div>This request has been declined. Following are details about this request:</div> 
+            <div class="divider"></div>
+            <ul>
+                <li>Case Number: <b>{{record?.caseNum}}</b></li>
+                <li>Requester's Fullname: <b>{{record?.userInfo.fullName}}</b></li>
+                <li>Requester's Organization: <b>{{record?.userInfo.organization}}</b></li>
+                <li>Requester's Email: <b>{{record?.userInfo.email}}</b></li>
+                <li>Organization: <b>{{record?.userInfo.organization}}</b></li>
+                <li>Country: <b>{{record?.userInfo.country}}</b></li>
+                <li>Description: <br><b [innerText]="record?.userInfo.description"></b></li>
+            </ul>
+            <div class="divider"></div>
         </div>
-    </div>
-</ng-template>
+    </ng-template>
+</div>
+<p-messages [enableService]="true"></p-messages>

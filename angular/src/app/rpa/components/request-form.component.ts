@@ -4,13 +4,16 @@ import { MessageService } from 'primeng/api';
 
 import { SelectItem } from 'primeng/api';
 import { SelectItemGroup } from 'primeng/api';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { RPAService } from '../services/rpa.service';
 import { ConfigurationService } from '../services/config.service';
 import { Dataset } from '../models/dataset.model';
 import { FormTemplate } from '../models/form-template.model';
-import { UserInfo } from '../models/form-data.model';
+import { UserInfo } from '../models/record.model';
+import { RequestFormData } from '../models/form-data.model';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'rpd-request-form',
@@ -19,6 +22,7 @@ import { UserInfo } from '../models/form-data.model';
   providers: [MessageService, ConfigurationService, RPAService]
 })
 export class RPARequestFormComponent implements OnInit {
+  queryId: string = "<EMPTY_EDIID>";
   datasets: Dataset[] = [];
   selectedDataset: Dataset;
   selectedFormTemplate: FormTemplate;
@@ -49,21 +53,50 @@ export class RPARequestFormComponent implements OnInit {
 
   domparser = new DOMParser();
 
-  constructor(private messageService: MessageService, private configService: ConfigurationService, private rpaService: RPAService, private router: Router, private httpClient: HttpClient) { }
+  constructor(private route: ActivatedRoute, private messageService: MessageService, private configService: ConfigurationService, private rpaService: RPAService, private router: Router, private httpClient: HttpClient) { }
 
   ngOnInit() {
-    this.getDatasets('config.yaml');
-    this.httpClient.get("assets/countries.json").subscribe(data =>{
+    // load list of datasets from the config file
+    // this.getDatasets('config.yaml');
+    this.route.queryParams.subscribe(params => {
+      // this.setSelecetedDataset(params['ediid']);
+      if (params['ediid']) {
+        this.queryId = params['ediid']
+        this.getSelectedDataset(this.queryId).subscribe(dataset => {
+          this.selectedDataset = dataset;
+          console.log("selectedDataset= ", this.selectedDataset);
+          if (this.selectedDataset !== undefined) {
+            this.configService.getFormTemplate(this.selectedDataset.formTemplate).subscribe(template => {
+              this.selectedFormTemplate = template;
+              console.log(template);
+            });
+          }
+        });
+      }
+
+    });
+
+    // load the countries list to use with dropdown menu, this list was provided by SF team
+    this.httpClient.get("assets/countries.json").subscribe(data => {
       console.log(data);
       this.countries = data;
     })
   }
 
-  getDatasets(filename: string) {
-    this.configService.getDatasets(filename).subscribe(datasets => {
+  getSelectedDataset(id: string): Observable<Dataset> {
+    return this.getDatasets('config.yaml').pipe(
+      map(datasets => datasets.find(dataset => dataset.ediid == id))
+    );
+  }
+
+  setSelecetedDataset(ediid: string) {
+    this.configService.getDatasets('config.yaml').subscribe(datasets => {
       console.log("Datasets", datasets);
-      this.datasets = datasets;
-      this.selectedDataset = datasets[0];
+      this.selectedDataset = datasets.find(dataset => {
+        return dataset.ediid === ediid;
+      });
+      console.log("selectedDataset= ", this.selectedDataset);
+      // this.selectedDataset = datasets[0];
       this.configService.getFormTemplate(this.selectedDataset.formTemplate).subscribe(template => {
         this.selectedFormTemplate = template;
         console.log(template);
@@ -71,6 +104,13 @@ export class RPARequestFormComponent implements OnInit {
     });
   }
 
+  // method to load datasets from local config file
+  getDatasets(filename: string): Observable<Dataset[]> {
+    return this.configService.getDatasets(filename);
+  }
+
+
+  // laod the specific form template for the selected dataset
   getFormTemplate() {
     this.configService.getFormTemplate(this.selectedDataset.formTemplate).subscribe(template => {
       this.selectedFormTemplate = template;
@@ -78,6 +118,7 @@ export class RPARequestFormComponent implements OnInit {
     });
   }
 
+  // function to be called when user clicks on the submit button
   submitForm() {
     console.log(this.requestForm.value);
     this.messageService.clear();
@@ -85,32 +126,51 @@ export class RPARequestFormComponent implements OnInit {
       this.isFormValid = false;
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid form. Check if any required fields (*) are missing.' });
     } else {
-      const userInfo = {} as UserInfo;
-      userInfo.fullName = this.requestForm.controls.fullName.value;
-      // userInfo.lastname = this.requestForm.controls.lastname.value;
-      userInfo.email = this.requestForm.controls.email.value;
-      userInfo.phone = this.requestForm.controls.phone.value;
-      userInfo.organization = this.requestForm.controls.organization.value;
-      userInfo.purposeOfUse = this.requestForm.controls.purposeOfUse.value;
-      userInfo.address1 = this.requestForm.controls.address1.value;
-      userInfo.address2 = this.requestForm.controls.address2.value;
-      userInfo.address3 = this.requestForm.controls.address3.value;
-      userInfo.stateOrProvince = this.requestForm.controls.stateOrProvince.value;
-      userInfo.zipCode = this.requestForm.controls.zipCode.value;
-      userInfo.country = this.requestForm.controls.country.value;
-      userInfo.receiveEmails = this.requestForm.controls.receiveEmails.value;
+      const requestFormData = {} as RequestFormData;
+      requestFormData.fullName = this.requestForm.controls.fullName.value;
+      requestFormData.email = this.requestForm.controls.email.value;
+      requestFormData.phone = this.requestForm.controls.phone.value;
+      requestFormData.organization = this.requestForm.controls.organization.value;
+      requestFormData.purposeOfUse = this.requestForm.controls.purposeOfUse.value;
+      requestFormData.address1 = this.requestForm.controls.address1.value;
+      requestFormData.address2 = this.requestForm.controls.address2.value;
+      requestFormData.address3 = this.requestForm.controls.address3.value;
+      requestFormData.stateOrProvince = this.requestForm.controls.stateOrProvince.value;
+      requestFormData.zipCode = this.requestForm.controls.zipCode.value;
+      requestFormData.country = this.requestForm.controls.country.value;
+      requestFormData.receiveEmails = this.requestForm.controls.receiveEmails.value;
+
+      let userInfo = this.makeUserInfo(requestFormData);
+      // create a new record
+      // make a call to the request handler in distribution service
       this.rpaService.createRecord(userInfo).subscribe((data: {}) => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Your request was submitted successfully!' });
-        this.router.navigate(['/rpd-request']);
+        this.router.navigate(['/rpa-request']);
       });
 
     }
   }
 
+  // creates the userInfo that will be used as payload for creating a new record case in SF.
+  // TODO: get subject/id from url param
+  makeUserInfo(requestFormData: RequestFormData): UserInfo {
+    let userInfo = {} as UserInfo;
+    userInfo.fullName = requestFormData.fullName;
+    userInfo.organization = requestFormData.organization;
+    userInfo.email = requestFormData.email;
+    userInfo.country = requestFormData.country;
+    userInfo.receiveEmails = requestFormData.receiveEmails ? "True" : "False";
+    userInfo.approvalStatus = "Pending";
+    userInfo.productTitle = this.selectedDataset.name;
+    userInfo.subject = "RPA: " + this.selectedDataset.ediid;
+    userInfo.description = "Product Title:\n" + this.selectedDataset.name + "\n\n Purpose of Use: \n" + requestFormData.purposeOfUse;
+    return userInfo;
+  }
+
   onChangeDataset(event) {
     this.configService.getFormTemplate(this.selectedDataset.formTemplate).subscribe(template => {
       this.selectedFormTemplate = template;
-      console.log("disclaimers", this.selectedFormTemplate.disclaimers)
+      console.log("selectedDataset:", this.selectedDataset)
     });
   }
 

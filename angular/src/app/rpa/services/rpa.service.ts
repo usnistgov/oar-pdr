@@ -2,13 +2,12 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, throwError } from "rxjs";
 import { catchError, retry } from "rxjs/operators";
-import { UserInfo } from "../models/form-data.model";
-import { Record, RecordWrapper } from "../models/record.model";
+import { ApprovalResponse, Record, RecordWrapper, UserInfo } from "../models/record.model";
 
 @Injectable()
 export class RPAService {
 
-    apiURL = 'http://localhost:9090';
+    baseUrl = 'http://localhost:9090';
 
     constructor(private http: HttpClient) { }
 
@@ -24,7 +23,7 @@ export class RPAService {
         console.log("User Info", userInfo);
         return this.http
             .post<Record>(
-                this.apiURL + '/new',
+                this.baseUrl + '/new',
                 JSON.stringify({ "userInfo": userInfo }),
                 this.httpOptions
             )
@@ -34,9 +33,25 @@ export class RPAService {
     public getRecord(recordId: string): Observable<RecordWrapper> {
         return this.http
         .get<RecordWrapper>(
-            this.apiURL + "/" + recordId, 
+            this.baseUrl + "/" + recordId, 
             this.httpOptions)
             .pipe(retry(1), catchError(this.handleError));
+    }
+
+    public approveRequest(recordId: string): Observable<ApprovalResponse> {
+        return this.http
+                .patch<ApprovalResponse>(this.baseUrl + "/" + recordId, 
+                {"Approval_Status__c":"Approved"}, 
+                this.httpOptions)
+                .pipe(retry(1), catchError(this.handleError));
+    }
+
+    public declineRequest(recordId: string): Observable<ApprovalResponse> {
+        return this.http
+                .patch<ApprovalResponse>(this.baseUrl + "/" + recordId, 
+                {"Approval_Status__c":"Declined"}, 
+                this.httpOptions)
+                .pipe(retry(1), catchError(this.handleError));
     }
 
     // Error handling
