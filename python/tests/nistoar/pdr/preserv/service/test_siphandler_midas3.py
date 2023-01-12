@@ -7,6 +7,7 @@ from nistoar.pdr.preserv.service import siphandler as sip
 from nistoar.pdr.preserv.service import status
 from nistoar.pdr.preserv.bagger import midas3 as midas
 from nistoar.pdr.preserv.bagit import BagBuilder
+from nistoar.doi import datacite as dc
 
 # datadir = nistoar/preserv/data
 datadir = os.path.join( os.path.dirname(os.path.dirname(__file__)), "data" )
@@ -390,8 +391,30 @@ class TestMIDAS3SIPHandler(test.TestCase):
         self.assertEqual(stat['state'], status.SUCCESSFUL)
         self.assertIn('orgotten', stat['message'])
 
+    def test_explain_error(self):
+        errs = [
+            { 'title': "Big problem!" },
+            { 'title': "(minor problem)" }
+        ]
+        errdata = dc.JSONAPIError(errs, "Resolver error")._()
+        ex = dc.DOIResolverError("mds2-9999", "https://api.datacite.fake", 500, **errdata)
 
+        msg = sip._explain_error(ex)
+        self.assertNotEqual(msg, "Resolver error")
+        msg = msg.split("\n")
+        self.assertEqual(len(msg), 4)
+        self.assertEqual(msg[0], "DOI service error: Resolver error")
+        self.assertEqual(msg[1], "Details:")
+        self.assertEqual(msg[2], "  Big problem!")
+        self.assertEqual(msg[3], "  (minor problem)")
 
+        ex = dc.DOIResolverError("mds2-9999", "https://api.datacite.fake", message="Resolver error")
+        msg = sip._explain_error(ex)
+        self.assertEqual(msg, "Resolver error")
+
+        ex = RuntimeError("error")
+        msg = sip._explain_error(ex)
+        self.assertEqual(msg, "error")
 
 
 

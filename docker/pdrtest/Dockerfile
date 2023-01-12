@@ -9,7 +9,7 @@
 #
 ##########################################
 
-FROM oar-metadata/ejsonschema
+FROM oar-metadata/ejsonschema-py2
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
