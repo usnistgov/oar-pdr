@@ -703,6 +703,7 @@ export class FiltersComponent implements OnInit {
         this.selectedAuthorDropdown = false;
         this.selectedResourceType = [];
         this.selectedResourceTypeNode = [];
+        this.forensicsSelectedThemesNode = [];
         this.resourceTypes = this.collectResourceTypes(this.searchResults);
         this.collectResourceTypesWithCount();
         this.authors = this.collectAuthors(this.searchResults);
@@ -714,7 +715,7 @@ export class FiltersComponent implements OnInit {
         this.collectThemesWithCount();
         this.themesTree = [{
             label: 'NIST Research Topics -',
-            "expanded": true,
+            "expanded": false,
             children: this.themesWithCount
         }];
         this.forensicsThemesTree = [{
@@ -724,16 +725,18 @@ export class FiltersComponent implements OnInit {
         }];
         this.componentsTree = [{
             label: 'Record has -',
-            "expanded": true,
+            "expanded": false,
             children: this.componentsWithCount
         }];
 
         this.resourceTypeTree = [{
             label: 'Resource Type -',
-            "expanded": true,
+            "expanded": false,
             children: this.resourceTypesWithCount
         }];
 
+        this.nodeExpanded = false;
+        this.forensicsNodeExpanded = true;
         this.filterResults()
     }
 

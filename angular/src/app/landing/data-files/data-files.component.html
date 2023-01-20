@@ -69,7 +69,7 @@
                 [virtualScrollItemSize]="57" [globalFilterFields]="['name']">
                 <ng-template pTemplate="caption">
                     <div style="text-align: right; height: 20px;margin: 0px;padding-top: 0px;">        
-                        <i class="pi pi-search" style="margin:4px 4px 0 0"></i>
+                        <i class="pi pi-search" style="margin:4px 4px 0 0" aria-label="Search on file or folder name"></i>
                         <input type="text" pInputText size="50" placeholder="Search on file or folder name ..." [(ngModel)]="searchText" (input)="toogleTree(true);tt.filterGlobal($event.target.value, 'contains')" style="width:auto; height: 20px;margin: 0 5px 20px 0;width: 60%;">
                         <button pButton type="submit" class="p-button-sm btn-labeled" id="btn-reset" (click)="searchText='';tt.filterGlobal('', 'contains')" label="Reset" [ngStyle]="{'margin-top':'0px','width':'max-content','height': '26px', 'background-color':'var(--nist-blue-default)', 'color': 'white'}">
                         </button>
@@ -200,7 +200,7 @@
                 </ng-template>
             </p-treeTable>
 
-            <div *ngIf="isExpanded" class="splitter" (mousedown)="onMousedown($event)" (mouseup)="onMouseUp($event)">
+            <div *ngIf="virtualScroll" class="splitter" (mousedown)="onMousedown($event)" (mouseup)="onMouseUp($event)">
                 <div id="separator">Scroll or drag this bar to see more...</div>
             </div>
         </div>
