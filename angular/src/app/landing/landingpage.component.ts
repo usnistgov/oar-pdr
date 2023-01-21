@@ -508,7 +508,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     useMetadata(): void {
         //Calculate the size of the dataset
-        if(this.md.components) {
+        if (this.md.components) {
             this.md.components.forEach( (comp) => {
                 if(comp.size != undefined){
                     this.datasetSize += comp.size;
