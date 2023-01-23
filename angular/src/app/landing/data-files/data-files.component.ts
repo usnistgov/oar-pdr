@@ -399,21 +399,28 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * @param event 
      * @returns 
      */
-    treeTableToggled(event: any) {
+    treeTableToggled(event: any = null) {
         //Set tree table's height based on the tree status
-        // If any node was expanded, and table height is minimum height, set it to maximum height.
-        //Otherwise leave the table height as it is.
+        // If only one top level folder and user collapses it, set window to MinTreeTableHeight.
+        // Else if only one file (not folder) in the table,  set window to MinTreeTableHeight.
+        // Else if only one top level folder and table height is MinTreeTableHeight and user expands the top folder, set window to MaxTreeTableHeight.
+        // Else leave the height as it is.
+
         let expanded: boolean = false;
         this.files.forEach((file) => {
             if(file.expanded) expanded = true;
         })
         this.isExpanded = expanded;
-
-        if(this.files.length <= 1) {
+        
+        if(this.files.length == 1 && !this.files[0].expanded){
             this.treeTableHeight = MinTreeTableHeight;
         }else{
-            if(this.treeTableHeight == MinTreeTableHeight){
-                this.treeTableHeight = MaxTreeTableHeight;
+            if(this.fileCount <= 1  || this.treeTableHeight < MinTreeTableHeight) {
+                this.treeTableHeight = MinTreeTableHeight;
+            }else{
+                if(this.treeTableHeight == MinTreeTableHeight){
+                    this.treeTableHeight = MaxTreeTableHeight;
+                }
             }
         }
     }
@@ -454,8 +461,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     toogleTree(expand = false, refresh = false) {
         this.setTree(this.files, 'children', 'name', true, expand);
-        this.treeTableHeight = expand? MaxTreeTableHeight : MinTreeTableHeight;
-        this.isExpanded = expand;
+        this.treeTableToggled();
         if(refresh)
             this.refreshTreeTable()
     }
