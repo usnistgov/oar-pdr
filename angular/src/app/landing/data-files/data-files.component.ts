@@ -401,21 +401,19 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     treeTableToggled(event: any) {
         //Set tree table's height based on the tree status
-        // If any node was expanded, set the height to max height
-        //Otherwise if files.length = 1, set height to min
+        // If any node was expanded, and table height is minimum height, set it to maximum height.
+        //Otherwise leave the table height as it is.
         let expanded: boolean = false;
         this.files.forEach((file) => {
             if(file.expanded) expanded = true;
         })
         this.isExpanded = expanded;
 
-        if(this.isExpanded){
-            this.treeTableHeight = MaxTreeTableHeight;
+        if(this.files.length <= 1) {
+            this.treeTableHeight = MinTreeTableHeight;
         }else{
-            if(this.files.length <= 1) {
-                this.treeTableHeight = MinTreeTableHeight;
-            }else{
-                this.treeTableHeight = MaxTreeTableHeight
+            if(this.treeTableHeight == MinTreeTableHeight){
+                this.treeTableHeight = MaxTreeTableHeight;
             }
         }
     }
