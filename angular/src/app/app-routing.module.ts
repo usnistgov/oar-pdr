@@ -11,10 +11,11 @@ import { DatacartRoutes } from './datacart/datacart.routes';
 import { MetricsComponent } from './metrics/metrics.component';
 import { RPARequestFormComponent } from './rpa/components/request-form.component';
 import { RPASMEComponent } from './rpa/components/rpa-sme.component';
-import { RPASMEApprovedComponent } from './rpa/components/rpa-sme-approved.component';
+import { RPARoutes } from './rpa/rpa.routing';
 
 const routes: Routes = [
     ...DatacartRoutes,
+    ...RPARoutes,
     { path: '', redirectTo: '/about', pathMatch: 'full' },
 
     // app paths
@@ -43,9 +44,6 @@ const routes: Routes = [
       ]
     },
     { path: 'metrics/:id',         component: MetricsComponent },
-    { path: 'rpa-request',         component: RPARequestFormComponent     },
-    { path: 'rpa-sme',             component: RPASMEComponent     },
-    { path: 'rpa-sme-approved',    component: RPASMEApprovedComponent     },
     { path: '**',                  component: NotFoundComponent      }
     
 ];

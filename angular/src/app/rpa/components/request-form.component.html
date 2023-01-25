@@ -1,4 +1,4 @@
-<div class="rpdform-main-wrapper">
+<div #rpaForm class="rpdform-main-wrapper">
     <div class="rpdform-form-wrapper">
 
         <!-- <label for="datasetsDropdown" class="rpdform-form-label">
@@ -11,8 +11,7 @@
         <p-messages severity="warn" *ngIf="selectedDataset === undefined">
             <ng-template pTemplate>
                 <i class="pi pi-info-circle"></i>
-                <span class="ml-2">Unknown dataset with ediid=<span
-                    style="color:red">{{queryId}}</span></span>
+                <span class="ml-2">Unknown dataset with ediid=<span style="color:red">{{queryId}}</span></span>
             </ng-template>
         </p-messages>
 
@@ -148,30 +147,23 @@
 
             </div>
 
-            <div class="rpdform-input-flex">
-                <div>
-                    <label for="country" class="rpdform-form-label required"> Country </label>
-                    <input type="text" name="country" id="country" class="rpdform-form-input"
-                        placeholder="United States" formControlName="country" />
-                </div>
-            </div>
-            <div class="rpdform-input-flex">
-                <!-- <p-dropdown [options]="countries" [(ngModel)]="selectedCountry" placeholder="Select a Country" [showClear]="true"></p-dropdown> -->
-                <!-- <p-dropdown [options]="countries" [(ngModel)]="selectedCountry" optionLabel="name" [filter]="true"
-                    filterBy="name" [showClear]="true" placeholder="Select a Country">
+            <div class="pdform-mb-3 country-dropdown-menu">
+                <label for="country" class="rpdform-form-label required"> Country </label>
+                <p-dropdown name="country" id="country" [options]="countries" [(ngModel)]="selectedCountry" optionLabel="name" [filter]="true"
+                    filterBy="name" [showClear]="true" placeholder="Select a Country" formControlName="country">
                     <ng-template pTemplate="selectedItem">
                         <div class="country-item country-item-value" *ngIf="selectedCountry">
-                            <div>{{selectedCountry.name}}</div>
+                            <div>{{ selectedCountry.name }}</div>
                         </div>
                     </ng-template>
                     <ng-template let-country pTemplate="item">
                         <div class="country-item">
-                            <div>{{country.name}}</div>
+                            <div>{{ country.name }}</div>
                         </div>
                     </ng-template>
-                </p-dropdown> -->
+                </p-dropdown>
             </div>
-
+            <div class="divider"></div>
 
 
             <div class="rpdform-mb-3">
@@ -274,4 +266,9 @@
             </p-messages> -->
         </form>
     </div>
+</div>
+
+<!-- progress spinner when submitting form -->
+<div class="progress-spinner" *ngIf="displayProgressSpinner">
+    <p-progressSpinner [style]="{width: '100px', height: '100px'}" styleClass="custom-spinner" strokeWidth="8" animationDuration=".5s" ></p-progressSpinner>
 </div>
