@@ -10,14 +10,13 @@ import { CardModule } from 'primeng/card';
 import { ChipModule } from 'primeng/chip';
 import { ButtonModule } from "primeng/button";
 import { RPARequestFormComponent } from "./components/request-form.component";
-import { TermsComponent } from "./components/terms.component";
-import { AgreementComponent } from "./components/agreement.component";
 import { RPASMEComponent } from "./components/rpa-sme.component";
-import { RPASMEApprovedComponent } from "./components/rpa-sme-approved.component";
+import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import {OverlayPanelModule} from 'primeng/overlaypanel';
 
 @NgModule({
-    imports: [CommonModule, ReactiveFormsModule, PanelModule, MessagesModule, MessageModule, DropdownModule, FormsModule, CardModule, ChipModule, ButtonModule],
-    declarations: [RPARequestFormComponent, TermsComponent, AgreementComponent, RPASMEComponent, RPASMEApprovedComponent],
+    imports: [CommonModule, ReactiveFormsModule, PanelModule, MessagesModule, MessageModule, FormsModule, DropdownModule, CardModule, ChipModule, ButtonModule, ProgressSpinnerModule, OverlayPanelModule],
+    declarations: [RPARequestFormComponent, RPASMEComponent],
     exports: []
 })
 export class RPAModule {
