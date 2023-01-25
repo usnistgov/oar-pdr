@@ -46,7 +46,7 @@ export class CartService {
     }
 
     public getRpaCart(id: string, cartName: string) : Observable<any> {
-        let backend: string = this.rpaBackend + "datacart?id=" + id;
+        let backend: string = this.rpaBackend + id;
 
         return new Observable<any>(subscriber => {
             return this._getRpaCart(backend).subscribe(
