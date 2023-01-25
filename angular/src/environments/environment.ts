@@ -30,12 +30,12 @@ export const config: LPSConfig = {
         customization: "https://data.nist.gov/customization",
         // customization: "https://testdata.nist.gov/customization",
         // distService: "https://data.nist.gov/od/ds/",
-        distService: "https://testdata.nist.gov/od/ds/",
+        distService: "http://localhost:8083/od/ds/",
         mdService: "https://data.nist.gov/od/id/",
         mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
         taxonomy:   "https://data.nist.gov/rmm/taxonomy",
-        rpaBackend: "https://data.nist.gov/rpa/"
+        rpaBackend: "http://localhost:8083/od/ds/restricted/"
     },
     mode: "dev",
     status: "Dev Version",
