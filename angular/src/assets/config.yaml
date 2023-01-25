@@ -24,7 +24,7 @@ datasets:
       - The researcher, at NIST's sole option, may be notified periodically when new datasets are available. Such information may also be posted on the relevant NIST website.
       - NIST should be acknowledged in any publication of results generated using the data.
     requiresApproval: true
-    formTemplate: demo
+    formTemplate: no-disclaimer
   - name: Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32
     ediid: ark:/88434/mds0000fbk
     description: NIST Special Database 32 - Multiple Encounter Dataset (MEDS) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence.
