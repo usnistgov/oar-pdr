@@ -1,27 +1,27 @@
 
 export interface UserInfo {
-    fullName: string;
-    organization: string;
-    email: string;
-    receiveEmails: string;
-    country: string;
-    approvalStatus: string;
-    productTitle?: string;
-    subject: string;
-    description: string;
+  fullName: string;
+  organization: string;
+  email: string;
+  receiveEmails: string;
+  country: string;
+  approvalStatus: string;
+  productTitle?: string;
+  subject: string;
+  description: string;
 }
 
 export interface Record {
-    is: string;
-    caseNum: string
-    userInfo: UserInfo
+  is: string;
+  caseNum: string
+  userInfo: UserInfo
 }
 
-  export interface RecordWrapper {
-    record: Record;
-  }
+export interface RecordWrapper {
+  record: Record;
+}
 
-  export interface ApprovalResponse {
-    recordId: string;
-    approvalStatus: string;
-  }
+export interface ApprovalResponse {
+  recordId: string;
+  approvalStatus: string;
+}

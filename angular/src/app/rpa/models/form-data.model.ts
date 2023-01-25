@@ -11,6 +11,6 @@ export interface RequestFormData {
     country: string;
     receiveEmails: string;
     purposeOfUse: string;
-  }
+}
   
   

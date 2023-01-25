@@ -6,4 +6,4 @@ export interface Dataset {
     terms: string[];
     requiresApproval: boolean;
     formTemplate: string;
-  }
+}
