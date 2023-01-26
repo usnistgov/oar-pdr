@@ -660,13 +660,15 @@ class TestNerdmUtils(test.TestCase):
 
         self.assertIn('releaseHistory', data)
         self.assertNotIn('versionHistory', data)
-        self.assertEqual(data['releaseHistory']['@id'], "ark:/88888/goober.rel")
+        self.assertEqual(data['releaseHistory']['@id'], "ark:/88888/goober/pdr:v")
         self.assertEqual(data['releaseHistory']['@type'], ["nrdr:ReleaseHistory"])
         self.assertEqual(len(data['releaseHistory']['hasRelease']), 1)
         self.assertEqual(data['releaseHistory']['hasRelease'][0]['hank'], 'aaron')
         self.assertEqual(data['releaseHistory']['hasRelease'][0]['version'], '1.0')
         self.assertEqual(data['releaseHistory']['hasRelease'][0]['location'],
-                         "https://pdr.nist.gov/od/id/ark:/88888/goober.v1_0")
+                         "https://pdr.nist.gov/od/id/ark:/88888/goober/pdr:v/1.0")
+        self.assertEqual(data['releaseHistory']['hasRelease'][0]['@id'],
+                         "ark:/88888/goober/pdr:v/1.0")
 
         data['versionHistory'] = [{
             "version": "2.0",
@@ -685,34 +687,77 @@ class TestNerdmUtils(test.TestCase):
         self.assertEqual(data['bar']['_extensionSchemas'], [])
 
         self.assertIn('releaseHistory', data)
-        self.assertNotIn('versionHistory', data)
-        self.assertEqual(data['releaseHistory']['@id'], "ark:/88888/goober.rel")
+        self.assertIn('versionHistory', data)
+        self.assertEqual(data['releaseHistory']['@id'], "ark:/88888/goober/pdr:v")
         self.assertEqual(data['releaseHistory']['@type'], ["nrdr:ReleaseHistory"])
         self.assertEqual(len(data['releaseHistory']['hasRelease']), 1)
         self.assertEqual(data['releaseHistory']['hasRelease'][0]['hank'], 'aaron')
         self.assertEqual(data['releaseHistory']['hasRelease'][0]['version'], '1.0')
         self.assertEqual(data['releaseHistory']['hasRelease'][0]['location'],
-                         "https://pdr.nist.gov/od/id/ark:/88888/goober.v2_0")
+                         "https://pdr.nist.gov/od/id/ark:/88888/goober/pdr:v/1.0")
 
     def test_create_release_history_for(self):
         hist = bagut.create_release_history_for("goob")
-        self.assertEqual(hist['@id'], "goob.rel")
+        self.assertEqual(hist['@id'], "goob/pdr:v")
         self.assertEqual(hist['@type'], ["nrdr:ReleaseHistory"])
         self.assertEqual(hist['hasRelease'], [])
 
-        self.assertEqual(bagut.create_release_history_for("goob.gurn")['@id'], "goob.gurn.rel")
-        self.assertEqual(bagut.create_release_history_for("goob.rel")['@id'], "goob.rel")
-        self.assertEqual(bagut.create_release_history_for("goob.v1")['@id'], "goob.rel")
-        self.assertEqual(bagut.create_release_history_for("goob.v1_2")['@id'], "goob.rel")
-        self.assertEqual(bagut.create_release_history_for("goob.v1.2")['@id'], "goob.rel")
-        self.assertEqual(bagut.create_release_history_for("goob.v1_2_3")['@id'], "goob.rel")
-        self.assertEqual(bagut.create_release_history_for("goob.v2_1_3_0")['@id'], "goob.rel")
+        self.assertEqual(bagut.create_release_history_for("goob.gurn")['@id'], "goob.gurn/pdr:v")
+        self.assertEqual(bagut.create_release_history_for("goob.rel")['@id'], "goob/pdr:v")
+        self.assertEqual(bagut.create_release_history_for("goob.v1")['@id'], "goob/pdr:v")
+        self.assertEqual(bagut.create_release_history_for("goob.v1_2")['@id'], "goob/pdr:v")
+        self.assertEqual(bagut.create_release_history_for("goob.v1.2")['@id'], "goob/pdr:v")
+        self.assertEqual(bagut.create_release_history_for("goob.v1_2_3")['@id'], "goob/pdr:v")
+        self.assertEqual(bagut.create_release_history_for("goob.v2_1_3_0")['@id'], "goob/pdr:v")
         
         hist = bagut.create_release_history_for("gary.v1_0_0")
-        self.assertEqual(hist['@id'], "gary.rel")
+        self.assertEqual(hist['@id'], "gary/pdr:v")
         self.assertEqual(hist['@type'], ["nrdr:ReleaseHistory"])
         self.assertEqual(hist['hasRelease'], [])
 
+    def test_to_version_ext(self):
+        self.assertEqual(bagut.to_version_ext("1.0"), "/pdr:v/1.0")
+        self.assertEqual(bagut.to_version_ext("goob"), "/pdr:v/goob")
+
+    def test_update_release_ref(self):
+        ref = { "issued": "never" }
+        with self.assertRaises(ValueError):
+            bagut.update_release_ref([])
+        with self.assertRaises(ValueError):
+            bagut.update_release_ref(ref)
+
+        ref['version'] = "2.1.9"
+        bagut.update_release_ref(ref)
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9" })
+
+        bagut.update_release_ref(ref, "ark:/88888/goob")
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9", "@id": "ark:/88888/goob/pdr:v/2.1.9"})
+
+        ref['@id'] = "ark:/88888/gurn"
+        bagut.update_release_ref(ref)
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9", "@id": "ark:/88888/gurn/pdr:v/2.1.9"})
+
+        ref['@id'] = "ark:/88888/fred.v2_1_9"
+        bagut.update_release_ref(ref)
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9", "@id": "ark:/88888/fred/pdr:v/2.1.9"})
+
+        bagut.update_release_ref(ref, "asdfxkcd", "https://example.com/id/")
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9", "@id": "asdfxkcd/pdr:v/2.1.9",
+                                "location": "https://example.com/id/asdfxkcd/pdr:v/2.1.9"})
+
+        ref['@id'] = "ark:/88888/fred.v2_1_9"
+        bagut.update_release_ref(ref)
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9", "@id": "ark:/88888/fred/pdr:v/2.1.9",
+                                "location": "https://example.com/id/ark:/88888/fred/pdr:v/2.1.9"})
+
+        ref['@id'] = "ark:/88888/mds2-8888.v2_1_9"
+        ref['location'] = "https://data.nist.gov/od/id/ark:/88888/mds2-8888.v2_1_9"
+        bagut.update_release_ref(ref)
+        self.assertEqual(ref, { "issued": "never", "version": "2.1.9",
+                                "@id": "ark:/88888/mds2-8888/pdr:v/2.1.9",
+                                "location": "https://data.nist.gov/od/id/ark:/88888/mds2-8888/pdr:v/2.1.9"})
+        
+        
                     
                          
 if __name__ == '__main__':

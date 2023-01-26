@@ -20,6 +20,13 @@ from ..bagit.builder import (NERDM_SCH_ID_BASE, NERDM_SCH_VER, NERDMPUB_SCH_VER,
 DEF_MBAG_VERSION = "0.4"
 DEF_NIST_PROF_VERSION = "0.4"
 
+RELHIST_EXTENSION = "/pdr:v"
+VERSION_EXTENSION_RE = re.compile(RELHIST_EXTENSION+r"/\d+(\.\d+)*$")
+
+def to_version_ext(version):
+    return RELHIST_EXTENSION + '/' + version
+
+
 def form_bag_name(aipid, bagseq=0, dsver="1.0", mbver=DEF_MBAG_VERSION,
                   namefmt=None):
     """
@@ -505,7 +512,11 @@ def update_nerdm_schema(nerdmd, version=None, byext={}):
             nerdmd['releaseHistory'] = create_release_history_for(nerdmd["@id"])
             nerdmd['releaseHistory']['hasRelease'] = nerdmd['versionHistory']
 
-        del nerdmd['versionHistory']
+            del nerdmd['versionHistory']
+
+    if 'releaseHistory' in nerdmd:
+        for rel in nerdmd['releaseHistory'].get('hasRelease', []):
+            update_release_ref(rel, nerdmd['@id'])
 
     return nerdmd
 
@@ -559,15 +570,69 @@ def create_release_history_for(pdrid):
     Since the introduction of the current releaseHistory property (defined in the nerdm-schem/rls 
     extension), the PDR adopted the convention that the traditional PDR-IDs (e.g. ark:/88434/mds2-3333) 
     now resolve to the latest release in a sequence of versioned releases.  A special collection 
-    composed of these releases has the form PDR-ID.rel (e.g. ark:/88434/mds2-3333.rel).  This 
+    composed of these releases has the form PDR-ID/pdr:v (e.g. ark:/88434/mds2-3333/pdr:v).  This 
     function will create a NERDm releaseHistory object with the '@id' property set according to this 
     convention.  If the given ID ends in a version string (e.g. ".v1_1_3"), it will be removed before 
-    applending the ".rel" extension).
+    applending the "/pdr:v" extension).
     """
     pdrid = re.sub(r'\.rel$', '', pdrid)
     pdrid = re.sub(r'\.v\d+([\._]\d+)*$', '', pdrid)
     return OrderedDict([
-        ("@id", pdrid+".rel"),
+        ("@id", pdrid + RELHIST_EXTENSION),
         ("@type", ["nrdr:ReleaseHistory"]),
         ("hasRelease", [])
     ])
+
+def update_release_ref(relref, id=None, resolveurl=None):
+    """
+    convert a reference to a release to the latest convention for identifying and pointing to a version
+    of a dataset.  The input object will be updated in place.
+
+    For a time in the past, a different ID convention was used where the release history had an ID ending 
+    in ".rel" and an ID for a specific release ended in ".vX_Y_Z".  These are converted to the new 
+    convention ("/pdr:v" and "/pdr:v/X.Y.Z", respectively).  
+
+    :param dict relref:  a dictionary describing a release that can be an item within a "hasRelease" list
+                         (in a "releaseHistory" object) or a "versionHistory" list.
+    :param str id:  the PDR ID to assume for the dataset this release applies to.  If not provided, one will 
+                    inferred by the content.
+    :param str resolveurl:  the ID resolver URL to assume.  If not provided, one will 
+                    inferred by the content.
+    """
+    if not isinstance(relref, Mapping) or not relref.get('version'):
+        msg = "update_release_ref(): input is not a relref object"
+        if isinstance(relref, Mapping) and not relref.get('version'):
+            msg += ": missing version property"
+        raise ValueError(msg)
+
+    ver = relref.get('version')
+    oldext = ".v" + re.sub(r'\.', '_', ver)
+    if not id:
+        id = relref.get('@id')
+        if id:
+            if id.endswith(oldext):
+                id = id[:-1*len(oldext)]
+            else:
+                id = VERSION_EXTENSION_RE.sub('', id)
+
+    if id and not resolveurl:
+        resolveurl = relref.get('location')
+        if resolveurl:
+            if resolveurl.endswith(oldext):
+                resolveurl = resolveurl[:-1*len(oldext)]
+            else:
+                resolveurl = VERSION_EXTENSION_RE.sub('', resolveurl)
+            idpos = resolveurl.find("ark:")
+            if idpos < 0:
+                resolveurl = resolveurl.rsplit('/', 1)[0]
+            else:
+                resolveurl = resolveurl[:idpos]
+    if resolveurl and not resolveurl.endswith('/'):
+        resolveurl += '/'
+
+    if id:
+        relref['@id'] = id + to_version_ext(ver)
+    if resolveurl:
+        relref['location'] = resolveurl + relref['@id']
+
+    return relref
