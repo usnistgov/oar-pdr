@@ -30,10 +30,10 @@ class TestPubCmd(test.TestCase):
         p = argparse.ArgumentParser()
         pub.define_pub_opts(p)
         args = p.parse_args("pdr2210".split())
-        self.assertEqual(args.aipid, "pdr2210")
+        self.assertEqual(args.aipid, ["pdr2210"])
         self.assertIsNone(args.bagparent)
         args = p.parse_args("pdr2210 -b goob".split())
-        self.assertEqual(args.aipid, "pdr2210")
+        self.assertEqual(args.aipid, ["pdr2210"])
         self.assertEqual(args.bagparent, "goob")
 
     def test_load_into(self):
@@ -44,14 +44,14 @@ class TestPubCmd(test.TestCase):
 
         usage = StringIO()
         p.print_help(file=usage)
-        self.assertIn("{prepupd,servenerd,setver,validate,fix}", usage.getvalue())
+        self.assertIn("{prepupd,authors,readme,setver,validate,servenerd,fix}", usage.getvalue())
 
     def test_determine_bag_path(self):
         p = argparse.ArgumentParser()
         pub.define_pub_opts(p)
         
         args = p.parse_args("pdr2210".split())
-        self.assertEqual(args.aipid, "pdr2210")
+        self.assertEqual(args.aipid, ["pdr2210"])
         workdir, bagparent, bagdir = pub.determine_bag_path(args, {})
         self.assertEqual(workdir, os.getcwd())
         self.assertEqual(bagparent, workdir)
@@ -84,7 +84,7 @@ class TestPubCmd(test.TestCase):
 
         # by default, aipid given as path are relative to CWD
         args = p.parse_args("curate/pdr2210 -b ./bags".split())      # -b is ignored
-        self.assertEqual(args.aipid, "curate/pdr2210")
+        self.assertEqual(args.aipid, ["curate/pdr2210"])
         workdir, bagparent, bagdir = pub.determine_bag_path(args, cfg)
         self.assertEqual(workdir, "/tmp")
         self.assertEqual(bagparent, os.path.join(os.getcwd(), "curate"))
@@ -93,7 +93,7 @@ class TestPubCmd(test.TestCase):
         # if the working dir is given on the command line, we can allow the aipid path be relative to it
         p.add_argument("-w", type=str, metavar="DIR", dest="workdir")
         args = p.parse_args("curate/pdr2210 -w /pdr/bags".split())      # -b is ignored
-        self.assertEqual(args.aipid, "curate/pdr2210")
+        self.assertEqual(args.aipid, ["curate/pdr2210"])
         workdir, bagparent, bagdir = pub.determine_bag_path(args, cfg)
         self.assertEqual(workdir, "/pdr/bags")
         self.assertEqual(bagparent, "/pdr/bags/curate")    # because ./curate/pdr2210 does not exist
@@ -103,7 +103,7 @@ class TestPubCmd(test.TestCase):
         self.tf.mkdir("curate")
         os.mkdir("curate/pdr2210")
         args = p.parse_args("curate/pdr2210 -w /pdr/bags".split())
-        self.assertEqual(args.aipid, "curate/pdr2210")
+        self.assertEqual(args.aipid, ["curate/pdr2210"])
         workdir, bagparent, bagdir = pub.determine_bag_path(args, cfg)
         self.assertEqual(args.aipid, "pdr2210")
         self.assertEqual(workdir, "/pdr/bags")

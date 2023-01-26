@@ -71,6 +71,10 @@ def determine_bag_path(args, config):
         workdir = args.workdir
     workdir = os.path.abspath(workdir)
 
+    # only one aipid is expected; convert list to string
+    if isinstance(args.aipid, list):
+        args.aipid = args.aipid[0]
+
     # bag parent dir: cl arg takes precendence over config
     bagparent = config.get('metadata_bag_dir')
     if os.sep in args.aipid:

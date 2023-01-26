@@ -351,7 +351,7 @@ class TestAddAuthorCmd(test.TestCase):
 
         upd = self.authcmd.update_to_datapub(nerd)
         self.assertEqual(upd["@type"], ["nrdp:DataPublication", "nrdp:PublicDataResource", "dcat:Dataset"])
-        self.assertEqual(len(upd['_extensionSchemas']), 2)
+        self.assertEqual(len(upd['_extensionSchemas']), 1)
         self.assertTrue(upd["_extensionSchemas"][-1].endswith("/DataPublication"))
         self.assertEqual(len(upd), 2)
 
@@ -377,7 +377,7 @@ class TestAddAuthorCmd(test.TestCase):
         upd = self.authcmd.update_to_datapub(nerd)
         self.assertEqual(upd["@type"], ["nrd:SRD", "nrdp:DataPublication", "nrdp:PublicDataResource",
                                         "dcat:Dataset"])
-        self.assertEqual(len(upd['_extensionSchemas']), 2)
+        self.assertEqual(len(upd['_extensionSchemas']), 1)
         self.assertTrue(upd["_extensionSchemas"][-1].endswith("/DataPublication"))
         self.assertEqual(len(upd), 2)
 
