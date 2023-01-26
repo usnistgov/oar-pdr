@@ -361,7 +361,7 @@ class TestPreservationUpdateBagger(test.TestCase):
             hist = mdata['releaseHistory']['hasRelease']
             self.assertEqual(hist[-1]['version'], "1.1.0")
             self.assertEqual(hist[-1]['description'], "data update")
-            self.assertTrue(hist[-1]['location'].endswith(".v1_1_0"),
+            self.assertTrue(hist[-1]['location'].endswith("/pdr:v/1.1.0"),
                             "location does not end with version: "+hist[-1]['location'] )
             self.assertEqual(hist[0]['version'], "1.0.0")
             self.assertEqual(len(hist), 2)

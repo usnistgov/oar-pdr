@@ -1300,10 +1300,13 @@ class MIDASMetadataBagger(SIPBagger):
         else:
             adata = OrderedDict()
         adata['version'] = self.sip.nerd['version']
+        resolver = 'https://'+pdr.PDR_PUBLIC_SERVER+ '/od/id/'
         relhist = self.sip.nerd.get('releaseHistory')
         if relhist is None:
             relhist = bagutils.create_release_history_for(self.sip.nerd['@id'])
             relhist['hasRelease'] = self.sip.nerd.get('versionHistory', [])
+            for rel in relhist['hasRelease']:
+                bagutils.update_release_ref(rel, self.sip.nerd['@id'], resolver)
         verhist = relhist['hasRelease']
 
         # set the version history
@@ -1312,14 +1315,12 @@ class MIDASMetadataBagger(SIPBagger):
            not any([h['version'] == self.sip.nerd['version'] for h in verhist]):
             issued = ('modified' in self.sip.nerd and self.sip.nerd['modified']) or \
                      self.sip.nerd['issued']
+            verid = self.sip.nerd['@id'] + bagutils.to_version_ext(self.sip.nerd['version'])
             relhist['hasRelease'].append(OrderedDict([
                 ('version', self.sip.nerd['version']),
                 ('issued', issued),
-                ('@id', self.sip.nerd['@id']+".v"+re.sub(r'\.','_',self.sip.nerd['version'])),
-                ('location', 'https://'+PDR_PUBLIC_SERVER+'/od/id/'+ \
-                          re.sub(r'\.rel$',
-                                 ".v"+re.sub(r'\.','_', self.sip.nerd['version']),
-                                 relhist['@id']))
+                ('@id', verid),
+                ('location', resolver + verid)
             ]))
             if self.sip.nerd.get('status', 'available') == 'removed':
                 # need to deprecate all previous minor versions

@@ -1126,10 +1126,13 @@ class PreservationBagger(SIPBagger):
         else:
             adata = OrderedDict()
         adata['version'] = newver
+        resolver = 'https://'+pdr.PDR_PUBLIC_SERVER+ '/od/id/'
         relhist = mdata.get('releaseHistory')
         if relhist is None:
             relhist = bagutils.create_release_history_for(mdata['@id'])
             relhist['hasRelease'] = mdata.get('versionHistory', [])
+            for rel in relhist['hasRelease']:
+                bagutils.update_release_ref(rel, mdata['@id'], resolver)
         verhist = relhist['hasRelease']
 
         if uptype != _NO_UPDATE and newver != mdata['version'] and \
@@ -1137,12 +1140,12 @@ class PreservationBagger(SIPBagger):
            not any([h['version'] == newver for h in verhist]):
             issued = ('modified' in mdata and mdata['modified']) or \
                      mdata['issued']
+            verid = mdata['@id'] + bagutils.to_version_ext(newver)
             verhist.append(OrderedDict([
                 ('version', newver),
                 ('issued', issued),
-                ('@id', mdata['@id']),
-                ('location', 'https://'+pdr.PDR_PUBLIC_SERVER+ \
-                             re.sub(r'\.rel$', ".v"+re.sub(r'\.','_', adata['version']), relhist['@id']))
+                ('@id', verid),
+                ('location', resolver + verid)
             ]))
             if update_reason is None:
                 if uptype == _MDATA_UPDATE:

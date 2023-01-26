@@ -1141,7 +1141,8 @@ class TestPreservationBagger(test.TestCase):
         hist = mdrec['releaseHistory']['hasRelease']
         self.assertEqual(hist[-1]['version'], "1.0.1")
         self.assertEqual(hist[-1]['description'], "metadata update")
-        self.assertTrue(hist[-1]['location'].endswith(".v1_0_1"),
+        self.assertEqual(hist[-1]['@id'], "ark:/88434/mds00hw91v/pdr:v/1.0.1")
+        self.assertTrue(hist[-1]['location'].endswith("/pdr:v/1.0.1"),
                         "location does not end with version: "+hist[-1]['location'])
             
 
