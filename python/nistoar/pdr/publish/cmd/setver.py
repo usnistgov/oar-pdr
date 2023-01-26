@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 from nistoar.pdr.exceptions import ConfigurationException, PDRException, PDRServerError
 from nistoar.pdr.preserv.bagit import NISTBag, BagBuilder
+from nistoar.pdr.preserv.bagger import utils as bagutils
 from nistoar.pdr.cli import PDRCommandFailure
 from . import validate as vald8, define_pub_opts, determine_bag_path
 
@@ -157,10 +158,14 @@ def execute(args, config=None, log=None):
 
     # update the history if requested
     if args.why:
-        history = nerd.get('versionHistory', [])
-        if len(history) > 1 and history[-1].get('version') == version:
+        history = nerd.get('releaseHistory')
+        if not history:
+            history = bagutils.create_release_history_for(nerd['@id'])
+        history.setdefault('hasRelease', [])
+        releases = history['hasRelease']
+        if len(releases) > 0 and releases[-1].get('version') == version:
             # history entry already exists for current version; just update the message
-            history[-1]['description'] = args.why
+            releases[-1]['description'] = args.why
 
         else:
             # append a new entry to the history
@@ -168,15 +173,16 @@ def execute(args, config=None, log=None):
                 raise PDRCommandFailure(default_name, "Unable to update version history as @id is not set", 2)
             baseurl = config.get('repo_access', {}).get('landing_page_service', {})  \
                             .get('service_endpoint', "https://data.nist.gov/od/id/")
-            history.append(OrderedDict([
+            verid = nerd['@id'] + bagutils.to_version_ext(version)
+            releases.append(OrderedDict([
                 ('version', version),
                 ('issued', date.today().isoformat()),
-                ('@id', nerd['@id']),
-                ('location', baseurl+nerd['@id']),
+                ('@id', verid),
+                ('location', baseurl+verid),
                 ('description', args.why)
             ]))
 
-        update['versionHistory'] = history
+        update['releaseHistory'] = history
 
     # write out the update
     try:

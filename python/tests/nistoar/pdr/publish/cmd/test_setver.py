@@ -84,8 +84,8 @@ class TestSetverCmd(test.TestCase):
         annot = bag.annotations_metadata_for('')
         self.assertEqual(nerd['version'], "1.0.0")
         self.assertNotIn('version', annot)
-        self.assertNotIn('versionHistory', annot)
-        self.assertNotIn('versionHistory', nerd)
+        self.assertNotIn('releaseHistory', annot)
+        self.assertNotIn('releaseHistory', nerd)
 
         argline = "-q -w "+self.workdir+" setver pdr2210 -m"
         self.cmd.execute(argline.split(), deepcopy(self.config))
@@ -95,6 +95,8 @@ class TestSetverCmd(test.TestCase):
         self.assertNotIn('version', annot)
         self.assertNotIn('versionHistory', annot)
         self.assertNotIn('versionHistory', nerd)
+        self.assertNotIn('releaseHistory', annot)
+        self.assertNotIn('releaseHistory', nerd)
 
         argline = "-q -w "+self.workdir+" setver pdr2210 -m -a"
         self.cmd.execute(argline.split(), deepcopy(self.config))
@@ -104,6 +106,8 @@ class TestSetverCmd(test.TestCase):
         self.assertEqual(nerd['version'], "1.0.1")
         self.assertNotIn('versionHistory', nerd)
         self.assertNotIn('versionHistory', annot)
+        self.assertNotIn('releaseHistory', annot)
+        self.assertNotIn('releaseHistory', nerd)
             
     def test_execute_data(self):
         bag = NISTBag(self.bagdir)
@@ -202,11 +206,16 @@ class TestSetverCmd(test.TestCase):
         self.assertEqual(nerd['version'], "1.0.0")
         self.assertNotIn('version', annot)
         self.assertNotIn('versionHistory', annot)
-        history = nerd['versionHistory']
+        self.assertNotIn('releaseHistory', annot)
+        self.assertNotIn('versionHistory', nerd)
+        history = nerd['releaseHistory']
+        self.assertEqual(history['@id'], "ark:/88434/mds00hw91v/pdr:v")
+        history = history['hasRelease']
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0]['description'], "update")
-        self.assertEqual(history[0]['@id'], "ark:/88434/mds00hw91v")
-        self.assertEqual(history[0]['location'], "https://data.nist.gov/od/id/ark:/88434/mds00hw91v")
+        self.assertEqual(history[0]['@id'], "ark:/88434/mds00hw91v/pdr:v/1.0.0")
+        self.assertEqual(history[0]['location'],
+                         "https://data.nist.gov/od/id/ark:/88434/mds00hw91v/pdr:v/1.0.0")
         self.assertEqual(history[0]['issued'], date.today().isoformat())
 
         argline = "-q -w "+self.workdir+" setver pdr2210 -m -H again"
@@ -216,7 +225,8 @@ class TestSetverCmd(test.TestCase):
         self.assertEqual(nerd['version'], "1.0.1")
         self.assertNotIn('version', annot)
         self.assertNotIn('versionHistory', annot)
-        history = nerd['versionHistory']
+        self.assertNotIn('releaseHistory', annot)
+        history = nerd['releaseHistory']['hasRelease']
         self.assertEqual(len(history), 2)
         self.assertEqual(history[0]['description'], "update")
         self.assertEqual(history[1]['description'], "again")
@@ -228,7 +238,7 @@ class TestSetverCmd(test.TestCase):
         self.assertEqual(nerd['version'], "1.0.1")
         self.assertNotIn('version', annot)
         self.assertNotIn('versionHistory', annot)
-        history = nerd['versionHistory']
+        history = nerd['releaseHistory']['hasRelease']
         self.assertEqual(len(history), 2)
         self.assertEqual(history[0]['description'], "update")
         self.assertEqual(history[1]['description'], "foobar")
