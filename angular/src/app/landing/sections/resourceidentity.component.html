@@ -1,6 +1,5 @@
 <div class="grid" id="identity">
     <div style="width:100%">
-    <!-- <div class="col-12 col-md-12 col-lg-12 col-sm-12"> -->
         <span class="recordType">
             <b>{{recordType}}</b>
             <span *ngIf="theme == scienceTheme" class="badge version"> Beta</span>
@@ -36,9 +35,7 @@
         <div *ngIf="theme == scienceTheme" style="width: 100%;" [ngStyle]="{'margin-bottom': record.creators? '15px' : '1.5em'}">
             <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
         </div>
-    <!-- </div> -->
     
-    <!-- <div class="col-8 col-md-8 col-lg-8 col-sm-12"> -->
         <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
         <span>Identifier: </span>
