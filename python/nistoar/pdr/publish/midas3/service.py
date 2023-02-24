@@ -408,7 +408,7 @@ class MIDAS3PublishingService(PublishSystem):
         try: 
             # prevent updates to new worker's bag
             replworker.halt_pod_processing("EDI-swapping")
-            oldworker.ensure_res_metadata()
+            oldworker.bagger.ensure_res_metadata()
 
             # lock the old worker
             oldworker.bagger.ensure_filelock()
