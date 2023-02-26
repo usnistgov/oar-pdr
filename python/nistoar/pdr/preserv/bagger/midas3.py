@@ -180,7 +180,7 @@ class MIDASSIP(object):
             if replid and (replid.startswith('doi:') or replid.startswith("http")):
                 replid = None
         if replid:
-            recnum = _midadid_to_dirname(midasid)
+            recnum = _midadid_to_dirname(replid)
             for pdir in [reviewdir, uploaddir]:
                 extradir = os.path.join(pdir, recnum)
                 if os.path.isdir(extradir):
