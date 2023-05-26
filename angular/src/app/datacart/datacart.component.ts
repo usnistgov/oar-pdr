@@ -57,24 +57,26 @@ export class DatacartComponent implements OnInit, AfterViewInit {
             let cartName = params['cartname'];
             let id: string = "";
             if(cartName == 'rpa'){
-                this.route.queryParams.subscribe(params => {
-                    console.log("param", params);
-                    id = params["id"];
-                })
-
-                this.cartService.getRpaCart(id, cartName).subscribe((result: DataCart) => {
-                    let dataCart01 = result;
-                    this.dataCart = this.cartService.getCart(cartName);
-                    this.dataCart.contents = dataCart01.contents;
-                    this.datacartName =  cartName;
-                    this.forceReload = true;
-
-                    //Trigger propagateSelectionUp and propagateSelectionDown
-                    //so all check boxes will be checked
-                    setTimeout(() => {
-                        this.dataCart.save();
-                    }, 0);
-                })
+                if(this.inBrowser) {
+                    this.route.queryParams.subscribe(params => {
+                        console.log("param", params);
+                        id = params["id"];
+                    })
+    
+                    this.cartService.getRpaCart(id, cartName).subscribe((result: DataCart) => {
+                        let dataCart01 = result;
+                        this.dataCart = this.cartService.getCart(cartName);
+                        this.dataCart.contents = dataCart01.contents;
+                        this.datacartName =  cartName;
+                        this.forceReload = true;
+    
+                        //Trigger propagateSelectionUp and propagateSelectionDown
+                        //so all check boxes will be checked
+                        setTimeout(() => {
+                            this.dataCart.save();
+                        }, 0);
+                    })
+                }
             }else{
                 this.datacartName = cartName;
                 this.dataCart = this.cartService.getCart(cartName);
