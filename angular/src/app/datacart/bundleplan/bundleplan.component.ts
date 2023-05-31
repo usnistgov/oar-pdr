@@ -139,7 +139,7 @@ export class BundleplanComponent implements OnInit {
 
         if (this.dataCart && this.downloadFiles) {
             let title = (this.dataCart.isGlobalCart()) ? "Global Data Cart"
-                                                       : this.downloadFiles[0].resTitle? this.downloadFiles[0].resTitle.substring(0,20)+"..." : "No title...";
+                                                       : this.downloadFiles[0].resTitle.substring(0,20)+"...";
             this.dataCartStatus.setDownloadCompleted(this.dataCart.getName(), title);
         }
 
@@ -178,7 +178,7 @@ export class BundleplanComponent implements OnInit {
     updateDownloadPercentage(percentage: number){
         if (this.dataCart && this.downloadFiles) {
             let title = (this.dataCart.isGlobalCart()) ? "Global Data Cart"
-                                                       : this.downloadFiles[0].resTitle? this.downloadFiles[0].resTitle.substring(0,20)+"..." : "No title...";
+                                                       : this.downloadFiles[0].resTitle.substring(0,20)+"...";
 
             this.dataCartStatus.updateDownloadPercentage(this.dataCart.getName(), percentage, title);
         }
