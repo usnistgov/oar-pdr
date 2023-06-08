@@ -5,7 +5,7 @@
             <div class="item-list">
                 <ul>
                     <li *ngFor="let socialMedia of socialMediaList">
-                        <a [href]="socialMedia.url" target="_blank" class="social-btn social-btn--large extlink ext"><i [class]="socialMedia.icon"><span
+                        <a [href]="socialMedia.url" target="_blank" rel="noopener noreferrer" class="social-btn social-btn--large extlink ext"><i [class]="socialMedia.icon"><span
                             class="element-invisible">{{socialMedia.name}}</span></i><span class="ext"><span class="element-invisible"> (link
                             is external)</span></span></a>
                     </li>
