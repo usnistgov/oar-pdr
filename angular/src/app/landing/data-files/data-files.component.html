@@ -110,8 +110,9 @@
                         </td>
                         <td [ngStyle]="statusStyle()">
                             <div style="display: flex;">
-                                <div *ngIf="rowData.comp.downloadURL;else space_holder">
+                                <div *ngIf="displayMode != 'restrict' || rowData.comp.downloadURL;else space_holder">
                                     <a *ngIf="rowData.downloadStatus != 'downloading'"
+                                        style="margin-left: 10px;"
                                         href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
                                         data-toggle="tooltip" title="Direct download"
                                         (click)="setFileDownloaded(rowData)">
@@ -126,18 +127,29 @@
                                 <ng-template #space_holder>
                                     <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
                                 </ng-template>
-                                <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
+
+                                <!-- Display shopping cart icon for oublic data. Otherwise display lock icon -->
+                                <div class="indent-content"
+                                *ngIf="displayMode != 'restrict' || rowData.comp.downloadURL; else RestrictedAccessPage">
+                                    <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
                                     (click)="removeFromGlobalCart(rowData)">
-                                    <i class="faa faa-cart-plus green-cart" aria-hidden="true" data-toggle="tooltip"
-                                        title="Remove from cart"></i>
-                                </div>
-                                <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">Added
-                                </div>
-                                <ng-template #not_in_cart>
-                                    <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
-                                        <i class="faa faa-cart-plus blue-cart" aria-hidden="true" data-toggle="tooltip"
-                                            title="Add to cart"></i>
+                                        <i class="faa faa-cart-plus green-cart" aria-hidden="true" data-toggle="tooltip"
+                                            title="Remove from cart"></i>
                                     </div>
+                                    <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">
+                                        Added
+                                    </div>
+                                    <ng-template #not_in_cart>
+                                        <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
+                                            <i class="faa faa-cart-plus blue-cart" aria-hidden="true" data-toggle="tooltip"
+                                                title="Add to cart"></i>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                                <ng-template #RestrictedAccessPage>
+                                    <a *ngIf="!rowData.comp.downloadURL && rapWithAccessUrl" href={{accessURL}} target="_blank">
+                                        <i class="faa faa-lock blue-cart" (click)="googleAnalytics(rowData.comp['accessURL'], $event, 'Request access')" aria-hidden="true" data-toggle="tooltip" title="Request access"></i>
+                                    </a>
                                 </ng-template>
                             </div>
                         </td>
