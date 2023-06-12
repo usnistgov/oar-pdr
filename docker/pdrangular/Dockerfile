@@ -30,18 +30,17 @@ RUN cd /usr/local && tar xJf /tmp/node-$node_ver-linux-x64.tar.xz \
                   && ln -s ../node/bin/npm  npm                 \
                   && ln -s ../node/bin/npx  npx            
 
-ENV GOSU_VERSION 1.10
+ENV GOSU_VERSION 1.14
+COPY verify-asc.sh /usr/local/bin
 RUN set -ex; \
     arch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
     wget -O /usr/local/bin/gosu \
    "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch"; \
     wget -O /usr/local/bin/gosu.asc \
 "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc";\
-    export GNUPGHOME="$(mktemp -d)"; \
-    gpg --batch --keyserver hkps://keys.openpgp.org \
-         --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
-    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-    sleep 1; rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc || true; \
+    verify-asc.sh /usr/local/bin/gosu /usr/local/bin/gosu.asc    \
+                  B42F6819007F00F88E364FD4036A9C25BF357DD4;      \
+    sleep 1; rm -r /usr/local/bin/gosu.asc || true; \
     chmod +x /usr/local/bin/gosu; \
     gosu nobody true
 

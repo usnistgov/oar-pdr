@@ -151,6 +151,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
     prevMouseY: number = 0;
     prevTreeTableHeight: number = 0;
     searchText: string = "";
+    rapWithAccessUrl: boolean = false; // Indicate if there is a restricted access page with access url
+    accessURL: string = "";
 
     // The key of treenode whose details is currently displayed
     currentKey: string = '';
@@ -168,7 +170,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'mediaType', header: 'File Type', width: 'auto' },
             { field: 'size', header: 'Size', width: 'auto' },
-            { field: 'download', header: 'Status', width: 'auto' }];
+            { field: 'download', header: "Status", width: 'auto' }];
 
         if (typeof (window) !== 'undefined') {
             window.onresize = (e) => {
@@ -219,8 +221,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * Restrict and preview mode: hide the whole block -- restrict_preview
      */
     get displayMode() {
-        if(!this.editEnabled || this.record['accessLevel'] === 'public') {
-            return "normal";
+        // if(!this.editEnabled || this.record['accessLevel'] === 'public') {
+        if(this.record['accessLevel'] === 'public') {
+                return "normal";
         }else if(this.record['accessLevel'] === 'restricted public' && this.editMode != this.EDIT_MODES.PREVIEW_MODE) {
             return "restrict";
         }else {
@@ -262,14 +265,37 @@ export class DataFilesComponent implements OnInit, OnChanges {
     // --- end of mouse drag functions
 
     useMetadata() {
-        this.ediid = this.record['ediid']
-        this.buildTree();
+        this.ediid = this.record['ediid'];
 
+        if(this.record['accessLevel'] === 'restricted public') {
+            this.checkAccessPageType();
+            this.cols[3]['header'] = "Access";
+        }
+
+        this.buildTree();
+        console.log("files", this.files);
         // If total file count > virtual scrolling threshold, set virtual scrolling to true. 
         this.virtualScroll = this.fileCount > FileCountForVirtualScroll? true : false;
 
         // If number of top level elements > 5, set table height to MaxTreeTableHeight, otherwise set it to actual rows * 25 pixels
         this.treeTableHeight = this.files.length > 5 ? MaxTreeTableHeight : this.files.length * 25;
+    }
+
+    isRestrictedData(node: any) {
+        return node['comp']['@type'].includes('nrdp:RestrictedAccessPage');
+    }
+
+    checkAccessPageType() {
+        let comps = this.record["components"];
+        if(comps && comps.length > 0) {
+            for (let comp of comps) {
+                if(comp['@type'].includes('nrdp:RestrictedAccessPage') && comp["accessURL"] && comp["accessURL"].trim() != "") {
+                    this.rapWithAccessUrl = true;
+                    this.accessURL = comp["accessURL"];
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -399,17 +425,29 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * @param event 
      * @returns 
      */
-    treeTableToggled(event: any) {
-        if(this.files[0].expanded){
-            if(this.treeTableHeight == MaxTreeTableHeight) return;
+    treeTableToggled(event: any = null) {
+        //Set tree table's height based on the tree status
+        // If only one top level folder and user collapses it, set window to MinTreeTableHeight.
+        // Else if only one file (not folder) in the table,  set window to MinTreeTableHeight.
+        // Else if only one top level folder and table height is MinTreeTableHeight and user expands the top folder, set window to MaxTreeTableHeight.
+        // Else leave the height as it is.
 
-            this.treeTableHeight = MaxTreeTableHeight;
-            this.isExpanded = true;
-        }else{
-            if(this.treeTableHeight == MinTreeTableHeight) return;
-
+        let expanded: boolean = false;
+        this.files.forEach((file) => {
+            if(file.expanded) expanded = true;
+        })
+        this.isExpanded = expanded;
+        
+        if(this.files.length == 1 && !this.files[0].expanded){
             this.treeTableHeight = MinTreeTableHeight;
-            this.isExpanded = false;
+        }else{
+            if(this.fileCount <= 1  || this.treeTableHeight < MinTreeTableHeight) {
+                this.treeTableHeight = MinTreeTableHeight;
+            }else{
+                if(this.treeTableHeight == MinTreeTableHeight){
+                    this.treeTableHeight = MaxTreeTableHeight;
+                }
+            }
         }
     }
 
@@ -449,8 +487,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
      */
     toogleTree(expand = false, refresh = false) {
         this.setTree(this.files, 'children', 'name', true, expand);
-        this.treeTableHeight = expand? MaxTreeTableHeight : MinTreeTableHeight;
-        this.isExpanded = expand;
+        this.treeTableToggled();
         if(refresh)
             this.refreshTreeTable()
     }
@@ -896,4 +933,14 @@ export class DataFilesComponent implements OnInit, OnChanges {
         let mType: string = MediaTypeMapping[ext];
         return mType == undefined ? "" : mType;
     }
+
+    /**
+     * Google Analytics track event
+     * @param url - URL that user visit
+     * @param event - action event
+     * @param title - action title
+     */
+    googleAnalytics(url: string, event, title) {
+        this.gaService.gaTrackEvent('homepage', event, title, url);
+    }    
 }

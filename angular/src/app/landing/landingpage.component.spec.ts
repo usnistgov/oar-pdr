@@ -51,7 +51,7 @@ describe('LandingPageComponent', () => {
         cfg.appVersion = "2.test";
         cfg.editEnabled = false;
 
-        nrd10 = testdata['test1'];
+        nrd10 = JSON.parse(JSON.stringify(testdata['test1']));
         /*
         nrd = {
             "@type": [ "nrd:SRD", "nrdp:DataPublication", "nrdp:DataPublicResource" ],
@@ -100,6 +100,16 @@ describe('LandingPageComponent', () => {
     });
 
     it("includes landing display", function() {
+        setupComponent();
+        expect(component).toBeTruthy();
+        let cmpel = fixture.nativeElement;
+        let el = cmpel.querySelector("h2");
+        expect(el).toBeTruthy();
+        expect(el.textContent).toContain(nrd10.title);
+    });
+
+    it("components property not required in NERDm record", function() {
+        delete nrd10["components"];
         setupComponent();
         expect(component).toBeTruthy();
         let cmpel = fixture.nativeElement;

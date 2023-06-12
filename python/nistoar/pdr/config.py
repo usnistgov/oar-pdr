@@ -67,7 +67,7 @@ def load_from_file(configfile):
             return json.load(fd)
         else:
             # YAML format
-            return yaml.load(fd)
+            return yaml.safe_load(fd)
 
 LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s: %(message)s"
 _log_handler = None

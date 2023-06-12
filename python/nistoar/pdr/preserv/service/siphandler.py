@@ -1227,7 +1227,8 @@ class MIDAS3SIPHandler(SIPHandler):
                 log.info("Submitted DOI record to DataCite")
             except Exception as ex:
                 msg = "Failed to submit DOI record with name=" + \
-                      self.bagger.name + " to DataCite: " + str(ex)
+                      self.bagger.name + " to DataCite: "
+                msg += _explain_error(ex)
                 log.exception(msg)
                 log.info("DOI minter service endpoint: %s", self._doiminter.dccli._ep)
 
@@ -1345,4 +1346,8 @@ class MIDAS3SIPHandler(SIPHandler):
         return _midadid_to_dirname(id)
 
 
-    
+def _explain_error(ex):
+    if hasattr(ex, 'errdata') and hasattr(ex.errdata, 'explain'):
+        return ex.errdata.explain()
+    return str(ex)
+

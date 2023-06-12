@@ -69,7 +69,7 @@
                 [virtualScrollItemSize]="57" [globalFilterFields]="['name']">
                 <ng-template pTemplate="caption">
                     <div style="text-align: right; height: 20px;margin: 0px;padding-top: 0px;">        
-                        <i class="pi pi-search" style="margin:4px 4px 0 0"></i>
+                        <i class="pi pi-search" style="margin:4px 4px 0 0" aria-label="Search on file or folder name"></i>
                         <input type="text" pInputText size="50" placeholder="Search on file or folder name ..." [(ngModel)]="searchText" (input)="toogleTree(true);tt.filterGlobal($event.target.value, 'contains')" style="width:auto; height: 20px;margin: 0 5px 20px 0;width: 60%;">
                         <button pButton type="submit" class="p-button-sm btn-labeled" id="btn-reset" (click)="searchText='';tt.filterGlobal('', 'contains')" label="Reset" [ngStyle]="{'margin-top':'0px','width':'max-content','height': '26px', 'background-color':'var(--nist-blue-default)', 'color': 'white'}">
                         </button>
@@ -110,8 +110,9 @@
                         </td>
                         <td [ngStyle]="statusStyle()">
                             <div style="display: flex;">
-                                <div *ngIf="rowData.comp.downloadURL;else space_holder">
+                                <div *ngIf="displayMode != 'restrict' || rowData.comp.downloadURL;else space_holder">
                                     <a *ngIf="rowData.downloadStatus != 'downloading'"
+                                        style="margin-left: 10px;"
                                         href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
                                         data-toggle="tooltip" title="Direct download"
                                         (click)="setFileDownloaded(rowData)">
@@ -126,18 +127,29 @@
                                 <ng-template #space_holder>
                                     <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
                                 </ng-template>
-                                <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
+
+                                <!-- Display shopping cart icon for oublic data. Otherwise display lock icon -->
+                                <div class="indent-content"
+                                *ngIf="displayMode != 'restrict' || rowData.comp.downloadURL; else RestrictedAccessPage">
+                                    <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
                                     (click)="removeFromGlobalCart(rowData)">
-                                    <i class="faa faa-cart-plus green-cart" aria-hidden="true" data-toggle="tooltip"
-                                        title="Remove from cart"></i>
-                                </div>
-                                <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">Added
-                                </div>
-                                <ng-template #not_in_cart>
-                                    <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
-                                        <i class="faa faa-cart-plus blue-cart" aria-hidden="true" data-toggle="tooltip"
-                                            title="Add to cart"></i>
+                                        <i class="faa faa-cart-plus green-cart" aria-hidden="true" data-toggle="tooltip"
+                                            title="Remove from cart"></i>
                                     </div>
+                                    <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">
+                                        Added
+                                    </div>
+                                    <ng-template #not_in_cart>
+                                        <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
+                                            <i class="faa faa-cart-plus blue-cart" aria-hidden="true" data-toggle="tooltip"
+                                                title="Add to cart"></i>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                                <ng-template #RestrictedAccessPage>
+                                    <a *ngIf="!rowData.comp.downloadURL && rapWithAccessUrl" href={{accessURL}} target="_blank">
+                                        <i class="faa faa-lock blue-cart" (click)="googleAnalytics(rowData.comp['accessURL'], $event, 'Request access')" aria-hidden="true" data-toggle="tooltip" title="Request access"></i>
+                                    </a>
                                 </ng-template>
                             </div>
                         </td>
@@ -200,7 +212,7 @@
                 </ng-template>
             </p-treeTable>
 
-            <div *ngIf="isExpanded" class="splitter" (mousedown)="onMousedown($event)" (mouseup)="onMouseUp($event)">
+            <div *ngIf="virtualScroll" class="splitter" (mousedown)="onMousedown($event)" (mouseup)="onMouseUp($event)">
                 <div id="separator">Scroll or drag this bar to see more...</div>
             </div>
         </div>
