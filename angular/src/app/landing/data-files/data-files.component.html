@@ -2,8 +2,6 @@
 <!-- <div id="filelisting"> -->
 <div id="filelisting" *ngIf="displayMode != 'restrict_preview'"
     [ngClass]="displayMode == 'restrict' ? 'restrict-public' : ''">
-    <div *ngIf="displayMode == 'restrict'">Note: This dataset is designated as restricted public data; this file list
-        will not be shown in the public version of this page.</div>
 
     <!-- Display 'Download all' and 'Add all to cart' buttons and other info -->
     <div *ngIf="files.length  > 0">
