@@ -178,6 +178,11 @@ export interface LPSConfig {
     gaCode?: string;
 
     /**
+     * Google Analytics 4 code
+     */
+    ga4Code?: string;
+
+    /**
      * other parameters are allowed
      */
     [propName: string]: any;
@@ -198,7 +203,8 @@ export class AppConfig implements LPSConfig {
     editEnabled: boolean;
     status: string;
     appVersion: string;
-    gaCode     : string;
+    gaCode: string;
+    ga4Code: string;
 
     /**
      * create an AppConfig directly from an LPSConfig object
@@ -261,6 +267,7 @@ export class AppConfig implements LPSConfig {
 
         // Set default Google Analytic code to dev
         if (! this.gaCode) this.gaCode = "UA-115121490-8";
+        if (! this.ga4Code) this.ga4Code = "G-B91GVV0J5B";
 
         if (typeof (this.editEnabled) === "undefined") this.editEnabled = false;
     }
