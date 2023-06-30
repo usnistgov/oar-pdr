@@ -11,6 +11,8 @@
  */
 import { LPSConfig } from '../app/config/config';
 
+const largedata: any  = require('../assets/sample-data/mds2-2116.json');
+
 export const context = {
     production: false,
     useMetadataService: false,
@@ -51,6 +53,7 @@ export const config: LPSConfig = {
 }
 
 export const testdata: {} = {
+    test0: largedata,
     test1: {
         "@context": [
             "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
