@@ -408,6 +408,7 @@ class MIDAS3PublishingService(PublishSystem):
         try: 
             # prevent updates to new worker's bag
             replworker.halt_pod_processing("EDI-swapping")
+            oldworker.bagger.ensure_res_metadata()
 
             # lock the old worker
             oldworker.bagger.ensure_filelock()
@@ -420,7 +421,18 @@ class MIDAS3PublishingService(PublishSystem):
             with replworker.bagger.lock:
                 replworker.bagger.ensure_res_metadata()
                 version = replworker.bagger.sip.nerd.get("version", "1.0.0")
-                replworker.bagger.bagbldr.update_metadata_for("", {"ediid": replworker.bagger.midasid}, 
+                replacesinfo = replworker.bagger.sip.nerd.get("replaces", [])
+                replacesinfo.append(OrderedDict([
+                    ("@id", replworker.bagger.sip.nerd.get("doi", replworker.bagger.sip.nerd.get("@id"))),
+                    ("ediid", oldworker.bagger.sip.nerd.get("ediid")),
+                    ("issued", replworker.bagger.sip.nerd.get("issued",
+                                                              replworker.bagger.sip.nerd.get("modified")))
+                ]))
+                tweak = {
+                    "ediid": replworker.bagger.midasid,
+                    "replaces": replacesinfo
+                }
+                replworker.bagger.bagbldr.update_metadata_for("", tweak,
                                                               message="setting new EDI-ID for major update")
                 if not re.search(r'\+ \([\w\s]+\)', version):
                     replworker.bagger.bagbldr.update_annotations_for("", {"version": version+"+ (in edit)"},
