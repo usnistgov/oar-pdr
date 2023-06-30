@@ -87,12 +87,18 @@ export class NERDResource {
         if (this.data['authors']) {
             for (let i = 0; i < this.data['authors'].length; i++) {
                 let author = this.data['authors'][i];
-                if (author.familyName !== null && author.familyName !== undefined)
-                    out += author.familyName + ', ';
-                if (author.givenName !== null && author.givenName !== undefined)
-                    out += author.givenName;
-                if (author.middleName !== null && author.middleName !== undefined && author.middleName.trim() != "")
-                    out += ' ' + author.middleName.trim();
+                if (author.fn !== null && author.fn !== undefined && author.fn.trim() != "") {
+                    out += author.fn.trim()
+                }
+                else {
+                    // If full name (fn) is not provided, try to reconstruct it:
+                    if (author.familyName !== null && author.familyName !== undefined)
+                        out += author.familyName + ', ';
+                    if (author.givenName !== null && author.givenName !== undefined)
+                        out += author.givenName;
+                    if (author.middleName !== null && author.middleName !== undefined && author.middleName.trim() != "")
+                        out += ' ' + author.middleName.trim();
+                }
                 if (i != this.data['authors'].length - 1)
                     out += ', ';
             }
