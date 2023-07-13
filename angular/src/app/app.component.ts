@@ -19,6 +19,7 @@ export class AppComponent {
     gaCode: string;
     ga4Code: string = null;
     inBrowser: boolean = false;
+    hostName: string = "dada.nist.gov";
 
     constructor(private gaService: GoogleAnalyticsService,
                 private cfg: AppConfig,
@@ -39,8 +40,13 @@ export class AppComponent {
         if(this.inBrowser){
             this.gaCode = this.cfg.get("gaCode", "") as string;
             this.ga4Code = this.cfg.get("ga4Code", "") as string;
+            let homeurl = this.cfg.get("locations.portalBase", "data.nist.gov") as string;
+            console.log('homeurl', homeurl);
+            const url = new URL(homeurl);
+            this.hostName = url.hostname;
 
-            this.gaService.appendGaTrackingCode(this.gaCode, this.ga4Code);
+
+            this.gaService.appendGaTrackingCode(this.gaCode, this.ga4Code, this.hostName);
 
             //Add GA4 code to track page view
             this.handleRouteEvents();
@@ -54,14 +60,15 @@ export class AppComponent {
     handleRouteEvents() {
         this.router.events.subscribe(event => {
             if (event instanceof NavigationEnd) {
-                console.log('event', event);
                 const title = this.getTitle(this.router.routerState, this.router.routerState.root).join('-');
-                console.log('title', title);
                 this.titleService.setTitle(title);
+                
                 gtag('event', 'page_view', {
                     page_title: title,
                     page_path: event.urlAfterRedirects,
-                    page_location: this.document.location.href
+                    page_location: this.document.location.href,
+                    cookie_domain: this.hostName, 
+                    cookie_flags: 'SameSite=None;Secure'
                 })
             }
         });
