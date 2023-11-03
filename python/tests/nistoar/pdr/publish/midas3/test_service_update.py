@@ -226,6 +226,10 @@ class TestMIDAS3PublishingServiceOnUpdate(test.TestCase):
         data = newwrkr.bagger.sip.nerd
         self.assertEqual(data.get('ediid'), self.updmidasid)
         self.assertEqual(data.get('version'), "1.0.0+ (in edit)")
+        self.assertIn('replaces', data)
+        self.assertGreater(len(data['replaces']), 0)
+        self.assertIn('ediid', data['replaces'][-1])
+        self.assertEqual(data['replaces'][-1].get("ediid"), oldwrkr.bagger.sip.nerd.get("ediid"))
 
         
     def test_update_ds_with_pod_onupdate(self):

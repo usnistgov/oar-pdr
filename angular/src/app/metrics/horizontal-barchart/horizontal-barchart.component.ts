@@ -287,7 +287,7 @@ export class HorizontalBarchartComponent implements OnInit {
             // .attr('height', 10)
             .attr('width', 0) 
             .style('fill', (d, i) => this.colors(i))
-            .on('mouseenter', function (actual, i) {
+            .on('mouseenter', function (event, actual) {
                 d3.select(this)
                     .transition()
                     .duration(300)
@@ -310,15 +310,15 @@ export class HorizontalBarchartComponent implements OnInit {
                   .style('fill', '#000')
 
                 tooltip
-                    .style("left", d3.event.pageX - 450 + "px")
-                    .style("top", d3.event.pageY - 120 + "px")
+                    .style("left", event.pageX - 450 + "px")
+                    .style("top", event.pageY - 120 + "px")
                     .style("display", "inline-block")
-                    .html("<div style='width:100%; padding: 10px 10px 0px 10px;'> File path: "+(actual[2]) + "</div><div style='width:100%; padding: 0 10px 10px 10px;'>" + "Total Downloads: " + (actual[1]) + "</div>");
+                    .html("<div style='width:100%; padding: 10px 10px 0px 10px;'> File path: "+(actual[2]) + "</div><div style='width:100%; padding: 0 10px 10px 10px;'>" + "Total Downloads: " + (actual[1]) + "</div>")
             })
-            .on("mousemove", (actual) => {
+            .on("mousemove", function (event, actual) {
                 tooltip
-                    .style("left", d3.event.pageX - 50 + "px")
-                    .style("top", d3.event.pageY - 90 + "px");
+                    .style("left", event.pageX - 50 + "px")
+                    .style("top", event.pageY - 90 + "px");
             })
             .on('mouseleave', function () {
                 d3.selectAll('.label')

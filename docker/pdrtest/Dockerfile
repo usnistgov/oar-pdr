@@ -9,7 +9,7 @@
 #
 ##########################################
 
-FROM oar-metadata/ejsonschema
+FROM oar-metadata/ejsonschema-py2
 
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
@@ -34,7 +34,7 @@ RUN set -ex; \
 "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc";\
     verify-asc.sh /usr/local/bin/gosu /usr/local/bin/gosu.asc    \
                   B42F6819007F00F88E364FD4036A9C25BF357DD4;      \
-    sleep 1; rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc || true; \
+    sleep 1; rm -r /usr/local/bin/gosu.asc || true; \
     chmod +x /usr/local/bin/gosu; \
     gosu nobody true
 

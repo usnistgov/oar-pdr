@@ -165,9 +165,20 @@ class TestMIDASSIPMixed(test.TestCase):
         self.assertTrue(isinstance(self.sip.nerd, Mapping))
         self.assertEqual(self.sip.midasid, self.midasid)
         self.assertEqual(self.sip._pod_rec(), {'distribution': []})
+        indirs = [os.path.join(self.revdir,"1491"), os.path.join(self.upldir,"1491")]
+        self.assertEqual(self.sip._indirs, indirs)
         nerd = self.sip._nerdm_rec()
         self.assertEqual(nerd['accessLevel'], "public")
         self.assertEqual(nerd['ediid'], self.midasid)
+
+        nerd['replaces'] = [{
+            "@id": "doi:10.88888/mds2-1491",
+            "ediid": "ark:/88434/mds2-1491",
+        }]
+        self.sip = midas.MIDASSIP.fromNERD(nerd, self.revdir, self.upldir)
+        self.assertEqual(self.sip._indirs, indirs + indirs)
+        
+                         
         
 
 class TestMIDASMetadataBaggerMixed(test.TestCase):

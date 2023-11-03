@@ -508,11 +508,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      */
     useMetadata(): void {
         //Calculate the size of the dataset
-        this.md.components.forEach( (comp) => {
-            if(comp.size != undefined){
-                this.datasetSize += comp.size;
-            }
-        })
+        if (this.md.components) {
+            this.md.components.forEach( (comp) => {
+                if(comp.size != undefined){
+                    this.datasetSize += comp.size;
+                }
+            })
+        }
 
         this.metricsData.url = "/metrics/" + this.reqId;
 

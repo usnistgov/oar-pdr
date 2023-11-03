@@ -13,6 +13,7 @@ import { isPlatformBrowser } from '@angular/common';
 export class AppComponent {
     title = 'PDR Resource Landing Page';
     gaCode: string;
+    ga4Code: string = null;
     inBrowser: boolean = false;
 
     constructor(private gaService: GoogleAnalyticsService,
@@ -30,7 +31,9 @@ export class AppComponent {
         // Applies to components only.
         if(this.inBrowser){
             this.gaCode = this.cfg.get("gaCode", "") as string;
-            this.gaService.appendGaTrackingCode(this.gaCode);
+            this.ga4Code = this.cfg.get("ga4Code", "") as string;
+
+            this.gaService.appendGaTrackingCode(this.gaCode, this.ga4Code);
         }
     }
 }

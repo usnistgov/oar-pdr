@@ -1,5 +1,5 @@
 <div class="grid" id="identity">
-    <div class="col-12 col-md-12 col-lg-12 col-sm-12">
+    <div style="width:100%">
         <span class="recordType">
             <b>{{recordType}}</b>
             <span *ngIf="theme == scienceTheme" class="badge version"> Beta</span>
@@ -10,15 +10,32 @@
           <i style="font-size: smaller;">Part of {{isPartOf[0]}} <a href="{{isPartOf[1]}}"
              title="view collection">{{isPartOf[2]}}</a> {{isPartOf[3]}}</i>
         </div>
+    </div>
+
+    <div style="width:100%">
+        <span *ngIf="showHomePageLink" style="float: right;">
+            <span *ngIf="inBrowser; else visitHomeOnServer">
+                <a href={{record.landingPage}} target="_blank" rel="noopener">
+                    <button type="button" pButton type="submit" [disabled]="!inViewMode"
+                        class="home_button p-button p-component ui-button-text-empty"
+                        [ngStyle]="{'background-color': visitHomePageBtnStyle()}"
+                        (click)="googleAnalytics(record.landingPage, $event, 'Resource title: '+record.title)">
+                        <i class="faa faa-external-link"
+                            style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
+                        Visit Home Page
+                    </button>
+                </a> 
+            </span>
+            <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
+        </span>
+
         <app-author [record]="record" [inBrowser]="inBrowser"></app-author>
 
         <!-- Facilitators -->
         <div *ngIf="theme == scienceTheme" style="width: 100%;" [ngStyle]="{'margin-bottom': record.creators? '15px' : '1.5em'}">
             <app-facilitators [record]="record" [inBrowser]="inBrowser"></app-facilitators>
         </div>
-    </div>
     
-    <div class="col-8 col-md-8 col-lg-8 col-sm-12">
         <app-contact [record]="record" [inBrowser]="inBrowser"></app-contact>
 
         <span>Identifier: </span>
@@ -44,24 +61,6 @@
             </div>
         </div>
         <pdr-version [record]="record"></pdr-version>
-    </div>
-
-    <div class="col-4 col-md-4 col-lg-4 col-sm-12">
-        <span *ngIf="showHomePageLink" style="float: right;">
-            <span *ngIf="inBrowser; else visitHomeOnServer">
-                <a href={{record.landingPage}} target="_blank" rel="noopener">
-                    <button type="button" pButton type="submit" [disabled]="!inViewMode"
-                        class="home_button p-button p-component ui-button-text-empty"
-                        [ngStyle]="{'background-color': visitHomePageBtnStyle()}"
-                        (click)="googleAnalytics(record.landingPage, $event, 'Resource title: '+record.title)">
-                        <i class="faa faa-external-link"
-                            style="color: #fff;padding-left: .5em;padding-right: .5em;"></i>
-                        Visit Home Page
-                    </button>
-                </a> 
-            </span>
-            <ng-template #visitHomeOnServer>Visit Home Page</ng-template>
-        </span>
     </div>
 </div>
 
