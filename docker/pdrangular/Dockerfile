@@ -24,11 +24,14 @@ RUN update-ca-certificates
 ENV NODE_EXTRA_CA_CERTS /etc/ssl/certs/ca-certificates.crt
 
 ARG node_ver=v14.19.0
-COPY node-sha256.txt /tmp
-RUN cd /tmp && wget https://nodejs.org/dist/$node_ver/node-$node_ver-linux-x64.tar.xz  \
-            && sha256sum -c node-sha256.txt
-RUN cd /usr/local && tar xJf /tmp/node-$node_ver-linux-x64.tar.xz \
-                  && ln -s node-$node_ver-linux-x64 node          \
+COPY node-*-sha256.txt /tmp
+RUN arch=`dpkg --print-architecture` && \
+    { [ "$arch" != "amd64" ] || arch="x64"; } && echo $arch > /etc/plat-arch
+RUN cd /tmp && arch=`cat /etc/plat-arch`  \
+            && wget https://nodejs.org/dist/$node_ver/node-$node_ver-linux-${arch}.tar.xz  \
+            && sha256sum -c node-${arch}-sha256.txt
+RUN cd /usr/local && tar xJf /tmp/node-$node_ver-linux-${arch}.tar.xz \
+                  && ln -s node-$node_ver-linux-${arch} node          \
                   && cd bin                                     \
                   && ln -s ../node/bin/node node                \
                   && ln -s ../node/bin/npm  npm                 \
