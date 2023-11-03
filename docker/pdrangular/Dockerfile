@@ -19,6 +19,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends zip wget ca-certificates git xz-utils \
                                                gnupg python
 
+COPY cacerts/README.md cacerts/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+ENV NODE_EXTRA_CA_CERTS /etc/ssl/certs/ca-certificates.crt
+
 ARG node_ver=v14.19.0
 COPY node-sha256.txt /tmp
 RUN cd /tmp && wget https://nodejs.org/dist/$node_ver/node-$node_ver-linux-x64.tar.xz  \
