@@ -5,7 +5,7 @@
             <div class="item-list">
                 <ul>
                     <li *ngFor="let socialMedia of socialMediaList">
-                        <a [href]="socialMedia.url" target="_blank" class="social-btn social-btn--large extlink ext"><i [class]="socialMedia.icon"><span
+                        <a [href]="socialMedia.url" target="_blank" rel="noopener noreferrer" class="social-btn social-btn--large extlink ext"><i [class]="socialMedia.icon"><span
                             class="element-invisible">{{socialMedia.name}}</span></i><span class="ext"><span class="element-invisible"> (link
                             is external)</span></span></a>
                     </li>
@@ -16,7 +16,7 @@
         <!-- Footer logo -->
         <div class="footer__logo">
             <a href="https://nist.gov/" target="_blank" title="National Institute of Standards and Technology"
-                class="footer__logo-link" rel="home">
+                class="footer__logo-link" rel="home noopener">
                 <img src="./assets/images/logo_rev.png" alt="National Institute of Standards and Technology"
                 title="National Institute of Standards and Technology">
             </a>
@@ -27,7 +27,7 @@
         class="block menu--footer-menu first even block--menu block--menu-menu-footer-menu" role="navigation">
             <ul class="menu">
                 <li *ngFor="let link of footerLinks01; let i = index" [ngClass]="getLinkClass(i, footerLinks01)">
-                    <a [href]="link.url" target="_blank" class="menu__link">{{link.title}} </a>
+                    <a [href]="link.url" target="_blank" rel="noopener" class="menu__link">{{link.title}} </a>
                 </li>
             </ul>
         </div>
@@ -37,7 +37,7 @@
         class="block menu--footer-menu last even block--menu block--menu-menu-footer-menu-3" role="navigation">
             <ul class="menu">
                 <li *ngFor="let link of footerLinks02; let i = index" [ngClass]="getLinkClass(i, footerLinks02)">
-                    <a [href]="link.url" target="_blank" class="menu__link">{{link.title}} </a>
+                    <a [href]="link.url" target="_blank" rel="noopener" class="menu__link">{{link.title}} </a>
                 </li>
             </ul>
         </div>

@@ -49,7 +49,7 @@
     <div class="col-4 col-md-4 col-lg-4 col-sm-12">
         <span *ngIf="showHomePageLink" style="float: right;">
             <span *ngIf="inBrowser; else visitHomeOnServer">
-                <a href={{record.landingPage}} target="_blank">
+                <a href={{record.landingPage}} target="_blank" rel="noopener">
                     <button type="button" pButton type="submit" [disabled]="!inViewMode"
                         class="home_button p-button p-component ui-button-text-empty"
                         [ngStyle]="{'background-color': visitHomePageBtnStyle()}"
