@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { DataCart } from '../datacart/cart';
+import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
+import { AppConfig } from '../config/config';
 
 interface CartLookup {
     /**
@@ -19,8 +21,19 @@ interface CartLookup {
 export class CartService {
     public CART_CONSTANTS: any = CartConstants.cartConst;
     carts : CartLookup = {};
+    rpaBackend: string;
+    portalBase: string;
 
-    constructor() { }
+    constructor(
+        private http: HttpClient,
+        private cfg: AppConfig,) { 
+            this.rpaBackend = cfg.get("APIs.rpaBackend", "/unconfigured");
+            if (this.rpaBackend == "/unconfigured")
+                throw new Error("APIs.rpaBackend endpoint not configured!");
+    
+            if (! this.rpaBackend.endsWith("/")) this.rpaBackend += "/"
+            this.portalBase = cfg.get("locations.portalBase", "/unconfigured");
+        }
 
     /**
      * return the cart instance with the given name.  This is normally an EDIID for a 
@@ -30,6 +43,35 @@ export class CartService {
         if (! this.carts[name])
             this.carts[name] = DataCart.openCart(name);
         return this.carts[name];
+    }
+
+    public getRpaCart(id: string, cartName: string) : Observable<any> {
+        let backend: string = this.rpaBackend + id;
+
+        return new Observable<any>(subscriber => {
+            return this._getRpaCart(backend).subscribe(
+                (result) => {
+                    let data = {};
+                    result.metadata.forEach((d) =>{
+                        let key = cartName+'/'+d.filePath;
+                        d['key'] = key;
+                        d["isSelected"] = true;
+                        data[key] = d;
+                    })
+                    let out: DataCart = new DataCart(cartName, data, null, 0);
+                    subscriber.next(out);
+                    subscriber.complete();
+                }, (err) =>{
+                    console.log("err", err);
+                    subscriber.next(null);
+                    subscriber.complete();
+                }
+            )
+        })
+    }
+
+    public _getRpaCart(url: string) : Observable<any> {
+        return this.http.get(url);
     }
 
     /**

@@ -36,7 +36,8 @@ export const config: LPSConfig = {
         mdService: "https://data.nist.gov/od/id/",
         mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
-        taxonomy:   "https://data.nist.gov/rmm/taxonomy"
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy",
+        rpaBackend: "https://data.nist.gov/rpa/"
     },
     mode: "dev",
     status: "Dev Version",

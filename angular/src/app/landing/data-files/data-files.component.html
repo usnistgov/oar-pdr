@@ -116,7 +116,7 @@
                                 <div *ngIf="rowData.comp.downloadURL;else space_holder">
                                     <a *ngIf="rowData.downloadStatus != 'downloading'"
                                         href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
-                                        data-toggle="tooltip" title="Direct download"
+                                        data-toggle="tooltip" title="Direct download" rel="noopener"
                                         (click)="setFileDownloaded(rowData)">
                                         <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
                                             aria-hidden="true"></i>
