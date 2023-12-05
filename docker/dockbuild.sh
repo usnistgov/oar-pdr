@@ -44,6 +44,9 @@ if { echo " $BUILD_IMAGES " | grep -qs " pdrtest "; }; then
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest 2>&1 | logit
 fi
 if { echo " $BUILD_IMAGES " | grep -qs " pdrangular "; }; then
+    # install CA certs into containers that can use them
+    cp_ca_certs_to pdrangular
+
     echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrangular pdrangular 2>&1
 fi

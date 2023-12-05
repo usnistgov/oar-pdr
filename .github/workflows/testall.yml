@@ -27,13 +27,13 @@ jobs:
           cd docker && bash ./dockbuild.sh
 
       - name: Build & Run Python Tests via Docker
-        run: cd docker && ./testall python
+        run: cd docker && ./testall -D python
 
       - name: Test Java via Docker
-        run: cd docker && ./testall java
+        run: cd docker && ./testall -D java
 
       - name: Build Angular Code
-        run: cd docker && ./makedist angular
+        run: cd docker && ./makedist -D angular
 
       - name: Run Angular Tests
-        run: cd docker && ./testall angular
+        run: cd docker && ./testall -D angular
