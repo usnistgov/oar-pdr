@@ -42,7 +42,7 @@
         <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"
             style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: 1em; ">
             <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.5em;"
-                href="{{resultItem.landingPage}}" target="_blank">
+                href="{{resultItem.landingPage}}" target="_blank" rel="noopener">
                 <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page-forensics"
                     icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
             </a>

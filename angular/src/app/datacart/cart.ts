@@ -149,6 +149,7 @@ export class DataCart {
         let out: DataCart = new DataCart(id, data, store, (md != null) ? parseMD(md).updated : 0);
         if (saveneeded)
             out.save();
+
         return out;
     }
 
@@ -279,6 +280,11 @@ export class DataCart {
      * return the name of this cart
      */
     public getName() : string { return this.cartName; }
+
+    /** 
+     * Set the name of this cart
+     */
+    public setName(cartName: string)  { this.cartName = cartName; }
 
     /**
      * return true if this cart serves as the global data cart

@@ -1,0 +1,86 @@
+{
+    "CART_CONSTANTS": {
+      "GLOBAL_CART_NAME": "global_datacart",
+      "CART_STATUS_STORAGE_NAME": "cartstatus"
+    },
+    "contents": {
+      "26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_face.zip": {
+        "@id": "cmps/NIST_SD32_MEDS-I_face.zip",
+        "@type": [
+          "nrdp:DataFile",
+          "nrdp:DownloadableFile",
+          "dcat:Distribution"
+        ],
+        "_extensionSchemas": [
+          "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+        ],
+        "downloadURL": "http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_face.zip",
+        "accessURL": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
+        "mediaType": "application/zip",
+        "format": {
+          "description": "JPEG formatted images"
+        },
+        "description": "Zip file with JPEG formatted face image files.",
+        "title": "Multiple Encounter Dataset (MEDS)",
+        "resId": "26DEA39AD677678AE0531A570681F32C1449",
+        "filePath": "NIST_SD32_MEDS-I_face.zip",
+        "key": "26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_face.zip",
+        "downloadStatus": "failed",
+        "isSelected": true,
+        "resTitle": "Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32",
+        "message": "File not added in package; There is an error accessing this file/URL from server."
+      },
+      "26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_html.zip": {
+        "@id": "cmps/NIST_SD32_MEDS-I_html.zip",
+        "@type": [
+          "nrdp:DataFile",
+          "nrdp:DownloadableFile",
+          "dcat:Distribution"
+        ],
+        "_extensionSchemas": [
+          "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+        ],
+        "downloadURL": "http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_html.zip",
+        "accessURL": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
+        "mediaType": "application/zip",
+        "format": {
+          "description": "zip file with html and jpeg formatted images"
+        },
+        "description": "zip file with html page with jpeg images of faces",
+        "title": "Multiple Encounter Dataset(MEDS-I)",
+        "resId": "26DEA39AD677678AE0531A570681F32C1449",
+        "filePath": "NIST_SD32_MEDS-I_html.zip",
+        "key": "26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_html.zip",
+        "downloadStatus": "failed",
+        "isSelected": true,
+        "resTitle": "Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32",
+        "message": "File not added in package; There is an error accessing this file/URL from server."
+      }
+    },
+    "cartName": "26DEA39AD677678AE0531A570681F32C1449",
+    "dispName": null,
+    "_storage": {
+      "cartstatus": "{\"action\":\"set_in_use\",\"datacartStatusLookup\":{\"id\":{\"isInUse\":true,\"downloadPercentage\":0,\"itemId\":\"id\",\"displayName\":\"id\"},\"mds2-2437\":{\"isInUse\":true,\"downloadPercentage\":0,\"itemId\":\"mds2-2437\",\"displayName\":\"mds2-2437\"},\"mds2-2116\":{\"isInUse\":true,\"downloadPercentage\":0,\"itemId\":\"mds2-2116\",\"displayName\":\"mds2-2116\"},\"mds2-2418\":{\"isInUse\":true,\"downloadPercentage\":0,\"itemId\":\"mds2-2418\",\"displayName\":\"mds2-2418\"},\"\":{\"isInUse\":true,\"downloadPercentage\":0,\"itemId\":\"\",\"displayName\":\"\"},\"26DEA39AD677678AE0531A570681F32C1449\":{\"isInUse\":false,\"downloadPercentage\":0,\"itemId\":\"26DEA39AD677678AE0531A570681F32C1449\",\"displayName\":\"26DEA39AD677678AE0531A570681F32C1449\"},\"rpa\":{\"isInUse\":false,\"downloadPercentage\":0,\"itemId\":\"rpa\",\"displayName\":\"rpa\"}}}",
+      "cart:global_datacart": "{\"mds2-2437/2021-06-10_v1/01-5xSSC-A1.fcs\":{\"@id\":\"cmps/2021-06-10_v1/01-5xSSC-A1.fcs\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"https://data.nist.gov/od/ds/ark:/88434/mds2-2437/2021-06-10_v1/01-5xSSC-A1.fcs\",\"mediaType\":\"application/octet-stream\",\"size\":39329016,\"_status\":\"in progress\",\"checksum\":{\"hash\":\"fb97e2c68d02574106df364b43f22a14fbe58329790ce62473db187c288651e4\",\"algorithm\":{\"tag\":\"sha256\",\"@type\":\"Thing\"}},\"resId\":\"ark:/88434/mds2-2437\",\"filePath\":\"2021-06-10_v1/01-5xSSC-A1.fcs\",\"key\":\"mds2-2437/2021-06-10_v1/01-5xSSC-A1.fcs\",\"downloadStatus\":\"\",\"isSelected\":false,\"resTitle\":\"Results of flow-FISH for RNA degradation\"},\"mds2-2116/SimulatedRadarWaveforms/Group1/group1_subset_1.mat\":{\"@id\":\"cmps/SimulatedRadarWaveforms/Group1/group1_subset_1.mat\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"https://data.nist.gov/od/ds/ark:/88434/mds2-2116/SimulatedRadarWaveforms/Group1/group1_subset_1.mat\",\"mediaType\":\"application/x-matlab-data\",\"size\":2463731809,\"checksum\":{\"hash\":\"e5e3d1c76892266d484abe1670723922759c0b94d02d750dffdfcf7da330f2d5\",\"algorithm\":{\"tag\":\"sha256\",\"@type\":\"Thing\"}},\"resId\":\"ark:/88434/mds2-2116\",\"filePath\":\"SimulatedRadarWaveforms/Group1/group1_subset_1.mat\",\"key\":\"mds2-2116/SimulatedRadarWaveforms/Group1/group1_subset_1.mat\",\"downloadStatus\":\"\",\"isSelected\":false,\"resTitle\":\"RF Dataset of Incumbent Radar Systems in the 3.5 GHz CBRS Band\"},\"mds2-2116/SimulatedRadarWaveforms/Group1/group1_subset_2.mat\":{\"@id\":\"cmps/SimulatedRadarWaveforms/Group1/group1_subset_2.mat\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"https://data.nist.gov/od/ds/ark:/88434/mds2-2116/SimulatedRadarWaveforms/Group1/group1_subset_2.mat\",\"mediaType\":\"application/x-matlab-data\",\"size\":2463731879,\"checksum\":{\"hash\":\"a432b303553546fe4aa04aba2d47435accb8c64e8a3c62f0f9cb2ee8c8e7d11e\",\"algorithm\":{\"tag\":\"sha256\",\"@type\":\"Thing\"}},\"resId\":\"ark:/88434/mds2-2116\",\"filePath\":\"SimulatedRadarWaveforms/Group1/group1_subset_2.mat\",\"key\":\"mds2-2116/SimulatedRadarWaveforms/Group1/group1_subset_2.mat\",\"downloadStatus\":\"\",\"isSelected\":false,\"resTitle\":\"RF Dataset of Incumbent Radar Systems in the 3.5 GHz CBRS Band\"}}",
+      "cart:26DEA39AD677678AE0531A570681F32C1449": "{\"26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_face.zip\":{\"@id\":\"cmps/NIST_SD32_MEDS-I_face.zip\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_face.zip\",\"accessURL\":\"https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds\",\"mediaType\":\"application/zip\",\"format\":{\"description\":\"JPEG formatted images\"},\"description\":\"Zip file with JPEG formatted face image files.\",\"title\":\"Multiple Encounter Dataset (MEDS)\",\"resId\":\"26DEA39AD677678AE0531A570681F32C1449\",\"filePath\":\"NIST_SD32_MEDS-I_face.zip\",\"key\":\"26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_face.zip\",\"downloadStatus\":\"failed\",\"isSelected\":true,\"resTitle\":\"Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32\",\"message\":\"File not added in package; There is an error accessing this file/URL from server.\"},\"26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_html.zip\":{\"@id\":\"cmps/NIST_SD32_MEDS-I_html.zip\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_html.zip\",\"accessURL\":\"https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds\",\"mediaType\":\"application/zip\",\"format\":{\"description\":\"zip file with html and jpeg formatted images\"},\"description\":\"zip file with html page with jpeg images of faces\",\"title\":\"Multiple Encounter Dataset(MEDS-I)\",\"resId\":\"26DEA39AD677678AE0531A570681F32C1449\",\"filePath\":\"NIST_SD32_MEDS-I_html.zip\",\"key\":\"26DEA39AD677678AE0531A570681F32C1449/NIST_SD32_MEDS-I_html.zip\",\"downloadStatus\":\"failed\",\"isSelected\":true,\"resTitle\":\"Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32\",\"message\":\"File not added in package; There is an error accessing this file/URL from server.\"}}",
+      "cart:.md": "{\"updated\":1673282815632,\"dispName\":null}",
+      "cart:mds2-2418.md": "{\"updated\":1673041021237,\"dispName\":\"Supplemental Data and Source Code for Min-Max Test Research\"}",
+      "cart:rpa": "{\"rpa/NIST_SD32_MEDS-I_face.zip\":{\"@id\":\"cmps/NIST_SD32_MEDS-I_face.zip\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_face.zip\",\"accessURL\":\"https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds\",\"mediaType\":\"application/zip\",\"format\":{\"description\":\"JPEG formatted images\"},\"description\":\"Zip file with JPEG formatted face image files.\",\"title\":\"Multiple Encounter Dataset (MEDS)\",\"resId\":\"26DEA39AD677678AE0531A570681F32C1449\",\"filePath\":\"NIST_SD32_MEDS-I_face.zip\",\"key\":\"rpa/NIST_SD32_MEDS-I_face.zip\",\"downloadStatus\":\"failed\",\"isSelected\":true,\"resTitle\":\"Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32\",\"message\":\"File not added in package; There is an error accessing this file/URL from server.\"},\"rpa/NIST_SD32_MEDS-I_html.zip\":{\"@id\":\"cmps/NIST_SD32_MEDS-I_html.zip\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_html.zip\",\"accessURL\":\"https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds\",\"mediaType\":\"application/zip\",\"format\":{\"description\":\"zip file with html and jpeg formatted images\"},\"description\":\"zip file with html page with jpeg images of faces\",\"title\":\"Multiple Encounter Dataset(MEDS-I)\",\"resId\":\"26DEA39AD677678AE0531A570681F32C1449\",\"filePath\":\"NIST_SD32_MEDS-I_html.zip\",\"key\":\"rpa/NIST_SD32_MEDS-I_html.zip\",\"downloadStatus\":\"failed\",\"isSelected\":true,\"resTitle\":\"Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32\",\"message\":\"File not added in package; There is an error accessing this file/URL from server.\"}}",
+      "cart:global_datacart.md": "{\"updated\":1673039868375,\"dispName\":null}",
+      "cart:mds2-2418": "{\"mds2-2418/minmax_SourceAndData.zip\":{\"@id\":\"cmps/minmax_SourceAndData.zip\",\"@type\":[\"nrdp:DataFile\",\"nrdp:DownloadableFile\",\"dcat:Distribution\"],\"_extensionSchemas\":[\"https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile\"],\"downloadURL\":\"https://data.nist.gov/od/ds/mds2-2418/minmax_SourceAndData.zip\",\"mediaType\":\"application/zip\",\"format\":{\"description\":\"zipped folder with mass spectra, source code, and result text files.\"},\"description\":\"Supplemental data and source code to accompany the manuscript \\\"The min-max test: an objective method for discriminating mass spectra\\\"\",\"size\":573148186,\"checksum\":{\"hash\":\"7be6eac5ee913ef8cc1493edb23e2d4f16d9c96344258ff6ba577cf07d9c7de7\",\"algorithm\":{\"tag\":\"sha256\",\"@type\":\"Thing\"}},\"resId\":\"ark:/88434/mds2-2418\",\"filePath\":\"minmax_SourceAndData.zip\",\"key\":\"mds2-2418/minmax_SourceAndData.zip\",\"downloadStatus\":\"\",\"isSelected\":true,\"resTitle\":\"Supplemental Data and Source Code for Min-Max Test Research\"}}",
+      "cart:mds2-2437.md": "{\"updated\":1673025891062,\"dispName\":null}",
+      "cart:rpa.md": "{\"updated\":1673292920825,\"dispName\":null}",
+      "cart:mds2-2116.md": "{\"updated\":1673037044594,\"dispName\":\"RF Dataset of Incumbent Radar Systems in the 3.5 GHz CBRS Band\"}",
+      "cart:": "{}",
+      "cart:26DEA39AD677678AE0531A570681F32C1449.md": "{\"updated\":1673292920377,\"dispName\":\"Multiple Encounter Dataset (MEDS-I) - NIST Special Database 32\"}"
+    },
+    "lastUpdated": 1673292920377,
+    "_statusUpdated": {
+      "_isScalar": false,
+      "observers": [],
+      "closed": false,
+      "isStopped": false,
+      "hasError": false,
+      "thrownError": null
+    }
+  }

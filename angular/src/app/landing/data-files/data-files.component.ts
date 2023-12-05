@@ -247,7 +247,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         if(this.mouseDragging) {
             let diff = this.mouse.y - this.prevMouseY;
             this.treeTableHeight = this.prevTreeTableHeight + diff;
-            this.treeTableHeight = this.treeTableHeight < 26? 25 : this.treeTableHeight > 500? 500 : this.treeTableHeight;
+            this.treeTableHeight = this.treeTableHeight < 26? 25 : this.treeTableHeight;
         }
     }
 

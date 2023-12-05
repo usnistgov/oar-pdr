@@ -37,6 +37,19 @@ export class CartcontrolComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
+        this.cartInit();
+    }
+    
+    ngOnChanges(changes: SimpleChanges) {
+        // cart name should not change
+        // if (changes.cartName && this.datacart)
+        //     this.cartName = this.datacart.getName();
+        if (changes.cartName) {
+            this.cartInit();
+        }
+    }
+
+    cartInit() {
         if (this.cartName) {
             this.datacart = this.cartService.getCart(this.cartName);
             this.updateCounts();
@@ -45,12 +58,6 @@ export class CartcontrolComponent implements OnInit, OnChanges {
                 this.updateCounts();
             });
         }
-    }
-    
-    ngOnChanges(changes: SimpleChanges) {
-        // cart name should not change
-        if (changes.cartName && this.datacart)
-            this.cartName = this.datacart.getName();
     }
 
     updateCounts() : void {

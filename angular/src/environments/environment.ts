@@ -11,6 +11,8 @@
  */
 import { LPSConfig } from '../app/config/config';
 
+const largedata: any  = require('../assets/sample-data/mds2-2116.json');
+
 export const context = {
     production: false,
     useMetadataService: false,
@@ -34,7 +36,8 @@ export const config: LPSConfig = {
         mdService: "https://data.nist.gov/od/id/",
         mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
-        taxonomy:   "https://data.nist.gov/rmm/taxonomy"
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy",
+        rpaBackend: "https://data.nist.gov/rpa/"
     },
     mode: "dev",
     status: "Dev Version",
@@ -42,6 +45,7 @@ export const config: LPSConfig = {
     production: context.production,
     editEnabled: false,
     gacode: "not-set",
+    ga4code: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
     // Decide how many seconds to wait to refresh metrics after user download one/more files
@@ -50,6 +54,7 @@ export const config: LPSConfig = {
 }
 
 export const testdata: {} = {
+    test0: largedata,
     test1: {
         "@context": [
             "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",

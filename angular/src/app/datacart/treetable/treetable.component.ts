@@ -240,7 +240,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     // Display
     isExpanded: boolean = true;
-    isVisible: boolean = true;
+    isVisible: boolean = false;
     showZipFilesNames: boolean = true;
     titleWidth: string;
     typeWidth: string;
@@ -253,6 +253,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
     defaultExpandLevel: number = 3;
 
     @Input() cartName: string;
+    @Input() forceReload: boolean = false; //Handle RPA, force reload after data cart is ready
 
     @ViewChild("ngtt")
     tt : TreeTable;
@@ -288,13 +289,7 @@ export class TreetableComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         if(this.inBrowser){
-            this.dataCartStatus = DataCartStatus.openCartStatus();
-
-            this.dataCart = this.cartService.getCart(this.cartName);
-
-            this.loadDataTree();
-
-            this.dataCart.watchForChanges(this.cartChanged.bind(this));
+            this.cartInit();
         }
     }
 
@@ -302,6 +297,23 @@ export class TreetableComponent implements OnInit, AfterViewInit {
      * @param changes 
      */
     ngOnChanges(changes: SimpleChanges) {
+        if(changes.forceReload.currentValue){
+            this.cartInit();
+            this.propagateSelections();
+        }
+    }
+
+    cartInit() {
+        if(this.cartName) {
+            this.dataCartStatus = DataCartStatus.openCartStatus();
+
+            this.dataCart = this.cartService.getCart(this.cartName);
+            this.loadDataTree();
+
+            this.dataCart.watchForChanges(this.cartChanged.bind(this));
+
+            this.isVisible = true;
+        }
     }
 
     ngAfterViewInit() {
@@ -321,8 +333,9 @@ export class TreetableComponent implements OnInit, AfterViewInit {
         if (this.tt) {
             let selcount = this.selectedData.length;
             for (let selnode of this.selectedData) {
-                if (selnode.children && selnode.children.length == 0)
+                if (selnode.children && selnode.children.length == 0){
                     this.tt.propagateSelectionUp(selnode, true);
+                }
             }
             if (this.tt.selection.length != selcount)
                 this.dataTree.children = [...this.dataTree.children];
