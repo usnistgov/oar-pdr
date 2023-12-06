@@ -57,13 +57,12 @@ export class GoogleAnalyticsService {
      *   This function takes GA tracking code as a parameter, constructs the script 
      *   and adds it to the top of current page.
      */
-    public appendGaTrackingCode(gaCode: string, ga4Code: string) {
+    public appendGaTrackingCode(gaCode: string, ga4Code: string, hostname: string = "dada.nist.gov") {
         try {
             //GA3
             let scriptId = '_fed_an_ua_tag';
 
             if (document.getElementById(scriptId)) {
-                console.log("Found GA id.");
                 document.getElementById(scriptId).remove();
             }
 
@@ -79,7 +78,6 @@ export class GoogleAnalyticsService {
             scriptId = '_gtag_js';
 
             if (document.getElementById(scriptId)) {
-                console.log("Found GA id.");
                 document.getElementById(scriptId).remove();
             }
 
@@ -95,14 +93,13 @@ export class GoogleAnalyticsService {
             scriptId = '_dataLayer';
 
             if (document.getElementById(scriptId)) {
-                console.log("Found GA id.");
                 document.getElementById(scriptId).remove();
             }
 
             var s2 = document.createElement('script') as any;
             s2.type = "text/javascript";
             s2.id = scriptId;
-            s2.text = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '" + ga4Code+ "');";
+            s2.text = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '" + ga4Code+ "',{'cookie_domain':'"+ hostname + "','cookie_flags': 'SameSite=None;Secure'})";
 
             var h2 = document.getElementsByTagName("head");
             document.getElementsByTagName("head")[0].appendChild(s2);
