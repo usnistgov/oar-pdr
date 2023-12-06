@@ -76,6 +76,9 @@ while [ "$1" != "" ]; do
         -d|--docker-build)
             dodockbuild=1
             ;;
+        -D|--no-docker-build)
+            dodockbuild=0
+            ;;
         --dist-dir)
             shift
             distdir="$1"
@@ -172,7 +175,7 @@ if [ -z "$dodockbuild" ]; then
     fi
 fi
         
-[ -z "$dodockbuild" ] || {
+[ "$dodockbuild" != "1" ] || {
     echo '#' Building missing docker containers...
     $execdir/dockbuild.sh
 }

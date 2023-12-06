@@ -60,6 +60,21 @@ function setup_build {
     BUILD_OPTS=`collect_build_opts`
 }
 
+function cp_ca_certs_to {
+    # assuming we are in the docker dir
+    [ \! -d cacerts ] || {
+        crts=`compgen -G 'cacerts/*.crt' || true`
+        [ -z "$crts" ] || {
+            echo "${prog}: installing CA certs from docker/cacerts"
+            for cont in $@; do
+                mkdir -p $cont/cacerts
+                echo '+' cp $crts cacerts/README.md $cont/cacerts
+                cp $crts cacerts/README.md $cont/cacerts
+            done
+        }
+    }
+}
+
 function help {
     helpfile=$OAR_BUILD_DIR/dockbuild_help.txt
     [ -f "$OAR_DOCKER_DIR/dockbuild_help.txt" ] && \

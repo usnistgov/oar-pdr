@@ -28,5 +28,5 @@ jobs:
           cd docker && bash ./dockbuild.sh python
 
       - name: Run Unit Tests via Docker
-        run: cd docker && ./testall python
+        run: cd docker && ./testall -D python
 
