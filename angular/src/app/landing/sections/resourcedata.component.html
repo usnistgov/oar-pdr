@@ -27,7 +27,7 @@
     <!-- Display Homepage button if 'landingPage field exist and does not contain '/od/id' -->
     <div *ngIf="record['landingPage'] && record['landingPage'].indexOf('/od/id') === -1 ">
         For more information, please visit the
-        <a target="_blank" href="{{ record['landingPage'] }}"
+        <a target="_blank" href="{{ record['landingPage'] }}" rel="noopener"
             (click)="gaService.gaTrackEvent('homepage', $event, 'Resource title: ' + record.title, record['landingPage'])">home
             page</a>.
     </div>
@@ -65,20 +65,23 @@
                 </div>
                 <ng-template #RestrictedAccessPage>
                     <div style="padding:10px 20px;">
-                        <a href={{apage.accessURL}} target="_blank">
+                        <a href={{apage.accessURL}} target="_blank" rel="noopener">
                             <button style="margin-top: -6px;" type="button" class="btn btn-primary py-0"
                                 data-toggle="tooltip" data-placement="top" title="{{apage['title']}}"
                                 (click)="googleAnalytics(apage['accessURL'], $event, 'Download Data')"><i
-                                    class="faa faa-external-link button_icon"></i>Download Data</button>
+                                    class="faa faa-external-link button_icon"></i>Request Data Access</button>
                         </a>
 
                         <div *ngIf="apage['description']">
-                            <div style="cursor: pointer;color: #1471AE;" (click)="apage[showDesc] = !apage[showDesc]"><i
-                                    class="faa faa-caret-right" *ngIf="!apage[showDesc]"></i><i
-                                    class="faa faa-caret-down" *ngIf="apage[showDesc]"></i> About downloading restricted
+                            <div style="cursor: pointer;color: #1471AE;" (click)="apage['showDesc'] = !apage['showDesc']"><i
+                                    class="faa faa-caret-right" *ngIf="!apage['showDesc']"></i><i
+                                    class="faa faa-caret-down" *ngIf="apage['showDesc']"></i> About downloading restricted
                                 public data
                             </div>
-                            <div class="description" *ngIf="apage[showDesc]" [@enterAnimation]>{{apage['description']}}
+
+                            <div *ngIf="apage['description']" class="description" >
+                                <div [@detailExpand]="apage['showDesc'] ? 'expanded' : 'collapsed'" style="overflow: hidden;">{{apage['description']}}
+                                </div>
                             </div>
                         </div>
                     </div>

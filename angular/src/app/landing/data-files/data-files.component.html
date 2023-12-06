@@ -1,9 +1,6 @@
 <!-- This bloack is for the data access session of landing page -->
 <!-- <div id="filelisting"> -->
-<div id="filelisting" *ngIf="displayMode != 'restrict_preview'"
-    [ngClass]="displayMode == 'restrict' ? 'restrict-public' : ''">
-    <div *ngIf="displayMode == 'restrict'">Note: This dataset is designated as restricted public data; this file list
-        will not be shown in the public version of this page.</div>
+<div id="filelisting" *ngIf="displayMode != 'restrict_preview'" style="margin-bottom: 20px;">
 
     <!-- Display 'Download all' and 'Add all to cart' buttons and other info -->
     <div *ngIf="files.length  > 0">
@@ -11,7 +8,7 @@
             <div class="flex-container" style="margin-top: 2em;">
                 <!-- 'Download all' and 'Add all to cart' buttons disabled if this is internal landing page -->
                 <div *ngIf="editEnabled; else editDisabled"
-                    style="flex: 0 0 120px; text-align: left; padding-bottom: 0em;">
+                    style="flex: 0 0 140px; text-align: left; padding-bottom: 0em;">
                     <span><b id="filelist-heading">Files </b> </span>
                     <span class="faa-stack fa-lg icon-download grey-color">
                         <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
@@ -25,11 +22,12 @@
                     </span>
                 </div>
                 <ng-template #editDisabled>
-                    <div style="flex: 0 0 130px; text-align: left; padding-bottom: 0em;">
+                    <div style="flex: 0 0 140px; text-align: left; padding-bottom: 0em;">
                         <span><b id="filelist-heading">Files </b> </span>
+
                         <a class="faa-stack fa-lg icon-download" *ngIf="!editEnabled" (click)="downloadAllFiles()"
-                            data-toggle="tooltip" title="Download all files"
-                            [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
+                        data-toggle="tooltip" title="Download all files"
+                        [ngStyle]="{'color':getDownloadAllBtnColor(),'cursor':'pointer'}">
                             <i class="faa faa-circle-thin faa-stack-2x" aria-hidden="true"></i>
                             <!-- <i class="faa faa-download faa-stack-1x" aria-hidden="true"></i> -->
                             <i *ngIf="!isAddingToDownloadAllCart; else show_spinner1"
@@ -37,8 +35,10 @@
                             <ng-template #show_spinner1><i class="faa faa-spinner faa-spin faa-stack-1x spinner"
                                     aria-hidden="true"></i></ng-template>
                         </a>
+
                         <a id="routeToDatacart" target="_blank" [routerLink]="['/datacart', 'popup']"
-                            style="display:none"></a>
+                        style="display:none"></a>
+
                         <span *ngIf="!editEnabled" class="faa-stack fa-lg icon-cart"
                             (click)="toggleAllFilesInGlobalCart(files)" [ngStyle]="{'color':getAddAllToDataCartBtnColor(), 'cursor': 'pointer',
                                 'margin-right': '1em'}" data-toggle="tooltip" [title]="getCartProcessTooltip()">
@@ -110,10 +110,11 @@
                         </td>
                         <td [ngStyle]="statusStyle()">
                             <div style="display: flex;">
-                                <div *ngIf="rowData.comp.downloadURL;else space_holder">
+                                <div *ngIf="displayMode != 'restrict' || rowData.comp.downloadURL;else space_holder">
                                     <a *ngIf="rowData.downloadStatus != 'downloading'"
+                                        style="margin-left: 10px;"
                                         href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
-                                        data-toggle="tooltip" title="Direct download"
+                                        data-toggle="tooltip" title="Direct download" rel="noopener"
                                         (click)="setFileDownloaded(rowData)">
                                         <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
                                             aria-hidden="true"></i>
@@ -126,18 +127,29 @@
                                 <ng-template #space_holder>
                                     <div style="padding-right: 0.4em;">&nbsp;&nbsp;</div>
                                 </ng-template>
-                                <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
+
+                                <!-- Display shopping cart icon for oublic data. Otherwise display lock icon -->
+                                <div class="indent-content"
+                                *ngIf="displayMode != 'restrict' || rowData.comp.downloadURL; else RestrictedAccessPage">
+                                    <div style="padding-left:10px;" *ngIf="rowData.isInCart;else not_in_cart"
                                     (click)="removeFromGlobalCart(rowData)">
-                                    <i class="faa faa-cart-plus green-cart" aria-hidden="true" data-toggle="tooltip"
-                                        title="Remove from cart"></i>
-                                </div>
-                                <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">Added
-                                </div>
-                                <ng-template #not_in_cart>
-                                    <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
-                                        <i class="faa faa-cart-plus blue-cart" aria-hidden="true" data-toggle="tooltip"
-                                            title="Add to cart"></i>
+                                        <i class="faa faa-cart-plus green-cart" aria-hidden="true" data-toggle="tooltip"
+                                            title="Remove from cart"></i>
                                     </div>
+                                    <div *ngIf="rowData.isInCart" style="margin-left: 0.5em;font-size: 0.5em">
+                                        Added
+                                    </div>
+                                    <ng-template #not_in_cart>
+                                        <div style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
+                                            <i class="faa faa-cart-plus blue-cart" aria-hidden="true" data-toggle="tooltip"
+                                                title="Add to cart"></i>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                                <ng-template #RestrictedAccessPage>
+                                    <a *ngIf="!rowData.comp.downloadURL && rapWithAccessUrl" href={{accessURL}} target="_blank">
+                                        <i class="faa faa-lock blue-cart" (click)="googleAnalytics(rowData.comp['accessURL'], $event, 'Request access')" aria-hidden="true" data-toggle="tooltip" title="Request access"></i>
+                                    </a>
                                 </ng-template>
                             </div>
                         </td>

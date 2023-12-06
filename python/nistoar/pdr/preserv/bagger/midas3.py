@@ -154,6 +154,8 @@ class MIDASSIP(object):
             nerd = nerdrec
         else:
             nerd = read_json(nerdrec)
+
+        # figure out where the files will be based on the EDI-ID
         midasid = nerd.get('ediid')
         if not midasid:
             msg = "Missing required ediid property from NERDm record"
@@ -167,8 +169,26 @@ class MIDASSIP(object):
         if not os.path.isdir(upldir):
             upldir = None
 
-        return cls(midasid, revdir, upldir, nerdrec=nerd)
+        out = cls(nerd.get('ediid'), revdir, upldir, nerdrec=nerd)
 
+        # if this SIP is replacing a previous one, look for data in the old local
+        replid = None
+        if nerd.get("replaces") and len(nerd['replaces']) > 0:
+            replid = nerd['replaces'][-1].get('ediid')
+            if not replid:
+                nerd['replaces'][-1].get('@id')
+            if replid and (replid.startswith('doi:') or replid.startswith("http")):
+                replid = None
+        if replid:
+            recnum = _midadid_to_dirname(replid)
+            for pdir in [reviewdir, uploaddir]:
+                extradir = os.path.join(pdir, recnum)
+                if os.path.isdir(extradir):
+                    out._indirs.append(extradir)
+
+        return out
+
+    
     def __init__(self, midasid, reviewdir, uploaddir=None, podrec=None, nerdrec=None):
         """
         :param midasid      str:  the identifier provided by MIDAS, used as the 

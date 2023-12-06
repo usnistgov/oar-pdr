@@ -35,6 +35,8 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     zipData: ZipData[] = [];
 
     overallStatus: string = "";
+    datacartName: string = "";
+    forceReload: boolean = false;
 
     @ViewChild('bundler', { static: true })
     bundler : BundleplanComponent;
@@ -50,18 +52,43 @@ export class DatacartComponent implements OnInit, AfterViewInit {
         @Inject(PLATFORM_ID) private platformId: Object ) 
     {
         this.inBrowser = isPlatformBrowser(platformId);
+
+        this.route.params.subscribe(params => {
+            let cartName = params['cartname'];
+            let id: string = "";
+            if(cartName == 'rpa'){
+                if(this.inBrowser) {
+                    this.route.queryParams.subscribe(params => {
+                        console.log("param", params);
+                        id = params["id"];
+                    })
+    
+                    this.cartService.getRpaCart(id, cartName).subscribe((result: DataCart) => {
+                        let dataCart01 = result;
+                        this.dataCart = this.cartService.getCart(cartName);
+                        this.dataCart.contents = dataCart01.contents;
+                        this.datacartName =  cartName;
+                        this.forceReload = true;
+    
+                        //Trigger propagateSelectionUp and propagateSelectionDown
+                        //so all check boxes will be checked
+                        setTimeout(() => {
+                            this.dataCart.save();
+                        }, 0);
+                    })
+                }
+            }else{
+                this.datacartName = cartName;
+                this.dataCart = this.cartService.getCart(cartName);
+                this.datacartName =  this.dataCart.getName();
+            }
+        });
     }
 
     /**
      * Get the params OnInit
      */
     ngOnInit(): void {
-        let currentUrl = this.router.url;
-
-        this.route.params.subscribe(params => {
-            let cartName = params['cartname'];
-            this.dataCart = this.cartService.getCart(cartName);
-        });
     }
 
     /**
