@@ -311,7 +311,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                         let filepath = this.md.components[i].filepath;
                         if(filepath) filepath = filepath.trim();
 
-                        this.metricsData.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath) != undefined;
+                        this.metricsData.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => {
+                            x.filepath? x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath : false
+                        }) != undefined;
+                        
                         if(this.metricsData.hasCurrentMetrics) break;
                     }
                 }else{
