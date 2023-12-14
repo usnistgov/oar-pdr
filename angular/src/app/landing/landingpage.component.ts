@@ -302,19 +302,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             // when download is completed
             if(event.type == HttpEventType.Response){
                 let response = await event.body.text();
-
+                
                 this.fileLevelMetrics = JSON.parse(response);
-
                 if(this.fileLevelMetrics.FilesMetrics != undefined && this.fileLevelMetrics.FilesMetrics.length > 0 && this.md.components){
                     // check if there is any current metrics data
                     for(let i = 1; i < this.md.components.length; i++){
-                        let filepath = this.md.components[i].filepath;
-                        if(filepath) filepath = filepath.trim();
+                        this.metricsData.hasCurrentMetrics = this.metricsService.findFileLevelMatch(this.fileLevelMetrics.FilesMetrics, this.md.ediid, this.md['@id'],this.md.components[i].filepath);
 
-                        this.metricsData.hasCurrentMetrics = this.fileLevelMetrics.FilesMetrics.find(x => {
-                            x.filepath? x.filepath.substr(x.filepath.indexOf(ediid)+ediid.length+1).trim() == filepath : false
-                        }) != undefined;
-                        
                         if(this.metricsData.hasCurrentMetrics) break;
                     }
                 }else{

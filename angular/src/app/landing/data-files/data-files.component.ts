@@ -273,7 +273,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
 
         this.buildTree();
-        console.log("files", this.files);
+
         // If total file count > virtual scrolling threshold, set virtual scrolling to true. 
         this.virtualScroll = this.fileCount > FileCountForVirtualScroll? true : false;
 

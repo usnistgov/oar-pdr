@@ -136,7 +136,6 @@ export class MetricsComponent implements OnInit {
                                         this.cleanupFileLevelData(this.files);
                                         this.fileLevelData.FilesMetrics = this.metricsData;
                                         this.handleSum(this.files);
-
                                         if(this.fileLevelData.FilesMetrics.length > 0){
                                             this.noChartData = false;
                                             this.createChartData();
@@ -252,7 +251,8 @@ export class MetricsComponent implements OnInit {
         let metricsData: any[] = [];
 
         for(let node of files){
-            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length).trim() == node.data.filePath.trim() && !x.filepath.endsWith('sha256'));
+            let found = this.metricsService.findFileLevelMatch(this.fileLevelData.FilesMetrics, node.data.ediid, node.data.pdrid, node.data.filePath);
+
             if(found){
                 metricsData.push(found);
                 node.data.success_get = found.success_get;
@@ -498,9 +498,9 @@ export class MetricsComponent implements OnInit {
      */
     getLastDownloadDate(){
         if (this.fileLevelData.FilesMetrics.length) {
-            var lastDownloadTime = this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.timestamp > m.timestamp) && i ? v : m).timestamp;
+            var lastDownloadTime = this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.last_time_logged > m.last_time_logged) && i ? v : m).last_time_logged;
 
-            return this.datePipe.transform(this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.timestamp > m.timestamp) && i ? v : m).timestamp, "MMM d, y");
+            return this.datePipe.transform(this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.last_time_logged > m.last_time_logged) && i ? v : m).last_time_logged, "MMM d, y");
         }
     }
 
@@ -523,7 +523,7 @@ export class MetricsComponent implements OnInit {
         let totalDownload = 0;
         if(this.fileLevelData != undefined) {
             this.fileLevelData.FilesMetrics.forEach( (file) => {
-                totalDownload += file.success_get * file.download_size;
+                totalDownload += file.success_get * file.total_size_download;
             });
         }
 
@@ -604,7 +604,7 @@ export class MetricsComponent implements OnInit {
     createNewDataHierarchy() {
         var testdata: TreeNode = {}
         if (this.record['components'] != null) {
-            testdata["data"] = this.arrangeIntoTree(this.record['components']);
+            testdata["data"] = this.arrangeIntoTree(this.record['components'], this.record['@id']);
             this.files.push(testdata);
         }
     }
@@ -614,7 +614,7 @@ export class MetricsComponent implements OnInit {
      * @param paths 
      * @returns 
      */
-    private arrangeIntoTree(paths) {
+    private arrangeIntoTree(paths, pdrid) {
         const tree: TreeNode[] = [];
         // This example uses the underscore.js library.
         var i = 1;
@@ -647,6 +647,7 @@ export class MetricsComponent implements OnInit {
                             data: {
                                 cartId: tempId,
                                 ediid: this.ediid,
+                                pdrid: pdrid,
                                 name: part,
                                 mediatype: path.mediaType,
                                 size: path.size,
