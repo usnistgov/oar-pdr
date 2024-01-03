@@ -57,12 +57,12 @@ export class GoogleAnalyticsService {
      *   This function takes GA tracking code as a parameter, constructs the script 
      *   and adds it to the top of current page.
      */
-    public appendGaTrackingCode(gaCode: string) {
+    public appendGaTrackingCode(gaCode: string, ga4Code: string, hostname: string = "dada.nist.gov") {
         try {
+            //GA3
             let scriptId = '_fed_an_ua_tag';
 
             if (document.getElementById(scriptId)) {
-                console.log("Found GA id.");
                 document.getElementById(scriptId).remove();
             }
 
@@ -73,6 +73,36 @@ export class GoogleAnalyticsService {
 
             var h = document.getElementsByTagName("head");
             document.getElementsByTagName("head")[0].appendChild(s);
+
+            //GA4
+            scriptId = '_gtag_js';
+
+            if (document.getElementById(scriptId)) {
+                document.getElementById(scriptId).remove();
+            }
+
+            var s1 = document.createElement('script') as any;
+            s1.type = "text/javascript";
+            s1.id = scriptId;
+            s1.async = true;
+            s1.src = "https://www.googletagmanager.com/gtag/js?id=" + ga4Code;
+
+            var h1 = document.getElementsByTagName("head");
+            document.getElementsByTagName("head")[0].appendChild(s1);
+
+            scriptId = '_dataLayer';
+
+            if (document.getElementById(scriptId)) {
+                document.getElementById(scriptId).remove();
+            }
+
+            var s2 = document.createElement('script') as any;
+            s2.type = "text/javascript";
+            s2.id = scriptId;
+            s2.text = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '" + ga4Code+ "',{'cookie_domain':'"+ hostname + "','cookie_flags': 'SameSite=None;Secure'})";
+
+            var h2 = document.getElementsByTagName("head");
+            document.getElementsByTagName("head")[0].appendChild(s2);
 
         } catch (ex) {
             console.error('Error appending google analytics');

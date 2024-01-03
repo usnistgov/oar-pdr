@@ -63,7 +63,7 @@
                     </td>
                     <td [ngStyle]="bodyStyle(sizeWidth)">
                         <div *ngIf="rowData.cartItem;else space_holder" style="display:inline;color: green;" >
-                            <a *ngIf="rowData.cartItem.downloadStatus != 'downloading'" href='{{rowData.cartItem.downloadURL}}' target='_blank' download="download" data-toggle="tooltip" 
+                            <a *ngIf="rowData.cartItem.downloadStatus != 'downloading'" href='{{rowData.cartItem.downloadURL}}' target='_blank' rel="noopener"  download="download" data-toggle="tooltip" 
                                 title="Download this file" aria-label="Download this file">
                                 <i class="faa faa-download"
                                     aria-hidden="true" (click)="setFileDownloaded(rowData)"></i>
@@ -99,7 +99,7 @@
             <ng-template pTemplate="emptymessage">
                 <tr>
                     <td align="center" colspan="3">
-                        No records found
+                        <!-- No records found -->
                     </td>
                 </tr>
             </ng-template>

@@ -11,10 +11,12 @@
  */
 import { LPSConfig } from '../app/config/config';
 
+const largedata: any  = require('../assets/sample-data/mds2-2116.json');
+
 export const context = {
     production: false,
     useMetadataService: false,
-    useCustomizationService: true
+    useCustomizationService: false
 };
 
 export const config: LPSConfig = {
@@ -28,20 +30,22 @@ export const config: LPSConfig = {
     },
     APIs: {
         customization: "https://data.nist.gov/customization",
-        // customization: "https://testdata.nist.gov/customization",
+        // customization: "https://data.nist.gov/customization",
         // distService: "https://data.nist.gov/od/ds/",
-        distService: "https://testdata.nist.gov/od/ds/",
+        distService: "https://data.nist.gov/od/ds/",
         mdService: "https://data.nist.gov/od/id/",
         mdSearch:  "https://data.nist.gov/rmm/",
         metrics:   "https://data.nist.gov/rmm/usagemetrics",
-        taxonomy:   "https://data.nist.gov/rmm/taxonomy"
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy",
+        rpaBackend: "https://data.nist.gov/rpa/"
     },
     mode: "dev",
     status: "Dev Version",
     appVersion: "v1.3.X",
     production: context.production,
-    editEnabled: true,
+    editEnabled: false,
     gacode: "not-set",
+    ga4code: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
     // Decide how many seconds to wait to refresh metrics after user download one/more files
@@ -50,6 +54,7 @@ export const config: LPSConfig = {
 }
 
 export const testdata: {} = {
+    test0: largedata,
     test1: {
         "@context": [
             "https://www.nist.gov/od/dm/nerdm-pub-context.jsonld",
@@ -386,9 +391,8 @@ export const testdata: {} = {
         "license": "https://www.nist.gov/open/license",
         "components": [
             {
-                "accessURL": "https://www.nist.gov/itl/iad/image-group/special-database-32-multiple-encounter-dataset-meds",
-                "description": "This page presents a registration form that must be completed to download the restricted data. Multiple Encounter Dataset (MEDS-I) is a test corpus organized from an extract of submissions of deceased persons with prior multiple encounters. MEDS is provided to assist the FBI and partner organizations refine tools, techniques, and procedures for face recognition as it supports Next Generation Identification (NGI), forensic comparison, training, and analysis, and face image conformance and inter-agency exchange standards. The MITRE Corporation (MITRE) prepared MEDS in the FBI Data Analysis Support Laboratory (DASL) with support from the FBI Biometric Center of Excellence.",
-                "title": "Gateway for Registered Data Access",
+                "description": "Zip file with JPEG formatted face image files.",
+                "title": "Multiple Encounter Dataset (MEDS)",
                 "format": {
                     "description": "JPEG formatted images"
                 },
@@ -396,12 +400,40 @@ export const testdata: {} = {
                 "downloadURL": "http://nigos.nist.gov:8080/nist/sd/32/NIST_SD32_MEDS-I_face.zip",
                 "filepath": "NIST_SD32_MEDS-I_face.zip",
                 "@type": [
-                    "nrdp:RestrictedAccessPage",
-                    "nrdp:AccessPage"
+                    "nrdp:Hidden",
+                    "nrdp:AccessPage",
+                    "dcat:Distribution"
                 ],
                 "@id": "cmps/NIST_SD32_MEDS-I_face.zip",
                 "_extensionSchemas": [
                     "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/AccessPage"
+                ]
+            },
+            {
+                "accessURL": "https://data.nist.gov/od/rp?@id=ark:/88434/mds2-2419",
+                "description": "This page provides a registration form that must be completed before downloading the data.",
+                "title": "Gateway for Registered Data Access",
+                "@type": [
+                  "nrdp:RestrictedAccessPage",
+                  "nrdp:AccessPage",
+                  "dcat:Distribution"
+                ],
+                "@id": "#pdr?@id=ark:/88434/mds2-2419",
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
+                ]
+            },
+            {
+                "accessURL": "https://doi.org/10.18434/mds0000fbk",
+                "description": "DOI Access to landing page",
+                "title": "DOI Access to \"Multiple Encounter Dataset (MEDS-I)\"",
+                "@type": [
+                    "nrdp:AccessPage",
+                    "dcat:Distribution"
+                ],
+                "@id": "#doi:10.18434/mds0000fbk",
+                "_extensionSchemas": [
+                    "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/"
                 ]
             },
             {
@@ -416,13 +448,35 @@ export const testdata: {} = {
                 "filepath": "NIST_SD32_MEDS-I_html.zip",
                 "@type": [
                     "nrdp:DataFile",
-                    "dcat:Distribution",
-                    "nrdp:AccessPage"
+                    "dcat:Distribution"
                 ],
                 "@id": "cmps/NIST_SD32_MEDS-I_html.zip",
                 "_extensionSchemas": [
                     "https://www.nist.gov/od/dm/nerdm-schema/pub/v0.1#/definitions/DataFile"
                 ]
+            },
+            {
+                "@id": "cmps/nfiq2_conformance_expected_output.csv",
+                "@type": [
+                  "nrdp:DataFile",
+                  "nrdp:DownloadableFile",
+                  "dcat:Distribution"
+                ],
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+                ],
+                "filepath": "nfiq2_conformance_expected_output.csv",
+                "mediaType": "text/csv",
+                "description": "Expected output from NFIQ 2 when run against the conformance dataset.",
+                "title": "NFIQ 2 Conformance Expected Output",
+                "size": 74061,
+                "checksum": {
+                  "hash": "863b33fd8b5a725616d21d5f482205ea7d0e625162f883b6aadfb20ad6cea34e",
+                  "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                  }
+                }
             },
             {
                 "accessURL": "https://doi.org/10.18434/mds0000fbk",
