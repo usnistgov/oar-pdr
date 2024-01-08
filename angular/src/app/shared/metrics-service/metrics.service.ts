@@ -28,8 +28,7 @@ export class MetricsService {
      * @returns http response
      */
     getFileLevelMetrics(ediid: string): Observable<any> {
-        let url = this.metricsBackend + "files?exclude=_id&include=ediid,filepath,success_get,download_size&ediid=" + ediid;
-
+        let url = this.metricsBackend + "files/" + ediid;
         const request = new HttpRequest(
             "GET", url, 
             { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
@@ -75,9 +74,17 @@ export class MetricsService {
             }
 
             for(let x of fileLevelData) {
-                if(x.pdrid.replace('ark:/88434/', '') == _pdrid.replace('ark:/88434/', '') && x.ediid.replace('ark:/88434/', '') == _ediid && (x.filepath? x.filepath.trim()==_filepath : false) && !x.filepath.endsWith('sha256')) {
-                    ret = x;
-                    break;
+                if(_pdrid.toLowerCase() == 'nan') {
+                    if((x.filepath? x.filepath.trim()==_filepath : false) && x.ediid.replace('ark:/88434/', '') == _ediid && !x.filepath.endsWith('sha256')) {
+                        ret = x;
+                        break;
+                    }
+                }else {
+                    if(x.pdrid.replace('ark:/88434/', '') == _pdrid && x.ediid.replace('ark:/88434/', '') == _ediid && (x.filepath? x.filepath.trim()==_filepath : false) && !x.filepath.endsWith('sha256')) {
+                        ret = x;
+                        break;
+                    }
+    
                 }
             }
         }

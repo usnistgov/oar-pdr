@@ -515,14 +515,11 @@ export class MetricsComponent implements OnInit {
 
     /**
      * Get total recordset level download size in bytes
+     * 01/08/2024 Discussed with Deoyani, use "total_size_download" in record level data. 
+     * No need to add file level data anymore.
      */
     get totalDownloadSizeInByte() {
         let totalDownload = 0;
-        if(this.fileLevelData != undefined) {
-            this.fileLevelData.FilesMetrics.forEach( (file) => {
-                totalDownload += file.success_get * file.total_size_download;
-            });
-        }
 
         if(this.recordLevelData != undefined) {
             totalDownload += this.recordLevelData.DataSetMetrics[0]["total_size_download"];
