@@ -61,7 +61,6 @@ export class MetricsService {
      */
     findFileLevelMatch(fileLevelData: any, ediid: string, pdrid: string, filepath: string) {
         if(!ediid || !pdrid || !filepath) return null;
-
         // Strip off 'ark:/88434/' if any
         let _ediid = ediid.replace('ark:/88434/', '');
         let _pdrid = pdrid.replace('ark:/88434/', '');
@@ -74,7 +73,8 @@ export class MetricsService {
             }
 
             for(let x of fileLevelData) {
-                if(_pdrid.toLowerCase() == 'nan') {
+                // If file's pdrid is "NaN", do not compare pdrid
+                if(x.pdrid.toLowerCase() == 'nan') {
                     if((x.filepath? x.filepath.trim()==_filepath : false) && x.ediid.replace('ark:/88434/', '') == _ediid && !x.filepath.endsWith('sha256')) {
                         ret = x;
                         break;
@@ -84,7 +84,6 @@ export class MetricsService {
                         ret = x;
                         break;
                     }
-    
                 }
             }
         }
