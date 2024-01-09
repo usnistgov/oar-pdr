@@ -250,9 +250,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         
                     if (this.editRequested) {
                         showError = false;
-                        // console.log("Returning from authentication redirection (editmode="+
-                        //             this.editRequested+")");
-                        
                         // Need to pass reqID (resID) because the resID in editControlComponent
                         // has not been set yet and the startEditing function relies on it.
                         this.edstatsvc.startEditing(this.reqId);
@@ -304,12 +301,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 let hasFile = false;
 
                 if(this.md.components && this.md.components.length > 0){
-                    this.md.components.forEach(element => {
-                        if(element.filepath){
+                    for(let com of this.md.components) {
+                        if(com.filepath){
                             hasFile = true;
-                            return;
+                            break;
                         }
-                    });
+                    }
                 }
 
                 if(hasFile){
