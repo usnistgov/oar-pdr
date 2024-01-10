@@ -185,7 +185,6 @@ export class MetricsComponent implements OnInit {
                         case HttpEventType.Response:
                             // this.recordLevelData = JSON.parse(JSON.stringify(event.body));
                             this.recordLevelData = JSON.parse(await event.body.text());
-
                             if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
 
                                 this.handleRecordLevelData();
@@ -254,7 +253,7 @@ export class MetricsComponent implements OnInit {
         // this.recordLevelTotalDownloads = this.recordLevelData.DataSetMetrics[0].success_get;
 
         for(let metrics of this.recordLevelData.DataSetMetrics) {
-            if(!this.pdrid || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid){
+            if((!this.pdrid || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
                 this.firstTimeLogged = this.datePipe.transform(metrics.first_time_logged, "MMM d, y");
                 this.recordLevelTotalDownloads = metrics.success_get;
                 this.totalDatasetDownloads = metrics.record_download;
