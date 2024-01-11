@@ -18,7 +18,7 @@ let fileLevelData = {
     "FilesMetrics": [
         {
             "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
-            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/1491_optSortSph20160701.m",
+            "filepath": "1491_optSortSph20160701.m",
             "success_head": 0,
             "success_get": 103,
             "failure_head": 0,
@@ -30,7 +30,7 @@ let fileLevelData = {
         },
         {
             "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
-            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/sub1/1491_optSortSphEvaluated20160701.cdf",
+            "filepath": "sub1/1491_optSortSphEvaluated20160701.cdf",
             "success_head": 0,
             "success_get": 73,
             "failure_head": 0,
@@ -42,7 +42,7 @@ let fileLevelData = {
         },
         {
             "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
-            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/1491_optSortSphEvaluated20160701.cdf",
+            "filepath": "1491_optSortSphEvaluated20160701.cdf",
             "success_head": 0,
             "success_get": 206,
             "failure_head": 0,
@@ -54,7 +54,7 @@ let fileLevelData = {
         },
         {
             "ediid": "3A1EE2F169DD3B8CE0531A570681DB5D1491",
-            "filepath": "3A1EE2F169DD3B8CE0531A570681DB5D1491/sub2/looooooooooooooooooooooooooooooooooooooooong_name_1491_optSortSphEvaluated20160701.cdf",
+            "filepath": "sub2/looooooooooooooooooooooooooooooooooooooooong_name_1491_optSortSphEvaluated20160701.cdf",
             "success_head": 0,
             "success_get": 207,
             "failure_head": 0,

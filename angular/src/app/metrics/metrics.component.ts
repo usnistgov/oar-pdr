@@ -252,7 +252,11 @@ export class MetricsComponent implements OnInit {
         let metricsData: any[] = [];
 
         for(let node of files){
-            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length).trim() == node.data.filePath.trim() && !x.filepath.endsWith('sha256'));
+            // let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length).trim() == node.data.filePath.trim() && !x.filepath.endsWith('sha256'));
+
+            let filenameWithPath = node.data.filePath[0] == '/' ? node.data.filePath.substr(1): node.data.filePath.trim();
+
+            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.trim() == filenameWithPath && !x.filepath.endsWith('sha256'));
             if(found){
                 metricsData.push(found);
                 node.data.success_get = found.success_get;
@@ -289,10 +293,10 @@ export class MetricsComponent implements OnInit {
      */
     handleSum(files: TreeNode[]){
         this.totalFileSize = 0;
-        files.forEach(child => {
+        for(let child of files) {
             const {downloads, fileSize} = this.sumFolder(child);
             this.totalFileSize += fileSize;
-        })
+        }
     }
 
     /**
@@ -302,11 +306,11 @@ export class MetricsComponent implements OnInit {
      */
     sumFolder(node: TreeNode){
         if (node.children.length > 0) {
-            node.children.forEach(child => {
+            for(let child of node.children) {
                 const {downloads, fileSize} = this.sumFolder(child);              
                 node.data.success_get += downloads;
                 node.data.download_size += fileSize;
-            });
+            };
         }
     
         var downloads = node.data.success_get;
@@ -448,7 +452,7 @@ export class MetricsComponent implements OnInit {
                     filenameDisp = "..." + filename.substr(filename.length - this.maxLabelLength);
                 }
 
-                filenameWithPath = this.fileLevelData.FilesMetrics[i].filepath.substr(this.fileLevelData.FilesMetrics[i].filepath.indexOf(this.ediid)+this.ediid.length+1);
+                filenameWithPath = this.fileLevelData.FilesMetrics[i].filepath;
                 filenameWithPath = decodeURI(filenameWithPath);
                 filenameWithPath = '/' + filenameWithPath.replace(new RegExp('%20', 'g'), " ").trim();
                 filenameWithPathDisp = filenameWithPath;
@@ -487,9 +491,6 @@ export class MetricsComponent implements OnInit {
                 }
             }
         }
-
-        // var sum = this.chartData.reduce((sum, current) => sum + current[1], 0);
-        // this.recordLevelTotalDownloads = sum;
     }
 
     /**
@@ -522,13 +523,13 @@ export class MetricsComponent implements OnInit {
     get totalDownloadSizeInByte() {
         let totalDownload = 0;
         if(this.fileLevelData != undefined) {
-            this.fileLevelData.FilesMetrics.forEach( (file) => {
+            for(let file of this.fileLevelData.FilesMetrics) {
                 totalDownload += file.success_get * file.download_size;
-            });
+            };
         }
 
         if(this.recordLevelData != undefined) {
-            totalDownload += this.recordLevelData.DataSetMetrics[0].record_download * this.totalFileSize;
+            totalDownload += this.recordLevelData.DataSetMetrics[0]["total_size_download"];
         }
 
         return totalDownload;
@@ -620,7 +621,7 @@ export class MetricsComponent implements OnInit {
         var i = 1;
         var tempfiletest = "";
 
-        paths.forEach((path) => {
+        for(let path of paths) {
             //Remove hidden type files and sha files 
             if (path.filepath && !path['@type'].includes('nrd:Hidden') && !path.filepath.endsWith('sha256')) {
                 if (!path.filepath.startsWith("/"))
@@ -630,7 +631,7 @@ export class MetricsComponent implements OnInit {
                 pathParts.shift(); // Remove first blank element from the parts array.
                 let currentLevel = tree; // initialize currentLevel to root
 
-                pathParts.forEach((part) => {
+                for(let part of pathParts) {
                     // check to see if the path already exists.
                     const existingPath = currentLevel.filter(level => level.data.name === part);
                     if (existingPath.length > 0) {
@@ -666,10 +667,10 @@ export class MetricsComponent implements OnInit {
                         currentLevel.push(newPart);
                         currentLevel = newPart.children;
                     }
-                });
+                };
             }
             i = i + 1;
-        });
+        };
         return tree;
     }
 
