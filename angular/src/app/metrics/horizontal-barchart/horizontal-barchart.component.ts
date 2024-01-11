@@ -294,16 +294,6 @@ export class HorizontalBarchartComponent implements OnInit {
                     .attr('opacity', 0.6)
                     .style('fill', '#00e68a')
             
-                // draw a yellow dash line at the end of the active bar
-                // line style is defined in line#limit
-                chart.append('line')
-                    .attr('id', 'limit')
-                    .attr('x1', xScale(actual[1]))
-                    .attr('y1', 0)
-                    .attr('x2', xScale(actual[1]))
-                    .attr('y2', height)
-                    .attr('stroke', 'red')
-            
                 d3.selectAll('.label')
                   .filter(function(d) { return d[0] == actual[0]; })
                   .attr('opacity', 1)

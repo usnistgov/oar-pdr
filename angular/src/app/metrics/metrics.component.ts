@@ -32,6 +32,7 @@ export class MetricsComponent implements OnInit {
 
     // Data
     ediid: string;
+    pdrid: string;
     files: TreeNode[] = [];
     fileLevelData: any;
     firstTimeLogged: string = '';
@@ -43,8 +44,12 @@ export class MetricsComponent implements OnInit {
     metricsData: any[] = [];
     totalFileLevelSuccessfulGet: number = 0;
     totalFileSize: number = 0;
+    totalFileSizeForDisplay: string = "";
     totalFilesinChart: number = 0;
     noDatasetSummary: boolean = false;
+    totalDatasetDownloads: number = 0;
+    totalUniqueUsers: number = 0;
+    totalDownloadSizeInByte: number = 0;
 
     // Chart
     chartData: Array<any>;
@@ -117,6 +122,7 @@ export class MetricsComponent implements OnInit {
                     if(md) {
                         this.record = md as NerdmRes;
                         this.datasetTitle = md['title'];
+                        this.pdrid = md['@id'];
 
                         this.createNewDataHierarchy();
                         if (this.files.length != 0){
@@ -136,7 +142,6 @@ export class MetricsComponent implements OnInit {
                                         this.cleanupFileLevelData(this.files);
                                         this.fileLevelData.FilesMetrics = this.metricsData;
                                         this.handleSum(this.files);
-
                                         if(this.fileLevelData.FilesMetrics.length > 0){
                                             this.noChartData = false;
                                             this.createChartData();
@@ -180,11 +185,9 @@ export class MetricsComponent implements OnInit {
                         case HttpEventType.Response:
                             // this.recordLevelData = JSON.parse(JSON.stringify(event.body));
                             this.recordLevelData = JSON.parse(await event.body.text());
-
                             if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
-                                this.firstTimeLogged = this.datePipe.transform(this.recordLevelData.DataSetMetrics[0].first_time_logged, "MMM d, y");
 
-                                this.recordLevelTotalDownloads = this.recordLevelData.DataSetMetrics[0].success_get;
+                                this.handleRecordLevelData();
 
                                 // this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
                                 this.datasetSubtitle = "Metrics Since " + this.firstTimeLogged;
@@ -245,38 +248,50 @@ export class MetricsComponent implements OnInit {
         }, 0);
     }
 
+
+    handleRecordLevelData() {
+        // this.recordLevelTotalDownloads = this.recordLevelData.DataSetMetrics[0].success_get;
+
+        for(let metrics of this.recordLevelData.DataSetMetrics) {
+            if((!this.pdrid || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
+                this.firstTimeLogged = this.datePipe.transform(metrics.first_time_logged, "MMM d, y");
+                this.recordLevelTotalDownloads = metrics.success_get;
+                this.totalDatasetDownloads = metrics.record_download;
+                this.totalUniqueUsers = metrics.number_users;
+                this.totalDownloadSizeInByte = metrics["total_size_download"];
+            }
+        }
+    }
+
     /**
      * Remove outdated data and sha files from the metrics
      */
     cleanupFileLevelData(files: TreeNode[]){
         let metricsData: any[] = [];
-
         for(let node of files){
-            // let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.substr(x.filepath.indexOf(this.ediid)+this.ediid.length).trim() == node.data.filePath.trim() && !x.filepath.endsWith('sha256'));
+            //Only check leaf
+            if(node.children.length <= 0) {
+                let found = this.metricsService.findFileLevelMatch(this.fileLevelData.FilesMetrics, node.data.ediid, node.data.pdrid, node.data.filePath);
 
-            let filenameWithPath = node.data.filePath[0] == '/' ? node.data.filePath.substr(1): node.data.filePath.trim();
+                if(found){
+                    metricsData.push(found);
+                    node.data.success_get = found.success_get;
+                    if(!node.data.download_size || node.data.download_size == 0){
+                        node.data.download_size = found.download_size;
+                    }
 
-            let found = this.fileLevelData.FilesMetrics.find(x => x.filepath.trim() == filenameWithPath && !x.filepath.endsWith('sha256'));
-            if(found){
-                metricsData.push(found);
-                node.data.success_get = found.success_get;
-                if(!node.data.download_size || node.data.download_size == 0){
-                    node.data.download_size = found.download_size;
+                    this.totalFileLevelSuccessfulGet += found.success_get;
+                    this.totalFilesinChart += 1;
+
+                    node.data.inChart = true;
+                    if(node.parent){
+                        node.parent.data.inChart = true;
+                    }
                 }
 
-                this.totalFileLevelSuccessfulGet += found.success_get;
-                this.totalFilesinChart += 1;
-
-                node.data.inChart = true;
-                if(node.parent){
-                    node.parent.data.inChart = true;
-                }
-            }
-
-            if(node.children.length > 0){
-                this.cleanupFileLevelData(node.children);
-            }else{
                 this.filescount = this.filescount + 1;
+            }else {
+                this.cleanupFileLevelData(node.children);
             }
         }
 
@@ -297,6 +312,8 @@ export class MetricsComponent implements OnInit {
             const {downloads, fileSize} = this.sumFolder(child);
             this.totalFileSize += fileSize;
         }
+
+        this.totalFileSizeForDisplay = this.commonFunctionService.formatBytes(this.totalFileSize, 2);
     }
 
     /**
@@ -314,7 +331,13 @@ export class MetricsComponent implements OnInit {
         }
     
         var downloads = node.data.success_get;
-        var fileSize = node.data.download_size;
+
+        var fileSize;
+        if(!node.data.download_size || node.data.download_size == 'nan')
+            fileSize = 0;
+        else
+            fileSize = node.data.download_size;
+
         return {downloads, fileSize};
     }
 
@@ -347,9 +370,9 @@ export class MetricsComponent implements OnInit {
         // Add summary
         csv = "# Record id," + this.ediid + "\r\n"
             + "# Total file downloads," + this.recordLevelTotalDownloads + "\r\n"
-            + "# Total dataset downloads," + this.TotalDatasetDownloads + "\r\n"
+            + "# Total dataset downloads," + this.totalDatasetDownloads + "\r\n"
             + "# Total bytes downloaded," + this.totalDownloadSizeInByte + "\r\n"
-            + "# Total unique users," + this.TotalUniqueUsers + "\r\n"
+            + "# Total unique users," + this.totalUniqueUsers + "\r\n"
             + "\r\n" + csv;
 
         // Create link and download
@@ -363,33 +386,11 @@ export class MetricsComponent implements OnInit {
     }
 
     /**
-     * Return total dataset downloads
-     */
-    get TotalDatasetDownloads() {
-        if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.recordLevelData.DataSetMetrics[0].record_download;
-        }else{
-            return ""
-        }
-    }
-
-    /**
      * Return total download size from file level summary
      */
-    get TotalFileSize() {
-        return this.commonFunctionService.formatBytes(this.totalFileSize, 2);
-    }
-
-    /**
-     * Get total unique users
-     */
-    get TotalUniqueUsers() {
-        if(this.recordLevelData.DataSetMetrics[0] != undefined){
-            return this.recordLevelData.DataSetMetrics[0].number_users;
-        }else{
-            return ""
-        }
-    }
+    // get TotalFileSize() {
+    //     return this.commonFunctionService.formatBytes(this.totalFileSize, 2);
+    // }
 
     /**
      * Save the bar chart as a png file
@@ -499,9 +500,9 @@ export class MetricsComponent implements OnInit {
      */
     getLastDownloadDate(){
         if (this.fileLevelData.FilesMetrics.length) {
-            var lastDownloadTime = this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.timestamp > m.timestamp) && i ? v : m).timestamp;
+            var lastDownloadTime = this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.last_time_logged > m.last_time_logged) && i ? v : m).last_time_logged;
 
-            return this.datePipe.transform(this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.timestamp > m.timestamp) && i ? v : m).timestamp, "MMM d, y");
+            return this.datePipe.transform(this.fileLevelData.FilesMetrics.reduce((m,v,i) => (v.last_time_logged > m.last_time_logged) && i ? v : m).last_time_logged, "MMM d, y");
         }
     }
 
@@ -519,21 +520,18 @@ export class MetricsComponent implements OnInit {
 
     /**
      * Get total recordset level download size in bytes
+     * 01/08/2024 Discussed with Deoyani, use "total_size_download" in record level data. 
+     * No need to add file level data anymore.
      */
-    get totalDownloadSizeInByte() {
-        let totalDownload = 0;
-        if(this.fileLevelData != undefined) {
-            for(let file of this.fileLevelData.FilesMetrics) {
-                totalDownload += file.success_get * file.download_size;
-            };
-        }
+    // get totalDownloadSizeInByte() {
+    //     let totalDownload = 0;
 
-        if(this.recordLevelData != undefined) {
-            totalDownload += this.recordLevelData.DataSetMetrics[0]["total_size_download"];
-        }
+    //     if(this.recordLevelData != undefined) {
+    //         totalDownload += this.recordLevelData.DataSetMetrics[0]["total_size_download"];
+    //     }
 
-        return totalDownload;
-    }
+    //     return totalDownload;
+    // }
 
      /**
      * Reture style for Title column of the file tree
@@ -605,7 +603,7 @@ export class MetricsComponent implements OnInit {
     createNewDataHierarchy() {
         var testdata: TreeNode = {}
         if (this.record['components'] != null) {
-            testdata["data"] = this.arrangeIntoTree(this.record['components']);
+            testdata["data"] = this.arrangeIntoTree(this.record['components'], this.record['@id']);
             this.files.push(testdata);
         }
     }
@@ -615,7 +613,7 @@ export class MetricsComponent implements OnInit {
      * @param paths 
      * @returns 
      */
-    private arrangeIntoTree(paths) {
+    private arrangeIntoTree(paths, pdrid) {
         const tree: TreeNode[] = [];
         // This example uses the underscore.js library.
         var i = 1;
@@ -648,6 +646,7 @@ export class MetricsComponent implements OnInit {
                             data: {
                                 cartId: tempId,
                                 ediid: this.ediid,
+                                pdrid: pdrid,
                                 name: part,
                                 mediatype: path.mediaType,
                                 size: path.size,

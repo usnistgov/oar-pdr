@@ -273,7 +273,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
 
         this.buildTree();
-        console.log("files", this.files);
+
         // If total file count > virtual scrolling threshold, set virtual scrolling to true. 
         this.virtualScroll = this.fileCount > FileCountForVirtualScroll? true : false;
 
@@ -282,7 +282,14 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     isRestrictedData(node: any) {
-        return node['comp']['@type'].includes('nrdp:RestrictedAccessPage');
+        if(node){
+            if(node['comp'])
+                return node['comp']['@type'].includes('nrdp:RestrictedAccessPage');
+            else
+                return false;
+        }else{
+            return false;
+        }
     }
 
     checkAccessPageType() {
@@ -631,7 +638,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
      * @returns boolean
      */
     isLeaf(fileNode: any) {
-        return (fileNode.comp['@type'].indexOf('nrdp:DataFile') > -1);
+        if(!fileNode.comp) return false;
+        else return (fileNode.comp['@type'].indexOf('nrdp:DataFile') > -1);
     }
 
     /**

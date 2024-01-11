@@ -52,7 +52,7 @@
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
                         <span class="float-left">Total dataset downloads</span>
-                        <span class="float-right">{{TotalDatasetDownloads}}</span>
+                        <span class="float-right">{{totalDatasetDownloads}}</span>
                     </div>
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
@@ -62,7 +62,7 @@
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
                         <span class="float-left">Total unique users</span>
-                        <span class="float-right">{{TotalUniqueUsers}}</span>
+                        <span class="float-right">{{totalUniqueUsers}}</span>
                     </div>
                     <div style="clear: both;"></div>
                     <div class="min-height-20">
@@ -149,7 +149,7 @@
 </div>
 
 <!-- Display file level data summary -->
-<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 100%; text-align: right;font-size: small;padding-right: 45px;">Total No. files: {{filescount}}, Total dataset size: {{TotalFileSize}}</div>
+<div *ngIf="filescount > 0" style="margin: 1em auto 0em auto; width: 100%; text-align: right;font-size: small;padding-right: 45px;">Total No. files: {{filescount}}, Total dataset size: {{totalFileSizeForDisplay}}</div>
 
 <!-- Display tree table -->
 <div #panel0 id="panel0" *ngIf="inBrowser; else filesLoading" class="flex-container" >

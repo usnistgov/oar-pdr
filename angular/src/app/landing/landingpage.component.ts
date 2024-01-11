@@ -52,6 +52,7 @@ import { Themes, ThemesPrefs } from '../shared/globals/globals';
     encapsulation: ViewEncapsulation.None
 })
 export class LandingPageComponent implements OnInit, AfterViewInit {
+    pdrid: string;
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
@@ -223,6 +224,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
+                this.pdrid = this.md["@id"];
                 this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
 
                 if(this.inBrowser){
@@ -250,9 +252,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         
                     if (this.editRequested) {
                         showError = false;
-                        // console.log("Returning from authentication redirection (editmode="+
-                        //             this.editRequested+")");
-                        
                         // Need to pass reqID (resID) because the resID in editControlComponent
                         // has not been set yet and the startEditing function relies on it.
                         this.edstatsvc.startEditing(this.reqId);
@@ -304,21 +303,25 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 let hasFile = false;
 
                 if(this.md.components && this.md.components.length > 0){
-                    this.md.components.forEach(element => {
-                        if(element.filepath){
+                    for(let com of this.md.components) {
+                        if(com.filepath){
                             hasFile = true;
-                            return;
+                            break;
                         }
-                    });
+                    }
                 }
 
                 if(hasFile){
-                    //Now check if there is any metrics data
-                    this.metricsData.totalDatasetDownload = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].record_download : 0;
-    
-                    this.metricsData.totalDownloadSize = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0]["total_size_download"] : 0;
-        
-                    this.metricsData.totalUsers = this.recordLevelMetrics.DataSetMetrics[0] != undefined? this.recordLevelMetrics.DataSetMetrics[0].number_users : 0;
+                    for(let metrics of this.recordLevelMetrics.DataSetMetrics) {
+                        if((!this.pdrid || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
+                            //Now check if there is any metrics data
+                            this.metricsData.totalDatasetDownload = metrics != undefined? metrics.record_download : 0;
+                            
+                            this.metricsData.totalDownloadSize = metrics != undefined? metrics["total_size_download"] : 0;
+
+                            this.metricsData.totalUsers = metrics != undefined? metrics.number_users : 0;
+                        }
+                    }
             
                     this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;  
 
