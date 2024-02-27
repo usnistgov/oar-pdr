@@ -313,7 +313,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
                 if(hasFile){
                     for(let metrics of this.recordLevelMetrics.DataSetMetrics) {
-                        if((!this.pdrid || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
+                        if((!this.pdrid || !metrics["pdrid"] || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
                             //Now check if there is any metrics data
                             this.metricsData.totalDatasetDownload = metrics != undefined? metrics.record_download : 0;
                             

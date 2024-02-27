@@ -253,7 +253,7 @@ export class MetricsComponent implements OnInit {
         // this.recordLevelTotalDownloads = this.recordLevelData.DataSetMetrics[0].success_get;
 
         for(let metrics of this.recordLevelData.DataSetMetrics) {
-            if((!this.pdrid || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
+            if((!this.pdrid || !metrics["pdrid"] || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
                 this.firstTimeLogged = this.datePipe.transform(metrics.first_time_logged, "MMM d, y");
                 this.recordLevelTotalDownloads = metrics.success_get;
                 this.totalDatasetDownloads = metrics.record_download;
