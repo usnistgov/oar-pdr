@@ -127,57 +127,16 @@ export class MetricsComponent implements OnInit {
                         this.createNewDataHierarchy();
                         if (this.files.length != 0){
                             this.files = <TreeNode[]>this.files[0].data;
-
                         }else{
                             this.noChartData = true;
                         }
         
                         this.expandToLevel(this.files, true, 0, 1);
+
+                        //Fetch metrics data regardless if there is chat data or not
+                        this.getMetricsData();
                     }
                 })                              
-
-                // Get record level metrics data
-                this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(async (event) => {
-                    switch (event.type) {
-                        case HttpEventType.Response:
-                            // this.recordLevelData = JSON.parse(JSON.stringify(event.body));
-                            this.recordLevelData = JSON.parse(await event.body.text());
-                            if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
-
-                                if(this.handleRecordLevelData()) {
-                                    //Get file level data
-                                    this.getFileLevelMetricsData();
-                                }
-
-                                // this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
-                                this.datasetSubtitle = "Metrics Since " + this.firstTimeLogged;
-                            }else{
-                                this.noDatasetSummary = true;
-                            }
-
-                            break;
-                        default:
-                            break;
-                    }
-
-                },
-                (err) => {
-                    let dateTime = new Date();
-                    console.log("err", err);
-                    this.errorMsg = JSON.stringify(err);
-                    this.hasError = true;
-                    console.log('this.hasError', this.hasError);
-
-                    this.emailSubject = 'PDR: Error getting file level metrics data';
-                    this.emailBody =
-                        'The information below describes an error that occurred while downloading metrics data.' + '%0D%0A%0D%0A'
-                        + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
-                        + 'ediid:' + this.ediid + '%0D%0A'
-                        + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                        + 'Error message:%0D%0A' + JSON.stringify(err);
-
-                    this.readyDisplay = true;
-                });
             });
         }
     }
@@ -205,6 +164,55 @@ export class MetricsComponent implements OnInit {
                 }
             }
         }, 0);
+    }
+
+    /**
+     * Get metrics data
+     * Get record level data first then file level.
+     */
+    getMetricsData() {
+        // Get record level metrics data
+        this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(async (event) => {
+            switch (event.type) {
+                case HttpEventType.Response:
+                    // this.recordLevelData = JSON.parse(JSON.stringify(event.body));
+                    this.recordLevelData = JSON.parse(await event.body.text());
+                    if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
+
+                        if(this.handleRecordLevelData()) {
+                            //Get file level data
+                            this.getFileLevelMetricsData();
+                        }
+
+                        // this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
+                        this.datasetSubtitle = "Metrics Since " + this.firstTimeLogged;
+                    }else{
+                        this.noDatasetSummary = true;
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+        },
+        (err) => {
+            let dateTime = new Date();
+            console.log("err", err);
+            this.errorMsg = JSON.stringify(err);
+            this.hasError = true;
+            console.log('this.hasError', this.hasError);
+
+            this.emailSubject = 'PDR: Error getting file level metrics data';
+            this.emailBody =
+                'The information below describes an error that occurred while downloading metrics data.' + '%0D%0A%0D%0A'
+                + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                + 'ediid:' + this.ediid + '%0D%0A'
+                + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                + 'Error message:%0D%0A' + JSON.stringify(err);
+
+            this.readyDisplay = true;
+        });
     }
 
     getFileLevelMetricsData() {
@@ -254,7 +262,7 @@ export class MetricsComponent implements OnInit {
             this.readyDisplay = true;
         });                                 
     }
-    
+
     /**
      * Handle record level data.
      * If only one record in DataSetMetrics, just use it. Otherwise check if pdrid matches 
