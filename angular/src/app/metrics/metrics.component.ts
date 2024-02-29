@@ -59,7 +59,7 @@ export class MetricsComponent implements OnInit {
     visible: boolean = true;
     cols: any[] = [];
     fontSize: string = '16px';  // Default font size
-    noChartData: boolean = false;
+    noChartData: boolean = true;
 
     //Display
     screenSizeBreakPoint: number;
@@ -123,61 +123,18 @@ export class MetricsComponent implements OnInit {
                         this.record = md as NerdmRes;
                         this.datasetTitle = md['title'];
                         this.pdrid = md['@id'];
-
+        
                         this.createNewDataHierarchy();
                         if (this.files.length != 0){
                             this.files = <TreeNode[]>this.files[0].data;
 
-                            // Get file level metrics data
-                            this.metricsService.getFileLevelMetrics(this.ediid).subscribe(async (event) => {
-                                // Some large dataset might take a while to download. Only handle the response
-                                // when it finishes downloading
-                                if(event.type == HttpEventType.Response){
-                                    let response = await event.body.text();
-                                    this.fileLevelData = JSON.parse(response);
-
-                                    if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
-                                        this.totalFileLevelSuccessfulGet = 0;
-                                        this.totalFilesinChart = 0;
-                                        this.cleanupFileLevelData(this.files);
-                                        this.fileLevelData.FilesMetrics = this.metricsData;
-                                        this.handleSum(this.files);
-                                        if(this.fileLevelData.FilesMetrics.length > 0){
-                                            this.noChartData = false;
-                                            this.createChartData();
-                                            this.lastDownloadDate = this.getLastDownloadDate()
-                                        }else{
-                                            this.noChartData = true;
-                                        }
-                                    }else{
-                                        this.noChartData = true;
-                                    }
-                                }
-                            },
-                            (err) => {
-                                let dateTime = new Date();
-                                console.log("err", err);
-                                this.errorMsg = JSON.stringify(err);
-                                this.hasError = true;
-                                console.log('this.hasError', this.hasError);
-                                this.emailSubject = 'PDR: Error getting file level metrics data';
-                                this.emailBody =
-                                    'The information below describes an error that occurred while downloading metrics data.' + '%0D%0A%0D%0A'
-                                    + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
-                                    + 'ediid:' + this.ediid + '%0D%0A'
-                                    + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
-                                    + 'Error message:%0D%0A' + JSON.stringify(err);
-            
-                                this.readyDisplay = true;
-                            });                            
                         }else{
                             this.noChartData = true;
                         }
-
-                        this.readyDisplay = true;
+        
                         this.expandToLevel(this.files, true, 0, 1);
                     }
-                })
+                })                              
 
                 // Get record level metrics data
                 this.metricsService.getRecordLevelMetrics(this.ediid).subscribe(async (event) => {
@@ -187,11 +144,13 @@ export class MetricsComponent implements OnInit {
                             this.recordLevelData = JSON.parse(await event.body.text());
                             if(this.recordLevelData.DataSetMetrics != undefined && this.recordLevelData.DataSetMetrics.length > 0){
 
-                                this.handleRecordLevelData();
+                                if(this.handleRecordLevelData()) {
+                                    //Get file level data
+                                    this.getFileLevelMetricsData();
+                                }
 
                                 // this.xAxisLabel = "Total Downloads Since " + this.firstTimeLogged;
                                 this.datasetSubtitle = "Metrics Since " + this.firstTimeLogged;
-                                this.noDatasetSummary = false;
                             }else{
                                 this.noDatasetSummary = true;
                             }
@@ -248,19 +207,89 @@ export class MetricsComponent implements OnInit {
         }, 0);
     }
 
+    getFileLevelMetricsData() {
+        // Get file level metrics data
+        this.metricsService.getFileLevelMetrics(this.ediid).subscribe(async (event) => {
+            // Some large dataset might take a while to download. Only handle the response
+            // when it finishes downloading
+            if(event.type == HttpEventType.Response){
+                let response = await event.body.text();
+                this.fileLevelData = JSON.parse(response);
 
-    handleRecordLevelData() {
-        // this.recordLevelTotalDownloads = this.recordLevelData.DataSetMetrics[0].success_get;
+                if(this.fileLevelData.FilesMetrics != undefined && this.fileLevelData.FilesMetrics.length > 0){
+                    this.totalFileLevelSuccessfulGet = 0;
+                    this.totalFilesinChart = 0;
+                    this.cleanupFileLevelData(this.files);
+                    this.fileLevelData.FilesMetrics = this.metricsData;
+                    this.handleSum(this.files);
+                    if(this.fileLevelData.FilesMetrics.length > 0){
+                        this.noChartData = this.noDatasetSummary;
+                        // this.noChartData = false;
+                        this.createChartData();
+                        this.lastDownloadDate = this.getLastDownloadDate()
+                    }else{
+                        this.noChartData = true;
+                    }
+                }else{
+                    this.noChartData = true;
+                }
 
-        for(let metrics of this.recordLevelData.DataSetMetrics) {
-            if((!this.pdrid || !metrics["pdrid"] || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
-                this.firstTimeLogged = this.datePipe.transform(metrics.first_time_logged, "MMM d, y");
-                this.recordLevelTotalDownloads = metrics.success_get;
-                this.totalDatasetDownloads = metrics.record_download;
-                this.totalUniqueUsers = metrics.number_users;
-                this.totalDownloadSizeInByte = metrics["total_size_download"];
+                this.readyDisplay = true;
             }
+        },
+        (err) => {
+            let dateTime = new Date();
+            console.log("err", err);
+            this.errorMsg = JSON.stringify(err);
+            this.hasError = true;
+            console.log('this.hasError', this.hasError);
+            this.emailSubject = 'PDR: Error getting file level metrics data';
+            this.emailBody =
+                'The information below describes an error that occurred while downloading metrics data.' + '%0D%0A%0D%0A'
+                + '[From the PDR Team:  feel free to add additional information about the failure or your questions here.  Thanks for sending this message!]' + '%0D%0A%0D%0A'
+                + 'ediid:' + this.ediid + '%0D%0A'
+                + 'Time: ' + dateTime.toString() + '%0D%0A%0D%0A'
+                + 'Error message:%0D%0A' + JSON.stringify(err);
+
+            this.readyDisplay = true;
+        });                                 
+    }
+    /**
+     * Handle record level data.
+     * If only one record in DataSetMetrics, just use it. Otherwise check if pdrid matches 
+     * Nerdm record's pdrid. If yes, use it. Otherwise return false.
+     * @returns true if there is valid record level data record
+     */
+    handleRecordLevelData() {
+        let met: any = null;
+
+        if(this.recordLevelData.DataSetMetrics && this.recordLevelData.DataSetMetrics.length > 1) {
+            for(let metrics of this.recordLevelData.DataSetMetrics) {
+                if(metrics["pdrid"] && (metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
+                    met = metrics;
+                }
+            }
+        }else{
+            met = this.recordLevelData.DataSetMetrics[0];
         }
+
+        if(met) {
+            this.firstTimeLogged = this.datePipe.transform(met.first_time_logged, "MMM d, y");
+            this.recordLevelTotalDownloads = met.success_get;
+            this.totalDatasetDownloads = met.record_download;
+            this.totalUniqueUsers = met.number_users;
+            this.totalDownloadSizeInByte = met.total_size_download;
+
+            this.noDatasetSummary = false;
+            this.noChartData = false;
+        }else{
+            console.error("Unable to handle multiple record level metrics data. Either missing pdrid or pdrid mismatch.", this.recordLevelData.DataSetMetrics);
+
+            this.noDatasetSummary = true;
+            this.noChartData = true;
+        }
+
+        return !this.noDatasetSummary;
     }
 
     /**
