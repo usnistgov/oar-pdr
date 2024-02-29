@@ -300,36 +300,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             if(event.type == HttpEventType.Response){
                 this.recordLevelMetrics = JSON.parse(await event.body.text());
 
-                let hasFile = false;
-
-                if(this.md.components && this.md.components.length > 0){
-                    for(let com of this.md.components) {
-                        if(com.filepath){
-                            hasFile = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(hasFile){
-                    for(let metrics of this.recordLevelMetrics.DataSetMetrics) {
-                        if((!this.pdrid || !metrics["pdrid"] || metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
-                            //Now check if there is any metrics data
-                            this.metricsData.totalDatasetDownload = metrics != undefined? metrics.record_download : 0;
-                            
-                            this.metricsData.totalDownloadSize = metrics != undefined? metrics["total_size_download"] : 0;
-
-                            this.metricsData.totalUsers = metrics != undefined? metrics.number_users : 0;
-                        }
-                    }
-            
-                    this.metricsData.totalUsers = this.metricsData.totalUsers == undefined? 0 : this.metricsData.totalUsers;  
-
-                    this.metricsData.hasCurrentMetrics = true;
-                    this.showMetrics = true;
-                }
-
-                this.metricsData.dataReady = true;
+                this.handleRecordLevelData();
             }
         },
         (err) => {
@@ -338,6 +309,42 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             this.showMetrics = true;
             this.metricsData.dataReady = true;
         });                    
+    }
+
+    /**
+     * Handle record level data.
+     * If only one record in DataSetMetrics, just use it. Otherwise check if pdrid matches 
+     * Nerdm record's pdrid. If yes, use it. Otherwise return false.
+     * @returns true if there is valid record level data record
+     */
+    handleRecordLevelData() {
+        let met: any = null;
+
+        if(this.recordLevelMetrics.DataSetMetrics) {
+            if(this.recordLevelMetrics.DataSetMetrics.length > 1) {
+                for(let metrics of this.recordLevelMetrics.DataSetMetrics) {
+                    if(metrics["pdrid"] && (metrics["pdrid"].toLowerCase() == 'nan' || metrics["pdrid"].trim() == this.pdrid) && metrics["last_time_logged"]){
+                        met = metrics;
+                    }
+                }
+            }else if(this.recordLevelMetrics.DataSetMetrics.length == 1){
+                met = this.recordLevelMetrics.DataSetMetrics[0];
+            }
+        }
+
+        if(met) {
+            this.metricsData.totalDatasetDownload = met.record_download;
+            this.metricsData.totalDownloadSize = met["total_size_download"];
+            this.metricsData.totalUsers = met.number_users;
+
+            this.metricsData.hasCurrentMetrics = true;
+            this.metricsData.dataReady = true;
+            this.showMetrics = true;
+        }else{
+            this.metricsData.hasCurrentMetrics = false;
+            this.showMetrics = true;
+            this.metricsData.dataReady = true;
+        }
     }
 
     /**

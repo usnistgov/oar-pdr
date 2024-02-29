@@ -254,6 +254,7 @@ export class MetricsComponent implements OnInit {
             this.readyDisplay = true;
         });                                 
     }
+    
     /**
      * Handle record level data.
      * If only one record in DataSetMetrics, just use it. Otherwise check if pdrid matches 
