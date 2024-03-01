@@ -61,6 +61,7 @@ export class MetricsService {
      */
     findFileLevelMatch(fileLevelData: any, ediid: string, pdrid: string, filepath: string) {
         if(!ediid || !pdrid || !filepath) return null;
+
         // Strip off 'ark:/88434/' if any
         let _ediid = ediid.replace('ark:/88434/', '');
         let _pdrid = pdrid.replace('ark:/88434/', '');
@@ -72,17 +73,31 @@ export class MetricsService {
                 _filepath = _filepath.trim();
             }
 
+            //Check if we have multiple pdrids
+            let hasMultiPdrid: boolean = false;
+            let prevPdrid: string = null;
             for(let x of fileLevelData) {
-                // If file's pdrid is "NaN", do not compare pdrid
-                if(x.pdrid.toLowerCase() == 'nan') {
-                    if((x.filepath? x.filepath.trim()==_filepath : false) && x.ediid.replace('ark:/88434/', '') == _ediid && !x.filepath.endsWith('sha256')) {
-                        ret = x;
+                if(x.pdrid && x.pdrid.toLowerCase() != 'nan'){
+                    if(!prevPdrid) {
+                       prevPdrid = x.pdrid; 
+                    } 
+                    else if(prevPdrid != x.pdrid) {
+                        hasMultiPdrid = true;
                         break;
                     }
-                }else {
-                    if(x.pdrid.replace('ark:/88434/', '') == _pdrid && x.ediid.replace('ark:/88434/', '') == _ediid && (x.filepath? x.filepath.trim()==_filepath : false) && !x.filepath.endsWith('sha256')) {
+                }
+            }
+            
+            for(let x of fileLevelData) {
+                if(x.ediid.replace('ark:/88434/', '') == _ediid && (x.filepath? x.filepath.trim()==_filepath : false) && !x.filepath.endsWith('sha256')) {
+                    if(hasMultiPdrid){
+                        if(x.pdrid.replace('ark:/88434/', '') == _pdrid.replace('ark:/88434/', '')) {
+                            ret = x;
+                            break;
+                        }
+                    }else{
                         ret = x;
-                        break;
+                        break; 
                     }
                 }
             }
