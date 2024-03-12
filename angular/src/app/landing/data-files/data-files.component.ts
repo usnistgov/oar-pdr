@@ -170,7 +170,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
             { field: 'name', header: 'Name', width: '60%' },
             { field: 'mediaType', header: 'File Type', width: 'auto' },
             { field: 'size', header: 'Size', width: 'auto' },
-            { field: 'download', header: "Status", width: 'auto' }];
+            { field: 'download', header: "Access", width: 'auto' }];
 
         if (typeof (window) !== 'undefined') {
             window.onresize = (e) => {
@@ -269,7 +269,6 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
         if(this.record['accessLevel'] === 'restricted public') {
             this.checkAccessPageType();
-            this.cols[3]['header'] = "Access";
         }
 
         this.buildTree();
