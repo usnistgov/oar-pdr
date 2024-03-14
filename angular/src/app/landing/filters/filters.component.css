@@ -1,5 +1,5 @@
 #filterHeader {
-    background-color: var(--science-theme-background-default);
+    background-color: var(--background-default);
     border-bottom:.5px solid #e6e6e6;
     width: 100%;
     padding: .625em;
@@ -23,7 +23,7 @@
 
 #activeFilter {
     /* background-color: #F8F9F9; */
-    background-color: var(--science-theme-background-light);
+    /* background-color: var(--forensics-background-light); */
     padding: 0px 0px 0px 0px;
 }
 
@@ -63,8 +63,8 @@
 .collapsedFilterBox {
     /* text-align:center;
     padding: 0px 5pxpx 0px 5px; */
-    /* background-color: var(--science-theme-background-default); */
-    background-image: linear-gradient( var(--science-theme-background-default), white);
+    /* background-color: var(--forensics-background-default); */
+    /* background-image: linear-gradient( var(--forensics-background-default), white); */
     color: #fff; 
     width: 40px;
     height: 300px;
@@ -74,19 +74,20 @@
 
 .normalFilter {
     /* float: left; */
+    background-color: var(--background-lighter);
     width: 100%;
 }
 
 .lbl-filter {
     margin-top:1em;
-    background-color: var(--science-theme-background-light);
+    background-color: var(--forensics-background-light);
     width: 100%;
     padding-left: 1em;
     padding-top:1em;
 }
 
 .filter-input {
-    background-color: var(--science-theme-background-light);
+    background-color: var(--forensics-background-light);
     padding-left:15px;
     padding-right:1.0em;
 }
@@ -103,7 +104,7 @@
 
 .show-more-less {
     color: #1E6BA1;
-    background-color: var(--science-theme-background-light);
+    background-color: var(--forensics-background-light);
     text-align: right;
     padding-right: 20px;
     width: 100%;
@@ -116,7 +117,7 @@
 }
 
 .badge-style {
-    background-color: var(--science-theme-background-default);
+    /* background-color: var(--forensics-background-default); */
     color: white;
     border-radius: 100%;
     padding: 2px 6px 2px 2px;

@@ -5,7 +5,7 @@
 
         <!-- Left side filters -->
         <div [@filterStatus]="filterToggler" style="vertical-align: top;" [ngStyle]="{'width': filterWidthStr}">
-                <app-filters [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [mobileMode]="mobileMode" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
+                <app-filters [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [collection]="collection" [mobileMode]="mobileMode" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
 
         </div>
 

@@ -42,6 +42,7 @@ export class ResourceDataComponent implements OnChanges {
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean; 
     @Input() theme: string;
+    @Input() collection: string;
 
     // pass out download status for metrics refresh
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();

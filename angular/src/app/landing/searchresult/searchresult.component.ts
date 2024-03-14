@@ -20,7 +20,7 @@ export class SearchresultComponent implements OnInit {
     mobHeight: number;
     mobWidth: number;
     mobileMode: boolean = false; // set mobile mode to true if window width < 641
-    filterWidth: number = 30;
+    filterWidth: number = 39; // Filter expanded by default
     filterWidthStr: string;
     filterMode: string = "normal";
     resultWidth: any;
@@ -38,6 +38,7 @@ export class SearchresultComponent implements OnInit {
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
+    @Input() collection: string;
 
     constructor(private cdr: ChangeDetectorRef) {
     }
@@ -98,6 +99,8 @@ export class SearchresultComponent implements OnInit {
      * @param filterMode expanded or collapsed
      */
     updateWidth(filterMode?: string){
+        if(!this.mobWidth) return;
+        
         this.filterMode = filterMode? filterMode : this.filterMode;
 
         if(!this.mobileMode){

@@ -1,8 +1,8 @@
 <div [@filterExpand]="mobileMode? 'expanded' : isActive? 'expanded' : 'collapsed'" [ngStyle]="{'width': mobileMode? '100%':filterWidthNum + 'px'}">
-    <div class="normalFilter" [hidden]="!isActive && !mobileMode" id="activeFilter" style="height:auto;padding-bottom: 1em;">
+    <div class="normalFilter" [hidden]="!isActive && !mobileMode" id="activeFilter" style="height:auto;padding-bottom: 1em;" [style.--background-lighter]="lightColor">
         <div>
             <!-- Filter header -->
-            <div id="filterHeader" *ngIf="isActive || mobileMode">
+            <div id="filterHeader" *ngIf="isActive || mobileMode" [style.--background-default]="defaultColor">
                 <a id="filtersLabel"
                 class="btn-sm collapsed in" (click)="this.isActive = !this.isActive;setFilterWidth()" data-toggle="collapse"
                 style="border-color: #025277; color: #FFF;padding: 0em;border: 0em"
@@ -22,15 +22,15 @@
             </div>
 
             <div style="padding-left: -1em;" *ngIf="isActive && !searching">
-                <!-- Forensics Research topics -->
-                <div class="bottom-line" *ngIf="forensicsThemesTree.length > 0">
+                <!-- Collection Research topics -->
+                <div class="bottom-line" *ngIf="collectionThemesTree.length > 0">
                     <div class="filter-checkbox">
-                        <div [@expand]="forensicsNodeExpanded? forensicsShowMoreLink ? 'collapsed':'expanded':'closed'" >
-                            <p-tree id="forensicsThemes" [value]="forensicsThemesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="forensicsSelectedThemesNode" 
+                        <div [@expand]="collectionNodeExpanded? collectionShowMoreLink ? 'collapsed':'expanded':'closed'" >
+                            <p-tree id="collectionThemes" [value]="collectionThemesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="collectionSelectedThemesNode" 
                                 (onNodeUnselect)="filterResults()"
                                 (onNodeSelect)="filterResults()" 
-                                (onNodeExpand)="forensicsNodeExpanded = true"
-                                (onNodeCollapse)="forensicsNodeExpanded = false">
+                                (onNodeExpand)="collectionNodeExpanded = true"
+                                (onNodeCollapse)="collectionNodeExpanded = false">
                                 <ng-template let-node pTemplate="default">
                                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
                                         <span *ngIf="node.label.split('-')[1] !=''; else header1" class="invisible-scrollbar" > {{node.label.split("-")[0]}}&nbsp;</span>
@@ -38,7 +38,7 @@
                                             <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
                                         </ng-template>
 
-                                        <span class="w3-badge badge-notify badge-style"
+                                        <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
                                             *ngIf="node.label.split('-')[1] !=''">
                                             {{node.label.split("-")[1]}}</span>
                                     </div>
@@ -46,11 +46,11 @@
                             </p-tree>
                         </div>
                     </div>
-                    <div class="show-more-less" (click)="$event.preventDefault(); forensicsShowMoreLink = false"
-                        *ngIf="forensicsNodeExpanded == true && forensicsShowMoreLink == true && forensicsThemesTree[0]?.children.length > 5">Show More...
+                    <div class="show-more-less" (click)="$event.preventDefault(); collectionShowMoreLink = false"
+                        *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == true && collectionThemesTree[0]?.children.length > 5">Show More...
                     </div>
-                    <div class="show-more-less" (click)="$event.preventDefault();forensicsShowMoreLink = true"
-                        *ngIf="forensicsNodeExpanded == true && forensicsShowMoreLink == false && forensicsThemesTree[0]?.children.length > 5">Show Less
+                    <div class="show-more-less" (click)="$event.preventDefault();collectionShowMoreLink = true"
+                        *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == false && collectionThemesTree[0]?.children.length > 5">Show Less
                     </div>
                 </div>
 
@@ -189,7 +189,7 @@
         </div>
     </div>
 
-    <div *ngIf="!searching && !isActive && !mobileMode" class="collapsedFilterBox" (click)="this.isActive = !this.isActive;setFilterWidth()">
+    <div *ngIf="!searching && !isActive && !mobileMode" class="collapsedFilterBox" [style.background-image]="collapedFilerColor" (click)="this.isActive = !this.isActive;setFilterWidth()">
         
         <!-- Collapsed filters -->
         <div >

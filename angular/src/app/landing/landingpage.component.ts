@@ -26,7 +26,8 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 import { MetricsData } from "./metrics-data";
-import { Themes, ThemesPrefs } from '../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections } from '../shared/globals/globals';
+import * as BannerUrls from '../../assets/site-constants/banner-urls.json';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -100,6 +101,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     theme: string;
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
+    collection: string = Collections.DEFAULT;
+    bannerUrls: any;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -224,10 +227,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
+                console.log("this.md", this.md);
+                console.log("this.md", JSON.stringify(this.md));
+
                 this.pdrid = this.md["@id"];
                 this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
 
                 if(this.inBrowser){
+                    this.getCollection();
+                    this.loadBannerUrl();
                     if(this.editEnabled){
                         this.metricsData.hasCurrentMetrics = false;
                         this.showMetrics = true;
@@ -288,6 +296,34 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
         });
+    }
+
+    getCollection() {
+        if(this.pdrid.includes("pdr0-0001"))
+            this.collection = Collections.FORENSICS;
+        else if(this.pdrid.includes("pdr1-0001"))
+            this.collection = Collections.SEMICONDUCTORS; 
+        else
+            this.collection = Collections.DEFAULT;
+    }
+
+    loadBannerUrl() {
+        this.bannerUrls = BannerUrls as any;
+
+        switch(this.collection) { 
+            case Collections.FORENSICS: { 
+                this.imageURL = this.bannerUrls.forensics;
+                break; 
+            } 
+            case Collections.SEMICONDUCTORS: { 
+                this.imageURL = this.bannerUrls.semiconductors;
+                break; 
+            } 
+            default: { 
+                this.imageURL = "";
+                break; 
+            } 
+        } 
     }
 
     /**

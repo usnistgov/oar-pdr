@@ -4,7 +4,7 @@
     border-bottom: 1px solid grey;
     align-items:center;
     margin: -8px 0 2em 0;
-    background-color: var(--science-theme-background-blue); 
+    background-color: var(--forensics-background-blue); 
 }
 
 .title {
@@ -32,30 +32,30 @@
 .visit-home-page-forensics {
     font-size: 13px; 
     width:120px; 
-    background-color: var(--science-theme-background-blue); 
+    background-color: var(--forensics-background-blue); 
     height: 30px !important;
     color: white;
     float: right;
 }
 
 .visit-home-page-forensics:hover {
-    background-color: var(--science-theme-background-blue-hover); 
+    background-color: var(--forensics-background-dark-hover); 
 }
 
 .search-button {
-    background-color: var(--science-theme-background-blue); 
+    background-color: var(--forensics-background-blue); 
 }
 
 #dog {
     width:100px;margin: auto;
     clear: both;
     margin-top: 2em;
-    fill: var(--science-theme-background-blue); 
+    fill: var(--forensics-background-blue); 
 }
 
 .nothing-found-text {
     margin-left: 2em;
-    color: var(--science-theme-background-blue); 
+    color: var(--forensics-background-blue); 
 }
 
 #table{ 
@@ -65,7 +65,7 @@
 }
 .tr{ 
     display: table-row; 
-    background-color: var(--science-theme-background-blue); 
+    background-color: var(--forensics-background-blue); 
     width: 100%;
 }
 .td{ 

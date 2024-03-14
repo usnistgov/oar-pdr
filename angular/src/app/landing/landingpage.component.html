@@ -9,7 +9,7 @@
 
 <!-- landing page panel -->
 <div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad">
-<!-- <div *ngIf="!displaySpecialMessage"> -->
+    <!-- <div *ngIf="!displaySpecialMessage"> -->
     <div [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
         <!-- <div> -->
         <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
@@ -35,42 +35,42 @@
         <div #stickyMenu></div>
         <div *ngIf="_showData">
             <!-- <div class="grid111"> -->
-                <!-- side tool menu (for tablets and desktop displays  -->
-                
-                <div [ngClass]="windowScrolled ? 'sticky-menu' : 'rightmenu'">
-                    <!-- <div style="position: sticky; top: 1em;width: 20%;display: inline-block;"> -->
-                    <!-- <div class="col-12"> -->
-                    <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
+            <!-- side tool menu (for tablets and desktop displays  -->
 
-                        <tools-menu #menu2 [record]="md" [isPopup]="false" (toggle_citation)="toggleCitation('large')"
-                            (scroll)="goToSection($event)">
-                        </tools-menu>
+            <div [ngClass]="windowScrolled ? 'sticky-menu' : 'rightmenu'">
+                <!-- <div style="position: sticky; top: 1em;width: 20%;display: inline-block;"> -->
+                <!-- <div class="col-12"> -->
+                <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
-                        <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
-                            [metricsData]="metricsData" [showMetrics]="showMetrics">
-                        </app-metricsinfo>
+                    <tools-menu #menu2 [record]="md" [isPopup]="false" [collection]="collection" (toggle_citation)="toggleCitation('large')"
+                        (scroll)="goToSection($event)">
+                    </tools-menu>
 
-                        <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
-                    </div>
-                    <!-- </div> -->
+                    <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
+                        [metricsData]="metricsData" [showMetrics]="showMetrics">
+                    </app-metricsinfo>
+
+                    <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
                 </div>
+                <!-- </div> -->
+            </div>
 
-                <!-- landing page content -->
-                <div style="display: inline-block;" [ngStyle]="{'width': mobileMode? '100%': '80%'}">
+            <!-- landing page content -->
+            <div style="display: inline-block;" [ngStyle]="{'width': mobileMode? '100%': '80%'}">
 
-                    <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled"
-                        [mobileMode]="mobileMode" [metricsData]="metricsData" [showJsonViewer]="showJsonViewer"
-                        [theme]="theme" (dlStatus)="onDownloadStatusChanged($event)">
-                    </pdr-landing-body>
+                <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled" [collection]="collection"
+                    [mobileMode]="mobileMode" [metricsData]="metricsData" [showJsonViewer]="showJsonViewer"
+                    [theme]="theme" (dlStatus)="onDownloadStatusChanged($event)">
+                </pdr-landing-body>
 
-                </div>
+            </div>
 
-                <!-- citation pop-up -->
-                <div *ngIf="inBrowser">
-                    <citation-popup [citetext]="getCitation()" [visible]="citationVisible" [width]="citationDialogWith"
-                        (visibleChange)="setCitationVisible($event)">
-                    </citation-popup>
-                </div>
+            <!-- citation pop-up -->
+            <div *ngIf="inBrowser">
+                <citation-popup [citetext]="getCitation()" [visible]="citationVisible" [width]="citationDialogWith"
+                    (visibleChange)="setCitationVisible($event)">
+                </citation-popup>
+            </div>
 
 
             <!-- </div> -->
