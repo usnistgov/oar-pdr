@@ -19,16 +19,16 @@
         </div>
 
         <!-- Menu button and the popup menu (mobile mode only) -->
-        <div style="width: 100%; height: 0px;">
+        <div style="width: 100%; height: 0px; margin-top: 1em;" class="sticky-button">
             <!-- div to keep track of the menu button position -->
             <div #stickyButton></div>
 
-            <button #menubtn *ngIf="md !== null && inBrowser && mobileMode"
-                [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" type="button" pButton
-                icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.togglePopup($event)">
+            <button #menubtn *ngIf="md !== null && inBrowser && mobileMode" type="button" pButton icon="faa faa-list"
+                class="ui-button ui-button-icon-only sticky-menu"
+                (click)="menu3.togglePopup($event)">
             </button>
 
-            <tools-menu #menu3 [record]="md" [isPopup]="true" [appendTo]="body" [theme]="theme"
+            <tools-menu #menu3 [record]="md" [isPopup]="true" [appendTo]="menubtn" [theme]="theme"
                 (toggle_citation)="toggleCitation('small')" (scroll)="goToSection($event)">
             </tools-menu>
         </div>
@@ -37,13 +37,14 @@
             <!-- <div class="grid111"> -->
             <!-- side tool menu (for tablets and desktop displays  -->
 
-            <div [ngClass]="windowScrolled ? 'sticky-menu' : 'rightmenu'">
+            <!-- <div [ngClass]="windowScrolled ? 'sticky-menu' : 'rightmenu'"> -->
+            <div class="sticky-menu">
                 <!-- <div style="position: sticky; top: 1em;width: 20%;display: inline-block;"> -->
                 <!-- <div class="col-12"> -->
                 <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
-                    <tools-menu #menu2 [record]="md" [isPopup]="false" [collection]="collection" (toggle_citation)="toggleCitation('large')"
-                        (scroll)="goToSection($event)">
+                    <tools-menu #menu2 [record]="md" [isPopup]="false" [collection]="collection"
+                        (toggle_citation)="toggleCitation('large')" (scroll)="goToSection($event)">
                     </tools-menu>
 
                     <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
@@ -58,9 +59,9 @@
             <!-- landing page content -->
             <div style="display: inline-block;" [ngStyle]="{'width': mobileMode? '100%': '80%'}">
 
-                <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled" [collection]="collection"
-                    [mobileMode]="mobileMode" [metricsData]="metricsData" [showJsonViewer]="showJsonViewer"
-                    [theme]="theme" (dlStatus)="onDownloadStatusChanged($event)">
+                <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled"
+                    [collection]="collection" [mobileMode]="mobileMode" [metricsData]="metricsData"
+                    [showJsonViewer]="showJsonViewer" [theme]="theme" (dlStatus)="onDownloadStatusChanged($event)">
                 </pdr-landing-body>
 
             </div>

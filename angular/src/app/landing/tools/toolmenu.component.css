@@ -129,7 +129,6 @@
   :host ::ng-deep .rightMenuStyleST > .p-menu  .p-menuitem{
     line-height: 1em;
     min-height: 1em;
-    background-color: var(--forensics-background-light);
     word-wrap: break-word;
     font-family: sans-serif;
     font-size: 14px;

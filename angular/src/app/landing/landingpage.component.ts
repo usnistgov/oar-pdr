@@ -27,7 +27,7 @@ import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 import { MetricsData } from "./metrics-data";
 import { Themes, ThemesPrefs, Collections } from '../shared/globals/globals';
-import * as BannerUrls from '../../assets/site-constants/banner-urls.json';
+import * as CollectionData from '../../assets/site-constants/collections.json';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -93,16 +93,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     dialogOpen: boolean = false;
     modalReference: any;
     windowScrolled: boolean = false;
-    btnPosition: number = 20;
-    menuPosition: number = 20;
-    menuBottom: string = "1em";
     showMetrics: boolean = false;
     imageURL: string;
     theme: string;
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
     collection: string = Collections.DEFAULT;
-    bannerUrls: any;
+    collectionObj: any;
+
+    buttonTop: number = 20;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -227,9 +226,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 metadataError = "not-found";
             }
             else{
-                console.log("this.md", this.md);
-                console.log("this.md", JSON.stringify(this.md));
-
                 this.pdrid = this.md["@id"];
                 this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
 
@@ -308,15 +304,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     loadBannerUrl() {
-        this.bannerUrls = BannerUrls as any;
+        this.collectionObj = CollectionData[this.collection.toLowerCase()] as any;
 
         switch(this.collection) { 
             case Collections.FORENSICS: { 
-                this.imageURL = this.bannerUrls.forensics;
+                this.imageURL = this.collectionObj.bannerUrl;
                 break; 
             } 
             case Collections.SEMICONDUCTORS: { 
-                this.imageURL = this.bannerUrls.semiconductors;
+                this.imageURL = this.collectionObj.bannerUrl;
                 break; 
             } 
             default: { 
@@ -389,11 +385,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     @HostListener("window:scroll", [])
     onWindowScroll() {
         if(this.mobileMode)
-            this.windowScrolled = (window.pageYOffset > this.btnPosition);
-        else
-            this.windowScrolled = (window.pageYOffset > this.menuPosition);
-
-        this.menuBottom = (window.pageYOffset).toString() + 'px';
+            this.buttonTop = window.pageYOffset > 200? 10 : 200 - window.pageYOffset;
     }
 
     /**
@@ -492,12 +484,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             .subscribe((state: BreakpointState) => {
                 if (state.matches) {
                     this.mobileMode = false;
-                    if (this.menuElement)
-                        this.menuPosition = this.menuElement.nativeElement.offsetTop + 20;
                 } else {
                     this.mobileMode = true;
-                    if (this.btnElement)
-                        this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
                 }
             });
         }

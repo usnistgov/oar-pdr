@@ -1,5 +1,4 @@
 #filterHeader {
-    background-color: var(--background-default);
     border-bottom:.5px solid #e6e6e6;
     width: 100%;
     padding: .625em;
@@ -73,21 +72,17 @@
 }
 
 .normalFilter {
-    /* float: left; */
-    background-color: var(--background-lighter);
     width: 100%;
 }
 
 .lbl-filter {
     margin-top:1em;
-    background-color: var(--forensics-background-light);
     width: 100%;
     padding-left: 1em;
     padding-top:1em;
 }
 
 .filter-input {
-    background-color: var(--forensics-background-light);
     padding-left:15px;
     padding-right:1.0em;
 }
@@ -104,7 +99,6 @@
 
 .show-more-less {
     color: #1E6BA1;
-    background-color: var(--forensics-background-light);
     text-align: right;
     padding-right: 20px;
     width: 100%;

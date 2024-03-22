@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FiltersComponent } from './filters.component';
+import { TaxonomyComponent } from './taxonomy.component';
 import { TreeModule } from 'primeng/tree';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { AutoCompleteModule } from 'primeng/autocomplete';
@@ -15,12 +15,12 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
-import { TaxonomyModule } from '../taxonomy/taxonomy.module';
 
 @NgModule({
-  declarations: [FiltersComponent],
+  declarations: [TaxonomyComponent],
   imports: [
-    CommonModule, TreeModule,
+    CommonModule,
+    TreeModule,
     DialogModule, 
     InputTextModule, 
     PanelMenuModule, 
@@ -33,11 +33,8 @@ import { TaxonomyModule } from '../taxonomy/taxonomy.module';
     InputTextareaModule,
     ProgressSpinnerModule,
     MultiSelectModule,
-    FormsModule,
-    TaxonomyModule
+    FormsModule
   ],
-  exports: [
-    FiltersComponent
-  ]
+  exports: [TaxonomyComponent]
 })
-export class FiltersModule { }
+export class TaxonomyModule { }

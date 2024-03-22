@@ -24,7 +24,6 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
 // import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
 import { SearchresultModule } from './searchresult/searchresult.module';
 
-
 /**
  * A module supporting the complete display of landing page content associated with 
  * a resource identifier

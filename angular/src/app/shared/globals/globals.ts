@@ -5,8 +5,11 @@ export class Themes {
 
 export class Collections {
     static readonly DEFAULT = 'Default';
+    static readonly DEFAULT_NAME = 'default';
     static readonly FORENSICS = 'Forensics';
+    static readonly FORENSICS_NAME = 'forensics';
     static readonly SEMICONDUCTORS = 'Semiconductors';
+    static readonly SEMICONDUCTORS_NAME = 'Semiconductors';
 }
 
 let _theme = {};
@@ -67,4 +70,18 @@ export class ColorPrefs {
     public static getColorStr(collection: string, color: string) {
         return "var(--" + collection.toLowerCase() + ColorPrefs._lColor[color] + ")";
     }    
+}
+
+export class Collection {
+    bannerUrl: string;
+    taxonomyURI: string;
+    color: ColorScheme;
+}
+
+export interface ColorScheme {
+    default: string;
+    light: string;
+    lighter: string;
+    dark: string;
+    hover: string;
 }

@@ -2,23 +2,22 @@
     width: 100%;
     height: 45px;
     border-bottom: 1px solid grey;
-    align-items:center;
+    align-items: center;
     margin: -8px 0 2em 0;
-    background-color: var(--forensics-background-blue); 
 }
 
 .title {
-    color:#1471AE;
+    color: #1471AE;
     font-size: 16px !important;
-  }
-  
+}
+
 .title:hover {
     text-decoration: underline;
 }
 
 .visit-home-page {
-    font-size: 13px; 
-    width:120px; 
+    font-size: 13px;
+    width: 120px;
     background-color: var(--nist-green-default);
     height: 35px;
     color: white;
@@ -30,46 +29,49 @@
 }
 
 .visit-home-page-forensics {
-    font-size: 13px; 
-    width:120px; 
-    background-color: var(--forensics-background-blue); 
+    font-size: 13px;
+    width: 120px;
+    background-color: var(--forensics-background-blue);
     height: 30px !important;
     color: white;
     float: right;
 }
 
 .visit-home-page-forensics:hover {
-    background-color: var(--forensics-background-dark-hover); 
+    background-color: var(--forensics-background-dark-hover);
 }
 
 .search-button {
-    background-color: var(--forensics-background-blue); 
+    background-color: var(--forensics-background-blue);
 }
 
 #dog {
-    width:100px;margin: auto;
+    width: 100px;
+    margin: auto;
     clear: both;
     margin-top: 2em;
-    fill: var(--forensics-background-blue); 
+    fill: var(--forensics-background-blue);
 }
 
 .nothing-found-text {
     margin-left: 2em;
-    color: var(--forensics-background-blue); 
+    color: var(--forensics-background-blue);
 }
 
-#table{ 
-    display: table; 
+#table {
+    display:table;
     width: 100%;
     margin-bottom: 1.5em;
 }
-.tr{ 
-    display: table-row; 
-    background-color: var(--forensics-background-blue); 
+
+.tr {
+    display: table-row;
+    background-color: var(--forensics-background-blue);
     width: 100%;
 }
-.td{ 
-    display: table-cell; 
+
+.td {
+    display:table-cell;
     color: white;
     text-align: left;
 }
