@@ -1,6 +1,17 @@
+import { SelectItem, TreeNode } from 'primeng/api';
+
 export class Themes {
     static readonly SCIENCE_THEME = 'ScienceTheme';
     static readonly DEFAULT_THEME = 'DefaultTheme';
+}
+
+export class Collections {
+    static readonly DEFAULT = 'Default';
+    static readonly DEFAULT_NAME = 'default';
+    static readonly FORENSICS = 'Forensics';
+    static readonly FORENSICS_NAME = 'forensics';
+    static readonly SEMICONDUCTORS = 'Semiconductors';
+    static readonly SEMICONDUCTORS_NAME = 'Semiconductors';
 }
 
 let _theme = {};
@@ -38,4 +49,53 @@ export class ThemesPrefs {
 
         return ThemesPrefs._lSourceLabel[theme]
     }
+}
+
+export class ColorDef {
+    static readonly DEFAULT = 'default';
+    static readonly DARK = 'Dark';
+    static readonly LIGHT = 'light';
+    static readonly LIGHT2 = 'lights';
+    static readonly DARK_HOVER = 'dark-hover';
+}
+
+let _color = {};
+_color[ColorDef.DEFAULT] = "-background-default";
+_color[ColorDef.DARK] = "-background-dark";
+_color[ColorDef.LIGHT] = "-background-light";
+_color[ColorDef.LIGHT2] = "-background-light2";
+_color[ColorDef.DARK_HOVER] = "-background-dark-hover";
+
+export class ColorPrefs {
+    private static readonly _lColor = _color;
+
+    public static getColorStr(collection: string, color: string) {
+        return "var(--" + collection.toLowerCase() + ColorPrefs._lColor[color] + ")";
+    }    
+}
+
+export class Collection {
+    bannerUrl: string;
+    taxonomyURI: string;
+    color: ColorScheme;
+    theme: CollectionThemes;
+}
+
+export interface ColorScheme {
+    default: string;
+    light: string;
+    lighter: string;
+    dark: string;
+    hover: string;
+}
+
+export interface CollectionThemes {
+    collectionThemes: SelectItem[];
+    collectionThemesAllArray: string[];
+    collectionUnspecifiedCount: number;
+    collectionUniqueThemes: string[];
+    collectionThemesWithCount: TreeNode[];
+    collectionThemesTree: TreeNode[];
+    collectionShowMoreLink: boolean;
+    collectionSelectedThemesNode: any[];
 }

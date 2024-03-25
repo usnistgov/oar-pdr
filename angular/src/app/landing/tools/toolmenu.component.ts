@@ -10,7 +10,7 @@ import * as _ from 'lodash-es';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { CartConstants } from '../../datacart/cartconstants';
-import { Themes, ThemesPrefs } from '../../shared/globals/globals';
+import { Collections, Themes, ThemesPrefs } from '../../shared/globals/globals';
 
 
 /**
@@ -40,6 +40,7 @@ export class ToolMenuComponent implements OnChanges {
     @Input() isPopup : boolean = false;
     @Input() appendTo : boolean = false;
     @Input() theme: string = "nist"
+    @Input() collection: string = Collections.DEFAULT;
 
     // signal for triggering display of the citation information
     @Output() toggle_citation = new EventEmitter<boolean>();
@@ -97,8 +98,12 @@ export class ToolMenuComponent implements OnChanges {
         if(this.theme == Themes.SCIENCE_THEME) {
             if(this.isPopup) 
                 return 'rightMenuStylePopST';
-            else
-                return 'rightMenuStyleST';
+            else{
+                if(this.collection == Collections.FORENSICS)
+                    return 'rightMenuStyleST rightMenuStyleForensicsHeader rightMenuStyleForensicsItem';
+                else
+                    return 'rightMenuStyleST rightMenuStyleSemiconductorsHeader rightMenuStyleSemiconductorsItem';
+            }
         }else{
             if(this.isPopup) 
                 return 'rightMenuStylePop';

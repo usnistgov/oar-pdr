@@ -42,6 +42,7 @@ export class LandingBodyComponent {
     @Input() md: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() editEnabled: boolean;
+    @Input() collection: string;
 
     // Pass out download status
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();

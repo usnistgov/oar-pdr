@@ -8,6 +8,8 @@ import { ThisReceiver } from '@angular/compiler';
 import * as e from 'express';
 import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import * as ColorTheme from '../../../assets/site-constants/color-theme.json';
+import { Collections } from '../../shared/globals/globals';
 
 @Component({
   selector: 'app-resultlist',
@@ -56,9 +58,14 @@ export class ResultlistComponent implements OnInit {
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 20;
+    itemsPerPage: number = 10;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: any = {name:'Page 1', value:1};
+
+    //  Color
+    defaultColor: string;
+    lightColor: string;  
+    lighterColor: string;  
 
     @Input() md: NerdmRes = null;
     @Input() searchValue: string;
@@ -66,6 +73,7 @@ export class ResultlistComponent implements OnInit {
     @Input() mobWidth: number = 1920;
     @Input() resultWidth: string = '400px';
     @Input() filterString: string = '';
+    @Input() collection: string = Collections.FORENSICS;
 
     constructor(private searchService: SearchService, 
         private cfg: AppConfig,
@@ -77,7 +85,7 @@ export class ResultlistComponent implements OnInit {
 
         let that = this;
         let urls = (new NERDResource(this.md)).dynamicSearchUrls();
-        // console.log("ResultlistComponent: Found "+urls.length+" search url(s)");
+
         for(let i=0; i < urls.length; i++){
             this.searchService.resolveSearchRequest(urls[i])
             .subscribe(
@@ -87,6 +95,28 @@ export class ResultlistComponent implements OnInit {
                 },
                 error => that.onError(urls[i], error)
             );
+        }
+
+        this.setColor(this.collection);
+    }
+
+    onPageChange(value: any){
+        console.log("this.currentPage", value.target.value);
+    }
+
+    setColor(collection: string) {
+        let _collection;
+        if(!collection) _collection = "default";
+        else _collection = collection.toLowerCase();
+
+        if(ColorTheme[_collection]) {
+            this.defaultColor = ColorTheme[_collection].default;
+            this.lightColor = ColorTheme[_collection].light;
+            this.lighterColor = ColorTheme[_collection].lighter;
+        }else{
+            this.defaultColor = ColorTheme["default"].default;
+            this.lightColor = ColorTheme["default"].light;
+            this.lighterColor = ColorTheme["default"].lighter;
         }
     }
 
@@ -462,6 +492,7 @@ export class ResultlistComponent implements OnInit {
      * @param event sort item
      */
     onSortByChange(event: any) {
+        console.log("event", event.value);
         let key = event.value.value;
 
         if(key == "modified"){
