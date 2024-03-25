@@ -1,3 +1,5 @@
+import { SelectItem, TreeNode } from 'primeng/api';
+
 export class Themes {
     static readonly SCIENCE_THEME = 'ScienceTheme';
     static readonly DEFAULT_THEME = 'DefaultTheme';
@@ -76,6 +78,7 @@ export class Collection {
     bannerUrl: string;
     taxonomyURI: string;
     color: ColorScheme;
+    theme: CollectionThemes;
 }
 
 export interface ColorScheme {
@@ -84,4 +87,15 @@ export interface ColorScheme {
     lighter: string;
     dark: string;
     hover: string;
+}
+
+export interface CollectionThemes {
+    collectionThemes: SelectItem[];
+    collectionThemesAllArray: string[];
+    collectionUnspecifiedCount: number;
+    collectionUniqueThemes: string[];
+    collectionThemesWithCount: TreeNode[];
+    collectionThemesTree: TreeNode[];
+    collectionShowMoreLink: boolean;
+    collectionSelectedThemesNode: any[];
 }

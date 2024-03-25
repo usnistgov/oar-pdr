@@ -23,86 +23,13 @@
             </div>
 
             <div style="padding-left: -1em;" *ngIf="isActive && !searching">
-                <div *ngFor="let theme of allThemes | keyvalue">
-                    <app-taxonomy [collectionThemesTree]="allThemes[theme.key].collectionThemesTree"
+                <!-- Loop through all themes -->
+                <div *ngFor="let collection of allCollections | keyvalue">
+                    <app-taxonomy [collectionThemesTree]="allCollections[collection.key].theme?.collectionThemesTree"
                         [backgroundColor]="lighterColor" [defaultColor]="defaultColor"
                         (filterString)="updateFilterString($event, collection)">
                     </app-taxonomy>
                 </div>
-
-                <!-- Collection Research topics -->
-                <!-- <app-taxonomy [collectionThemesTree]="collectionThemesTree" [backgroundColor]="lighterColor"
-                    [defaultColor]="defaultColor" (filterString)="updateFilterString($event, collection)">
-                </app-taxonomy> -->
-
-                <!-- NIST Research topics -->
-                <!-- <app-taxonomy [collectionThemesTree]="themesTree" [backgroundColor]="lighterColor"
-                    [defaultColor]="defaultColor" (filterString)="updateFilterString($event, collection)">
-                </app-taxonomy> -->
-
-                <!-- Collection Research topics -->
-                <!-- <div class="bottom-line" *ngIf="collectionThemesTree.length > 0">
-                    <div class="filter-checkbox">
-                        <div [@expand]="collectionNodeExpanded? collectionShowMoreLink ? 'collapsed':'expanded':'closed'" >
-                            <p-tree id="collectionThemes" [value]="collectionThemesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="collectionSelectedThemesNode" 
-                                (onNodeUnselect)="filterResults()"
-                                (onNodeSelect)="filterResults()" 
-                                (onNodeExpand)="collectionNodeExpanded = true"
-                                (onNodeCollapse)="collectionNodeExpanded = false">
-                                <ng-template let-node pTemplate="default">
-                                    <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                                        <span *ngIf="node.label.split('-')[1] !=''; else header1" class="invisible-scrollbar" > {{node.label.split("-")[0]}}&nbsp;</span>
-                                        <ng-template #header1>
-                                            <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
-                                        </ng-template>
-
-                                        <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
-                                            *ngIf="node.label.split('-')[1] !=''">
-                                            {{node.label.split("-")[1]}}</span>
-                                    </div>
-                                </ng-template>
-                            </p-tree>
-                        </div>
-                    </div>
-                    <div class="show-more-less" (click)="$event.preventDefault(); collectionShowMoreLink = false" [style.background-color]="lighterColor"
-                        *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == true && collectionThemesTree[0]?.children.length > 5">Show More...
-                    </div>
-                    <div class="show-more-less" (click)="$event.preventDefault();collectionShowMoreLink = true" [style.background-color]="lighterColor"
-                        *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == false && collectionThemesTree[0]?.children.length > 5">Show Less
-                    </div>
-                </div> -->
-
-                <!-- NIST Research topics -->
-                <!-- <div class="bottom-line">
-                    <div class="filter-checkbox">
-                        <div [@expand]="nodeExpanded? showMoreLink ? 'collapsed':'expanded':'closed'">
-                            <p-tree id="themes" [value]="themesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="selectedThemesNode" 
-                                (onNodeUnselect)="filterResults()"
-                                (onNodeSelect)="filterResults()" 
-                                (onNodeExpand)="nodeExpanded = true"
-                                (onNodeCollapse)="nodeExpanded = false">
-                                <ng-template let-node pTemplate="default">
-                                    <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                                        <span *ngIf="node.label.split('-')[1] !=''; else header1" class="invisible-scrollbar"> {{node.label.split("-")[0]}}&nbsp;</span>
-                                        <ng-template #header1>
-                                            <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
-                                        </ng-template>
-
-                                        <span class="w3-badge badge-notify badge-style"
-                                            *ngIf="node.label.split('-')[1] !=''">
-                                            {{node.label.split("-")[1]}}</span>
-                                    </div>
-                                </ng-template>
-                            </p-tree>
-                        </div>
-                    </div>
-                    <div class="show-more-less" (click)="$event.preventDefault(); showMoreLink = false"
-                        *ngIf="nodeExpanded == true && showMoreLink == true && themesTree[0]?.children.length > 5">Show More...
-                    </div>
-                    <div class="show-more-less" (click)="$event.preventDefault();showMoreLink = true"
-                        *ngIf="nodeExpanded == true && showMoreLink == false && themesTree[0]?.children.length > 5">Show Less
-                    </div>
-                </div> -->
 
                 <div *ngIf="theme=='ScienceTheme'" style="width: 100%;">
                     <span class="show-more-less" style="float: right;"
