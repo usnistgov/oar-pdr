@@ -510,7 +510,7 @@ class MIDASMetadataBagger(SIPBagger):
             upldir = bgrmd.get('upload_directory')
 
         resmd = bag.nerd_metadata_for('')
-        return MIDASMetadataBagger(resmd.get['ediid'], bgrmd.get('bag_parent'),
+        return MIDASMetadataBagger(resmd['ediid'], bgrmd.get('bag_parent'),
                                    bgrmd.get('data_directory'), upldir, config, None, minter)
 
 
