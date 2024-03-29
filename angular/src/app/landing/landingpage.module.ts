@@ -23,6 +23,7 @@ import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
 // import { ForensicslandingbodyModule } from './forensicslandingbody/forensicslandingbody.module';
 // import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
 import { SearchresultModule } from './searchresult/searchresult.module';
+import { CollectionService } from '../shared/collection-service/collection.service'
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -45,7 +46,7 @@ import { SearchresultModule } from './searchresult/searchresult.module';
         ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent, MetricsinfoComponent
     ],
     providers: [
-        MetadataUpdateService, TaxonomyListService, DatePipe
+        MetadataUpdateService, TaxonomyListService, DatePipe, CollectionService
     ],
     exports: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,

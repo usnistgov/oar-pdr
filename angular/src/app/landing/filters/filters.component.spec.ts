@@ -13,6 +13,7 @@ import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { testdata } from '../../../environments/environment';
 import { TaxonomyModule } from '../taxonomy/taxonomy.module';
 import { TaxonomyComponent } from '../taxonomy/taxonomy.component';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 describe('FiltersComponent', () => {
     let component: FiltersComponent;
@@ -35,6 +36,7 @@ describe('FiltersComponent', () => {
                 TaxonomyModule],
             providers: [
                 SearchService,
+                CollectionService,
                 { provide: AppConfig,       useValue: cfg }
             ]
         })

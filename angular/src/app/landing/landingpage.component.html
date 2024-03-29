@@ -23,13 +23,24 @@
             <!-- div to keep track of the menu button position -->
             <div #stickyButton></div>
 
-            <button #menubtn *ngIf="md !== null && inBrowser && mobileMode" type="button" pButton icon="faa faa-list"
+            <!-- <button #menubtn *ngIf="md !== null && inBrowser && mobileMode" type="button" pButton icon="faa faa-list"
                 class="ui-button ui-button-icon-only sticky-menu"
                 (click)="menu3.togglePopup($event)">
+            </button> -->
+
+            <button #menubtn *ngIf="md !== null && inBrowser && mobileMode"
+                [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" type="button" pButton
+                icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.togglePopup($event)">
             </button>
 
-            <tools-menu #menu3 [record]="md" [isPopup]="true" [appendTo]="menubtn" [theme]="theme"
-                (toggle_citation)="toggleCitation('small')" (scroll)="goToSection($event)">
+            <tools-menu #menu3 
+                [record]="md" 
+                [isPopup]="true" 
+                [collection]="collection" 
+                [appendTo]="menubtn" 
+                [theme]="theme"
+                (toggle_citation)="toggleCitation('small')" 
+                (scroll)="goToSection($event)">
             </tools-menu>
         </div>
         <div #stickyMenu></div>

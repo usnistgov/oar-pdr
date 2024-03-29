@@ -19,26 +19,13 @@
     font-size: 13px;
     width: 120px;
     background-color: var(--nist-green-default);
-    height: 35px;
+    height: 30px !important;
     color: white;
     float: right;
 }
 
 .visit-home-page:hover {
     background-color: var(--nist-green-light);
-}
-
-.visit-home-page-forensics {
-    font-size: 13px;
-    width: 120px;
-    background-color: var(--forensics-background-blue);
-    height: 30px !important;
-    color: white;
-    float: right;
-}
-
-.visit-home-page-forensics:hover {
-    background-color: var(--forensics-background-dark-hover);
 }
 
 .search-button {

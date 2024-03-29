@@ -1,13 +1,13 @@
 {
-    "default": {
+    "nist": {
         "bannerUrl": "",
         "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes/",
         "color": {
             "default": "#257a2d",
             "light": "#6bad73",
-            "lighter": "#e9ffeb",
+            "lighter": "#f0f7f1",
             "dark": "#1c6022",
-            "hover": "#6bad73"
+            "hover": "#ffffff"
         }
     },
     "forensics": {
@@ -18,7 +18,7 @@
             "light": "#e3f7fd",
             "lighter": "#f5fbfd",
             "dark": "#007287",
-            "hover": "#2db2fa"
+            "hover": "#ffffff"  
         }
     },
     "semiconductors": {
@@ -29,7 +29,7 @@
             "light": "#d6d9ff",
             "lighter": "#f7f7ff",
             "dark": "#00076c",
-            "hover": "#4e5aff"
+            "hover": "#ffffff"
         }
     }
 }

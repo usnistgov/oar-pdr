@@ -8,8 +8,9 @@ import { ThisReceiver } from '@angular/compiler';
 import * as e from 'express';
 import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
-import * as ColorTheme from '../../../assets/site-constants/color-theme.json';
-import { Collections } from '../../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes } from '../../shared/globals/globals';
+import * as CollectionData from '../../../assets/site-constants/collections.json';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 @Component({
   selector: 'app-resultlist',
@@ -62,6 +63,8 @@ export class ResultlistComponent implements OnInit {
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: any = {name:'Page 1', value:1};
 
+    allCollections: any = {};
+
     //  Color
     defaultColor: string;
     lightColor: string;  
@@ -77,6 +80,7 @@ export class ResultlistComponent implements OnInit {
 
     constructor(private searchService: SearchService, 
         private cfg: AppConfig,
+        public collectionService: CollectionService,
         public gaService: GoogleAnalyticsService) { }
 
     ngOnInit(): void {
@@ -97,27 +101,20 @@ export class ResultlistComponent implements OnInit {
             );
         }
 
-        this.setColor(this.collection);
+        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+
+        // Set colors
+        this.setColor();
     }
 
     onPageChange(value: any){
         console.log("this.currentPage", value.target.value);
     }
 
-    setColor(collection: string) {
-        let _collection;
-        if(!collection) _collection = "default";
-        else _collection = collection.toLowerCase();
-
-        if(ColorTheme[_collection]) {
-            this.defaultColor = ColorTheme[_collection].default;
-            this.lightColor = ColorTheme[_collection].light;
-            this.lighterColor = ColorTheme[_collection].lighter;
-        }else{
-            this.defaultColor = ColorTheme["default"].default;
-            this.lightColor = ColorTheme["default"].light;
-            this.lighterColor = ColorTheme["default"].lighter;
-        }
+    setColor() {
+        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
+        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
+        this.lightColor = this.allCollections[this.collection.toLowerCase()].color.light;
     }
 
     ngOnChanges(changes: SimpleChanges): void {

@@ -11,6 +11,7 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
 import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes } from '../../shared/globals/globals';
 import * as CollectionData from '../../../assets/site-constants/collections.json';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 const SEARCH_SERVICE = 'SEARCH_SERVICE';
 
@@ -69,9 +70,6 @@ export class FiltersComponent implements OnInit {
     unspecifiedCount: number = 0;
     showMoreLink: boolean = true;
     standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
-
-    nistObj: Collection;
-    collectionObj: Collection;
 
     filterStrings = {};
 
@@ -150,6 +148,7 @@ export class FiltersComponent implements OnInit {
         public taxonomyListService: TaxonomyListService,
         public searchFieldsListService: SearchfieldsListService,
         public searchService: SearchService,
+        public collectionService: CollectionService,
         private cfg: AppConfig
     ) { 
         // this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
@@ -159,22 +158,18 @@ export class FiltersComponent implements OnInit {
         this.msgs = [];
         this.searchResultsError = [];
         this.MoreOptionsDisplayed = (this.theme == 'ScienceTheme');
-
         this.setFilterWidth();
-
-        // Load collection data from config file
-        this.nistObj = Object.assign(new Collection(), CollectionData[Collections.DEFAULT.toLowerCase()]);  
-        this.collectionObj = Object.assign(new Collection(), CollectionData[this.collection.toLowerCase()]);  
+        
+        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
 
         // Set colors
         this.setColor();
-
-        this.standardNISTTaxonomyURI = this.nistObj.taxonomyURI;
+        this.standardNISTTaxonomyURI = this.allCollections.nist.taxonomyURI;
     }
 
     setColor() {
-        this.defaultColor = this.collectionObj.color.default;
-        this.lighterColor = this.collectionObj.color.lighter;
+        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
+        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
         this.collapedFilerColor = "linear-gradient(" +  this.defaultColor + ", white)";
     }
 
