@@ -9,7 +9,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { CartService } from './cart.service';
 import { DataCart } from './cart';
 import { BundleplanComponent } from './bundleplan/bundleplan.component';
-
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 /**
  * a component that provides an interface for viewing the contents of a data cart and download items 
  * from it in bulk (as zip files).  It includes three main subcomponents:
@@ -41,6 +42,9 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     @ViewChild('bundler', { static: true })
     bundler : BundleplanComponent;
 
+    // property to track if the cart loading was successful
+    isCartLoadedSuccessfully: boolean = false;
+    
     /**
      * Creates an instance of the SearchPanel
      *
@@ -53,35 +57,45 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     {
         this.inBrowser = isPlatformBrowser(platformId);
 
-        this.route.params.subscribe(params => {
-            let cartName = params['cartname'];
-            let id: string = "";
-            if(cartName == 'rpa'){
-                if(this.inBrowser) {
-                    this.route.queryParams.subscribe(params => {
-                        console.log("param", params);
-                        id = params["id"];
-                    })
-    
-                    this.cartService.getRpaCart(id, cartName).subscribe((result: DataCart) => {
-                        let dataCart01 = result;
-                        this.dataCart = this.cartService.getCart(cartName);
-                        this.dataCart.contents = dataCart01.contents;
-                        this.datacartName =  cartName;
-                        this.forceReload = true;
-    
-                        //Trigger propagateSelectionUp and propagateSelectionDown
-                        //so all check boxes will be checked
-                        setTimeout(() => {
-                            this.dataCart.save();
-                        }, 0);
-                    })
-                }
-            }else{
+        this.isCartLoadedSuccessfully = false;
+
+        this.route.params.pipe(
+            switchMap(params => {
+                let cartName = params['cartname'];
                 this.datacartName = cartName;
                 this.dataCart = this.cartService.getCart(cartName);
-                this.datacartName =  this.dataCart.getName();
+                if(cartName === 'rpa' && this.inBrowser) {
+                    return this.route.queryParams.pipe(
+                        switchMap(queryParams => {
+                            let id = queryParams['id'];
+                            return this.cartService.getRpaCart(id, cartName);
+                        })
+                    );
+                } else {
+                    // Emit null or an empty observable if not 'rpa' cart or not in browser,
+                    // since no further action is needed in these cases.
+                    return of(null);
+                }
+            })
+        ).subscribe((result: DataCart | null) => {
+            if (result) {
+                this.isCartLoadedSuccessfully = true;
+                this.dataCart.contents = result.contents;
+                this.forceReload = true;
+                
+                // Trigger propagateSelectionUp and propagateSelectionDown
+                // so all check boxes will be checked
+                setTimeout(() => {
+                    this.dataCart.save();
+                }, 0);
+            } else {
+                // Handle case where result is null 
+                // (either not 'rpa' cart, not in browser, or cart loading failed)
+                this.isCartLoadedSuccessfully = false;
             }
+        }, (error) => {
+            console.error("Error loading cart:", error);
+            this.isCartLoadedSuccessfully = false;
         });
     }
 

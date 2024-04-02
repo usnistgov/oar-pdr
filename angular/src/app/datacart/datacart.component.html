@@ -10,4 +10,4 @@
 </app-bundleplan>
 
 <!-- Tree table -->
-<app-treetable [cartName]="datacartName" [forceReload]="forceReload"></app-treetable>
+<app-treetable *ngIf="isCartLoadedSuccessfully" [cartName]="datacartName" [forceReload]="forceReload"></app-treetable>
