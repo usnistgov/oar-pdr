@@ -44,7 +44,8 @@ export class DatacartComponent implements OnInit, AfterViewInit {
 
     // property to track if the cart loading was successful
     isCartLoadedSuccessfully: boolean = false;
-    
+    // property to hold the error message
+    errorMessage: string = ''; 
     /**
      * Creates an instance of the SearchPanel
      *
@@ -77,26 +78,26 @@ export class DatacartComponent implements OnInit, AfterViewInit {
                     return of(null);
                 }
             })
-        ).subscribe((result: DataCart | null) => {
-            if (result) {
+        ).subscribe({
+            next: (result: any) => { // Adjust the type as needed
+              if (result) {
                 this.isCartLoadedSuccessfully = true;
                 this.dataCart.contents = result.contents;
                 this.forceReload = true;
                 
-                // Trigger propagateSelectionUp and propagateSelectionDown
-                // so all check boxes will be checked
                 setTimeout(() => {
-                    this.dataCart.save();
+                  this.dataCart.save();
                 }, 0);
-            } else {
-                // Handle case where result is null 
-                // (either not 'rpa' cart, not in browser, or cart loading failed)
+              } else {
                 this.isCartLoadedSuccessfully = false;
+              }
+            },
+            error: (error: string) => {
+              console.error("Error loading cart:", error);
+              this.errorMessage = error; // Set the error message to display in the UI
+              this.isCartLoadedSuccessfully = false;
             }
-        }, (error) => {
-            console.error("Error loading cart:", error);
-            this.isCartLoadedSuccessfully = false;
-        });
+          });
     }
 
     /**
