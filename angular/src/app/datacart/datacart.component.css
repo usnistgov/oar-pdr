@@ -345,3 +345,8 @@ button:disabled{
     font-size: larger;
     margin-bottom: .5em;
 }
+
+.unavailabe-error-message {
+  margin: 20px;
+  text-align: center;
+}
