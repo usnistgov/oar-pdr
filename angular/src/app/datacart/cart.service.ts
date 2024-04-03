@@ -76,6 +76,7 @@ export class CartService {
                 }, 
                 (err) => {
                     // Log the error or handle it if needed
+                    console.error("Error:", err);
                     console.error("Error in getRpaCart:", err.message);
                     subscriber.error(err.message); // Propagate the error to the component
                     subscriber.complete();
