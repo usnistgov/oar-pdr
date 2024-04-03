@@ -13,5 +13,6 @@
 <app-treetable *ngIf="isCartLoadedSuccessfully" [cartName]="datacartName" [forceReload]="forceReload"></app-treetable>
 
 <div *ngIf="errorMessage" class="alert alert-danger unavailabe-error-message">
+    <i class="fa fa-exclamation-triangle" style="margin-right: 5px;"></i>
     {{ errorMessage }}
 </div>
