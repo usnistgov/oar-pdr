@@ -76,17 +76,31 @@ export class CartService {
                 }, 
                 (err) => {
                     // Log the error or handle it if needed
-                    console.error("Error:", err);
-                    console.error("Error in getRpaCart:", err.message);
-                    subscriber.error(err.message); // Propagate the error to the component
+                    const errorMessage = this.getErrorMessage(err);
+                    console.error("Error in getRpaCart:", errorMessage);
+                    subscriber.error(errorMessage); // Propagate the error to the component
                     subscriber.complete();
                 }
             );
         });
     }
 
+    
     public _getRpaCart(url: string) : Observable<any> {
         return this.http.get(url);
+    }
+
+    /**
+     * Utility function to get the error message
+     * @param error The error object or a function returning an error object
+     * @returns The extracted error message
+     */  
+    private getErrorMessage(error: any): string {
+        // Check if the error is a function and call it to get the Error object
+        const errorObj = typeof error === 'function' ? error() : error;
+        
+        // Return the error message
+        return errorObj.message;
     }
 
     /**
