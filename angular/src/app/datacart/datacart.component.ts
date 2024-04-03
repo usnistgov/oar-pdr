@@ -79,7 +79,7 @@ export class DatacartComponent implements OnInit, AfterViewInit {
                 }
             })
         ).subscribe({
-            next: (result: any) => { // Adjust the type as needed
+            next: (result: any) => {
               if (result) {
                 this.isCartLoadedSuccessfully = true;
                 this.dataCart.contents = result.contents;
@@ -94,7 +94,7 @@ export class DatacartComponent implements OnInit, AfterViewInit {
             },
             error: (error: string) => {
               console.error("Error loading cart:", error);
-              this.errorMessage = error; // Set the error message to display in the UI
+              this.errorMessage = error; // Error message to display in HTML
               this.isCartLoadedSuccessfully = false;
             }
           });
