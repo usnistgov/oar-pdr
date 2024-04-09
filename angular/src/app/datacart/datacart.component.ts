@@ -11,6 +11,9 @@ import { DataCart } from './cart';
 import { BundleplanComponent } from './bundleplan/bundleplan.component';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { throwError } from 'rxjs';
+
+
 /**
  * a component that provides an interface for viewing the contents of a data cart and download items 
  * from it in bulk (as zip files).  It includes three main subcomponents:
@@ -58,46 +61,56 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     {
         this.inBrowser = isPlatformBrowser(platformId);
 
-        this.isCartLoadedSuccessfully = false;
+        // this.isCartLoadedSuccessfully = false; Already initialized during declaration
 
         this.route.params.pipe(
             switchMap(params => {
                 let cartName = params['cartname'];
                 this.datacartName = cartName;
-                this.dataCart = this.cartService.getCart(cartName);
-                if(cartName === 'rpa' && this.inBrowser) {
-                    return this.route.queryParams.pipe(
-                        switchMap(queryParams => {
-                            let id = queryParams['id'];
-                            return this.cartService.getRpaCart(id, cartName);
-                        })
-                    );
+                // Attempt to get the cart; assuming getCart returns a cart object or null if unsuccessful
+                const cart = this.cartService.getCart(cartName);
+                if (cart) {
+                    this.dataCart = cart;
+                    this.isCartLoadedSuccessfully = true; // Set flag to true for successfully retrieved carts
+                    // Check if it's an RPA cart and we're in the browser
+                    if(cartName === 'rpa' && this.inBrowser) {
+                        return this.route.queryParams.pipe(
+                            switchMap(queryParams => {
+                                let id = queryParams['id'];
+                                return this.cartService.getRpaCart(id, cartName);
+                            })
+                        );
+                    } else {
+                        // For non-RPA carts or when not in browser, no further action needed
+                        // Use of(null) to complete the Observable chain
+                        return of(null);
+                    }
                 } else {
-                    // Emit null or an empty observable if not 'rpa' cart or not in browser,
-                    // since no further action is needed in these cases.
-                    return of(null);
+                    // Handle the case where the cart could not be retrieved
+                    this.isCartLoadedSuccessfully = false;
+                    return throwError(() => new Error("Cart could not be retrieved"));
                 }
             })
         ).subscribe({
             next: (result: any) => {
               if (result) {
-                this.isCartLoadedSuccessfully = true;
-                this.dataCart.contents = result.contents;
-                this.forceReload = true;
-                
-                setTimeout(() => {
-                  this.dataCart.save();
-                }, 0);
-              } else {
-                this.isCartLoadedSuccessfully = false;
+                // Only update the contents for RPA carts as the cart is already loaded successfully above
+                if(this.datacartName === 'rpa') {
+                    this.dataCart.contents = result.contents;
+                    this.forceReload = true;
+                    
+                    setTimeout(() => {
+                      this.dataCart.save();
+                    }, 0);
+                }
               }
             },
             error: (error: string) => {
               console.error("Error loading cart:", error);
-              this.errorMessage = error; // Error message to display in HTML
+              this.errorMessage = error; // Set the error message for display
               this.isCartLoadedSuccessfully = false;
             }
-          });
+        });
     }
 
     /**
