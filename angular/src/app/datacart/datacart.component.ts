@@ -9,6 +9,10 @@ import { isPlatformBrowser } from '@angular/common';
 import { CartService } from './cart.service';
 import { DataCart } from './cart';
 import { BundleplanComponent } from './bundleplan/bundleplan.component';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { throwError } from 'rxjs';
+
 
 /**
  * a component that provides an interface for viewing the contents of a data cart and download items 
@@ -41,6 +45,10 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     @ViewChild('bundler', { static: true })
     bundler : BundleplanComponent;
 
+    // property to track if the cart loading was successful
+    isCartLoadedSuccessfully: boolean = false;
+    // property to hold the error message
+    errorMessage: string = ''; 
     /**
      * Creates an instance of the SearchPanel
      *
@@ -53,34 +61,54 @@ export class DatacartComponent implements OnInit, AfterViewInit {
     {
         this.inBrowser = isPlatformBrowser(platformId);
 
-        this.route.params.subscribe(params => {
-            let cartName = params['cartname'];
-            let id: string = "";
-            if(cartName == 'rpa'){
-                if(this.inBrowser) {
-                    this.route.queryParams.subscribe(params => {
-                        console.log("param", params);
-                        id = params["id"];
-                    })
-    
-                    this.cartService.getRpaCart(id, cartName).subscribe((result: DataCart) => {
-                        let dataCart01 = result;
-                        this.dataCart = this.cartService.getCart(cartName);
-                        this.dataCart.contents = dataCart01.contents;
-                        this.datacartName =  cartName;
-                        this.forceReload = true;
-    
-                        //Trigger propagateSelectionUp and propagateSelectionDown
-                        //so all check boxes will be checked
-                        setTimeout(() => {
-                            this.dataCart.save();
-                        }, 0);
-                    })
-                }
-            }else{
+        // this.isCartLoadedSuccessfully = false; Already initialized during declaration
+
+        this.route.params.pipe(
+            switchMap(params => {
+                let cartName = params['cartname'];
                 this.datacartName = cartName;
-                this.dataCart = this.cartService.getCart(cartName);
-                this.datacartName =  this.dataCart.getName();
+                // Attempt to get the cart; assuming getCart returns a cart object or null if unsuccessful
+                const cart = this.cartService.getCart(cartName);
+                if (cart) {
+                    this.dataCart = cart;
+                    this.isCartLoadedSuccessfully = true; // Set flag to true for successfully retrieved carts
+                    // Check if it's an RPA cart and we're in the browser
+                    if(cartName === 'rpa' && this.inBrowser) {
+                        return this.route.queryParams.pipe(
+                            switchMap(queryParams => {
+                                let id = queryParams['id'];
+                                return this.cartService.getRpaCart(id, cartName);
+                            })
+                        );
+                    } else {
+                        // For non-RPA carts or when not in browser, no further action needed
+                        // Use of(null) to complete the Observable chain
+                        return of(null);
+                    }
+                } else {
+                    // Handle the case where the cart could not be retrieved
+                    this.isCartLoadedSuccessfully = false;
+                    return throwError(() => new Error("Cart could not be retrieved"));
+                }
+            })
+        ).subscribe({
+            next: (result: any) => {
+              if (result) {
+                // Only update the contents for RPA carts as the cart is already loaded successfully above
+                if(this.datacartName === 'rpa') {
+                    this.dataCart.contents = result.contents;
+                    this.forceReload = true;
+                    
+                    setTimeout(() => {
+                      this.dataCart.save();
+                    }, 0);
+                }
+              }
+            },
+            error: (error: string) => {
+              console.error("Error loading cart:", error);
+              this.errorMessage = error; // Set the error message for display
+              this.isCartLoadedSuccessfully = false;
             }
         });
     }
