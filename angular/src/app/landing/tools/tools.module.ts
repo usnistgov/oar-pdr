@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
 
 import { ToolMenuComponent } from './toolmenu.component';
+import { MenuComponent } from './menu/menu.component';
 
 /**
  * A module providing tools for interacting with the landing page's record metadata.  
@@ -17,10 +18,12 @@ import { ToolMenuComponent } from './toolmenu.component';
         MenuModule
     ],
     declarations: [
-        ToolMenuComponent
+        ToolMenuComponent,
+        MenuComponent
     ],
     exports: [
-        ToolMenuComponent
+        ToolMenuComponent,
+        MenuComponent
     ]
 })
 export class ToolsModule { }

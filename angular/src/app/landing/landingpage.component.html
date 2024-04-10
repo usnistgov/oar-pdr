@@ -28,20 +28,25 @@
                 (click)="menu3.togglePopup($event)">
             </button> -->
 
+            <!-- <button #menubtn *ngIf="md !== null && inBrowser && mobileMode"
+                [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" type="button" pButton
+                icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.togglePopup($event); showStickMenu = !showStickMenu">
+            </button> -->
+
+            <!-- 
+            <tools-menu #menu3 [record]="md" [isPopup]="true" [collection]="collection" [appendTo]="body"
+                [theme]="theme" (toggle_citation)="toggleCitation('small')" (scroll)="goToSection($event)">
+            </tools-menu> -->
+
             <button #menubtn *ngIf="md !== null && inBrowser && mobileMode"
                 [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" type="button" pButton
-                icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.togglePopup($event)">
+                icon="faa faa-list" class="ui-button ui-button-icon-only"
+                (click)="toggleMenu($event)">
             </button>
 
-            <tools-menu #menu3 
-                [record]="md" 
-                [isPopup]="true" 
-                [collection]="collection" 
-                [appendTo]="menubtn" 
-                [theme]="theme"
-                (toggle_citation)="toggleCitation('small')" 
-                (scroll)="goToSection($event)">
-            </tools-menu>
+            <app-menu [record]="md" class="sticky-menu01" *ngIf="showStickMenu && mobileMode" [collection]="collection"
+                [theme]="theme" (scroll)="goToSection($event)" (toggle_citation)="toggleCitation('large')">
+            </app-menu>
         </div>
         <div #stickyMenu></div>
         <div *ngIf="_showData">
@@ -54,9 +59,13 @@
                 <!-- <div class="col-12"> -->
                 <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
-                    <tools-menu #menu2 [record]="md" [isPopup]="false" [collection]="collection"
+                    <!-- <tools-menu #menu2 [record]="md" [isPopup]="false" [collection]="collection"
                         (toggle_citation)="toggleCitation('large')" (scroll)="goToSection($event)">
-                    </tools-menu>
+                    </tools-menu> -->
+
+                    <app-menu [record]="md" [collection]="collection" [theme]="theme" (scroll)="goToSection($event)"
+                        (toggle_citation)="toggleCitation('large')">
+                    </app-menu>
 
                     <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
                         [metricsData]="metricsData" [showMetrics]="showMetrics">

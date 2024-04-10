@@ -103,6 +103,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
 
     buttonTop: number = 20;
 
+    showStickMenu: boolean = false;
+
+
+    @HostListener('document:click', ['$event'])
+    documentClick(event: MouseEvent) {
+        event.stopPropagation();
+        this.showStickMenu = false;
+    }
+
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
 
@@ -578,10 +587,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * sections.  
      */
     goToSection(sectionId: string) {
-        // If sectionID is "Metadata", scroll to About This Dataset and display JSON viewer
         this.showJsonViewer = (sectionId == "Metadata");
         if(sectionId == "Metadata") sectionId = "about";
-
+      
         setTimeout(() => {
             this.landingBodyComponent.goToSection(sectionId);
         }, 50);
@@ -636,5 +644,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         }else{
             "col-10 md:col-10 lg:col-10 sm:flex-nowrap";
         }
+    }
+
+    toggleMenu(event){
+        event.stopPropagation(); 
+        this.showStickMenu = !this.showStickMenu
     }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges, ViewChild, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, OnChanges, ViewChild, EventEmitter, SimpleChanges, ElementRef } from '@angular/core';
 
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
@@ -30,7 +30,9 @@ import { CollectionService } from '../../shared/collection-service/collection.se
                [style.--background-default]="defaultColor"
                [style.--background-lighter]="lighterColor"
                [style.--background-hover]="hoverColor"
-               [popup]="isPopup" [model]="items" [appendTo]="appendTo"></p-menu>
+               [popup]="isPopup" [model]="items" 
+               [appendTo]="appendTo"
+               ></p-menu>
 `,
     styleUrls: ['./toolmenu.component.css']
 })
@@ -41,13 +43,14 @@ export class ToolMenuComponent implements OnChanges {
     hoverColor: string;
     //  Object that hold all themes: Forensics, NIST, ...
     allCollections: any = {};
+    buttonTop = 0;
 
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;
 
     // true if this menu should appear as a popup
     @Input() isPopup : boolean = false;
-    @Input() appendTo : boolean = false;
+    @Input() appendTo;
     @Input() theme: string = "nist"
     @Input() collection: string = Collections.DEFAULT;
 
@@ -66,6 +69,7 @@ export class ToolMenuComponent implements OnChanges {
     public CART_CONSTANTS: any = CartConstants.cartConst;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
     editEnabled: any;
+    parentContext: ElementRef;
 
     /**
      * create the component.
@@ -80,6 +84,7 @@ export class ToolMenuComponent implements OnChanges {
     }
 
     ngOnInit(): void {
+        console.log("appendTo", this.appendTo);
         this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
 
         this.setColor();
