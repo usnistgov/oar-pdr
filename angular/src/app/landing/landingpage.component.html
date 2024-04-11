@@ -30,7 +30,7 @@
             </button>
 
             <app-menu [record]="md" class="sticky-menu-popup" *ngIf="showStickMenu && mobileMode" [collection]="collection"
-                [theme]="theme" (scroll)="goToSection($event)" (toggle_citation)="toggleCitation('large')">
+                [theme]="theme" [inBrowser]="inBrowser" [metricsData]="metricsData" [showMetrics]="showMetrics" (scroll)="goToSection($event)" (toggle_citation)="toggleCitation('large')">
             </app-menu>
         </div>
         <div #stickyMenu></div>
@@ -38,13 +38,13 @@
             <div class="sticky-menu">
                 <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
-                    <app-menu [record]="md" [collection]="collection" [theme]="theme" (scroll)="goToSection($event)"
+                    <app-menu [record]="md" [collection]="collection" [theme]="theme" [inBrowser]="inBrowser" [metricsData]="metricsData" [showMetrics]="showMetrics" (scroll)="goToSection($event)"
                         (toggle_citation)="toggleCitation('large')">
                     </app-menu>
 
-                    <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
+                    <!-- <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
                         [metricsData]="metricsData" [showMetrics]="showMetrics">
-                    </app-metricsinfo>
+                    </app-metricsinfo> -->
 
                     <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
                 </div>

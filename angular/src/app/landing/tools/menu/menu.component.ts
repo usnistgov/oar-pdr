@@ -1,10 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CollectionService } from '../../../shared/collection-service/collection.service';
 import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes } from '../../../shared/globals/globals';
 import { NerdmRes, NERDResource } from '../../../nerdm/nerdm';
 import { CartConstants } from '../../../datacart/cartconstants';
 import { AppConfig } from '../../../config/config';
 import * as _ from 'lodash-es';
+import { isPlatformBrowser } from '@angular/common';
+import { MetricsData } from "../../metrics-data";
 
 export class menuItem {
     title: string;
@@ -47,12 +49,20 @@ export class MenuComponent implements OnInit {
     public CART_CONSTANTS: any = CartConstants.cartConst;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
     recordType: string = "";
-
+    scienceTheme = Themes.SCIENCE_THEME;
+    inBrowser: boolean = false;
 
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;    
     @Input() collection: string = Collections.DEFAULT;
     @Input() theme: string = "nist";
+
+    // Record level metrics data
+    @Input() metricsData : MetricsData;
+
+    // flag if metrics is ready to display
+    @Input() showMetrics : boolean = false;
+
     @Output() scroll = new EventEmitter<string>();
     
     // signal for triggering display of the citation information
@@ -60,7 +70,10 @@ export class MenuComponent implements OnInit {
 
     constructor(
         public collectionService: CollectionService,
-        private cfg : AppConfig) { }
+        @Inject(PLATFORM_ID) private platformId: Object,
+        private cfg : AppConfig) { 
+            this.inBrowser = isPlatformBrowser(platformId);
+        }
 
     ngOnInit(): void {
         this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());

@@ -37,3 +37,8 @@
         </td>
     </tr>
 </table>
+
+<!-- Metrics info-->
+<app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="record"
+[metricsData]="metricsData" [showMetrics]="showMetrics">
+</app-metricsinfo>
