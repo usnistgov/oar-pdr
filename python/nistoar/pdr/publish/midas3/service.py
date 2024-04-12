@@ -908,6 +908,9 @@ class MIDAS3PublishingService(PublishSystem):
                                          + halted)
 
         pod['_preserve'] = 'new'
+        if worker.is_working():
+            self.log.info("Note: POD processing is currently in progress; final processing for "+
+                          "publication will follow.")
         self._apply_pod_async(pod, async)
         if async and worker.is_working():
             # wait around for a little while to see if finishes quickly
@@ -930,6 +933,8 @@ class MIDAS3PublishingService(PublishSystem):
         if pod.get('accessLevel') == 'non-public':
             raise ejs.ValidationError("Unacceptable accessLevel property value for preservation: " +
                                       str(pod.get('accessLevel')))
+        if pod.get("_preserve"):
+            del pod['_preserve']
 
     def preserve_update(self, pod, async=None):
         """
@@ -1063,7 +1068,11 @@ class MIDAS3PublishingService(PublishSystem):
         def queue_POD(self, pod):
             self.ensure_qlock()
             with self.qlock:
-                write_json(pod, self.next_pod)
+                if pod.get('_preserve'):
+                    self.log.debug("%s: Queuing POD for preservation", self.id)
+                    write_json(pod, self.presv_pod)
+                else:
+                    write_json(pod, self.next_pod)
 
         def mark_for_preservation(self, asupdate=False):
             # NOTE: use of this function is DEPRECATED

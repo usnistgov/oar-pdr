@@ -201,27 +201,39 @@ class MIDASSIP(object):
                                   the POD JSON file
         :param nerdrec str|dict:  either the NERDm record data (as a dict) or a filepath to 
                                   the NERDm JSON file
+        :raises SIPDirectoryError:  if either of the given directories are not readable or 
+                                  if neither exist 
         """
         self.midasid = midasid
+        self.revdatadir = reviewdir
+        self.upldatadir = uploaddir
 
         # ensure we have at least one readable input directory
-        self.revdatadir = self._check_input_datadir(reviewdir)
-        self.upldatadir = self._check_input_datadir(uploaddir)
-
         self._indirs = []
-        if self.revdatadir:
-            self._indirs.append(self.revdatadir)
-        if self.upldatadir:
-            self._indirs.append(self.upldatadir)
-
-        if not self._indirs:
-            if log.isEnabledFor(logging.DEBUG):
-                log.warn("No input directories available for midasid=%s", midasid)
-                log.debug("Input dirs:\n  %s\n  %s", str(self.revdatadir), str(self.upldatadir))
-            raise SIPDirectoryNotFound(msg="No input directories available", sys=self)
+        self.refresh_indirs()  # may raise SIPDirectoryNotFound, SIPDirectoryError
 
         self.nerd = nerdrec
         self.pod  = podrec
+
+    def refresh_indirs(self):
+        """
+        check and update the directories where this bagger will look for data
+        """
+        indirs = []
+        indir = self._check_input_datadir(self.revdatadir)
+        if indir:
+            indirs.append(indir)
+        indir = self._check_input_datadir(self.upldatadir)
+        if indir:
+            indirs.append(indir)
+        self._indirs = indirs
+
+        if not self._indirs:
+            if log.isEnabledFor(logging.DEBUG):
+                log.warn("No input directories available for midasid=%s", self.midasid)
+                log.debug("Input dirs:\n  %s\n  %s", str(self.revdatadir), str(self.upldatadir))
+            raise SIPDirectoryNotFound(msg="No input directories available", sys=self)
+        
 
     @property
     def input_dirs(self):
@@ -885,6 +897,8 @@ class MIDASMetadataBagger(SIPBagger):
     def _apply_pod(self, pod, validate=True, force=False):
         if not isinstance(pod, (str, unicode, Mapping)):
             raise NERDTypeError("dict", type(pod), "POD Dataset")
+        self.log.debug("%s: refreshing available input directories", self.midasid)
+        self.sip.refresh_indirs()
         self.ensure_base_bag()
 
         log.debug("BagBuilder log has %s formatters:\n%s", len(self.bagbldr.log.handlers),
