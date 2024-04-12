@@ -13,7 +13,7 @@ import { LPSConfig } from '../app/config/config';
 
 export const context = {
     production: false,
-    useMetadataService: true,
+    useMetadataService: false,
     useCustomizationService: true
 };
 
@@ -40,7 +40,7 @@ export const config: LPSConfig = {
     status: "Dev Version",
     appVersion: "v1.3.X",
     production: context.production,
-    editEnabled: false,
+    editEnabled: true,
     gacode: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
