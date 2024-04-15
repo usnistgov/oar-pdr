@@ -297,7 +297,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     getCollection() {
         if(this.pdrid.includes("pdr0-0001"))
             this.collection = Collections.FORENSICS;
-        else if(this.pdrid.includes("pdr1-0001"))
+        else if(this.pdrid.includes("pdr0-0002"))
             this.collection = Collections.SEMICONDUCTORS; 
         else
             this.collection = Collections.DEFAULT;
