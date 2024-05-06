@@ -9,7 +9,7 @@ include
 """
 # from . import topics
 from .... import cli
-from . import topics
+from . import topics, filemd
 
 default_name = "fix"
 help = "fix specials SIP problems via subcommands"
@@ -29,6 +29,7 @@ def load_into(subparser, as_cmd=None):
         as_cmd = default_name
     out = cli.CommandSuite(as_cmd, p)
     out.load_subcommand(topics)
+    out.load_subcommand(filemd)
     return out
 
     
