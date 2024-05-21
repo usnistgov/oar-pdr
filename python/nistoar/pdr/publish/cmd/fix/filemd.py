@@ -98,7 +98,7 @@ def execute(args, config=None, log=None):
     if not args.filepaths:
         args.filepaths = list(bgr.datafiles.keys())
         if args.dryrun or args.verbose:
-            log.info("%s: will examine all available files")
+            log.info("%s: will check all available files", args.aipid)
 
     examine_files = which_files(args, bgr, log)
     
