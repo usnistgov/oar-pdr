@@ -1,0 +1,6 @@
+
+config/*
+!config/config.sample.json
+logs/*
+.env
+!.env.sample

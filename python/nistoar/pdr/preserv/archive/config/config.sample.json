@@ -1,0 +1,10 @@
+{
+    "request_queue_url": "https://sqs.us-east-1.amazonaws.com/1234567890/request-queue.fifo",
+    "completion_queue_url": "https://sqs.us-east-1.amazonaws.com/1234567890/completion-queue.fifo",
+    "region": "us-east-1",
+    "AWS_ACCESS_KEY_ID": "XXX",
+    "AWS_SECRET_ACCESS_KEY": "XXX",
+    "schema_file": "schema/message_schema.json",
+    "max_number_of_messages": 10,
+    "wait_time_seconds": 20
+}

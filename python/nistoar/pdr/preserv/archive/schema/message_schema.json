@@ -1,0 +1,54 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Dataset Replication Message",
+    "description": "A message format for requesting data archiving and receiving responses. The first five properties are required for the request message. The properties 'success' and 'message' are only included in the response message.",
+    "type": "object",
+    "properties": {
+        "action": {
+            "type": "string",
+            "description": "The action to be performed. Part of the request message."
+        },
+        "aipid": {
+            "type": "string",
+            "description": "Unique identifier for the AIP to be archived. Part of the request message."
+        },
+        "filenames": {
+            "type": "array",
+            "description": "List of AIP filenames to be archived. Part of the request message.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "timestamp": {
+            "type": "string",
+            "description": "Date and time the message was created in ISO 8601 format. Part of the request message.",
+            "format": "date-time"
+        },
+        "priority": {
+            "type": "string",
+            "description": "Priority level of the message, where 'low', 'medium', and 'high' are the options. Part of the request message.",
+            "enum": [
+                "low",
+                "medium",
+                "high"
+            ]
+        },
+        "success": {
+            "type": "boolean",
+            "description": "Flag indicating whether the archival process was successful. Only present in the response message.",
+            "optional": true
+        },
+        "message": {
+            "type": "string",
+            "description": "A descriptive message about the archival process, particularly useful in case of failure. Only present in the response message.",
+            "optional": true
+        }
+    },
+    "required": [
+        "action",
+        "aipid",
+        "filenames",
+        "timestamp"
+    ],
+    "additionalProperties": true
+}
