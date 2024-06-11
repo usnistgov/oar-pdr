@@ -11,14 +11,15 @@ from ..exceptions import PDRException, PDRServiceException, PDRServerError
 
 class RESTServiceClient(object):
     """
-    a generic public client interface to a REST service
+    a generic public client interface to a REST service featuring JSON inputs and outputs
     """
 
-    def __init__(self, baseurl):
+    def __init__(self, baseurl, authkey=None):
         """
         initialized the service to the given base URL
         """
-        self.base = baseurl
+        self.base = baseurl.rstrip('/')
+        self.key = authkey
 
     def get_json(self, relurl):
         """
@@ -28,13 +29,38 @@ class RESTServiceClient(object):
 
         :param str relurl:   a relative URL for the desired resource
         """
+        return self._send_request(relurl, 'GET')
+
+    def put_json(self, relurl, body="", params=None):
+        """
+        PUT a message onto the service
+        """
+        return self._send_request(relurl, 'PUT')
+
+    def del_json(self, relurl, params=None):
+        """
+        send a delete request
+        """
+        return self._send_request(relurl, 'DELETE', params=params)
+
+    def _send_request(self, relurl, meth="GET", body=None, params=None):
         if not relurl.startswith('/'):
             relurl = '/'+relurl
         hdrs = { "Accept": "application/json" }
+        if self.key:
+            hdrs["Authorization"] = "Bearer: "+self.key
+
+        args = { "headers": hdrs }
+        if meth != "GET":
+            if body is None:
+                body = ""
+            args['json'] = body
+        if params:
+            args['params'] = params
 
         resp = None
         try:
-            resp = requests.get(self.base+relurl, headers=hdrs)
+            resp = requests.request(meth, self.base+relurl, **args)
 
             if resp.status_code >= 500:
                 raise DistribServerError(relurl, resp.status_code, resp.reason)
