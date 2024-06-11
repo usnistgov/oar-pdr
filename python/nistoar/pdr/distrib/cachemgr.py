@@ -15,11 +15,11 @@ class CacheManagerClient(object):
     OBJS_EP = "objects/"
     QUEU_EP = "queue/"
 
-    def __init__(self, baseurl):
+    def __init__(self, baseurl, authkey=None):
         """
         initialize the client
         """
-        self.svccli = RESTServiceClient(baseurl)
+        self.svccli = RESTServiceClient(baseurl, authkey)
 
     def volumes(self):
         """
