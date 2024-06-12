@@ -166,16 +166,12 @@ class SQSArchiveClient(ArchiveClient):
                 f"Missing required configuration keys: {', '.join(missing_keys)}"
             )
 
-        try:
-            self.sqs = boto3.client(
-                "sqs",
-                region_name=config["region"],
-                aws_access_key_id=config["aws_access_key_id"],
-                aws_secret_access_key=config["aws_secret_access_key"],
-            )
-        except Exception as e:
-            raise ConfigurationException(f"Error initializing AWS SQS client: {e}")
-
+        self.sqs = boto3.client(
+            "sqs",
+            region_name=config["region"],
+            aws_access_key_id=config["aws_access_key_id"],
+            aws_secret_access_key=config["aws_secret_access_key"],
+        )
         self.request_queue_url = config["request_queue_url"]
         self.completion_queue_url = config["completion_queue_url"]
         self.validator = validator
