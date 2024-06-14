@@ -31,8 +31,8 @@ export class MetricsService {
         let url = this.metricsBackend + "files/" + ediid;
         const request = new HttpRequest(
             "GET", url, 
-            { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob' }), reportProgress: true, responseType: 'blob' });
-
+            { headers: new HttpHeaders({ 'Content-Type': 'application/json', 'responseType': 'blob','Connection':'keep-alive','Cache-Control':'max-age=0' }), reportProgress: true, responseType: 'blob' });
+            console.log("request", request);
         return this.http.request(request);
     }
 

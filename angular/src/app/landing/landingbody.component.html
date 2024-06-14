@@ -12,7 +12,7 @@
 
                 <!-- description: abstract, keywords, research areas, etc. -->
                 <a name="description" #description></a>
-                <pdr-resource-desc [record]="md" [inBrowser]="inBrowser"></pdr-resource-desc>
+                <pdr-resource-desc [record]="md" [inBrowser]="inBrowser" [collection]="collection"></pdr-resource-desc>
             </div>
 
             <!-- data access, include available files -->
@@ -21,6 +21,7 @@
                 [record]="md" 
                 [inBrowser]="inBrowser" 
                 [editEnabled]="editEnabled" 
+                [collection]="collection"
                 [theme]="theme"
                 (dlStatus)="setDownloadStatus($event)">
             </pdr-resource-data>

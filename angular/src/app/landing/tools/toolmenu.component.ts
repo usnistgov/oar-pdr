@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges, ViewChild, EventEmitter } from '@angular/core';
+import { Component, Input, Output, OnChanges, ViewChild, EventEmitter, SimpleChanges, ElementRef } from '@angular/core';
 
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
@@ -10,8 +10,9 @@ import * as _ from 'lodash-es';
 import { RecordLevelMetrics } from '../../metrics/metrics';
 import { CommonFunctionService } from '../../shared/common-function/common-function.service';
 import { CartConstants } from '../../datacart/cartconstants';
-import { Themes, ThemesPrefs } from '../../shared/globals/globals';
-
+import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes } from '../../shared/globals/globals';
+import * as CollectionData from '../../../assets/site-constants/collections.json';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 /**
  * A component for displaying access to landing page tools in a menu.
@@ -25,21 +26,33 @@ import { Themes, ThemesPrefs } from '../../shared/globals/globals';
 @Component({
     selector: 'tools-menu',
     template: `
-<p-menu #tmenu [ngClass]="menuStyle()" 
-               [popup]="isPopup" [model]="items" [appendTo]="appendTo"></p-menu>
+<p-menu #tmenu id="additionalCss" [ngClass]="menuStyle()" 
+               [style.--background-default]="defaultColor"
+               [style.--background-lighter]="lighterColor"
+               [style.--background-hover]="hoverColor"
+               [popup]="isPopup" [model]="items" 
+               [appendTo]="appendTo"
+               ></p-menu>
 `,
     styleUrls: ['./toolmenu.component.css']
 })
 export class ToolMenuComponent implements OnChanges {
     recordType: string = "";
+    defaultColor: string;
+    lighterColor: string;
+    hoverColor: string;
+    //  Object that hold all themes: Forensics, NIST, ...
+    allCollections: any = {};
+    buttonTop = 0;
 
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;
 
     // true if this menu should appear as a popup
     @Input() isPopup : boolean = false;
-    @Input() appendTo : boolean = false;
+    @Input() appendTo;
     @Input() theme: string = "nist"
+    @Input() collection: string = Collections.DEFAULT;
 
     // signal for triggering display of the citation information
     @Output() toggle_citation = new EventEmitter<boolean>();
@@ -56,6 +69,7 @@ export class ToolMenuComponent implements OnChanges {
     public CART_CONSTANTS: any = CartConstants.cartConst;
     globalCartUrl: string = "/datacart/" + this.CART_CONSTANTS.GLOBAL_CART_NAME;
     editEnabled: any;
+    parentContext: ElementRef;
 
     /**
      * create the component.
@@ -64,14 +78,25 @@ export class ToolMenuComponent implements OnChanges {
     constructor(
         private cfg : AppConfig,
         public commonFunctionService: CommonFunctionService,
+        public collectionService: CollectionService,
         public edstatsvc: EditStatusService) {  
             this.editEnabled = cfg.get("editEnabled", "");
     }
 
     ngOnInit(): void {
-        //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-        //Add 'implements OnInit' to the class.
-        // console.log("menu this.theme", this.theme);
+        console.log("appendTo", this.appendTo);
+        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+
+        this.setColor();
+    }
+
+    /**
+     * Set color variables
+     */
+    setColor() {
+        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
+        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
+        this.hoverColor = this.allCollections[this.collection.toLowerCase()].color.hover;
     }
 
     /**
@@ -85,26 +110,27 @@ export class ToolMenuComponent implements OnChanges {
     /**
      * update the component state when the record metadata is updated
      */
-    ngOnChanges() {
-        if (this.record) {
-            this.recordType = (new NERDResource(this.record)).resourceLabel();
-            this.theme = (new NERDResource(this.record)).theme();
-            this.updateMenu();
+    ngOnChanges(changes: SimpleChanges) {
+        if(changes.collection){
+            this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+
+            this.setColor();
         }
+
+        // if(!changes.record){
+            if (this.record) {
+                this.recordType = (new NERDResource(this.record)).resourceLabel();
+                this.theme = (new NERDResource(this.record)).theme();
+                this.updateMenu();
+            }
+        // }
     }
 
     menuStyle() {
-        if(this.theme == Themes.SCIENCE_THEME) {
-            if(this.isPopup) 
-                return 'rightMenuStylePopST';
-            else
-                return 'rightMenuStyleST';
-        }else{
-            if(this.isPopup) 
-                return 'rightMenuStylePop';
-            else
-                return 'rightMenuStyle';
-        }
+        if(this.isPopup) 
+            return 'rightMenuStylePop';
+        else
+            return 'rightMenuStyle';
     }
 
     /**
