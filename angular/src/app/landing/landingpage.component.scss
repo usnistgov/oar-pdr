@@ -34,7 +34,7 @@
 .rightmenu-button {
     float: right;
     // position: absolute; 
-    top: 1em; 
+    top: 1em;
     // right: 1.5em;
     // overflow: hidden;
     width: 2.3em;
@@ -42,28 +42,29 @@
     z-index: 10;
 }
 
-.sticky-button{
-    position: fixed;
-    top: 1em; 
-    right: 1.5em;
-    overflow: hidden;
+.sticky-button {
+    float: right;
+    position: sticky;
+    top: 1em;
+    right: 2.5em;
     width: 2.3em;
     height: 2.3em;
     z-index: 10;
 }
 
-.sticky-menu{
-    position: fixed;
-    top: 1em; 
+.sticky-menu {
+    float: right;
+    position: sticky;
+    top: 1em;
     right: 2.5em;
-    overflow: hidden;
+    // overflow: hidden;
     z-index: 10;
     width: 17%;
 }
 
 .rightmenu {
     float: right;
-    top: 1em; 
+    top: 1em;
     right: 1em;
     z-index: 10;
     width: 18%;
@@ -71,13 +72,20 @@
 
 .p-menu-dynamic {
     position: fixed;
-    top: 1em; 
+    top: 1em;
     right: 1.5em;
 }
 
 .science-theme-banner {
     width: 100%;
-    height: 50px;
+    height: 100px;
     background-size: cover;
     background-position-y: 25%;
+}
+
+.stretch {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
 }

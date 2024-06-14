@@ -10,6 +10,7 @@ import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { AppConfig } from '../../config/config'
 import { NerdmRes } from '../../nerdm/nerdm';
 import { testdata } from '../../../environments/environment';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 describe('ToolMenuComponent', () => {
     let component : ToolMenuComponent;
@@ -27,7 +28,7 @@ describe('ToolMenuComponent', () => {
             imports: [ CommonModule, MenuModule, BrowserAnimationsModule ],
             declarations: [ ToolMenuComponent ],
             providers: [
-                { provide: AppConfig,  useValue: cfg },
+                { provide: AppConfig,  useValue: cfg }, CollectionService
             ]
         }).compileComponents();
 

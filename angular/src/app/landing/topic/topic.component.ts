@@ -22,6 +22,7 @@ export class TopicComponent implements OnInit {
     @Input() inBrowser: boolean;   // false if running server-side
     //05-12-2020 Ray asked to read topic data from 'theme' instead of 'topic'
     fieldName = 'theme';
+    @Input() collection: string;
 
     constructor(public mdupdsvc: MetadataUpdateService,
                 private ngbModal: NgbModal,

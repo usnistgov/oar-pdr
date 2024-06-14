@@ -8,6 +8,9 @@ import { ThisReceiver } from '@angular/compiler';
 import * as e from 'express';
 import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
+import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes } from '../../shared/globals/globals';
+import * as CollectionData from '../../../assets/site-constants/collections.json';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 @Component({
   selector: 'app-resultlist',
@@ -56,9 +59,16 @@ export class ResultlistComponent implements OnInit {
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 20;
+    itemsPerPage: number = 10;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: any = {name:'Page 1', value:1};
+
+    allCollections: any = {};
+
+    //  Color
+    defaultColor: string;
+    lightColor: string;  
+    lighterColor: string;  
 
     @Input() md: NerdmRes = null;
     @Input() searchValue: string;
@@ -66,9 +76,11 @@ export class ResultlistComponent implements OnInit {
     @Input() mobWidth: number = 1920;
     @Input() resultWidth: string = '400px';
     @Input() filterString: string = '';
+    @Input() collection: string = Collections.FORENSICS;
 
     constructor(private searchService: SearchService, 
         private cfg: AppConfig,
+        public collectionService: CollectionService,
         public gaService: GoogleAnalyticsService) { }
 
     ngOnInit(): void {
@@ -77,7 +89,7 @@ export class ResultlistComponent implements OnInit {
 
         let that = this;
         let urls = (new NERDResource(this.md)).dynamicSearchUrls();
-        // console.log("ResultlistComponent: Found "+urls.length+" search url(s)");
+
         for(let i=0; i < urls.length; i++){
             this.searchService.resolveSearchRequest(urls[i])
             .subscribe(
@@ -88,6 +100,21 @@ export class ResultlistComponent implements OnInit {
                 error => that.onError(urls[i], error)
             );
         }
+
+        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+
+        // Set colors
+        this.setColor();
+    }
+
+    onPageChange(value: any){
+        console.log("this.currentPage", value.target.value);
+    }
+
+    setColor() {
+        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
+        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
+        this.lightColor = this.allCollections[this.collection.toLowerCase()].color.light;
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -462,6 +489,7 @@ export class ResultlistComponent implements OnInit {
      * @param event sort item
      */
     onSortByChange(event: any) {
+        console.log("event", event.value);
         let key = event.value.value;
 
         if(key == "modified"){

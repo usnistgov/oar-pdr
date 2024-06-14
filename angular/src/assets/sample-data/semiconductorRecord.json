@@ -1,0 +1,128 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.7#",
+    "firstIssued": "2021-08-23",
+    "issued": "2021-08-23",
+    "modified": "2021-08-23",
+    "annotated": "2021-08-23",
+    "pdrid": "semiconductors",
+    "topic": [
+      {
+        "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+        "tag": "Semiconductors",
+        "@type": "Concept"
+      },
+      {
+        "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+        "tag": "Information Technology: Semiconductors",
+        "@type": "Concept"
+      }
+    ],
+    "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/PublicDataResource",
+      "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.2#/definitions/ScienceTheme"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/ark:/88434/pdr0-0001",
+    "title": "Semiconductors Data",
+    "theme": [
+      "Semiconductors",
+      "Information Technology: Semiconductors"
+    ],
+    "version": "1.0.0",
+    "programCode": [
+      "006:045"
+    ],
+    "@context": [
+      "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+      {
+        "@base": "ark:/88434/pdr0-0001"
+      }
+    ],
+    "description": [
+      "This forensic portal provides finding aids for a wide variety of data related to forensic science that is housed at NIST.  It includes multiple disciplines: DNA, ballistics, fingerprint and other biometrics, drugs, toxicology, trace evidence, and digital, video and other multimedia. In addition to NIST physical reference standards, these data help forensic laboratories validate their analytical methods and ensure accurate test results."
+    ],
+    "language": [
+      "en"
+    ],
+    "bureauCode": [
+      "006:55"
+    ],
+    "contactPoint": {
+      "hasEmail": "mailto:robert.ramotowski@nist.gov",
+      "fn": "Robert Ramotowski"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/pdr1-0001",
+    "publisher": {
+      "name": "National Institute of Standards and Technology",
+      "@type": "org:Organization"
+    },
+    "license": "https://www.nist.gov/open/license",
+    "keyword": [
+      "Semiconductors",
+      "Semiconductors databases"
+    ],
+    "facilitators": [
+      {
+        "jobTitle": "Semiconductors Lead",
+        "familyName": "Guttman",
+        "givenName": "Barbara",
+        "@type": "foaf:Person",
+        "fn": "Barbara Guttman"
+      },
+      {
+        "jobTitle": "Semiconductors Database Lead",
+        "familyName": "Fiumara",
+        "givenName": "Gregory",
+        "@type": "foaf:Person",
+        "fn": "Gregory Fiumara"
+      }
+    ],
+    "ediid": "ark:/88434/pdr0-0001",
+    "components": [
+      {
+        "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/pdr0-0001&alternateView=forensics",
+        "description": "The search URL here queries all the data which is part of Semiconductors data collection.",
+        "@type": [
+          "nrda:DynamicResourceSet",
+          "nrdp:SearchPage"
+        ],
+        "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/pdr0-0001",
+        "title": "All Semiconductors Data Collection",
+        "_extensionSchemas": [
+          "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/SearchPage",
+          "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.2#/definitions/DynamicResourceSet"
+        ]
+      },
+      {
+        "accessURL": "https://www.nist.gov/forensic-science",
+        "@type": [
+          "nrdp:AccessPage",
+          "dcat:Distribution"
+        ],
+        "_extensionSchemas": [
+          "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
+        ],
+        "description": "NIST Forensic Science oveview, areas of research, policy, and practice",
+        "title": "NIST Forensic Science Website"
+      }
+    ],
+    "@type": [
+      "nrda:ScienceTheme",
+      "nrdp:PublicDataResource"
+    ],
+    "releaseHistory": {
+      "@id": "ark:/88434/pdr0-0001/pdr:v",
+      "@type": [
+        "nrdr:ReleaseHistory"
+      ],
+      "hasRelease": [
+        {
+          "issued": "2021-08-23",
+          "version": "1.0.0",
+          "@id": "ark:/88434/pdr0-0001/pdr:v/1.0.0",
+          "location": "https://data.nist.gov/od/id/ark:/88434/pdr0-0001/pdr:v/1.0.0",
+          "description": "initial release"
+        }
+      ]
+    }
+  }
