@@ -20,7 +20,7 @@ export class SearchresultComponent implements OnInit {
     mobHeight: number;
     mobWidth: number;
     mobileMode: boolean = false; // set mobile mode to true if window width < 641
-    filterWidth: number = 39; // Filter expanded by default
+    filterWidth: number = 499; // Filter expanded by default
     filterWidthStr: string;
     filterMode: string = "normal";
     resultWidth: any;
@@ -70,7 +70,7 @@ export class SearchresultComponent implements OnInit {
         if(this.mouseDragging) {
             let diff = this.mouse.x - this.prevMouseX;
             this.filterWidth = this.prevFilterWidth + diff;
-            this.filterWidth = this.filterWidth < 40? 39 : this.filterWidth > 500? 500 : this.filterWidth;
+            this.filterWidth = this.filterWidth < 40? 49 : this.filterWidth > 500? 500 : this.filterWidth;
             this.filterWidthStr = this.filterWidth + 'px';
         }
 
@@ -111,10 +111,10 @@ export class SearchresultComponent implements OnInit {
             }
 
             if(this.filterMode == 'normal'){
-                this.filterWidth = this.mobWidth / 4;                
+                this.filterWidth = this.mobWidth / 4;                  
                 this.filterToggler = 'expanded';
             }else{
-                this.filterWidth = 39;
+                this.filterWidth = 49;
                 this.filterToggler = 'collapsed';
             }
 
