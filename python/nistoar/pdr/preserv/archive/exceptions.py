@@ -37,8 +37,10 @@ class SQSException(ArchivingException):
         :param original_exception Exception: The original exception thrown by AWS SQS.
         :param message str: Optional custom message to provide additional context about the error.
         """
-        default_message = f"An error occurred with SQS: {str(original_exception)}"
-        super().__init__(
+        default_message = "An error occurred with SQS: {}".format(
+            str(original_exception)
+        )
+        super(SQSException, self).__init__(
             msg=message if message else default_message, cause=original_exception
         )
 

@@ -1,17 +1,23 @@
 import json
 import logging
-from abc import ABC, abstractmethod
-from urllib.parse import urlparse
+import os
+from abc import ABCMeta, abstractmethod
 
 import requests
 from jsonschema import SchemaError, ValidationError, validate
+from urlparse import urlparse
+
+# Current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-class MessageValidator(ABC):
+class MessageValidator(object):
     """
     An abstract base class for message validators. Classes that inherit from this must
     implement the validate method to ensure message data matches a schema.
     """
+
+    __metaclass__ = ABCMeta
 
     @abstractmethod
     def validate(self, message):
@@ -47,20 +53,22 @@ class JSONSchemaValidator(MessageValidator):
         :return dict: The loaded JSON schema.
         :raises Exception: If the schema cannot be loaded from the specified source.
         """
-        if urlparse(schema_source).scheme in ("http", "https"):
+        parsed_url = urlparse(schema_source)
+        if parsed_url.scheme in ("http", "https"):
             try:
                 response = requests.get(schema_source)
                 response.raise_for_status()  # Raises HTTPError for bad responses
                 return response.json()
             except requests.RequestException as e:
-                raise Exception(f"Failed to load schema from URL: {e}")
+                raise Exception("Failed to load schema from URL: {}".format(e))
         else:
             try:
-                with open(schema_source, "r") as file:
+                schema_path = os.path.join(current_dir, "schema", schema_source)
+                with open(schema_path, "r") as file:
                     return json.load(file)
-            except FileNotFoundError:
-                raise Exception(f"Schema file not found: {schema_source}")
-            except json.JSONDecodeError:
+            except IOError:
+                raise Exception("Schema file not found: {}".format(schema_source))
+            except ValueError:
                 raise Exception("Invalid JSON in schema file.")
 
     def validate(self, message):
@@ -75,10 +83,10 @@ class JSONSchemaValidator(MessageValidator):
             validate(instance=message, schema=self.schema)
             logging.info("Validation successful.")
         except ValidationError as e:
-            logging.info(f"Validation failed: {e}")
+            logging.info("Validation failed: {}".format(e))
             raise
         except SchemaError as e:
-            logging.info(f"Schema validation error: {e}")
+            logging.info("Schema validation error: {}".format(e))
             raise
 
 

@@ -1,24 +1,46 @@
 import hashlib
 import json
 import logging
-from abc import ABC, abstractmethod
+import os
+import sys
 from datetime import datetime
-from urllib.parse import urlparse
 
-import boto3
-from botocore.exceptions import ClientError
+# Add the root directory of the project to the PYTHONPATH
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
+)
+
+from abc import ABCMeta, abstractmethod
+
+
 from jsonschema import ValidationError
-from nistoar.pdr.config import ConfigurationException
+from nistoar.pdr.exceptions import ConfigurationException
 
-from .exceptions import SQSException, ValidationException
+from nistoar.pdr.preserv.archive.exceptions import SQSException, ValidationException
 
 logger = logging.getLogger("archive.client")
+
+
+try:
+    import boto3
+except ImportError:
+    logger.warning("No module named botocore or boto3. You may need to install boto3")
+    sys.exit(1)
+
+boto3.compat.filter_python_deprecation_warnings()
+
+from botocore.exceptions import (
+    ClientError,
+    NoCredentialsError,
+    PartialCredentialsError,
+    ParamValidationError,
+)
 
 DEFAULT_MAX_MESSAGES = 10  # Max number of messages to be polled
 DEFAULT_WAIT_TIME = 20  # 20s for long polling
 
 
-class ArchiveClient(ABC):
+class ArchiveClient(object):
     """
     An abstract base class that defines the interface for an archive client.
 
@@ -32,6 +54,8 @@ class ArchiveClient(ABC):
     This design makes it easy to swap between different queue systems and simplifies
     unit testing by allowing the use of a mock implementation.
     """
+
+    __metaclass__ = ABCMeta
 
     @abstractmethod
     def request_archive(self, aipid, filenames, priority=None):
@@ -152,7 +176,6 @@ class SQSArchiveClient(ArchiveClient):
                               and 'completion_queue_url'.
         :param validator MessageValidator: The validator to use for validating messages.
         """
-        # This is to replace the KeyError exception, this fails faster and provides more user feedback
         required_keys = [
             "region",
             "aws_access_key_id",
@@ -160,27 +183,32 @@ class SQSArchiveClient(ArchiveClient):
             "request_queue_url",
             "completion_queue_url",
         ]
+
+        # This is to replace the KeyError exception, this fails faster and provides more user feedback
         missing_keys = [key for key in required_keys if key not in config]
         if missing_keys:
             raise ConfigurationException(
-                f"Missing required configuration keys: {', '.join(missing_keys)}"
+                "Missing required configuration keys: %s" % ", ".join(missing_keys)
             )
 
         self.sqs = boto3.client(
             "sqs",
-            region_name=config["region"],
-            aws_access_key_id=config["aws_access_key_id"],
-            aws_secret_access_key=config["aws_secret_access_key"],
+            region_name=config.get("region"),
+            aws_access_key_id=config.get("aws_access_key_id"),
+            aws_secret_access_key=config.get("aws_secret_access_key"),
         )
-        self.request_queue_url = config["request_queue_url"]
-        self.completion_queue_url = config["completion_queue_url"]
+        self.request_queue_url = config.get("request_queue_url")
+        self.completion_queue_url = config.get("completion_queue_url")
+
         self.validator = validator
 
     def request_archive(self, aipid, filenames, priority="medium"):
         """
         Sends an archive request to the configured SQS request queue.
 
-        :param message dict: The message content in dictionary format to be sent to the queue.
+        :param aipid str: The AIP ID for the archive request.
+        :param filenames list: The list of filenames to be archived.
+        :param priority str: The priority of the request (default is "medium").
 
         :return dict: A dictionary containing the response from the SQS service, which includes
                         details such as the message ID and other metadata.
@@ -202,9 +230,11 @@ class SQSArchiveClient(ArchiveClient):
             )
             return response
         except ClientError as e:
-            logger.error(f"Failed to send archive request for AIP ID {aipid}: {e}")
+            logger.error(
+                "Failed to send archive request for AIP ID {}: {}".format(aipid, str(e))
+            )
             raise SQSException(
-                e, message=f"Failed to send archive request for AIP ID {aipid}."
+                e, message="Failed to send archive request for AIP ID {}.".format(aipid)
             )
 
     def receive_completion_message(self):
@@ -214,10 +244,19 @@ class SQSArchiveClient(ArchiveClient):
         :return dict: A dictionary representing the message received from SQS, which may include
                         the message body and receipt handle among other details.
         """
-        max_messages = int(
-            self.config.get("max_number_of_messages", DEFAULT_MAX_MESSAGES)
-        )
-        wait_time_seconds = int(self.config.get("wait_time_seconds", DEFAULT_WAIT_TIME))
+        try:
+            max_messages = int(
+                self.config.get("max_number_of_messages", DEFAULT_MAX_MESSAGES)
+            )
+        except ValueError:
+            raise ConfigurationException("Invalid value for max_number_of_messages")
+
+        try:
+            wait_time_seconds = int(
+                self.config.get("wait_time_seconds", DEFAULT_WAIT_TIME)
+            )
+        except ValueError:
+            raise ConfigurationException("Invalid value for wait_time_seconds")
 
         try:
             response = self.sqs.receive_message(
@@ -232,13 +271,18 @@ class SQSArchiveClient(ArchiveClient):
                         self.validator.validate(message_body)
                         return message_body
                     except ValidationError as ve:
-                        logger.error(f"Message validation failed: {ve}")
+                        logger.error("Message validation failed: {}".format(str(ve)))
                         raise ValidationException(
                             "Message validation failed.", errors=[str(ve)]
                         )
             return None
-        except ClientError as e:
-            logger.error(f"Failed to receive completion message: {e}")
+        except (
+            ClientError,
+            NoCredentialsError,
+            PartialCredentialsError,
+            ParamValidationError,
+        ) as e:
+            logger.error("Failed to receive completion message: {}".format(str(e)))
             raise SQSException(e, message="Failed to receive completion message.")
 
     def delete_message(self, receipt_handle):
@@ -254,10 +298,14 @@ class SQSArchiveClient(ArchiveClient):
             self.sqs.delete_message(
                 QueueUrl=self.completion_queue_url, ReceiptHandle=receipt_handle
             )
-            logger.info(f"Deleted message with receipt handle: {receipt_handle}")
+            logger.info(
+                "Deleted message with receipt handle: {}".format(receipt_handle)
+            )
         except ClientError as e:
-            logger.error(f"Failed to delete message from SQS: {e}")
+            logger.error("Failed to delete message from SQS: {}".format(str(e)))
             raise SQSException(
                 e,
-                message=f"Failed to delete message receipt handle {receipt_handle} from SQS",
+                message="Failed to delete message receipt handle {} from SQS".format(
+                    receipt_handle
+                ),
             )

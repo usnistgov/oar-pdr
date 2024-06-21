@@ -1,55 +1,29 @@
+#!/usr/bin/python
 import argparse
 import json
-import os
 import logging
-from client import SQSArchiveClient
-from datetime import datetime, timezone
+import sys
+import os
 
-LOG_FILE = "logs/sqs_messages.log"
+# Current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Add the root directory to PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(current_dir, "../../..")))
+
+from nistoar.pdr.preserv.archive.client import SQSArchiveClient
+from nistoar.pdr.preserv.archive.validators import JSONSchemaValidator
+
+LOG_FILE = os.path.join(current_dir, "logs", "sqs_cli.log")
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 
+
 # Configure logging
-# logging.basicConfig(
-#     level=logging.INFO,
-#     filename=LOG_FILE,
-#     format="%(asctime)s - %(levelname)s - %(message)s",
-# )
-
-
-def send_message(client, aipid, filenames):
-    """Construct and send a message to the SQS queue."""
-    message_dict = {
-        "action": "archive",
-        "aipid": aipid,
-        "filenames": filenames,
-        "timestamp": datetime.now(timezone.utc).isoformat(),  # ISO 8601 format
-        "priority": "low",
-    }
-    logging.info(
-        f"Sending request message to archive AIP ID {aipid} with filenames {filenames}"
-    )
-    try:
-        response = client.send_archive_request(message_dict)
-        logging.info(f"Request message sent. SQS response: {response}")
-    except Exception as e:
-        logging.error(f"Failed to send message due to: {e}")
-        raise
-
-
-def receive_message(client):
-    """Receive a message from the SQS queue."""
-    logging.info("Receiving message from the SQS queue.")
-    response = client.receive_completion_message()
-    logging.info(f"Message received: {response}")
-
-
 def setup_logging(level):
     """Setup logging configuration."""
-
-    # Set logging level based on a user input
     numeric_level = getattr(logging, level.upper(), None)
     if not isinstance(numeric_level, int):
-        raise ValueError(f"Invalid log level: {level}")
+        raise ValueError("Invalid log level: {}".format(level))
 
     logging.basicConfig(
         level=numeric_level,
@@ -62,17 +36,21 @@ def load_config(profile=None):
     """Load configuration from a specified profile in the config directory."""
     default_profile = "local"
     profile = profile or default_profile
-    config_path = f"config/config.{profile}.json"
+    config_path = os.path.join(current_dir, "config", "config.{}.json".format(profile))
 
     if not os.path.exists(config_path):
         logging.error(
-            f"No configuration file found for the profile '{profile}' at '{config_path}'"
+            "No configuration file found for the profile '{}' at '{}'".format(
+                profile, config_path
+            )
         )
-        raise FileNotFoundError(
-            f"No configuration file found for the profile '{profile}' at '{config_path}'"
+        raise IOError(
+            "No configuration file found for the profile '{}' at '{}'".format(
+                profile, config_path
+            )
         )
 
-    logging.info(f"Loading configuration from {config_path}")
+    logging.info("Loading configuration from {}".format(config_path))
     with open(config_path, "r") as file:
         return json.load(file)
 
@@ -80,7 +58,45 @@ def load_config(profile=None):
 def create_client(config):
     """Create an SQSArchiveClient instance from configuration."""
     logging.info("Creating an SQS client with the provided configuration.")
-    return SQSArchiveClient(config)
+    validator = JSONSchemaValidator(config.get("schema_file"))
+    return SQSArchiveClient(config, validator)
+
+
+def send_message(client, aipid, filenames):
+    """Construct and send a message to the SQS queue."""
+    logging.info(
+        "Sending request message to archive AIP ID {} with filenames {}".format(
+            aipid, filenames
+        )
+    )
+    try:
+        response = client.request_archive(aipid, filenames)
+        logging.info("Request message sent. SQS response: {}".format(response))
+    except Exception as e:
+        logging.error("Failed to send message due to: {}".format(e))
+        raise
+
+
+def receive_message(client):
+    """Receive a message from the SQS queue."""
+    logging.info("Receiving message from the SQS queue.")
+    try:
+        message = client.receive_completion_message()
+        logging.info("Message received: {}".format(message))
+    except Exception as e:
+        logging.error("Failed to receive message due to: {}".format(e))
+        raise
+
+
+def delete_message(client, receipt_handle):
+    """Delete a message from the SQS queue using the receipt handle."""
+    logging.info("Deleting message with receipt handle {}".format(receipt_handle))
+    try:
+        client.delete_message(receipt_handle)
+        logging.info("Message deleted successfully.")
+    except Exception as e:
+        logging.error("Failed to delete message due to: {}".format(e))
+        raise
 
 
 def main():
@@ -97,7 +113,7 @@ def main():
         help="Set the logging level (e.g., DEBUG, INFO)",
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Commands", required=True)
+    subparsers = parser.add_subparsers(dest="command", help="Commands")
 
     # Subparser for sending messages
     send_parser = subparsers.add_parser("send", help="Send a message to the queue")
@@ -105,23 +121,36 @@ def main():
     send_parser.add_argument(
         "--filenames", nargs="+", required=True, help="List of filenames to be archived"
     )
-    send_parser.set_defaults(func=send_message)
 
     # Subparser for receiving messages
     receive_parser = subparsers.add_parser(
         "receive", help="Receive a message from the queue"
     )
-    receive_parser.set_defaults(func=receive_message)
+
+    # Subparser for deleting messages
+    delete_parser = subparsers.add_parser(
+        "delete", help="Delete a message from the queue"
+    )
+    delete_parser.add_argument(
+        "--receipt-handle",
+        type=str,
+        required=True,
+        help="Receipt handle of the message to delete",
+    )
 
     args = parser.parse_args()
     setup_logging(args.log_level)
     config = load_config(args.profile)
     client = create_client(config)
 
-    try:
-        args.func(client, **vars(args))
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
+    if args.command == "send":
+        send_message(client, args.aipid, args.filenames)
+    elif args.command == "receive":
+        receive_message(client)
+    elif args.command == "delete":
+        delete_message(client, args.receipt_handle)
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":
