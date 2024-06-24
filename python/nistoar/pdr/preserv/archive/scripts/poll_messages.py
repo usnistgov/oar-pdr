@@ -3,13 +3,14 @@ import logging
 import os
 import subprocess
 import sys
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 # This is to be able to import modules from the archive package
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from archive.client import SQSArchiveClient
-from archive.validators import JSONSchemaValidator
+from nistoar.pdr.preserv.archive.client import SQSArchiveClient
+from nistoar.pdr.preserv.archive.validators import JSONSchemaValidator
 from dotenv import load_dotenv
 
 
@@ -24,15 +25,17 @@ def init_logging():
     )
 
 
-# Configuration to be loaded either from this local variable or a file
 def get_default_config():
+    """
+    Configuration to be loaded either from this local variable or a file.
+    """
     return {
         "request_queue_url": os.getenv("SQS_REQUEST_QUEUE_URL"),
         "completion_queue_url": os.getenv("SQS_COMPLETION_QUEUE_URL"),
         "region": os.getenv("AWS_REGION"),
         "schema_file": os.getenv("SCHEMA_FILE"),
-        "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID"),
-        "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY"),
+        "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID"),
+        "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
         "max_number_of_messages": os.getenv("MAX_NUMBER_OF_MESSAGES", 1),
         "wait_time_seconds": os.getenv("WAIT_TIME_SECONDS", 20),
     }
@@ -56,7 +59,6 @@ def load_config(source="variable", filename=None, url=None):
     :return: A configuration dictionary.
     """
     if source == "variable":
-        # Load from the local variable
         logging.info("Loading configuration from local variable.")
         return get_default_config()
     elif source == "file":
@@ -80,7 +82,7 @@ def load_config(source="variable", filename=None, url=None):
             import requests
 
             response = requests.get(url)
-            response.raise_for_status()  # This will raise an HTTPError of bad response
+            response.raise_for_status()  # This will raise an HTTPError for bad response
             return response.json()
         except requests.RequestException as e:
             logging.error(f"Failed to load configuration from URL: {e}")
@@ -96,23 +98,22 @@ def handle_message(message_content):
     This function calls an external Python script (`process_message.py`) to process each message.
     It passes the message content as input to the script.
 
-    :param message_content: The conent of the validated message.
+    :param message_content: The content of the validated message.
     """
-    logging.info(f"Handling message with AIP ID: {message_content['aipid']}")
+    logging.info(
+        "Handling message with AIP ID: {}".format(message_content.get("aipid"))
+    )
     script_dir = os.path.dirname(os.path.abspath(__file__))
     script_path = os.path.join(script_dir, "process_message.py")
     message_data = json.dumps(message_content)
 
-    # Command including the aipid argument.
-    # The aipid argument here serves as a placeholder only for monitoring purposes.
-    command = ["python", script_path, f"--aipid={message_content['aipid']}"]
+    command = ["python", script_path, "--aipid={}".format(message_content.get("aipid"))]
 
-    # Launch process as a system call
     try:
         subprocess.run(command, input=message_data, text=True, check=True)
         logging.info("Subprocess executed successfully.")
     except subprocess.CalledProcessError as e:
-        logging.error(f"Subprocess failed with {e.returncode}, error: {e}")
+        logging.error("Subprocess failed with {}, error: {}".format(e.returncode, e))
 
 
 def poll_messages(client):
@@ -123,7 +124,7 @@ def poll_messages(client):
     response = client.receive_completion_message()
     messages = response.get("Messages", [])
     if messages:
-        logging.info(f"Received {len(messages)} messages.")
+        logging.info("Received {} messages.".format(len(messages)))
         process_messages_async(messages)
     else:
         logging.info("No messages received.")
@@ -143,20 +144,28 @@ def process_messages_async(messages):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Poll messages from SQS and process them."
+    )
+    parser.add_argument("--config", help="Path to the configuration file.")
+    args = parser.parse_args()
+
     init_logging()
 
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Root
     dotenv_path = os.path.join(root_dir, ".env")  # Path to .env file
-    # Load environment variables from the .env file
     load_dotenv(dotenv_path)
 
-    config = load_config(source="variable")  # Load default configuration
+    if args.config:
+        config = load_config(source="file", filename=args.config)
+    else:
+        config = load_config(source="variable")  # Load default configuration
+
     schema_path = config["schema_file"]
 
-    # Get the absolute path if not already absolute
     if not os.path.isabs(schema_path):
         schema_path = os.path.join(root_dir, schema_path)
-    logging.info(f"Using schema file at: {schema_path}")
+    logging.info("Using schema file at: {}".format(schema_path))
     validator = JSONSchemaValidator(schema_path)
     client = SQSArchiveClient(config, validator)
     poll_messages(client)
