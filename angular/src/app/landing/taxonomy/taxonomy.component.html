@@ -8,14 +8,14 @@
                 (onNodeCollapse)="collectionNodeExpanded = false">
                 <ng-template let-node pTemplate="default">
                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                        <span *ngIf="node.label.split('-')[1] !=''; else header1" class="invisible-scrollbar" > {{node.label.split("-")[0]}}&nbsp;</span>
+                        <span *ngIf="node.label.split('---')[1] !=''; else header1" class="invisible-scrollbar" > {{node.label.split("---")[0]}}&nbsp;</span>
                         <ng-template #header1>
-                            <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
+                            <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
                         </ng-template>
 
                         <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
-                            *ngIf="node.label.split('-')[1] !=''">
-                            {{node.label.split("-")[1]}}</span>
+                            *ngIf="node.label.split('---')[1] !=''">
+                            {{node.label.split("---")[1]}}</span>
                     </div>
                 </ng-template>
             </p-tree>

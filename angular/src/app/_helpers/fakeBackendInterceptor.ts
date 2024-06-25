@@ -13,6 +13,10 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     // array in local storage for registered users
 
     // const sampleData: any = require('../../assets/science-theme/BiometricsScienceTheme.json');
+    // const sampleData: any = require('../../assets/sample-data/semiconductorRecord.json');
+    const sampleData: any = require('../../assets/sample-data/semi-conductors.json');
+    const sampleCollection: any = require('../../assets/sample-data/semiconductors-collection.json');
+    const fields: any = require('../../assets/sample-data/fields.json');
     // const sampleRecord: any = require('../../assets/science-theme/DNAScienceTheme.json');
 
     // const biometricsData1: any  = require('../../assets/science-theme/SDB-300.json');
@@ -51,6 +55,22 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         //     return of(new HttpResponse({ status: 200, body: testdata }));
         // }
 
+        if (request.url.indexOf('fields') > -1 && request.method === 'GET') {
+            console.log("Getting fields.....")
+            return of(new HttpResponse({ status: 200, body: fields }));
+        }
+
+        if (request.url.indexOf('isPartOf') > -1 && request.url.indexOf('pdr0-0002') > -1 && request.method === 'GET') {
+            console.log("Getting semiconductors collections.....")
+            return of(new HttpResponse({ status: 200, body: sampleCollection }));
+        }
+
+        if (request.url.indexOf('pdr0-0002') > -1 && request.method === 'GET') {
+            console.log("Getting semiconductors.....")
+            return of(new HttpResponse({ status: 200, body: sampleData }));
+        }
+
+        
         if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') 
         {
           console.log("Throw error...");

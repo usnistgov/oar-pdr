@@ -45,15 +45,15 @@
                                 (onNodeSelect)="filterResults()">
                                 <ng-template let-node pTemplate="default">
                                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                                        <span *ngIf="node.label.split('-')[1] !=''; else header2">
-                                            {{node.label.split("-")[0]}}&nbsp;</span>
+                                        <span *ngIf="node.label.split('---')[1] !=''; else header2">
+                                            {{node.label.split("---")[0]}}&nbsp;</span>
                                         <ng-template #header2>
-                                            <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
+                                            <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
                                         </ng-template>
 
                                         <span class="w3-badge badge-notify badge-style"
-                                            *ngIf="node.label.split('-')[1] !=''">
-                                            {{node.label.split("-")[1]}}</span>
+                                            *ngIf="node.label.split('---')[1] !=''">
+                                            {{node.label.split("---")[1]}}</span>
                                     </div>
                                 </ng-template>
                             </p-tree>
@@ -66,15 +66,15 @@
                                 (onNodeSelect)="filterResults()">
                                 <ng-template let-node pTemplate="default">
                                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                                        <span *ngIf="node.label.split('-')[1] !=''; else header3">
-                                            {{node.label.split("-")[0]}}&nbsp;</span>
+                                        <span *ngIf="node.label.split('---')[1] !=''; else header3">
+                                            {{node.label.split("---")[0]}}&nbsp;</span>
                                         <ng-template #header3>
-                                            <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
+                                            <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
                                         </ng-template>
 
                                         <span class="w3-badge badge-notify badge-style"
-                                            *ngIf="node.label.split('-')[1] !=''">
-                                            {{node.label.split("-")[1]}}</span>
+                                            *ngIf="node.label.split('---')[1] !=''">
+                                            {{node.label.split("---")[1]}}</span>
                                     </div>
                                 </ng-template>
                             </p-tree>
