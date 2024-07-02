@@ -20,9 +20,9 @@ COPY verify-asc.sh /usr/local/bin
 
 # install multibag from source
 RUN curl -L -o multibag-py.zip \
-    https://github.com/usnistgov/multibag-py/archive/master.zip && \
+    https://github.com/usnistgov/multibag-py/archive/0.5.zip && \
     unzip -oq multibag-py.zip && \
-    cd multibag-py-master &&     \
+    cd multibag-py-0.5 &&     \
     python setup.py install
 
 ENV GOSU_VERSION 1.14
