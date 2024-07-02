@@ -1,13 +1,16 @@
 """
 This module implements a validator for the Multibag Profile
 """
-import os, re
+from __future__ import absolute_import
+import os, re, io
 from collections import OrderedDict
 from urlparse import urlparse
 
 from .base import (Validator, ValidatorBase, ALL, ValidationResults,
                    ERROR, WARN, REC, ALL, PROB)
 from ..bag import NISTBag
+
+from multibag.constants import DEF_ENC
 
 class MultibagValidator(ValidatorBase):
     """
@@ -243,7 +246,7 @@ class MultibagValidator(ValidatorBase):
         found = set()
         foundme = False
         last = None
-        with open(mbemf) as fd:
+        with io.open(mbemf, encoding=DEF_ENC) as fd:
             i = 0
             for line in fd:
                 i += 1
@@ -333,7 +336,7 @@ class MultibagValidator(ValidatorBase):
         replicated = []
         missing = []
         paths = set()
-        with open(flirf) as fd:
+        with io.open(flirf, encoding=DEF_ENC) as fd:
             i = 0
             for line in fd:
                 i += 1

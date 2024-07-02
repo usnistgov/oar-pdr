@@ -1,5 +1,5 @@
 from __future__ import print_function
-import os, sys, pdb, json, shutil, copy, re
+import os, sys, pdb, json, shutil, copy, re, io
 
 import unittest as test
 from collections import OrderedDict
@@ -9,6 +9,8 @@ import nistoar.pdr.preserv.bagit.validate.multibag as val
 import nistoar.pdr.preserv.bagit.bag as bag
 import nistoar.pdr.preserv.bagit.exceptions as bagex
 import nistoar.pdr.exceptions as exceptions
+
+from multibag.constants import DEF_ENC
 
 datadir = os.path.join( os.path.dirname(os.path.dirname(
                            os.path.dirname(__file__))), "data" )
@@ -276,13 +278,14 @@ class TestMultibagValidator(test.TestCase):
                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         mbf = os.path.join(self.bag.multibag_dir, "member-bags.tsv")
-        with open(mbf, 'a') as fd:
-            print(self.bag.name, file=fd)
-            print("goober_bag\tbag.zip", file=fd)
-            print("goober_ bag\tbag.zip", file=fd)
-            print("goober_bag bag.zip", file=fd)
-            print("goober_bag bag.zip", file=fd)
-            print("gurn_bag\tbag.zip\tfoobar", file=fd)
+        with io.open(mbf, 'a', encoding=DEF_ENC) as fd:
+            print(self.bag.name.decode(DEF_ENC), file=fd)
+            print(u"goober_bag\tbag.zip", file=fd)
+            print(u"goober_ bag\tbag.zip", file=fd)
+            print(u"goober_bag bag.zip", file=fd)
+            print(u"goober_bag bag.zip", file=fd)
+            print(u"gurn_bag\tbag.zip\tfoobar", file=fd)
+            print(u"gurn\u03b1\tbag.7z\n", file=fd)
 
         errs = self.valid8.test_member_bags(self.bag)
         self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
@@ -311,12 +314,13 @@ class TestMultibagValidator(test.TestCase):
                      "False Positives: "+ str([str(e) for e in errs.failed()]))
 
         flf = os.path.join(self.bag.multibag_dir, "file-lookup.tsv")
-        with open(flf, 'a') as fd:
-            print("data/goober.dat\t{0}".format(self.bag.name), file=fd)
-            print("data/goober.dat\totherbag", file=fd)
-            print("gurn.json", file=fd)
-            print("gurn.json\tbooger\tbonnet", file=fd)
-            print("data/trial1.json\totherbag", file=fd)
+        with io.open(flf, 'a', encoding=DEF_ENC) as fd:
+            print(u"data/goober.dat\t{0}".format(self.bag.name), file=fd)
+            print(u"data/goober.dat\totherbag", file=fd)
+            print(u"gurn.json", file=fd)
+            print(u"gurn.json\tbooger\tbonnet", file=fd)
+            print(u"data/trial1.json\totherbag", file=fd)
+            print(u"data/trial\u03b1.json\tother", file=fd)
 
         errs = self.valid8.test_file_lookup(self.bag)
         self.assertEqual(len(errs.failed()), 3, "Unexpected # of errors: [\n  " +
