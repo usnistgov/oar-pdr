@@ -26,7 +26,7 @@ log = logging.getLogger(pdrsys.system_abbrev)   \
              .getChild(pdrsys.subsystem_abbrev) \
              .getChild("m3mdserv")
 
-DEF_BASE_PATH = "/midas/"
+DEF_BASE_PATH = u"/midas/"
 
 class MIDAS3DataAccessApp(object):
     """
@@ -114,11 +114,15 @@ class Handler(object):
         self._midascl = app._midascl
 
     def send_error(self, code, message):
+        if isinstance(message, unicode):
+            message = message.encode('utf8')
         status = "{0} {1}".format(str(code), message)
         self._start(status, [], sys.exc_info())
         return []
 
     def send_ok(self, message="OK"):
+        if isinstance(message, unicode):
+            message = message.encode('utf8')
         status = "{0} {1}".format(str(code), message)
         self._start(status, [], None)
         return []
@@ -143,9 +147,11 @@ class Handler(object):
         meth_handler = 'do_'+self._meth
 
         path = self._env.get('PATH_INFO', '/')
+        if isinstance(path, str):
+            path = path.decode('utf8')
         if '/' not in path:
             path += '/'
-        if not path.startswith(self.app.base_path):
+        if not path.startswith(self.app.base_path):    # path and base_path must both be unicode
             return self.send_error(404, "Resource not found")
         path = path[len(self.app.base_path):].rstrip('/')
 
@@ -278,9 +284,12 @@ class Handler(object):
                 if not dir:
                     continue
                 mdfile = os.path.join(dir, dsid+".json")
+                if isinstance(mdfile, unicode):
+                    mdfile = mdfile.encode('utf8')
                 if os.path.isfile(mdfile):
                     mdata = read_json(mdfile)
-                    log.info("Retrieving metadata record for id=%s from %s", dsid, mdfile)
+                    log.info("Retrieving metadata record for id=%s from %s",
+                             dsid, mdfile.decode('utf8'))
 
         except ValueError as ex:
             log.exception("Internal error while parsing JSON file, %s: %s", mdfile, str(ex))
@@ -296,7 +305,7 @@ class Handler(object):
             if mdata is None:
                 log.info("Metadata record not found for ID="+dsid)
                 return self.send_error(404,
-                                       "Dataset with ID={0} not being edited".format(dsid))
+                                       "Dataset with ID=%s not being edited" % dsid)
         except ValueError as ex:
             return self.send_error(500, "Internal parsing error")
         except Exception as ex:
@@ -326,7 +335,7 @@ class Handler(object):
             if mdata is None:
                 log.info("Metadata record not found for ID="+dsid)
                 return self.send_error(404,
-                                       "Dataset with ID={0} not being edited".format(dsid))
+                                       "Dataset with ID=%s not being edited" % dsid)
         except ValueError as ex:
             return self.send_error(500, "Internal parsing error")
         except Exception as ex:
@@ -374,13 +383,13 @@ class Handler(object):
             mdata = self.get_metadata(id)
             if mdata is None:
                 log.info("send_datafile: Metadata record not found for ID="+id)
-                return self.send_error(404,"Dataset with ID={0} not available".format(id))
+                return self.send_error(404,"Dataset with ID=%s not available" % id)
             sip = MIDASSIP.fromNERD(mdata, self.app.revdir, self.app.upldir)
             
         except SIPDirectoryNotFound as ex:
             # shouldn't happen
             log.warn("No SIP directories for ID="+dsid)
-            self.send_error(404,"Dataset with ID={0} not available".format(id))
+            self.send_error(404,"Dataset with ID=%s not available" % id)
             return []
         except Exception as ex:
             log.exception("Internal error: "+str(ex))

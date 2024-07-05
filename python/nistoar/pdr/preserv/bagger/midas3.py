@@ -28,7 +28,7 @@ from ....id import PDRMinter
 from ....nerdm import utils as nerdutils
 from ... import def_merge_etcdir, utils, ARK_NAAN, PDR_PUBLIC_SERVER
 from .. import (SIPDirectoryError, SIPDirectoryNotFound, AIPValidationError,
-                ConfigurationException, StateException, PODError,
+                ConfigurationException, StateException, PODError, NERDError,
                 PreservationStateError)
 from .... import pdr
 from .prepupd import UpdatePrepService
@@ -324,7 +324,7 @@ class MIDASSIP(object):
 
         pod = self._pod_rec()
 
-        return [self._distsvcurl.sub('', urllib.unquote(d['downloadURL']))
+        return [self._distsvcurl.sub('', urllib.unquote(str(d['downloadURL'])).decode('utf8'))
                 for d in pod.get('distribution',[]) if 'downloadURL' in d]
                 
 

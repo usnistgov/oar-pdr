@@ -68,6 +68,17 @@ class TestApp(test.TestCase):
         self.assertIn("404", self.resp[0])
         self.assertIn('asdifuiad', self.resp[0])
 
+    def test_bad_id_unicode(self):
+        req = {
+            'PATH_INFO': '/asdifui\xce\xb1d',
+            'REQUEST_METHOD': 'GET'
+        }
+        body = self.svc(req, self.start)
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("404", self.resp[0])
+        self.assertIn('asdifui\xce\xb1d', self.resp[0])
+
     def test_ark_id(self):
         req = {
             'PATH_INFO': '/ark:/88434/mds4-29sd17',
