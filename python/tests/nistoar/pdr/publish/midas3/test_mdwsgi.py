@@ -116,7 +116,7 @@ class TestApp(test.TestCase):
         self.assertGreater(len([l for l in self.resp if "Content-Type:" in l]),0)
         data = json.loads(body[0])
         self.assertEqual(data['ediid'], '3A1EE2F169DD3B8CE0531A570681DB5D1491')
-        self.assertEqual(len(data['components']), 8)
+        self.assertEqual(len(data['components']), 9)
         for cmp in data['components']:
             if 'downloadURL' in cmp:
                 self.assertNotIn("/od/ds/", cmp['downloadURL'])
@@ -172,6 +172,26 @@ class TestApp(test.TestCase):
         self.assertGreater(len(redirect), 0)
         self.assertEqual(redirect[0],"X-Accel-Redirect: /midasdata/upload_dir/1491/trial3/trial3a.json")
 
+    def test_get_datafile_unicode(self):
+        req = {
+            'PATH_INFO': '/3A1EE2F169DD3B8CE0531A570681DB5D1491/trial\xce\xb1.json',
+            'REQUEST_METHOD': 'GET'
+        }
+#         body = self.svc(req, self.start)
+        hdlr = wsgi.Handler(self.svc, req, self.start)
+        body = hdlr.send_datafile('3A1EE2F169DD3B8CE0531A570681DB5D1491',
+                                  u"trial3/trial3\u03b1.json")
+
+        self.assertGreater(len(self.resp), 0)
+        self.assertIn("200", self.resp[0])
+        redirect = [r for r in self.resp if "X-Accel-Redirect:" in r]
+        self.assertGreater(len(redirect), 0)
+        self.assertEqual(redirect[0],
+                         "X-Accel-Redirect: /midasdata/review_dir/1491/trial3/trial3%CE%B1.json")
+        mtype = [r for r in self.resp if "Content-Type:" in r]
+        self.assertGreater(len(mtype), 0)
+        self.assertEqual(mtype[0],"Content-Type: application/json")
+        
     def test_test_permission_read(self):
         hdlr = wsgi.Handler(self.svc, {}, self.start)
         body = hdlr.test_permission('mds2-2000', "read", "me")
