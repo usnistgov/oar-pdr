@@ -11,6 +11,10 @@
 
 FROM oar-metadata/ejsonschema-py2
 
+ENV LANG=C.UTF-8
+COPY setdefenc.py /tmp/
+RUN cat /tmp/setdefenc.py >> /usr/lib/python2.7/sitecustomize.py
+
 RUN apt-get update && apt-get install -y python-yaml nginx curl wget less sudo \
                                          uwsgi uwsgi-plugin-python zip \
                                          p7zip-full ca-certificates git
@@ -20,9 +24,9 @@ COPY verify-asc.sh /usr/local/bin
 
 # install multibag from source
 RUN curl -L -o multibag-py.zip \
-    https://github.com/usnistgov/multibag-py/archive/0.5.zip && \
+    https://github.com/usnistgov/multibag-py/archive/0.6.zip && \
     unzip -oq multibag-py.zip && \
-    cd multibag-py-0.5 &&     \
+    cd multibag-py-0.6 &&     \
     python setup.py install
 
 ENV GOSU_VERSION 1.14
