@@ -655,7 +655,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
                          os.path.join(revsip, "trial2.json"))
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(revsip, "trial3/trial3a.json"))
-        self.assertEqual(len(datafiles), 6)
+        self.assertEqual(len(datafiles), 6) 
 
     def test_available_files(self):
         revsip = os.path.join(self.revdir, self.midasid[32:])
