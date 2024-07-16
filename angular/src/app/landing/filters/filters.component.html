@@ -24,10 +24,10 @@
 
             <div style="padding-left: -1em;" *ngIf="isActive && !searching">
                 <!-- Loop through all themes -->
-                <div *ngFor="let collection of allCollections | keyvalue">
-                    <app-taxonomy [collectionThemesTree]="allCollections[collection.key].theme?.collectionThemesTree"
+                <div *ngFor="let key of collectionOrder">
+                    <app-taxonomy [collectionThemesTree]="allCollections[key].theme?.collectionThemesTree" [collection]="key"
                         [backgroundColor]="lighterColor" [defaultColor]="defaultColor"
-                        (filterString)="updateFilterString($event, collection)">
+                        (filterString)="updateFilterString($event, key)">
                     </app-taxonomy>
                 </div>
 
@@ -38,28 +38,28 @@
 
                 <div style="width: 100%;">
                     <div [@expandOptions]="MoreOptionsDisplayed ? 'collapsed':'expanded'">
-                        <!-- Resource type -->
+                        <!-- Type of Resource -->
                         <div class="filter-checkbox bottom-line">
                             <p-tree [value]="resourceTypeTree" selectionMode="checkbox" [style]="ResourceTypeStyle"
                                 [(selection)]="selectedResourceTypeNode" (onNodeUnselect)="filterResults()"
                                 (onNodeSelect)="filterResults()">
                                 <ng-template let-node pTemplate="default">
                                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                                        <span *ngIf="node.label.split('---')[1] !=''; else header2">
+                                        <span *ngIf="node.count > 0; else header2">
                                             {{node.label.split("---")[0]}}&nbsp;</span>
                                         <ng-template #header2>
                                             <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
                                         </ng-template>
 
-                                        <span class="w3-badge badge-notify badge-style"
-                                            *ngIf="node.label.split('---')[1] !=''">
-                                            {{node.label.split("---")[1]}}</span>
+                                        <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
+                                            *ngIf="node.count > 0">
+                                            {{node.count}}</span>
                                     </div>
                                 </ng-template>
                             </p-tree>
                         </div>
 
-                        <!-- Components -->
+                        <!-- Components (Record has) -->
                         <div class="filter-checkbox bottom-line" *ngIf="componentsTree.length > 0">
                             <p-tree [value]="componentsTree" selectionMode="checkbox" [style]="recordHasStyle"
                                 [(selection)]="selectedComponentsNode" (onNodeUnselect)="filterResults()"
@@ -72,9 +72,9 @@
                                             <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
                                         </ng-template>
 
-                                        <span class="w3-badge badge-notify badge-style"
-                                            *ngIf="node.label.split('---')[1] !=''">
-                                            {{node.label.split("---")[1]}}</span>
+                                        <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
+                                            *ngIf="node.count > 0">
+                                            {{node.count}}</span>
                                     </div>
                                 </ng-template>
                             </p-tree>

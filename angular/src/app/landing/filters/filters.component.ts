@@ -59,15 +59,16 @@ export class FiltersComponent implements OnInit {
     resourceTypes: SelectItem[] = [];
     resourceTypesAllArray: string[] = [];
     uniqueRes: string[] = [];
-    resourceTypesWithCount: TreeNode[] = [];
+    resourceTypesWithCount: FilterTreeNode[] = [];
     authors: string[] = [];
     components: SelectItem[] = [];
     componentsAllArray: string[] = [];
-    componentsWithCount: TreeNode[] = [];
+    componentsWithCount: FilterTreeNode[] = [];
     showComponents: string[] = ["Data File", "Access Page", "Subcollection"];
     MoreOptionsDisplayed: boolean = false;
     moreOptionsText: string = "Show More Options...";
 
+    allUnspecifiedCount: any = {};
     unspecifiedCount: number = 0;
     showMoreLink: boolean = true;
     standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
@@ -77,9 +78,10 @@ export class FiltersComponent implements OnInit {
     filterStrings = {};
 
 //  Object that hold all themes: Forensics, NIST, ...
-    allCollections: any = {
-        nist : {} as Collection
-    };
+    allCollections: any = {};
+
+//  Array to define the collection order
+    collectionOrder: string[] = [Collections.DEFAULT];
 
 //  Color
     defaultColor: string;   //For header background
@@ -144,6 +146,7 @@ export class FiltersComponent implements OnInit {
     @Input() mobileMode: boolean = false;
     @Input() theme: string;
     @Input() collection: string = Collections.FORENSICS;
+    @Input() taxonomyURI: any = {};
     @Output() filterMode = new EventEmitter<string>();  // normal or collapsed
     @Output() filterString = new EventEmitter<string>();  
 
@@ -158,21 +161,30 @@ export class FiltersComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.collectionOrder.unshift(Collections.FORENSICS);
+        this.collectionOrder.unshift(Collections.SEMICONDUCTORS);
         this.msgs = [];
         this.searchResultsError = [];
         this.MoreOptionsDisplayed = (this.theme == 'ScienceTheme');
         this.setFilterWidth();
+
+        for(let col of this.collectionOrder) {
+            this.allCollections[col] = this.collectionService.localCollectionData(col);
+        }
         
-        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+        // this.allCollections = this.collectionService.loadCollections(this.collection);
+        // this.allCollections[Collections.DEFAULT] = {} as Collection;
 
         // Set colors
         this.setColor();
-        this.standardNISTTaxonomyURI = this.allCollections.nist.taxonomyURI;
+        // to be removed
+        this.standardNISTTaxonomyURI = this.collectionService.loadCollections(Collections.DEFAULT)[Collections.DEFAULT].taxonomyURI;
+        // ===
     }
 
     setColor() {
-        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
-        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
+        this.defaultColor = this.allCollections[this.collection].color.default;
+        this.lighterColor = this.allCollections[this.collection].color.lighter;
         this.collapedFilerColor = "linear-gradient(" +  this.defaultColor + ", white)";
     }
 
@@ -373,9 +385,14 @@ export class FiltersComponent implements OnInit {
         }
         // collect Research topics with count
         // this.collectionThemesWithCount["nist"] = new FilterTreeNode('root');
-        this.collectThemesWithCount("nist");
         // this.collectionThemesWithCount[this.collection] = new FilterTreeNode('root');
-        this.collectThemesWithCount(this.collection);
+
+        // this.collectThemesWithCount(Collections.DEFAULT);
+        // this.collectThemesWithCount(this.collection, searchResults);
+
+        for(let col of this.collectionOrder) {
+            this.collectThemesWithCount(col, searchResults);
+        }
 
         this.components = this.collectComponents(searchResults);
 
@@ -386,14 +403,18 @@ export class FiltersComponent implements OnInit {
         if (this.componentsWithCount.length == 0) {
             compNoData = true;
             this.componentsWithCount = [];
-            this.componentsWithCount.push({ label: "DataFile - 0", data: "DataFile" });
-            this.componentsWithCount.push({ label: "AccessPage - 0", data: "AccessPage" });
-            this.componentsWithCount.push({ label: "SubCollection - 0", data: "Subcollection" });
+            // this.componentsWithCount.push({ label: "DataFile - 0", data: "DataFile" });
+            // this.componentsWithCount.push({ label: "AccessPage - 0", data: "AccessPage" });
+            // this.componentsWithCount.push({ label: "SubCollection - 0", data: "Subcollection" });
             this.componentsTree = [{
                 label: 'Record has -',
                 "expanded": true,
                 children: this.componentsWithCount,
             }];
+
+            this.componentsWithCount.push(new FilterTreeNode("DataFile - 0", false, "DataFile", "DataFile", 0));
+            this.componentsWithCount.push(new FilterTreeNode("AccessPage - 0", false, "AccessPage", "AccessPage", 0));
+            this.componentsWithCount.push(new FilterTreeNode("SubCollection - 0", false, "SubCollection", "SubCollection", 0));
 
             this.componentsTree[0].selectable = false;
 
@@ -402,12 +423,12 @@ export class FiltersComponent implements OnInit {
             }
         }
 
-        if(!this.allCollections.nist) {
-            this.allCollections.nist = {} as Collection;
+        if(!this.allCollections[Collections.DEFAULT]) {
+            this.allCollections[Collections.DEFAULT] = {} as Collection;
         }
 
-        if(!this.allCollections.nist.theme) {
-            this.allCollections.nist.theme = {} as CollectionThemes;
+        if(!this.allCollections[Collections.DEFAULT].theme) {
+            this.allCollections[Collections.DEFAULT].theme = {} as CollectionThemes;
         }
 
         // this.allCollections.nist.theme.collectionThemesTree = [{
@@ -415,11 +436,12 @@ export class FiltersComponent implements OnInit {
         //     "expanded": false,
         //     children: this.allCollections.nist.theme.collectionThemesWithCount
         // }];
-        this.allCollections.nist.theme.collectionThemesTree = [{
-            label: 'NIST Research Topics -',
-            "expanded": false,
-            children: this.collectionThemesWithCount['nist'].children
-        }];
+        // this.allCollections[Collections.DEFAULT].theme.collectionThemesTree = [{
+        //     label: 'NIST Research Topics -',
+        //     "expanded": false,
+        //     level: 1,
+        //     children: this.collectionThemesWithCount[Collections.DEFAULT].children
+        // }];
         
         if(!this.allCollections[this.collection]) {
             this.allCollections[this.collection] = {} as Collection;
@@ -434,11 +456,17 @@ export class FiltersComponent implements OnInit {
         //     "expanded": true,
         //     children: this.allCollections[this.collection].theme.collectionThemesWithCount
         // }];
-        this.allCollections[this.collection].theme.collectionThemesTree = [{
-            label: this.collection + ' Research Topics -',
-            "expanded": true,
-            children: this.collectionThemesWithCount[this.collection].children
-        }];
+        for(let col of this.collectionOrder) {
+            if(this.collectionThemesWithCount[col]) {
+                this.allCollections[col].theme.collectionThemesTree = [{
+                    label: col + ' Research Topics -',
+                    "expanded": (col != Collections.DEFAULT),
+                    level: 1,
+                    children: this.collectionThemesWithCount[col].children
+                }];
+            }
+        }
+
 
         this.resourceTypeTree = [{
             label: 'Type of Resource  -',
@@ -510,19 +538,25 @@ export class FiltersComponent implements OnInit {
         }
 
         // NIST Research topics
-        console.log("this.filterStrings[Collections.DEFAULT]", this.filterStrings[Collections.DEFAULT]);
-        if(this.filterStrings[Collections.DEFAULT]) {
-            lFilterString += this.filterStrings[Collections.DEFAULT];
-            lFilterString = this.removeEndingComma(lFilterString);
-        }
+        // if(this.filterStrings[Collections.DEFAULT]) {
+        //     lFilterString += this.filterStrings[Collections.DEFAULT];
+        //     lFilterString = this.removeEndingComma(lFilterString);
+        // }
 
 
         // Collection Research topics
-        if(this.filterStrings[this.collection]) {
-            lFilterString += this.filterStrings[this.collection];
-            lFilterString = this.removeEndingComma(lFilterString);
-        }        
+        // if(this.filterStrings[this.collection]) {
+        //     lFilterString += this.filterStrings[this.collection];
+        //     lFilterString = this.removeEndingComma(lFilterString);
+        // }        
         
+        for(let col of this.collectionOrder) {
+            if(this.filterStrings[col]) {
+                lFilterString += this.filterStrings[col];
+                lFilterString = this.removeEndingComma(lFilterString);
+            }   
+        }
+
         // Record has
         if (this.selectedComponentsNode.length > 0) {
             if(lFilterString != '') lFilterString += "&";
@@ -723,11 +757,10 @@ export class FiltersComponent implements OnInit {
      * clear filters
      */
     clearFilters() {
-        this.filterStrings = {
-            "nist": "",
-            "forensics": "",
-            "semiconductors": ""
-        }
+        this.filterStrings = {};
+        this.filterStrings[Collections.DEFAULT] = "";
+        this.filterStrings[Collections.FORENSICS] = "";        
+        this.filterStrings[Collections.SEMICONDUCTORS] = "";
 
         this.suggestedThemes = [];
         this.suggestedKeywords = [];
@@ -747,8 +780,8 @@ export class FiltersComponent implements OnInit {
         this.components = this.collectComponents(this.searchResults);
         this.collectComponentsWithCount();
         this.collectThemes(this.searchResults);
-        this.collectionThemesWithCount["nist"]
-        this.collectThemesWithCount("nist");
+        // this.collectionThemesWithCount[Collections.DEFAULT];
+        this.collectThemesWithCount(Collections.DEFAULT);
         this.collectThemesWithCount(this.collection);
 
         this.componentsTree = [{
@@ -819,7 +852,9 @@ export class FiltersComponent implements OnInit {
         for (let res of this.resourceTypes) {
             let count: any;
             count = _.countBy(this.resourceTypesAllArray, _.partial(_.isEqual, res.value))['true'];
-            this.resourceTypesWithCount.push({ label: res.label + "---" + count, data: res.value });
+            // this.resourceTypesWithCount.push({ label: res.label + "---" + count, data: res.value });
+
+            this.resourceTypesWithCount.push(new FilterTreeNode(res.label + "---" + count, true, res.label, res.label, count));
         }
     }
 
@@ -925,7 +960,9 @@ export class FiltersComponent implements OnInit {
             let count: any;
             if (this.showComponents.includes(comp.label)) {
                 count = _.countBy(this.componentsAllArray, _.partial(_.isEqual, comp.value))['true'];
-                this.componentsWithCount.push({ label: comp.label + "---" + count, data: comp.value });
+                // this.componentsWithCount.push({ label: comp.label + "---" + count, data: comp.value });
+
+                this.componentsWithCount.push(new FilterTreeNode(comp.label + "---" + count, true, comp.label, comp.label, count));
             }
         }
     }
@@ -935,8 +972,18 @@ export class FiltersComponent implements OnInit {
      * @param searchResults - search results
      */
     collectThemes(searchResults: any[]) {
+        let allThemes: any = {};
+        allThemes[Collections.DEFAULT] = [];
+        allThemes[Collections.FORENSICS] = [];
+        allThemes[Collections.SEMICONDUCTORS] = [];
+
         let themes: SelectItem[] = [];
         let collectionThemes: SelectItem[] = [];
+
+        let allThemesArray: any = {};
+        allThemesArray[Collections.DEFAULT] = [];
+        allThemesArray[Collections.FORENSICS] = [];
+        allThemesArray[Collections.SEMICONDUCTORS] = [];
 
         let themesArray: string[] = [];
         let collectionThemesArray: string[] = [];
@@ -944,105 +991,195 @@ export class FiltersComponent implements OnInit {
         let topicLabel: string;
         let data: string;
 
+        let allUniqueThemes: any = {};
+        allUniqueThemes[Collections.DEFAULT] = [];
+        allUniqueThemes[Collections.FORENSICS] = [];
+        allUniqueThemes[Collections.SEMICONDUCTORS] = [];
+
         let uniqueThemes: string[] = [];
         let collectionUniqueThemes: string[] = [];
+
+        let allThemesAllArray: any = {};
+        allThemesAllArray[Collections.DEFAULT] = [];
+        allThemesAllArray[Collections.FORENSICS] = [];
+        allThemesAllArray[Collections.SEMICONDUCTORS] = [];
 
         let themesAllArray: string[] = [];
         let collectionThemesAllArray: string[] = [];
 
         this.unspecifiedCount = 0;
         
+        //Collecting all themes
         for (let resultItem of searchResults) {
             if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
                 for (let topic of resultItem.topic) {
                     let topics = topic.tag.split(":");
-                    let col = "nist";
-                    if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
-                        col = "collection";
-                    }
+                    // let col = Collections.DEFAULT;
+                    // if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
+                    //     col = "collection";
+                    // }
 
                     topicLabel = topics[0];
                     data = topic.tag;
 
                     if(topics.length > 1){
-                        topicLabel = topics[0] + ":" + topics[1];
+                        // topicLabel = topics[0] + ":" + topics[1];
+                        topicLabel = topic.tag;
                     }
-
-                    if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
+                    
+                    if(topic['scheme'].indexOf(this.taxonomyURI[Collections.SEMICONDUCTORS]) >= 0) {
                         topicLabel = topics[0];
                         data = topic.tag;
 
                         if(topics.length > 1){
-                            topicLabel = topics[0] + ":" + topics[1];
+                            // topicLabel = topics[0] + ":" + topics[1];
+                            topicLabel = topic.tag;
                         }
 
-                        if (collectionThemesArray.indexOf(topicLabel) < 0) {
-                            collectionThemes.push({ label: topicLabel, value: data });
-                            collectionThemesArray.push(topicLabel);
-                        } 
+                        if(allThemesArray[Collections.SEMICONDUCTORS].indexOf(topicLabel) < 0) {
+                            allThemes[Collections.SEMICONDUCTORS].push({ label: topicLabel, value: data });
+                            allThemesArray[Collections.SEMICONDUCTORS].push(topicLabel);
+                        }
+                    }else if(topic['scheme'].indexOf(this.taxonomyURI[Collections.FORENSICS]) >= 0) {
+                        data = topic.tag;
+
+                        if(topics.length > 1){
+                            // topicLabel = topics[0] + ":" + topics[1];
+                            topicLabel = topic.tag;
+                        }
+
+                        if(allThemesArray[Collections.FORENSICS].indexOf(topicLabel) < 0) {
+                            allThemes[Collections.FORENSICS].push({ label: topicLabel, value: data });
+                            allThemesArray[Collections.FORENSICS].push(topicLabel);
+                        }
                     }else{
                         topicLabel = topics[0];
-                        topic = topic.tag;
 
-                        if (themesArray.indexOf(topicLabel) < 0) {
-                            themes.push({ label: topicLabel, value: topic });
-                            themesArray.push(topicLabel);
+                        if (allThemesArray[Collections.DEFAULT].indexOf(topicLabel) < 0) {
+                            allThemes[Collections.DEFAULT].push({ label: topicLabel, value: topic.tag });
+                            allThemesArray[Collections.DEFAULT].push(topicLabel);
                         }
                     }
+
+                    //To be removed
+                    // if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
+                    //     topicLabel = topics[0];
+                    //     data = topic.tag;
+
+                    //     if(topics.length > 1){
+                    //         // topicLabel = topics[0] + ":" + topics[1];
+                    //         topicLabel = topic.tag;
+                    //     }
+                    //     console.log("collectionThemesArray", collectionThemesArray);
+                    //     if (collectionThemesArray.indexOf(topicLabel) < 0) {
+                    //         collectionThemes.push({ label: topicLabel, value: data });
+                    //         collectionThemesArray.push(topicLabel);
+                    //     } 
+                    // }else{
+                    //     topicLabel = topics[0];
+
+                    //     console.log("themesArray", themesArray);
+                    //     if (themesArray.indexOf(topicLabel) < 0) {
+                    //         themes.push({ label: topicLabel, value: topic.tag });
+                    //         themesArray.push(topicLabel);
+                    //     }
+                    // }
+                    //To be removed --
                 }
             } else {
                 this.unspecifiedCount += 1;
             }
         }
 
+        //Find unique themes
         for (let resultItem of searchResults) {
             uniqueThemes = [];
             collectionUniqueThemes = [];
+            for(let col of this.collectionOrder){
+                allUniqueThemes[col] = [];
+            }
 
             if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
                 for (let topic of resultItem.topic) {
-                    topic = topic.tag;
+                    let topicTag = topic.tag;
 
-                    for(let theme of collectionThemes){
-                        if(topic.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
-                            collectionUniqueThemes.push(theme.label);
-                        }
+                    for(let col of this.collectionOrder) {
+                        // if(topic['scheme'].indexOf(this.taxonomyURI[col]) >= 0) {
+                            for(let theme of allThemes[col]){
+                                if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
+                                    allUniqueThemes[col].push(theme.label);
+                                }
+                            }
+                        // }
                     }
-
-                    for(let theme of themes){
-                        if(topic.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
-                            uniqueThemes.push(theme.label);
-                        }
-                    }
-                    
                 }
 
-                collectionThemesAllArray = collectionThemesAllArray.concat(collectionUniqueThemes.filter(this.onlyUnique));
-                themesAllArray = themesAllArray.concat(uniqueThemes.filter(this.onlyUnique));
+                for(let col of this.collectionOrder) {
+                    allThemesAllArray[col] = allThemesAllArray[col].concat(allUniqueThemes[col].filter(this.onlyUnique));
+                }
             }
+
+            //To be removed
+            // if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
+            //     for (let topic of resultItem.topic) {
+            //         let topicTag = topic.tag;
+
+            //         for(let theme of collectionThemes){
+            //             if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
+            //                 collectionUniqueThemes.push(theme.label);
+            //             }
+            //         }
+
+            //         for(let theme of themes){
+            //             if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
+            //                 uniqueThemes.push(theme.label);
+            //             }
+            //         }
+                    
+            //     }
+
+            //     collectionThemesAllArray = collectionThemesAllArray.concat(collectionUniqueThemes.filter(this.onlyUnique));
+            //     themesAllArray = themesAllArray.concat(uniqueThemes.filter(this.onlyUnique));
+            // }
+            //To be removed --
         }
 
-        if(!this.allCollections.nist){
-            this.allCollections.nist = {} as Collection;
+        for(let col of this.collectionOrder) {
+            if(!this.allCollections[col]){
+                this.allCollections[col] = {} as Collection;
+            }
+
+            if(!this.allCollections[col].theme){
+                this.allCollections[col].theme = {} as CollectionThemes;
+            }
+
+            this.allCollections[col].theme.collectionThemes = allThemes[col];
+            this.allCollections[col].theme.collectionThemesAllArray = allThemesAllArray[col];
         }
 
-        if(!this.allCollections.nist.theme){
-            this.allCollections.nist.theme = {} as CollectionThemes;
-        }
 
-        this.allCollections.nist.theme.collectionThemes = themes;
-        this.allCollections.nist.theme.collectionThemesAllArray = themesAllArray;
 
-        if(!this.allCollections[this.collection]){
-            this.allCollections[this.collection] = {} as Collection;
-        }
+        // if(!this.allCollections[Collections.DEFAULT]){
+        //     this.allCollections[Collections.DEFAULT] = {} as Collection;
+        // }
 
-        if(!this.allCollections[this.collection].theme){
-            this.allCollections[this.collection].theme = {} as CollectionThemes;
-        }
+        // if(!this.allCollections[Collections.DEFAULT].theme){
+        //     this.allCollections[Collections.DEFAULT].theme = {} as CollectionThemes;
+        // }
 
-        this.allCollections[this.collection].theme.collectionThemes = collectionThemes;
-        this.allCollections[this.collection].theme.collectionThemesAllArray = collectionThemesAllArray;
+        // this.allCollections[Collections.DEFAULT].theme.collectionThemes = themes;
+        // this.allCollections[Collections.DEFAULT].theme.collectionThemesAllArray = themesAllArray;
+
+        // if(!this.allCollections[this.collection]){
+        //     this.allCollections[this.collection] = {} as Collection;
+        // }
+
+        // if(!this.allCollections[this.collection].theme){
+        //     this.allCollections[this.collection].theme = {} as CollectionThemes;
+        // }
+
+        // this.allCollections[this.collection].theme.collectionThemes = collectionThemes;
+        // this.allCollections[this.collection].theme.collectionThemesAllArray = collectionThemesAllArray;
     }
 
     /**
@@ -1063,16 +1200,23 @@ export class FiltersComponent implements OnInit {
     /**
      * Collect NIST themes + count
      */
-    collectThemesWithCount(collection: string) {
+    collectThemesWithCount(collection: string, searchResults: any = null) {
+        // if(!searchResults) return;
+
         let sortable: any[] = [];
-        let expand = (collection != 'nist');
+        let expand = (collection != Collections.DEFAULT);
         sortable = [];
         this.collectionThemesWithCount[collection] = new FilterTreeNode(this.collection + ' Research Topics', expand);
 
         if(!this.allCollections[collection]){
-            this.allCollections[collection].themes = {} as CollectionThemes;
+            this.allCollections[collection] = {} as Collection;
         }
-        this.allCollections[collection].theme.collectionThemesWithCount = [];
+
+        if(!this.allCollections[collection].theme)
+            this.allCollections[collection].theme = {} as CollectionThemes;
+
+        if(!this.allCollections[collection].theme.collectionThemesWithCount)
+            this.allCollections[collection].theme.collectionThemesWithCount = [];
 
         for (let theme in (_.countBy(this.allCollections[collection].theme.collectionThemesAllArray))) {
             sortable.push([theme, _.countBy(this.allCollections[collection].theme.collectionThemesAllArray)[theme]]);
@@ -1082,7 +1226,7 @@ export class FiltersComponent implements OnInit {
             return b[1] - a[1];
         });
 
-        if (this.unspecifiedCount > 0) {
+        if (this.unspecifiedCount > 0 && collection == Collections.DEFAULT) {
             sortable.push(['Unspecified', this.unspecifiedCount]);
         }
 
@@ -1092,7 +1236,7 @@ export class FiltersComponent implements OnInit {
             //     data: sortable[key][0]
             // });
 
-            this.collectionThemesWithCount[collection].upsertNodeFor(sortable[key]);
+            this.collectionThemesWithCount[collection].upsertNodeFor(sortable[key], 1, searchResults, this.standardNISTTaxonomyURI, collection, this.taxonomyURI);
             // this.allCollections[collection].theme.collectionThemesWithCount.push(tree);
         }
 

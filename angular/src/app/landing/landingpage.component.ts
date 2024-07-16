@@ -313,7 +313,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     loadBannerUrl() {
-        this.collectionObj = CollectionData[this.collection.toLowerCase()] as any;
+        this.collectionObj = CollectionData[this.collection] as any;
 
         switch(this.collection) { 
             case Collections.FORENSICS: { 

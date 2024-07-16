@@ -1,7 +1,8 @@
 import { Component, OnInit, Input, HostListener, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-
+import { CollectionService } from '../../shared/collection-service/collection.service';
+import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
 
 @Component({
     selector: 'app-searchresult',
@@ -32,6 +33,7 @@ export class SearchresultComponent implements OnInit {
     mouseDragging: boolean = false;
     prevMouseX: number = 0;
     prevFilterWidth: number = 0;
+    taxonomyURI: any = {};
 
     @ViewChild('parentDiv')
     topLevelDiv: ElementRef;
@@ -40,11 +42,16 @@ export class SearchresultComponent implements OnInit {
     @Input() inBrowser: boolean = false;
     @Input() collection: string;
 
-    constructor(private cdr: ChangeDetectorRef) {
+    constructor(
+        private cdr: ChangeDetectorRef,
+        public collectionService: CollectionService,
+    ) {
     }
 
     ngOnInit(): void {
-
+        this.taxonomyURI[Collections.DEFAULT] = this.collectionService.loadCollections(Collections.DEFAULT)[Collections.DEFAULT].taxonomyURI;
+        this.taxonomyURI[Collections.FORENSICS] = this.collectionService.loadCollections(Collections.FORENSICS)[Collections.FORENSICS].taxonomyURI;
+        this.taxonomyURI[Collections.SEMICONDUCTORS] = this.collectionService.loadCollections(Collections.SEMICONDUCTORS)[Collections.SEMICONDUCTORS].taxonomyURI;
     }
 
     ngAfterViewInit(): void {
@@ -114,7 +121,7 @@ export class SearchresultComponent implements OnInit {
                 this.filterWidth = this.mobWidth / 4;                  
                 this.filterToggler = 'expanded';
             }else{
-                this.filterWidth = 49;
+                this.filterWidth = 39;
                 this.filterToggler = 'collapsed';
             }
 

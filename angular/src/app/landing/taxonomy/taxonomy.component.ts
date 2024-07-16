@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import {TreeNode} from 'primeng/api';
 import { TaxonomyListService, SearchfieldsListService } from '../../shared/index';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
 
 @Component({
   selector: 'app-taxonomy',
@@ -39,6 +40,7 @@ export class TaxonomyComponent implements OnInit {
     @Input() collectionThemesTree: TreeNode[] = [];
     @Input() backgroundColor: string = "white";
     @Input() defaultColor: string = "black";
+    @Input() collection: string = Collections.DEFAULT;
     @Output() filterString: EventEmitter<string> = new EventEmitter();
     
     constructor() { 
@@ -48,6 +50,11 @@ export class TaxonomyComponent implements OnInit {
         console.log("collectionThemesTree", this.collectionThemesTree);
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
+        //Add '${implements OnChanges}' to the class.
+        console.log("changes", changes);
+    }
     /**
      * Form the filter string and refresh the result page
      */
@@ -59,12 +66,15 @@ export class TaxonomyComponent implements OnInit {
         // Collection Research topics
         if (this.collectionSelectedThemesNode.length > 0) {
             for (let theme of this.collectionSelectedThemesNode) {
-                if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data !== 'undefined') {
+                if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data[0] !== 'undefined') {
                     themeSelected = true;
-                    this.collectionSelectedThemesNode.push(theme.data);
-                    themeType += theme.data + ',';
+                    for(let i = 0; i < theme.data.length; i++ ){
+                        // this.collectionSelectedThemesNode.push(theme.data[i]);
 
-                    lFilterString += theme.data.trim() + ",";
+                        themeType += theme.data[i] + ',';
+
+                        lFilterString += this.collection + "----" + theme.data[i].trim() + ",";
+                    }
                 }
             }
         }
@@ -100,4 +110,22 @@ export class TaxonomyComponent implements OnInit {
         else
             return "";
     }    
+
+    /**
+     * Only expand the filter window if user close the first level 
+     * @param level node level
+     */
+    onNodeExpand(event) {
+        if(event.node.level == 1)
+            this.collectionNodeExpanded = true;
+    }
+
+    /**
+     * Only collapse the filter window if user close the first level 
+     * @param level node level
+     */
+    onNodeCollapse(event) {
+        if(event.node.level == 1)
+            this.collectionNodeExpanded = false;
+    }
 }

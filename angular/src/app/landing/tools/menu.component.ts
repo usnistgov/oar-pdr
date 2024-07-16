@@ -76,7 +76,7 @@ export class MenuComponent implements OnInit {
         }
 
     ngOnInit(): void {
-        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+        this.allCollections = this.collectionService.loadCollections(this.collection);
 
         this.setColor();
 
@@ -177,9 +177,9 @@ export class MenuComponent implements OnInit {
      * Set color variables
      */
     setColor() {
-        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
-        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
-        this.hoverColor = this.allCollections[this.collection.toLowerCase()].color.hover;
+        this.defaultColor = this.allCollections[this.collection].color.default;
+        this.lighterColor = this.allCollections[this.collection].color.lighter;
+        this.hoverColor = this.allCollections[this.collection].color.hover;
     }   
     
     /**

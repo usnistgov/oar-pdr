@@ -77,6 +77,7 @@ export class ResultlistComponent implements OnInit {
     @Input() resultWidth: string = '400px';
     @Input() filterString: string = '';
     @Input() collection: string = Collections.FORENSICS;
+    @Input() taxonomyURI: any = {};
 
     constructor(private searchService: SearchService, 
         private cfg: AppConfig,
@@ -101,7 +102,7 @@ export class ResultlistComponent implements OnInit {
             );
         }
 
-        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+        this.allCollections = this.collectionService.loadCollections(this.collection);
 
         // Set colors
         this.setColor();
@@ -112,9 +113,9 @@ export class ResultlistComponent implements OnInit {
     }
 
     setColor() {
-        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
-        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
-        this.lightColor = this.allCollections[this.collection.toLowerCase()].color.light;
+        this.defaultColor = this.allCollections[this.collection].color.default;
+        this.lighterColor = this.allCollections[this.collection].color.lighter;
+        this.lightColor = this.allCollections[this.collection].color.light;
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -402,20 +403,30 @@ export class ResultlistComponent implements OnInit {
 
                         break;
                     case "topic.tag":
-                        this.searchResults.forEach((object) => {
+                        let topics = filter.split("=")[1].split(",");
+                        for(let resultItem of this.searchResults) {
                             
-                            if(object.active == true){
-                                object.active = false;
+                            if(resultItem.active == true){
+                                resultItem.active = false;
 
-                                object["topic"].forEach((oTopic) => {
-                                    let topics = filter.split("=")[1].split(",");
-                                    topics.forEach(topic => {
-                                        if(oTopic["tag"].toLowerCase().includes(topic.toLowerCase()))
-                                            object.active = true;
-                                    });
-                                })
+                                for(let oTopic of resultItem["topic"]) {
+                                    for(let topic of topics) {
+                                        let collection = topic.split("----")[0];
+                                        let topicValue = topic.split("----")[1];
+
+                                        if(oTopic['scheme'].indexOf(this.taxonomyURI[collection]) >= 0) {
+                                            if(collection == Collections.DEFAULT) {
+                                                if(oTopic["tag"].toLowerCase().includes(topicValue.toLowerCase()))
+                                                    resultItem.active = true;
+                                            }else {
+                                                if(oTopic["tag"].toLowerCase() == (topicValue.toLowerCase()))
+                                                    resultItem.active = true;
+                                            }
+                                        }
+                                    };
+                                };
                             }
-                        });
+                        };
 
                         break;
                     case "components.@type":

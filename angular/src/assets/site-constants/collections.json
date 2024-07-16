@@ -1,5 +1,5 @@
 {
-    "nist": {
+    "NIST": {
         "bannerUrl": "",
         "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes/",
         "color": {
@@ -10,7 +10,7 @@
             "hover": "#ffffff"
         }
     },
-    "forensics": {
+    "Forensics": {
         "bannerUrl": "assets/images/fingerprint.jpg",
         "taxonomyURI": "https://data.nist.gov/od/dm/forensics-themes/",
         "color": {
@@ -21,9 +21,9 @@
             "hover": "#ffffff"  
         }
     },
-    "semiconductors": {
+    "Semiconductors": {
         "bannerUrl": "assets/images/METIS-Banner-Op1.png",
-        "taxonomyURI": "https://data.nist.gov/od/dm/semiconductors-themes/",
+        "taxonomyURI": "https://www.nist.gov/od/dm/nist-themes/",
         "color": {
             "default": "#003c97",
             "light": "#d6d9ff",

@@ -17,12 +17,12 @@ export class CollectionService {
     loadCollections(collection: string) {
         let allCollections = {}; 
 
-        // Load collection data from config file
-        allCollections[Collections.DEFAULT.toLowerCase()] = this.localCollectionData(Collections.DEFAULT.toLowerCase())
-
         if(collection){
-            allCollections[collection.toLowerCase()] = this.localCollectionData(collection.toLowerCase())
+            allCollections[collection] = this.localCollectionData(collection)
         }
+
+        // Load collection data from config file
+        allCollections[Collections.DEFAULT] = this.localCollectionData(Collections.DEFAULT)
 
         return allCollections;
     }
@@ -34,8 +34,8 @@ export class CollectionService {
      */
     localCollectionData(collection: string) {
         if(collection)
-            return Object.assign(new Collection(), CollectionData[collection.toLowerCase()]);  
+            return Object.assign(new Collection(), CollectionData[collection]);  
         else    
-            return Object.assign(new Collection(), CollectionData[Collections.DEFAULT.toLowerCase()]);  
+            return Object.assign(new Collection(), CollectionData[Collections.DEFAULT]);  
     }
 }
