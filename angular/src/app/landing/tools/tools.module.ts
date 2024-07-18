@@ -1,9 +1,9 @@
 import { NgModule }     from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { MenuModule } from 'primeng/menu';
-
 import { ToolMenuComponent } from './toolmenu.component';
+import { MenuComponent } from './menu.component';
+import { MetricsinfoModule } from '../metricsinfo/metricsinfo.module';
 
 /**
  * A module providing tools for interacting with the landing page's record metadata.  
@@ -14,13 +14,16 @@ import { ToolMenuComponent } from './toolmenu.component';
 @NgModule({
     imports: [
         CommonModule,
-        MenuModule
+        MenuModule,
+        MetricsinfoModule
     ],
     declarations: [
-        ToolMenuComponent
+        ToolMenuComponent,
+        MenuComponent
     ],
     exports: [
-        ToolMenuComponent
+        ToolMenuComponent,
+        MenuComponent
     ]
 })
 export class ToolsModule { }

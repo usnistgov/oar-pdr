@@ -19,7 +19,7 @@ import { DoneComponent } from './done/done.component';
 import { DownloadstatusComponent } from './downloadstatus/downloadstatus.component';
 import { TaxonomyListService } from '../shared/taxonomy-list'
 import { ErrorComponent, UserErrorComponent } from './error.component';
-import { MetricsinfoComponent } from './metricsinfo/metricsinfo.component';
+
 // import { ForensicslandingbodyModule } from './forensicslandingbody/forensicslandingbody.module';
 // import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
 import { SearchresultModule } from './searchresult/searchresult.module';
@@ -43,7 +43,7 @@ import { CollectionService } from '../shared/collection-service/collection.servi
     ],
     declarations: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,
-        ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent, MetricsinfoComponent
+        ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent
     ],
     providers: [
         MetadataUpdateService, TaxonomyListService, DatePipe, CollectionService

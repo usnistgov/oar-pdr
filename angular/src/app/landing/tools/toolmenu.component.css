@@ -51,6 +51,12 @@
 
 }
 
+:host ::ng-deep .rightMenuStylePop>.p-menu .p-tieredmenu .p-submenu-list {
+    position: absolute;
+    top: 1000px !important;
+    left: unset;
+}
+
 :host ::ng-deep .rightMenuStylePop>.p-menu .p-menuitem-link {
     padding: 0.5em 0.2em 0.5em 0.5em;
     font-size: 14px;
