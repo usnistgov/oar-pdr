@@ -1,0 +1,440 @@
+{
+    "ResultCount": 17,
+    "PageSize": 0,
+    "ResultData": [
+        {
+            "landingPage": "https://www.ctcms.nist.gov/~knc6/JARVIS.html",
+            "bureauCode": [
+              "006:55"
+            ],
+            "contactPoint": {
+              "fn": "Kamal Choudhary",
+              "hasEmail": "mailto:kamal.choudhary@nist.gov"
+            },
+            "@type": [
+              "nrdp:PublicDataResource"
+            ],
+            "@id": "ark:/88434/mds00k6tgp",
+            "keyword": [
+              "Density functional theory",
+              "classical interatomic potential",
+              "force-field",
+              "python",
+              "JARVIS",
+              "MGI",
+              "MDCS",
+              "RESTAPI",
+              "automation"
+            ],
+            "inventory": [
+              {
+                "childCount": 3,
+                "byType": [
+                  {
+                    "forType": "dcat:Distribution",
+                    "childCount": 3,
+                    "descCount": 3
+                  },
+                  {
+                    "forType": "nrd:Hidden",
+                    "childCount": 1,
+                    "descCount": 1
+                  },
+                  {
+                    "forType": "nrdp:AccessPage",
+                    "childCount": 2,
+                    "descCount": 2
+                  }
+                ],
+                "descCount": 3,
+                "childCollections": [],
+                "forCollection": ""
+              }
+            ],
+            "doi": "doi:10.18434/M3HQ1W",
+            "modified": "2017-10-18",
+            "@context": [
+              "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+              {
+                "@base": "ark:/88434/mds00k6tgp"
+              }
+            ],
+            "references": [
+              {
+                "@id": "#ref:articles/sdata2016125",
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.7#/definitions/DCiteReference"
+                ],
+                "@type": "deo:BibliographicReference",
+                "refType": "IsReferencedBy",
+                "location": "https://www.nature.com/articles/sdata2016125"
+              },
+              {
+                "@id": "#ref:articles/s41598-017-05402-0",
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.7#/definitions/DCiteReference"
+                ],
+                "@type": "deo:BibliographicReference",
+                "refType": "IsReferencedBy",
+                "location": "https://www.nature.com/articles/s41598-017-05402-0"
+              }
+            ],
+            "description": [
+              "JARVIS (Joint Automated Repository for Various Integrated Simulations) is a repository designed to automate materials discovery using classical force-field, density functional theory, machine learning calculations and experiments.The Force-field section of JARVIS (JARVIS-FF) consists of thousands of automated LAMMPS based force-field calculations on DFT geometries. Some of the properties included in JARVIS-FF are energetics, elastic constants, surface energies, defect formations energies and phonon frequencies of materials.The Density functional theory section of JARVIS (JARVIS-DFT) consists of thousands of VASP based calculations for 3D-bulk, single layer (2D), nanowire (1D) and molecular (0D) systems. Most of the calculations are carried out with optB88vDW functional. JARVIS-DFT includes materials data such as: energetics, diffraction pattern, radial distribution function, band-structure, density of states, carrier effective mass, temperature and carrier concentration dependent thermoelectric properties, elastic constants and gamma-point phonons.The Machine-learning section of JARVIS (JARVIS-ML) consists of machine learning prediction tools, trained on JARVIS-DFT data. Some of the ML-predictions focus on energetics, heat of formation, GGA/METAGGA bandgaps, bulk and shear modulus."
+            ],
+            "_extensionSchemas": [
+              "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/PublicDataResource"
+            ],
+            "language": [
+              "en"
+            ],
+            "programCode": [
+              "006:045"
+            ],
+            "components": [
+              {
+                "accessURL": "https://www.ctcms.nist.gov/~knc6/JVASP.html",
+                "@type": [
+                  "nrdp:AccessPage",
+                  "dcat:Distribution"
+                ],
+                "@id": "#~knc6/JVASP.html",
+                "format": {
+                  "description": "text/html"
+                },
+                "title": "JARVIS for DFT",
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
+                ]
+              },
+              {
+                "accessURL": "https://www.ctcms.nist.gov/~knc6/periodic.html",
+                "@type": [
+                  "nrdp:AccessPage",
+                  "dcat:Distribution"
+                ],
+                "@id": "#~knc6/periodic.html",
+                "format": {
+                  "description": "text/html"
+                },
+                "title": "JARVIS for Force-fields",
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
+                ]
+              },
+              {
+                "@id": "#doi:10.18434/M3HQ1W",
+                "@type": [
+                  "nrd:Hidden",
+                  "dcat:Distribution"
+                ],
+                "accessURL": "https://doi.org/10.18434/M3HQ1W"
+              }
+            ],
+            "license": "https://www.nist.gov/open/license",
+            "topic": [
+              {
+                "tag": "Physics: Condensed matter",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Materials: Modeling and computational material science",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Electronics: Thin-film electronics",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Electronics: Optoelectronics",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Chemistry: Molecular characterization",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Chemistry: Theoretical chemistry and modeling",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Chemistry: Chemical thermodynamics and chemical properties",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Electronics: Semiconductors",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Materials: Materials characterization",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "tag": "Physics: Optical physics",
+                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+                "@type": "Concept"
+              },
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Metrology", 
+                "@type": "Concept"
+              }, 
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Metrology: Computational Technique", 
+                "@type": "Concept"
+              },
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Metrology: Computational Technique: Modeling", 
+                "@type": "Concept"
+              },
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Metrology: Computational Technique: Simulation", 
+                "@type": "Concept"
+              },
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Metrology: Computational Technique: AI/ML", 
+                "@type": "Concept"
+              }
+            ],
+            "theme": [
+              "Condensed matter",
+              "Modeling and computational material science",
+              "Thin-film electronics",
+              "Optoelectronics",
+              "Molecular characterization",
+              "Theoretical chemistry and modeling",
+              "Chemical thermodynamics and chemical properties",
+              "Semiconductors",
+              "Materials characterization",
+              "Atomic, molecular, and quantum",
+              "Optical physics"
+            ],
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.7#",
+            "ediid": "5BD81D0B67AA9AFAE0531A57068100201871",
+            "title": "JARVIS: Joint Automated Repository for Various Integrated Simulations",
+            "publisher": {
+              "name": "National Institute of Standards and Technology",
+              "@type": "org:Organization"
+            },
+            "accessLevel": "public",
+            "version": "1.0.0",
+            "isPartOf": [
+              {
+                "@type": [
+                  "nrda:ScienceTheme",
+                  "nrdp:PublicDataResource"
+                ],
+                "@id": "ark:/88434/pdr0-0002",
+                "title": "CHIPS Metrology Data"
+              }
+            ]
+        },
+        {
+            "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.7#",
+            "@context": [
+              "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+              {
+                "@base": "ark:/88434/mds2-2997"
+              }
+            ],
+            "@type": [
+              "nrdp:DataPublication",
+              "nrdp:PublicDataResource",
+              "dcat:Dataset"
+            ],
+            "_extensionSchemas": [
+              "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/PublicDataResource"
+            ],
+            "@id": "ark:/88434/mds2-2997",
+            "ediid": "ark:/88434/mds2-2997",
+            "version": "1.0.0",
+            "doi": "doi:10.18434/mds2-2997",
+            "title": "CMOS Sky130 Primitives measured at cryogenic temperatures",
+            "contactPoint": {
+              "fn": "Brian Hoskins",
+              "hasEmail": "mailto:brian.hoskins@chips.gov"
+            },
+            "modified": "2023-04-19",
+            "status": "available",
+            "landingPage": "https://data.nist.gov/od/id/mds2-2997",
+            "description": [
+              "Sky130 is an open source complimentary metal oxide semiconductor (CMOS) technology manufactured by Skywater Technology in its facility in Bloomington, Minnesota. Since it is an open source technology, there are no legal restrictions on it's characterization, unlike in typical foundry semiconductor technologies. To facilitate the development of cryogenic electronics, this data set includes measurements of devices manufactured in Sky130 at low temperatures."
+            ],
+            "keyword": [
+              "cryogenics",
+              "quantum",
+              "CMOS",
+              "semiconductor",
+              "transistor"
+            ],
+            "topic": [
+              {
+                "@type": "Concept",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+                "tag": "Electronics: Semiconductors"
+              },
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Microelectronics", 
+                "@type": "Concept"
+              }, 
+              {
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0", 
+                "tag": "Microelectronics: CMOS", 
+                "@type": "Concept"
+              }
+            ],
+            "accessLevel": "public",
+            "license": "https://www.nist.gov/open/license",
+            "publisher": {
+              "name": "National Institute of Standards and Technology",
+              "@type": "org:Organization"
+            },
+            "language": [
+              "en"
+            ],
+            "bureauCode": [
+              "006:55"
+            ],
+            "programCode": [
+              "006:052"
+            ],
+            "theme": [
+              "Electronics: Semiconductors"
+            ],
+            "_editStatus": "done",
+            "components": [
+              {
+                "@id": "cmps/2997_README_v3.txt",
+                "@type": [
+                  "nrdp:DataFile",
+                  "nrdp:DownloadableFile",
+                  "dcat:Distribution"
+                ],
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+                ],
+                "filepath": "2997_README_v3.txt",
+                "downloadURL": "https://data.nist.gov/od/ds/mds2-2997/2997_README_v3.txt",
+                "mediaType": "text/plain",
+                "format": {
+                  "description": "txt file"
+                },
+                "description": "A written description of the data and the file format. ",
+                "title": "Readme",
+                "size": 6887,
+                "checksum": {
+                  "hash": "194dcbc97098f14b27977edb512c9f8ccce40665e25c1769756f8a198d04406b",
+                  "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                  }
+                }
+              },
+              {
+                "@id": "cmps/Sky130-4k.zip",
+                "@type": [
+                  "nrdp:DataFile",
+                  "nrdp:DownloadableFile",
+                  "dcat:Distribution"
+                ],
+                "_extensionSchemas": [
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+                ],
+                "filepath": "Sky130-4k.zip",
+                "downloadURL": "https://data.nist.gov/od/ds/mds2-2997/Sky130-4k.zip",
+                "mediaType": "text/plain",
+                "title": "Sky130-4k",
+                "size": 3531642,
+                "checksum": {
+                  "hash": "92d823f92f70cdc77e404003a7a9eb0dcc5a0bc4c26dd23f8d855996feb97953",
+                  "algorithm": {
+                    "tag": "sha256",
+                    "@type": "Thing"
+                  }
+                },
+                "description": "Measurements of Sky130 Transistors at 4 Kelvin "
+              }
+            ],
+            "authors": [
+              {
+                "familyName": "Akturk",
+                "fn": "Akin  Akturk",
+                "givenName": "Akin",
+                "middleName": "",
+                "affiliation": [
+                  {
+                    "title": "CoolCad Electronics LLC",
+                    "@type": "org:Organization"
+                  }
+                ],
+                "orcid": "",
+                "@type": "foaf:Person"
+              },
+              {
+                "familyName": "Hoskins",
+                "fn": "Brian D Hoskins",
+                "givenName": "Brian",
+                "middleName": "D",
+                "affiliation": [
+                  {
+                    "title": "National Institute of Standards and Technology",
+                    "subunits": [
+                      "Nanoscale Device Characterization Division"
+                    ],
+                    "@type": "org:Organization",
+                    "@id": "ror:05xpvk416"
+                  }
+                ],
+                "orcid": "",
+                "@type": "foaf:Person"
+              },
+              {
+                "familyName": "Shrestha",
+                "fn": "Pragya   Shrestha",
+                "givenName": "Pragya ",
+                "middleName": "",
+                "affiliation": [
+                  {
+                    "title": "National Institute of Standards and Technology",
+                    "subunits": [
+                      "Nanoscale Device Characterization Division"
+                    ],
+                    "@type": "org:Organization",
+                    "@id": "ror:05xpvk416"
+                  }
+                ],
+                "orcid": "",
+                "@type": "foaf:Person"
+              }
+            ],
+            "annotated": "2023-08-18T17:20:49.104387",
+            "revised": "2023-08-18T17:20:49.104387",
+            "issued": null,
+            "firstIssued": "2023-08-18T17:20:49.104387",
+            "isPartOf": [
+              {
+                "@type": [
+                  "nrda:ScienceTheme",
+                  "nrdp:PublicDataResource"
+                ],
+                "@id": "ark:/88434/pdr0-0002",
+                "title": "CHIPS Metrology Data"
+              }
+            ]
+        }
+    ]
+}

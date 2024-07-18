@@ -51,7 +51,7 @@
             </div>
 
             <div *ngIf="scienceThemeTopics.length > 0">
-                <strong>{{ collection }} Research Topics: </strong>
+                <strong>{{ allCollections[collection].tag }}: </strong>
                 <span class="topics" *ngFor="let topic of scienceThemeTopics; let i =index">
                     <i>{{ topic }}</i>
                     <span *ngIf="i < scienceThemeTopics.length-1 ">, </span>

@@ -9,12 +9,11 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { SearchService } from '../../shared/search-service';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
-import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
 import * as CollectionData from '../../../assets/site-constants/collections.json';
 import { CollectionService } from '../../shared/collection-service/collection.service';
 
 const SEARCH_SERVICE = 'SEARCH_SERVICE';
-
 
 @Component({
     selector: 'app-filters',
@@ -71,10 +70,8 @@ export class FiltersComponent implements OnInit {
     allUnspecifiedCount: any = {};
     unspecifiedCount: number = 0;
     showMoreLink: boolean = true;
-    standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
 
     collectionThemesWithCount: FilterTreeNode[] = [];
-
     filterStrings = {};
 
 //  Object that hold all themes: Forensics, NIST, ...
@@ -157,29 +154,24 @@ export class FiltersComponent implements OnInit {
         public collectionService: CollectionService,
         private cfg: AppConfig
     ) { 
-        // this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
+
     }
 
     ngOnInit(): void {
-        this.collectionOrder.unshift(Collections.FORENSICS);
-        this.collectionOrder.unshift(Collections.SEMICONDUCTORS);
+        this.collectionOrder = this.collectionService.getCollectionOrder();
         this.msgs = [];
         this.searchResultsError = [];
         this.MoreOptionsDisplayed = (this.theme == 'ScienceTheme');
         this.setFilterWidth();
 
-        for(let col of this.collectionOrder) {
-            this.allCollections[col] = this.collectionService.localCollectionData(col);
-        }
-        
-        // this.allCollections = this.collectionService.loadCollections(this.collection);
-        // this.allCollections[Collections.DEFAULT] = {} as Collection;
+        this.allCollections = this.collectionService.loadAllCollections();
+
+        // for(let col of this.collectionOrder) {
+        //     this.allCollections[col] = this.collectionService.localCollectionData(col);
+        // }
 
         // Set colors
         this.setColor();
-        // to be removed
-        this.standardNISTTaxonomyURI = this.collectionService.loadCollections(Collections.DEFAULT)[Collections.DEFAULT].taxonomyURI;
-        // ===
     }
 
     setColor() {
@@ -261,16 +253,11 @@ export class FiltersComponent implements OnInit {
         this.searchFieldsListService.get().subscribe(
             fields => {
                 this.toSortItems(fields);
-                // this.searchService.setQueryValue(this.searchValue, '', '');
-                // this.queryStringErrorMessage = this.searchQueryService.validateQueryString(this.searchValue);
                 if(! this.queryStringErrorMessage){ 
                     this.queryStringError = true;
                 }
 
-                let lSearchValue = this.searchValue.replace(/  +/g, ' ');
                 this.doSearch();
-                //Convert to a query then search
-                // this.doSearch(this.searchQueryService.buildQueryFromString(lSearchValue, null, this.fields));
             },
             error => {
                 this.errorMessage = <any>error
@@ -383,12 +370,6 @@ export class FiltersComponent implements OnInit {
         if (searchResults.length === 0) {
             this.resultStatus = this.RESULT_STATUS.noResult;
         }
-        // collect Research topics with count
-        // this.collectionThemesWithCount["nist"] = new FilterTreeNode('root');
-        // this.collectionThemesWithCount[this.collection] = new FilterTreeNode('root');
-
-        // this.collectThemesWithCount(Collections.DEFAULT);
-        // this.collectThemesWithCount(this.collection, searchResults);
 
         for(let col of this.collectionOrder) {
             this.collectThemesWithCount(col, searchResults);
@@ -403,9 +384,6 @@ export class FiltersComponent implements OnInit {
         if (this.componentsWithCount.length == 0) {
             compNoData = true;
             this.componentsWithCount = [];
-            // this.componentsWithCount.push({ label: "DataFile - 0", data: "DataFile" });
-            // this.componentsWithCount.push({ label: "AccessPage - 0", data: "AccessPage" });
-            // this.componentsWithCount.push({ label: "SubCollection - 0", data: "Subcollection" });
             this.componentsTree = [{
                 label: 'Record has -',
                 "expanded": true,
@@ -430,18 +408,6 @@ export class FiltersComponent implements OnInit {
         if(!this.allCollections[Collections.DEFAULT].theme) {
             this.allCollections[Collections.DEFAULT].theme = {} as CollectionThemes;
         }
-
-        // this.allCollections.nist.theme.collectionThemesTree = [{
-        //     label: 'NIST Research Topics -',
-        //     "expanded": false,
-        //     children: this.allCollections.nist.theme.collectionThemesWithCount
-        // }];
-        // this.allCollections[Collections.DEFAULT].theme.collectionThemesTree = [{
-        //     label: 'NIST Research Topics -',
-        //     "expanded": false,
-        //     level: 1,
-        //     children: this.collectionThemesWithCount[Collections.DEFAULT].children
-        // }];
         
         if(!this.allCollections[this.collection]) {
             this.allCollections[this.collection] = {} as Collection;
@@ -451,15 +417,10 @@ export class FiltersComponent implements OnInit {
             this.allCollections[this.collection].theme = {} as CollectionThemes;
         }
 
-        // this.allCollections[this.collection].theme.collectionThemesTree = [{
-        //     label: this.collection + ' Research Topics -',
-        //     "expanded": true,
-        //     children: this.allCollections[this.collection].theme.collectionThemesWithCount
-        // }];
         for(let col of this.collectionOrder) {
-            if(this.collectionThemesWithCount[col]) {
+            if(this.collectionThemesWithCount[col].children.length > 0) {
                 this.allCollections[col].theme.collectionThemesTree = [{
-                    label: col + ' Research Topics -',
+                    label: this.allCollections[col].tag,
                     "expanded": (col != Collections.DEFAULT),
                     level: 1,
                     children: this.collectionThemesWithCount[col].children
@@ -535,20 +496,7 @@ export class FiltersComponent implements OnInit {
             }
 
             lFilterString = this.removeEndingComma(lFilterString);
-        }
-
-        // NIST Research topics
-        // if(this.filterStrings[Collections.DEFAULT]) {
-        //     lFilterString += this.filterStrings[Collections.DEFAULT];
-        //     lFilterString = this.removeEndingComma(lFilterString);
-        // }
-
-
-        // Collection Research topics
-        // if(this.filterStrings[this.collection]) {
-        //     lFilterString += this.filterStrings[this.collection];
-        //     lFilterString = this.removeEndingComma(lFilterString);
-        // }        
+        }    
         
         for(let col of this.collectionOrder) {
             if(this.filterStrings[col]) {
@@ -780,7 +728,7 @@ export class FiltersComponent implements OnInit {
         this.components = this.collectComponents(this.searchResults);
         this.collectComponentsWithCount();
         this.collectThemes(this.searchResults);
-        // this.collectionThemesWithCount[Collections.DEFAULT];
+
         this.collectThemesWithCount(Collections.DEFAULT);
         this.collectThemesWithCount(this.collection);
 
@@ -808,9 +756,6 @@ export class FiltersComponent implements OnInit {
     collectResourceTypes(searchResults: any[]) {
         let resourceTypes: SelectItem[] = [];
         let resourceTypesArray: string[] = [];
-        let resourceTypesAllArray: string[] = [];
-        let resultItemResourceType: string[] = [];
-        let res: any[] = [];
         let resType: string;
         let tempType: any;
         this.resourceTypesAllArray = [];
@@ -836,8 +781,7 @@ export class FiltersComponent implements OnInit {
 
             this.uniqueRes = this.uniqueRes.filter(this.onlyUnique);
             for (let res of this.uniqueRes) {
-                // if(this.resourceTypesAllArray.indexOf(res) < 0)
-                    this.resourceTypesAllArray.push(res);
+                this.resourceTypesAllArray.push(res);
             }
         }
 
@@ -852,7 +796,6 @@ export class FiltersComponent implements OnInit {
         for (let res of this.resourceTypes) {
             let count: any;
             count = _.countBy(this.resourceTypesAllArray, _.partial(_.isEqual, res.value))['true'];
-            // this.resourceTypesWithCount.push({ label: res.label + "---" + count, data: res.value });
 
             this.resourceTypesWithCount.push(new FilterTreeNode(res.label + "---" + count, true, res.label, res.label, count));
         }
@@ -960,7 +903,6 @@ export class FiltersComponent implements OnInit {
             let count: any;
             if (this.showComponents.includes(comp.label)) {
                 count = _.countBy(this.componentsAllArray, _.partial(_.isEqual, comp.value))['true'];
-                // this.componentsWithCount.push({ label: comp.label + "---" + count, data: comp.value });
 
                 this.componentsWithCount.push(new FilterTreeNode(comp.label + "---" + count, true, comp.label, comp.label, count));
             }
@@ -977,16 +919,10 @@ export class FiltersComponent implements OnInit {
         allThemes[Collections.FORENSICS] = [];
         allThemes[Collections.SEMICONDUCTORS] = [];
 
-        let themes: SelectItem[] = [];
-        let collectionThemes: SelectItem[] = [];
-
         let allThemesArray: any = {};
         allThemesArray[Collections.DEFAULT] = [];
         allThemesArray[Collections.FORENSICS] = [];
         allThemesArray[Collections.SEMICONDUCTORS] = [];
-
-        let themesArray: string[] = [];
-        let collectionThemesArray: string[] = [];
 
         let topicLabel: string;
         let data: string;
@@ -996,16 +932,10 @@ export class FiltersComponent implements OnInit {
         allUniqueThemes[Collections.FORENSICS] = [];
         allUniqueThemes[Collections.SEMICONDUCTORS] = [];
 
-        let uniqueThemes: string[] = [];
-        let collectionUniqueThemes: string[] = [];
-
         let allThemesAllArray: any = {};
         allThemesAllArray[Collections.DEFAULT] = [];
         allThemesAllArray[Collections.FORENSICS] = [];
         allThemesAllArray[Collections.SEMICONDUCTORS] = [];
-
-        let themesAllArray: string[] = [];
-        let collectionThemesAllArray: string[] = [];
 
         this.unspecifiedCount = 0;
         
@@ -1014,11 +944,6 @@ export class FiltersComponent implements OnInit {
             if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
                 for (let topic of resultItem.topic) {
                     let topics = topic.tag.split(":");
-                    // let col = Collections.DEFAULT;
-                    // if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
-                    //     col = "collection";
-                    // }
-
                     topicLabel = topics[0];
                     data = topic.tag;
 
@@ -1044,7 +969,6 @@ export class FiltersComponent implements OnInit {
                         data = topic.tag;
 
                         if(topics.length > 1){
-                            // topicLabel = topics[0] + ":" + topics[1];
                             topicLabel = topic.tag;
                         }
 
@@ -1060,31 +984,6 @@ export class FiltersComponent implements OnInit {
                             allThemesArray[Collections.DEFAULT].push(topicLabel);
                         }
                     }
-
-                    //To be removed
-                    // if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0) {
-                    //     topicLabel = topics[0];
-                    //     data = topic.tag;
-
-                    //     if(topics.length > 1){
-                    //         // topicLabel = topics[0] + ":" + topics[1];
-                    //         topicLabel = topic.tag;
-                    //     }
-                    //     console.log("collectionThemesArray", collectionThemesArray);
-                    //     if (collectionThemesArray.indexOf(topicLabel) < 0) {
-                    //         collectionThemes.push({ label: topicLabel, value: data });
-                    //         collectionThemesArray.push(topicLabel);
-                    //     } 
-                    // }else{
-                    //     topicLabel = topics[0];
-
-                    //     console.log("themesArray", themesArray);
-                    //     if (themesArray.indexOf(topicLabel) < 0) {
-                    //         themes.push({ label: topicLabel, value: topic.tag });
-                    //         themesArray.push(topicLabel);
-                    //     }
-                    // }
-                    //To be removed --
                 }
             } else {
                 this.unspecifiedCount += 1;
@@ -1093,8 +992,6 @@ export class FiltersComponent implements OnInit {
 
         //Find unique themes
         for (let resultItem of searchResults) {
-            uniqueThemes = [];
-            collectionUniqueThemes = [];
             for(let col of this.collectionOrder){
                 allUniqueThemes[col] = [];
             }
@@ -1104,13 +1001,11 @@ export class FiltersComponent implements OnInit {
                     let topicTag = topic.tag;
 
                     for(let col of this.collectionOrder) {
-                        // if(topic['scheme'].indexOf(this.taxonomyURI[col]) >= 0) {
-                            for(let theme of allThemes[col]){
-                                if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
-                                    allUniqueThemes[col].push(theme.label);
-                                }
+                        for(let theme of allThemes[col]){
+                            if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
+                                allUniqueThemes[col].push(theme.label);
                             }
-                        // }
+                        }
                     }
                 }
 
@@ -1118,30 +1013,6 @@ export class FiltersComponent implements OnInit {
                     allThemesAllArray[col] = allThemesAllArray[col].concat(allUniqueThemes[col].filter(this.onlyUnique));
                 }
             }
-
-            //To be removed
-            // if (typeof resultItem.topic !== 'undefined' && resultItem.topic.length > 0) {
-            //     for (let topic of resultItem.topic) {
-            //         let topicTag = topic.tag;
-
-            //         for(let theme of collectionThemes){
-            //             if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
-            //                 collectionUniqueThemes.push(theme.label);
-            //             }
-            //         }
-
-            //         for(let theme of themes){
-            //             if(topicTag.toLowerCase().indexOf(theme.label.toLowerCase()) > -1){
-            //                 uniqueThemes.push(theme.label);
-            //             }
-            //         }
-                    
-            //     }
-
-            //     collectionThemesAllArray = collectionThemesAllArray.concat(collectionUniqueThemes.filter(this.onlyUnique));
-            //     themesAllArray = themesAllArray.concat(uniqueThemes.filter(this.onlyUnique));
-            // }
-            //To be removed --
         }
 
         for(let col of this.collectionOrder) {
@@ -1156,30 +1027,6 @@ export class FiltersComponent implements OnInit {
             this.allCollections[col].theme.collectionThemes = allThemes[col];
             this.allCollections[col].theme.collectionThemesAllArray = allThemesAllArray[col];
         }
-
-
-
-        // if(!this.allCollections[Collections.DEFAULT]){
-        //     this.allCollections[Collections.DEFAULT] = {} as Collection;
-        // }
-
-        // if(!this.allCollections[Collections.DEFAULT].theme){
-        //     this.allCollections[Collections.DEFAULT].theme = {} as CollectionThemes;
-        // }
-
-        // this.allCollections[Collections.DEFAULT].theme.collectionThemes = themes;
-        // this.allCollections[Collections.DEFAULT].theme.collectionThemesAllArray = themesAllArray;
-
-        // if(!this.allCollections[this.collection]){
-        //     this.allCollections[this.collection] = {} as Collection;
-        // }
-
-        // if(!this.allCollections[this.collection].theme){
-        //     this.allCollections[this.collection].theme = {} as CollectionThemes;
-        // }
-
-        // this.allCollections[this.collection].theme.collectionThemes = collectionThemes;
-        // this.allCollections[this.collection].theme.collectionThemesAllArray = collectionThemesAllArray;
     }
 
     /**
@@ -1201,7 +1048,7 @@ export class FiltersComponent implements OnInit {
      * Collect NIST themes + count
      */
     collectThemesWithCount(collection: string, searchResults: any = null) {
-        // if(!searchResults) return;
+        if(!searchResults) return;
 
         let sortable: any[] = [];
         let expand = (collection != Collections.DEFAULT);
@@ -1231,18 +1078,8 @@ export class FiltersComponent implements OnInit {
         }
 
         for (var key in sortable) {
-            // this.allCollections[collection].theme.collectionThemesWithCount.push({
-            //     label: sortable[key][0] + "-" + sortable[key][1],
-            //     data: sortable[key][0]
-            // });
-
-            this.collectionThemesWithCount[collection].upsertNodeFor(sortable[key], 1, searchResults, this.standardNISTTaxonomyURI, collection, this.taxonomyURI);
-            // this.allCollections[collection].theme.collectionThemesWithCount.push(tree);
+            this.collectionThemesWithCount[collection].upsertNodeFor(sortable[key], 1, searchResults, collection, this.taxonomyURI);
         }
-
-        // if(this.collectionThemesWithCount[collection] && this.allCollections[collection].theme.collectionThemesTree) {
-        //     this.allCollections[collection].theme.collectionThemesWithCount.push(this.collectionThemesWithCount[collection]);
-        // }
 
         if (sortable.length > 5) {
             this.showMoreLink = true;
@@ -1271,7 +1108,6 @@ export class FiltersComponent implements OnInit {
     filterTooltip(filternode: any) {
         if(filternode && filternode.label)
             return filternode.label.split('---')[0] + "-" + filternode.label.split('---')[1];
-            // return filternode.label + "-" + filternode.count;
         else
             return "";
     }

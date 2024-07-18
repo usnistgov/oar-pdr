@@ -79,30 +79,22 @@ export class FilterTreeNode implements TreeNode {
      * insert or update a node within this tree corresponding to the given data cart item
      * @return CartTreeNode   the node that was inserted or updated
      */
-    upsertNodeFor(item: any[], level:number = 1, searchResults: any = null, nistURI: string = "", collection: string = null, taxonomyURI: any = {}) : TreeNode {
+    upsertNodeFor(item: any[], level:number = 1, searchResults: any = null, collection: string = null, taxonomyURI: any = {}) : TreeNode {
         let levels = item[0].split(":");
         for(let i = 0; i < levels.length; i++) {
             levels[i] = levels[i].trim();
         }
         
-        return this._upsertNodeFor(levels, item, level, searchResults, nistURI, collection, taxonomyURI);
+        return this._upsertNodeFor(levels, item, level, searchResults, collection, taxonomyURI);
     }
 
-    _upsertNodeFor(levels: string[], item: any[], level: number = 1, searchResults: any = null, nistURI: string = "", collection: string=null, taxonomyURI: any = {}) : TreeNode {
+    _upsertNodeFor(levels: string[], item: any[], level: number = 1, searchResults: any = null, collection: string=null, taxonomyURI: any = {}) : TreeNode {
         let nodeLabel: string = ''; 
         // find the node corresponding to the given item in the data cart 
         for (let child of this.children) {
             if (child.keyname == levels[0]) {
                 if(searchResults) {
                     for (let resultItem of searchResults) {
-                        // let found = resultItem.topic.find(item => item['scheme'].indexOf(taxonomyURI[collection]) >= 0 && item['tag'] == item[0]);
-                        // let found: boolean = false;
-                        // for(let i=0; i < resultItem.topic.length; i++) {
-                        //     if(resultItem.topic[i].tag == item[0] && resultItem.topic[i]['scheme'].indexOf(taxonomyURI[collection]) >= 0) {
-                        //         found = true;
-                        //         break;
-                        //     }
-                        // }
                         let found: boolean = false;
                         if(resultItem.topic && resultItem.topic.length > 0){
                             for(let topic of resultItem.topic) {
@@ -120,12 +112,7 @@ export class FilterTreeNode implements TreeNode {
                                     }
                                 }
                             }
-                        }else{
-                            // child.label = "Unspecified";
-                            // child.keyname = levels[0];
-                            // found = true;
                         }
-
     
                         if(found){
                             if(!child.ediids.includes(resultItem.ediid)){
@@ -137,37 +124,24 @@ export class FilterTreeNode implements TreeNode {
                 }
 
                 if (levels.length > 1){
-                    // if(!child.data.includes(item[0]))
-                    //     child.count += item[1];
-
-                    //Add only unique dataset to the count
-
-
-                    return child._upsertNodeFor(levels.slice(1), item, level+1, searchResults, nistURI, collection, taxonomyURI);
+                    return child._upsertNodeFor(levels.slice(1), item, level+1, searchResults, collection, taxonomyURI);
                 }else {
-                    // child.updateData(item);
                     child.label = levels[0] + "---" + item[1];
-                    // child.count = item[1];
-                    // child.data = item[0];
                     if(!child.data.includes(item[0]))
                         child.data.push(item[0]);
 
-                    // child.count += item[1];
                     return child;
                 }
             }
         }
 
         // ancestor does not exist yet; create it
-        // let key = (this.keyname) ? this.keyname + '/' + levels[0] : levels[0];
         let key = levels[0];
         let label = levels[0];
         let data = item[0];
-        // nodeLabel = data.indexOf(":");
-        // nodeLabel = data.split(":", level).join(":");
+
         let count = 0;
         if (levels.length == 1) {
-            // count = item[1];
             label += "---" + item[1]; 
         }
 
@@ -179,12 +153,9 @@ export class FilterTreeNode implements TreeNode {
         child.parent = this;
         this.children = [...this.children, child];
 
-        // let unspecified = new FilterTreeNode("Unspecified", false, key, data, 1, true, level+1);
         //Add only unique dataset to the count
         if(searchResults) {
             for (let resultItem of searchResults) {
-                // let found = resultItem.topic.find(item => item['scheme'].indexOf(taxonomyURI[collection]) >= 0 && item['tag'] == item[0]);
-
                 let found: boolean = false;
                 if(resultItem.topic && resultItem.topic.length > 0){
                     for(let topic of resultItem.topic) {
@@ -202,14 +173,7 @@ export class FilterTreeNode implements TreeNode {
                             }
                         }
                     }
-                }else{
-
-                    // if(!unspecified.ediids.includes(resultItem.ediid)){
-                    //     unspecified.ediids.push(resultItem.ediid);
-                    //     unspecified.count++;
-                    // }
                 }
-
 
                 if(found){
                     if(!child.ediids.includes(resultItem.ediid)){
@@ -220,16 +184,8 @@ export class FilterTreeNode implements TreeNode {
             }
         }
 
-        // if(!this.unspecified[collection]) {
-        //     unspecified.parent = this;
-        //     this.children = [...this.children, unspecified];
-        //     this.unspecified[collection] = true;
-        // }
-
         if (levels.length > 1){
-
-            // child.count += item[1];
-            return child._upsertNodeFor(levels.slice(1), item, level+1, searchResults, nistURI, collection, taxonomyURI);
+            return child._upsertNodeFor(levels.slice(1), item, level+1, searchResults, collection, taxonomyURI);
         }
         return child;
     }    

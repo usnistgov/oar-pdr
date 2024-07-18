@@ -76,7 +76,7 @@ export class MenuComponent implements OnInit {
         }
 
     ngOnInit(): void {
-        this.allCollections = this.collectionService.loadCollections(this.collection);
+        this.allCollections = this.collectionService.loadAllCollections();
 
         this.setColor();
 

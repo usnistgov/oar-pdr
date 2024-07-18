@@ -6,6 +6,7 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
 import { deepCopy } from '../../utils';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 @Component({
     selector: 'app-topic',
@@ -17,6 +18,7 @@ export class TopicComponent implements OnInit {
     scienceThemeTopics: any[] = [];
     recordType: string = "";
     standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
+    allCollections: any = {};
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean;   // false if running server-side
@@ -27,6 +29,7 @@ export class TopicComponent implements OnInit {
     constructor(public mdupdsvc: MetadataUpdateService,
                 private ngbModal: NgbModal,
                 private cfg: AppConfig,
+                public collectionService: CollectionService,
                 private notificationService: NotificationService) {
 
             this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
@@ -50,6 +53,9 @@ export class TopicComponent implements OnInit {
 
     ngOnInit() {
         this.updateResearchTopics();
+        this.allCollections = this.collectionService.loadAllCollections();
+        console.log("this.record", this.record);
+        console.log("this.record.topic", this.record["topic"]);
     }
 
     /**
@@ -67,10 +73,10 @@ export class TopicComponent implements OnInit {
         if(this.record) {
             this.scienceThemeTopics = [];
             this.nistTaxonomyTopics = [];
-
+            
             if (this.record['topic']) {
                 this.record['topic'].forEach(topic => {
-                    if (topic['scheme']) {
+                    if (topic['scheme'] && topic.tag) {
                         if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0){
                             if(this.scienceThemeTopics.indexOf(topic.tag) < 0)
                                 this.scienceThemeTopics.push(topic.tag);

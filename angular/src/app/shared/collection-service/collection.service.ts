@@ -6,25 +6,34 @@ import * as CollectionData from '../../../assets/site-constants/collections.json
   providedIn: 'root'
 })
 export class CollectionService {
+    //  Array to define the collection order
+    collectionOrder: string[] = [];
 
-    constructor() { }
+    allCollections: any = {};
+
+    constructor() {
+        // this.collectionOrder = Object.keys(CollectionData).sort(function(a,b){return CollectionData[a]["displayOrder"]-CollectionData[b]["displayOrder"]});
+
+        this.collectionOrder = Object.keys(CollectionData).sort(function(a,b){return CollectionData[a]["displayOrder"]-CollectionData[b]["displayOrder"]});
+
+        this.collectionOrder = this.collectionOrder.filter(function(v) { return v !== 'default' });
+     }
+
+    getCollectionOrder() {
+        return this.collectionOrder;
+    }
 
     /**
      * Loads collection data from json file for nist and given collection
      * @param collection collection to be loaded
      * @returns collection object list that contains nist and collection data
      */
-    loadCollections(collection: string) {
-        let allCollections = {}; 
-
-        if(collection){
-            allCollections[collection] = this.localCollectionData(collection)
+    loadAllCollections() {
+        for(let col of this.collectionOrder) {
+            this.allCollections[col] = this.loadCollection(col);
         }
 
-        // Load collection data from config file
-        allCollections[Collections.DEFAULT] = this.localCollectionData(Collections.DEFAULT)
-
-        return allCollections;
+        return this.allCollections;
     }
 
     /**
@@ -32,7 +41,7 @@ export class CollectionService {
      * @param collection collection to be loaded
      * @returns collection object
      */
-    localCollectionData(collection: string) {
+    loadCollection(collection: string) {
         if(collection)
             return Object.assign(new Collection(), CollectionData[collection]);  
         else    

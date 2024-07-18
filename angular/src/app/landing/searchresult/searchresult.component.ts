@@ -34,6 +34,7 @@ export class SearchresultComponent implements OnInit {
     prevMouseX: number = 0;
     prevFilterWidth: number = 0;
     taxonomyURI: any = {};
+    allCollections: any = {};
 
     @ViewChild('parentDiv')
     topLevelDiv: ElementRef;
@@ -49,9 +50,10 @@ export class SearchresultComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.taxonomyURI[Collections.DEFAULT] = this.collectionService.loadCollections(Collections.DEFAULT)[Collections.DEFAULT].taxonomyURI;
-        this.taxonomyURI[Collections.FORENSICS] = this.collectionService.loadCollections(Collections.FORENSICS)[Collections.FORENSICS].taxonomyURI;
-        this.taxonomyURI[Collections.SEMICONDUCTORS] = this.collectionService.loadCollections(Collections.SEMICONDUCTORS)[Collections.SEMICONDUCTORS].taxonomyURI;
+        this.allCollections = this.collectionService.loadAllCollections();
+        this.taxonomyURI[Collections.DEFAULT] = this.allCollections[Collections.DEFAULT].taxonomyURI;
+        this.taxonomyURI[Collections.FORENSICS] = this.allCollections[Collections.FORENSICS].taxonomyURI;
+        this.taxonomyURI[Collections.SEMICONDUCTORS] = this.allCollections[Collections.SEMICONDUCTORS].taxonomyURI;
     }
 
     ngAfterViewInit(): void {

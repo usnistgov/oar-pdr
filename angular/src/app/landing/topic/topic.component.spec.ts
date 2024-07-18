@@ -40,11 +40,15 @@ describe('TopicComponent', () => {
     }));
 
     beforeEach(() => {
-        let record: any = require('../../../assets/sampleRecord.json');
+        let record: any = require('../../../assets/sample3.json');
+        console.log('record.topic', record.topic);
         fixture = TestBed.createComponent(TopicComponent);
         component = fixture.componentInstance;
         component.record = record;
         component.inBrowser = true;
+        component.collection = "Semiconductors";
+        component.allCollections["Semiconductors"] = {};
+        component.allCollections["Semiconductors"].tag = "CHIPS Metrology Topics";
         fixture.detectChanges();
     });
 
@@ -52,11 +56,11 @@ describe('TopicComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('Research Topics should contains Manufacturing: Factory communications', () => {
+    it('Research Topics should contains Information Technology', () => {
         let cmpel = fixture.nativeElement;
         let aels = cmpel.querySelectorAll(".topics");
-        expect(aels.length).toEqual(6);
-        expect(aels[0].innerText).toContain('Manufacturing: Factory communications');
+        expect(aels.length).toEqual(4);
+        expect(aels[0].innerText).toContain('Information Technology');
       });
     
 });

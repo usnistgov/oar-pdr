@@ -1,7 +1,6 @@
 import { NgModule }     from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
-import { ToolMenuComponent } from './toolmenu.component';
 import { MenuComponent } from './menu.component';
 import { MetricsinfoModule } from '../metricsinfo/metricsinfo.module';
 
@@ -18,11 +17,9 @@ import { MetricsinfoModule } from '../metricsinfo/metricsinfo.module';
         MetricsinfoModule
     ],
     declarations: [
-        ToolMenuComponent,
         MenuComponent
     ],
     exports: [
-        ToolMenuComponent,
         MenuComponent
     ]
 })

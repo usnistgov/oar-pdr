@@ -102,7 +102,7 @@ export class ResultlistComponent implements OnInit {
             );
         }
 
-        this.allCollections = this.collectionService.loadCollections(this.collection);
+        this.allCollections = this.collectionService.loadAllCollections();
 
         // Set colors
         this.setColor();

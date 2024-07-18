@@ -43,6 +43,7 @@ describe('ResourceDescriptionComponent', () => {
     beforeEach(waitForAsync(() => {
         makeComp();
         component.inBrowser = true;
+        component.collection = "Semiconductors";
         fixture.detectChanges();
     }));
 

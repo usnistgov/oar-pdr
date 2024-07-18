@@ -48,6 +48,7 @@ describe('LandingBodyComponent', () => {
         component.md["@type"][0] = "nrdp:PublicDataResource";
         component.metricsData = new MetricsData();
         component.editEnabled = false;
+        component.collection = "Semiconductors";
         fixture.detectChanges();
     }));
 

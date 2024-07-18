@@ -15,7 +15,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     // const sampleData: any = require('../../assets/science-theme/BiometricsScienceTheme.json');
     // const sampleData: any = require('../../assets/sample-data/semiconductorRecord.json');
     const sampleData: any = require('../../assets/sample-data/semi-conductors.json');
-    const sampleCollection: any = require('../../assets/sample-data/semiconductors-collection.json');
+    // const sampleCollection: any = require('../../assets/sample-data/semiconductors-collection.json');
+    const sampleCollection: any = require('../../assets/sample-data/semiconductor-realdata.json');
+    
     const fields: any = require('../../assets/sample-data/fields.json');
     // const sampleRecord: any = require('../../assets/science-theme/DNAScienceTheme.json');
 
