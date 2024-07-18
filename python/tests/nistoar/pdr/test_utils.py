@@ -8,6 +8,7 @@ testdir = os.path.dirname(os.path.abspath(__file__))
 testdatadir = os.path.join(testdir, 'data')
 testdatadir3 = os.path.join(testdir, 'preserv', 'data')
 testdatadir2 = os.path.join(testdatadir3, 'simplesip')
+testdatadir4 = os.path.join(testdatadir3, 'midassip', 'review', '1491')
 
 loghdlr = None
 rootlog = None
@@ -95,6 +96,8 @@ class TestChecksum(test.TestCase):
         dfile = os.path.join(testdatadir2,"trial2.json")
         self.assertEqual(utils.checksum_of(dfile), self.syssum(dfile))
         dfile = os.path.join(testdatadir2,"trial3/trial3a.json")
+        self.assertEqual(utils.checksum_of(dfile), self.syssum(dfile))
+        dfile = os.path.join(testdatadir4,u"trial3/trial3\u03b1.json")
         self.assertEqual(utils.checksum_of(dfile), self.syssum(dfile))
 
     def syssum(self, filepath):
@@ -284,6 +287,14 @@ class TestJsonIO(test.TestCase):
     def write_test_data(self):
         with open(self.testdata) as fd:
             data = json.load(fd)
+
+    def test_write_unicode_name(self):
+        data = utils.read_json(self.testdata)
+        data['foo'] = 'bar'
+        outf = self.tf(u"d\u03b1ta.json")
+        utils.write_json(data, outf)
+        data2 = utils.read_json(outf)
+        self.assertEqual(data2, data)
 
     def test_writes(self):
         # this is not a definitive test that the use of LockedFile is working

@@ -6,7 +6,7 @@ the MIDAS3 convention, the MIDAS3PublishingService handles updates to the metada
 This web service provides the public access to the metadata and the data files provided 
 by the author to MIDAS.  
 """
-import os, sys, logging, json, re
+import os, sys, logging, json, re, urllib
 from wsgiref.headers import Headers
 from cgi import parse_qs, escape as escape_qp
 from collections import OrderedDict
@@ -96,6 +96,7 @@ app = MIDAS3DataAccessApp
 class Handler(object):
 
     badidre = re.compile(r"[<>\s]")
+    enc = "ISO-8859-1"
 
     def __init__(self, app, wsgienv, start_resp):
         self.app = app
@@ -129,7 +130,8 @@ class Handler(object):
         # thus, this will raise a UnicodeEncodeError if the input strings
         # include Unicode (char code > 255).
         e = "ISO-8859-1"
-        self._hdr.add_header(name.encode(e), value.encode(e))
+        onerr = "backslashreplace"
+        self._hdr.add_header(name.encode(e, onerr), value.encode(e, onerr))
 
     def set_response(self, code, message):
         self._code = code
@@ -410,10 +412,22 @@ class Handler(object):
 
         self.set_response(200, "Data file found")
         self.add_header('Content-Type', mtype)
-        self.add_header('Content-Disposition',
-                        'inline; filename="%s"' % os.path.basename(filepath)) 
+        outname = os.path.basename(filepath)
+        try:
+            outname.encode("ISO-8859-1")
+            self.add_header('Content-Disposition',
+                            'inline; filename="%s"' % outname) 
+        except UnicodeError:
+            outname = urllib.quote(outname.encode())
+            self.add_header('Content-Disposition',
+                            'inline; filename*=UTF-8''"%s"' % outname) 
         if xsend:
-            self.add_header('X-Accel-Redirect', xsend)
+            try:
+                xsend.encode("ISO-8859-1")
+                self.add_header('X-Accel-Redirect', xsend)
+            except UnicodeEncodeError:
+                xsend = urllib.quote(xsend.encode())
+                self.add_header('X-Accel-Redirect', xsend)
         self.end_headers()
 
         if xsend:

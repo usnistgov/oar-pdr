@@ -492,7 +492,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
 
         datafiles = self.bagr.available_files()
         self.assertIsInstance(datafiles, dict)
-        self.assertEqual(len(datafiles), 5)
+        self.assertEqual(len(datafiles), 6)
         self.assertIn("trial1.json", datafiles)
         self.assertIn("trial1.json.sha256", datafiles)
         self.assertIn("trial2.json", datafiles)
@@ -505,7 +505,7 @@ class TestMIDASMetadataBaggerMixed(test.TestCase):
         # copy of trial3a.json in upload overrides
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(uplsip, "trial3/trial3a.json"))
-        self.assertEqual(len(datafiles), 5)
+        self.assertEqual(len(datafiles), 6)
 
     def test_baggermd_file_for(self):
         self.bagr.ensure_base_bag()
@@ -596,7 +596,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
 
         self.bagr.ensure_data_files()
         self.assertIsNotNone(self.bagr.datafiles)
-        self.assertEqual(len(self.bagr.datafiles), 5)
+        self.assertEqual(len(self.bagr.datafiles), 6)
         self.assertEqual(len([d for d in self.bagr.datafiles.keys()
                                 if d.endswith(".sha256")]), 2)
 
@@ -643,7 +643,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
 
         datafiles = self.bagr.registered_files()
         self.assertIsInstance(datafiles, dict)
-        self.assertEqual(len(datafiles), 5)
+        self.assertEqual(len(datafiles), 6)
         self.assertIn("trial1.json", datafiles)
         self.assertIn("trial1.json.sha256", datafiles)
         self.assertIn("trial2.json", datafiles)
@@ -655,14 +655,14 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
                          os.path.join(revsip, "trial2.json"))
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(revsip, "trial3/trial3a.json"))
-        self.assertEqual(len(datafiles), 5)
+        self.assertEqual(len(datafiles), 6) 
 
     def test_available_files(self):
         revsip = os.path.join(self.revdir, self.midasid[32:])
 
         datafiles = self.bagr.available_files()
         self.assertIsInstance(datafiles, dict)
-        self.assertEqual(len(datafiles), 5)
+        self.assertEqual(len(datafiles), 6)
         self.assertIn("trial1.json", datafiles)
         self.assertIn("trial1.json.sha256", datafiles)
         self.assertIn("trial2.json", datafiles)
@@ -674,7 +674,7 @@ class TestMIDASMetadataBaggerReview(test.TestCase):
                          os.path.join(revsip, "trial2.json"))
         self.assertEqual(datafiles["trial3/trial3a.json"],
                          os.path.join(revsip, "trial3/trial3a.json"))
-        self.assertEqual(len(datafiles), 5)
+        self.assertEqual(len(datafiles), 6)
 
     def test_fileExaminer(self):
         # turn on asyncexamine (but turn off autolaunch so that we can test

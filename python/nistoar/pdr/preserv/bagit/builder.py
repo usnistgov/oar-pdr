@@ -445,7 +445,7 @@ class BagBuilder(PreservationSystem):
         if ediid.startswith(arkpfx):
             # our convention is to omit the "ark:/88434/" prefix
             ediid = ediid[len(arkpfx):]
-        return self._distbase + ediid + '/' + urlencode(path)
+        return self._distbase + ediid + '/' + urlencode(str(path))
 
     def assign_id(self, id, keep_conv=False):
         """
@@ -2495,7 +2495,7 @@ format(nerdm['title'].replace('\n', ' '))
         out = OrderedDict([
             ("_schema", NERD_DEF + "Component"),
             ("@context", NERDM_CONTEXT),
-            ("@id", "cmps/" + urlencode(destpath)),
+            ("@id", "cmps/" + urlencode(str(destpath))),
             ("@type", deepcopy(self._comp_types["DataFile"][0]))
         ])
         out["_extensionSchemas"] = deepcopy(self._comp_types["DataFile"][1])
@@ -2514,7 +2514,7 @@ format(nerdm['title'].replace('\n', ' '))
         out = OrderedDict([
             ("_schema", NERD_DEF + "Component"),
             ("@context", NERDM_CONTEXT),
-            ("@id", "cmps/" + urlencode(destpath)),
+            ("@id", "cmps/" + urlencode(str(destpath))),
             ("@type", deepcopy(self._comp_types["ChecksumFile"][0])),
             ("filepath", destpath)
         ])
@@ -2543,7 +2543,7 @@ format(nerdm['title'].replace('\n', ' '))
         out = OrderedDict([
             ("_schema", NERD_DEF + "Component"),
             ("@context", NERDM_CONTEXT),
-            ("@id", "cmps/" + urlencode(destpath)),
+            ("@id", "cmps/" + urlencode(str(destpath))),
             ("@type", deepcopy(self._comp_types["Subcollection"][0])),
             ("_extensionSchemas", deepcopy(self._comp_types["Subcollection"][1])),
             ("filepath", destpath)

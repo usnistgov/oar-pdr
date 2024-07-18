@@ -318,7 +318,7 @@ class TestSIPHandlerRestricted(test.TestCase):
         nerdm = bag.nerdm_record()
         self.assertEqual(nerdm.get('accessLevel'), "restricted public")
         self.assertEqual(nerdm.get('disclaimer'), "Be careful.")
-        self.assertEqual(len(nerdm['components']), 9)
+        self.assertEqual(len(nerdm['components']), 10)
         self.assertEquals(nerdm['version'], "1.0.1")
         
         # serialize
@@ -347,7 +347,7 @@ class TestSIPHandlerRestricted(test.TestCase):
         nerdm = bag.nerdm_record()
         self.assertEqual(nerdm.get('accessLevel'), "restricted public")
         self.assertEqual(nerdm.get('disclaimer'), "Be careful.")
-        self.assertEqual(len(nerdm['components']), 9)
+        self.assertEqual(len(nerdm['components']), 10)
         self.assertEquals(nerdm['version'], "1.0.1")
         
         
