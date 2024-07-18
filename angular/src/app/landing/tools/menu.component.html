@@ -1,0 +1,44 @@
+
+<!-- Go To menu-->
+<table style="width: 100%;">
+    <tr *ngFor="let menuitem of gotoMenu">
+        <td [ngClass]="menuitem.isHeader? 'menu-header menu-body' : 'menu-item menu-body'" scope="row"
+            [style.--background-default]="menuitem.isHeader? defaultColor: lighterColor" [style.--background-lighter]="lighterColor"
+            [style.--background-hover]="hoverColor" 
+            (click)="goToSection(menuitem.sectionName, menuitem.url)">
+            <i [class]="menuitem.icon"></i>
+            {{menuitem.title}}
+        </td>
+    </tr>
+</table>
+
+<!-- Use menu-->
+<table style="width: 100%;">
+    <tr *ngFor="let menuitem of useMenu">
+        <td [ngClass]="menuitem.isHeader? 'menu-header menu-body' : 'menu-item menu-body'" scope="row"
+            [style.--background-default]="menuitem.isHeader? defaultColor: lighterColor" [style.--background-lighter]="lighterColor"
+            [style.--background-hover]="hoverColor" 
+            (click)="goToSection(menuitem.sectionName, menuitem.url)">
+            <i [class]="menuitem.icon"></i>
+            {{menuitem.title}}
+        </td>
+    </tr>
+</table>
+
+<!-- Find menu-->
+<table style="width: 100%;">
+    <tr *ngFor="let menuitem of findMenu">
+        <td [ngClass]="menuitem.isHeader? 'menu-header menu-body' : 'menu-item menu-body'" scope="row"
+            [style.--background-default]="menuitem.isHeader? defaultColor: lighterColor" [style.--background-lighter]="lighterColor"
+            [style.--background-hover]="hoverColor" 
+            (click)="goToSection(menuitem.sectionName, menuitem.url)">
+            <i [class]="menuitem.icon"></i>
+            {{menuitem.title}}
+        </td>
+    </tr>
+</table>
+
+<!-- Metrics info-->
+<app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="record"
+[metricsData]="metricsData" [showMetrics]="showMetrics">
+</app-metricsinfo>

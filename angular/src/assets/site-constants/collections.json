@@ -1,0 +1,35 @@
+{
+    "nist": {
+        "bannerUrl": "",
+        "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes/",
+        "color": {
+            "default": "#257a2d",
+            "light": "#6bad73",
+            "lighter": "#f0f7f1",
+            "dark": "#1c6022",
+            "hover": "#ffffff"
+        }
+    },
+    "forensics": {
+        "bannerUrl": "assets/images/fingerprint.jpg",
+        "taxonomyURI": "https://data.nist.gov/od/dm/forensics-themes/",
+        "color": {
+            "default": "#008097",
+            "light": "#e3f7fd",
+            "lighter": "#f5fbfd",
+            "dark": "#007287",
+            "hover": "#ffffff"  
+        }
+    },
+    "semiconductors": {
+        "bannerUrl": "assets/images/METIS-Banner-Op1.png",
+        "taxonomyURI": "https://data.nist.gov/od/dm/semiconductors-themes/",
+        "color": {
+            "default": "#003c97",
+            "light": "#d6d9ff",
+            "lighter": "#f7f7ff",
+            "dark": "#00076c",
+            "hover": "#ffffff"
+        }
+    }
+}

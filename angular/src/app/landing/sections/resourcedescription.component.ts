@@ -21,6 +21,7 @@ export class ResourceDescriptionComponent implements OnChanges {
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
+    @Input() collection: string;
 
     /**
      * create an instance of the Identity section

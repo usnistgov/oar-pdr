@@ -1,6 +1,14 @@
+import { SelectItem, TreeNode } from 'primeng/api';
+
 export class Themes {
     static readonly SCIENCE_THEME = 'ScienceTheme';
     static readonly DEFAULT_THEME = 'DefaultTheme';
+}
+
+export class Collections {
+    static readonly DEFAULT = 'NIST';
+    static readonly FORENSICS = 'Forensics';
+    static readonly SEMICONDUCTORS = 'Semiconductors';
 }
 
 let _theme = {};
@@ -38,4 +46,30 @@ export class ThemesPrefs {
 
         return ThemesPrefs._lSourceLabel[theme]
     }
+}
+
+export class Collection {
+    bannerUrl: string;
+    taxonomyURI: string;
+    color: ColorScheme;
+    theme: CollectionThemes;
+}
+
+export interface ColorScheme {
+    default: string;
+    light: string;
+    lighter: string;
+    dark: string;
+    hover: string;
+}
+
+export interface CollectionThemes {
+    collectionThemes: SelectItem[];
+    collectionThemesAllArray: string[];
+    collectionUnspecifiedCount: number;
+    collectionUniqueThemes: string[];
+    collectionThemesWithCount: TreeNode[];
+    collectionThemesTree: TreeNode[];
+    collectionShowMoreLink: boolean;
+    collectionSelectedThemesNode: any[];
 }

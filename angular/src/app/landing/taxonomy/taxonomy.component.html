@@ -1,0 +1,30 @@
+<div class="bottom-line" *ngIf="collectionThemesTree && collectionThemesTree.length > 0">
+    <div class="filter-checkbox">
+        <div [@expand]="collectionNodeExpanded? collectionShowMoreLink ? 'collapsed':'expanded':'closed'" >
+            <p-tree id="collectionThemes" [value]="collectionThemesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="collectionSelectedThemesNode" 
+                (onNodeUnselect)="filterResults()"
+                (onNodeSelect)="filterResults()" 
+                (onNodeExpand)="collectionNodeExpanded = true"
+                (onNodeCollapse)="collectionNodeExpanded = false">
+                <ng-template let-node pTemplate="default">
+                    <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
+                        <span *ngIf="node.label.split('-')[1] !=''; else header1" class="invisible-scrollbar" > {{node.label.split("-")[0]}}&nbsp;</span>
+                        <ng-template #header1>
+                            <span><b> {{node.label.split("-")[0]}}&nbsp;</b></span>
+                        </ng-template>
+
+                        <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
+                            *ngIf="node.label.split('-')[1] !=''">
+                            {{node.label.split("-")[1]}}</span>
+                    </div>
+                </ng-template>
+            </p-tree>
+        </div>
+    </div>
+    <div class="show-more-less" (click)="$event.preventDefault(); collectionShowMoreLink = false" [style.background-color]="backgroundColor" 
+        *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == true && collectionThemesTree[0]?.children.length > 5">Show More...
+    </div>
+    <div class="show-more-less" (click)="$event.preventDefault();collectionShowMoreLink = true" [style.background-color]="backgroundColor" 
+        *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == false && collectionThemesTree[0]?.children.length > 5">Show Less
+    </div>
+</div>

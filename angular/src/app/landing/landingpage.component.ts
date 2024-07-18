@@ -26,7 +26,8 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { CartActions } from '../datacart/cartconstants';
 import { initBrowserMetadataTransfer } from '../nerdm/metadatatransfer-browser.module';
 import { MetricsData } from "./metrics-data";
-import { Themes, ThemesPrefs } from '../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections } from '../shared/globals/globals';
+import * as CollectionData from '../../assets/site-constants/collections.json';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -92,14 +93,15 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     dialogOpen: boolean = false;
     modalReference: any;
     windowScrolled: boolean = false;
-    btnPosition: number = 20;
-    menuPosition: number = 20;
-    menuBottom: string = "1em";
     showMetrics: boolean = false;
     imageURL: string;
     theme: string;
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
+    collection: string = Collections.DEFAULT;
+    collectionObj: any;
+
+    buttonTop: number = 20;
 
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
@@ -228,6 +230,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.theme = ThemesPrefs.getTheme((new NERDResource(this.md)).theme());
 
                 if(this.inBrowser){
+                    this.getCollection();
+                    this.loadBannerUrl();
                     if(this.editEnabled){
                         this.metricsData.hasCurrentMetrics = false;
                         this.showMetrics = true;
@@ -288,6 +292,34 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
                 this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
             }
         });
+    }
+
+    getCollection() {
+        if(this.pdrid.includes("pdr0-0001"))
+            this.collection = Collections.FORENSICS;
+        else if(this.pdrid.includes("pdr0-0002"))
+            this.collection = Collections.SEMICONDUCTORS; 
+        else
+            this.collection = Collections.DEFAULT;
+    }
+
+    loadBannerUrl() {
+        this.collectionObj = CollectionData[this.collection.toLowerCase()] as any;
+
+        switch(this.collection) { 
+            case Collections.FORENSICS: { 
+                this.imageURL = this.collectionObj.bannerUrl;
+                break; 
+            } 
+            case Collections.SEMICONDUCTORS: { 
+                this.imageURL = this.collectionObj.bannerUrl;
+                break; 
+            } 
+            default: { 
+                this.imageURL = "";
+                break; 
+            } 
+        } 
     }
 
     /**
@@ -353,11 +385,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     @HostListener("window:scroll", [])
     onWindowScroll() {
         if(this.mobileMode)
-            this.windowScrolled = (window.pageYOffset > this.btnPosition);
-        else
-            this.windowScrolled = (window.pageYOffset > this.menuPosition);
-
-        this.menuBottom = (window.pageYOffset).toString() + 'px';
+            this.buttonTop = window.pageYOffset > 200? 10 : 200 - window.pageYOffset;
     }
 
     /**
@@ -456,12 +484,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             .subscribe((state: BreakpointState) => {
                 if (state.matches) {
                     this.mobileMode = false;
-                    if (this.menuElement)
-                        this.menuPosition = this.menuElement.nativeElement.offsetTop + 20;
                 } else {
                     this.mobileMode = true;
-                    if (this.btnElement)
-                        this.btnPosition = this.btnElement.nativeElement.offsetTop + 20;
                 }
             });
         }

@@ -9,7 +9,7 @@
 
 <!-- landing page panel -->
 <div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad">
-<!-- <div *ngIf="!displaySpecialMessage"> -->
+    <!-- <div *ngIf="!displaySpecialMessage"> -->
     <div [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
         <!-- <div> -->
         <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
@@ -19,58 +19,70 @@
         </div>
 
         <!-- Menu button and the popup menu (mobile mode only) -->
-        <div style="width: 100%; height: 0px;">
+        <div style="width: 100%; height: 0px; margin-top: 1em;" class="sticky-button">
             <!-- div to keep track of the menu button position -->
             <div #stickyButton></div>
+
+            <!-- <button #menubtn *ngIf="md !== null && inBrowser && mobileMode" type="button" pButton icon="faa faa-list"
+                class="ui-button ui-button-icon-only sticky-menu"
+                (click)="menu3.togglePopup($event)">
+            </button> -->
 
             <button #menubtn *ngIf="md !== null && inBrowser && mobileMode"
                 [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" type="button" pButton
                 icon="faa faa-list" class="ui-button ui-button-icon-only" (click)="menu3.togglePopup($event)">
             </button>
 
-            <tools-menu #menu3 [record]="md" [isPopup]="true" [appendTo]="body" [theme]="theme"
-                (toggle_citation)="toggleCitation('small')" (scroll)="goToSection($event)">
+            <tools-menu #menu3 
+                [record]="md" 
+                [isPopup]="true" 
+                [collection]="collection" 
+                [appendTo]="menubtn" 
+                [theme]="theme"
+                (toggle_citation)="toggleCitation('small')" 
+                (scroll)="goToSection($event)">
             </tools-menu>
         </div>
         <div #stickyMenu></div>
         <div *ngIf="_showData">
             <!-- <div class="grid111"> -->
-                <!-- side tool menu (for tablets and desktop displays  -->
-                
-                <div [ngClass]="windowScrolled ? 'sticky-menu' : 'rightmenu'">
-                    <!-- <div style="position: sticky; top: 1em;width: 20%;display: inline-block;"> -->
-                    <!-- <div class="col-12"> -->
-                    <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
+            <!-- side tool menu (for tablets and desktop displays  -->
 
-                        <tools-menu #menu2 [record]="md" [isPopup]="false" (toggle_citation)="toggleCitation('large')"
-                            (scroll)="goToSection($event)">
-                        </tools-menu>
+            <!-- <div [ngClass]="windowScrolled ? 'sticky-menu' : 'rightmenu'"> -->
+            <div class="sticky-menu">
+                <!-- <div style="position: sticky; top: 1em;width: 20%;display: inline-block;"> -->
+                <!-- <div class="col-12"> -->
+                <div *ngIf="inBrowser" class="d-none d-md-block d-lg-block d-xl-block ">
 
-                        <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
-                            [metricsData]="metricsData" [showMetrics]="showMetrics">
-                        </app-metricsinfo>
+                    <tools-menu #menu2 [record]="md" [isPopup]="false" [collection]="collection"
+                        (toggle_citation)="toggleCitation('large')" (scroll)="goToSection($event)">
+                    </tools-menu>
 
-                        <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
-                    </div>
-                    <!-- </div> -->
+                    <app-metricsinfo *ngIf="theme != scienceTheme" [inBrowser]="inBrowser" [record]="md"
+                        [metricsData]="metricsData" [showMetrics]="showMetrics">
+                    </app-metricsinfo>
+
+                    <app-downloadstatus [inBrowser]="inBrowser"></app-downloadstatus>
                 </div>
+                <!-- </div> -->
+            </div>
 
-                <!-- landing page content -->
-                <div style="display: inline-block;" [ngStyle]="{'width': mobileMode? '100%': '80%'}">
+            <!-- landing page content -->
+            <div style="display: inline-block;" [ngStyle]="{'width': mobileMode? '100%': '80%'}">
 
-                    <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled"
-                        [mobileMode]="mobileMode" [metricsData]="metricsData" [showJsonViewer]="showJsonViewer"
-                        [theme]="theme" (dlStatus)="onDownloadStatusChanged($event)">
-                    </pdr-landing-body>
+                <pdr-landing-body [md]="md" [inBrowser]="inBrowser" [editEnabled]="editEnabled"
+                    [collection]="collection" [mobileMode]="mobileMode" [metricsData]="metricsData"
+                    [showJsonViewer]="showJsonViewer" [theme]="theme" (dlStatus)="onDownloadStatusChanged($event)">
+                </pdr-landing-body>
 
-                </div>
+            </div>
 
-                <!-- citation pop-up -->
-                <div *ngIf="inBrowser">
-                    <citation-popup [citetext]="getCitation()" [visible]="citationVisible" [width]="citationDialogWith"
-                        (visibleChange)="setCitationVisible($event)">
-                    </citation-popup>
-                </div>
+            <!-- citation pop-up -->
+            <div *ngIf="inBrowser">
+                <citation-popup [citetext]="getCitation()" [visible]="citationVisible" [width]="citationDialogWith"
+                    (visibleChange)="setCitationVisible($event)">
+                </citation-popup>
+            </div>
 
 
             <!-- </div> -->
