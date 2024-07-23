@@ -2,7 +2,7 @@
  * Classes and interfaces to support the NERDm metadata infrastructure
  */
 import { Injectable, InjectionToken } from '@angular/core';
-import { Themes, ThemesPrefs } from '../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections } from '../shared/globals/globals';
 import * as _ from 'lodash-es';
 
 /**
@@ -78,7 +78,7 @@ export class NERDResource {
     /**
      * return the recommend text for citing this resource
      */
-    getCitation() : string {
+    getCitation(collection:string = Collections.DEFAULT) : string {
       if(this.data != null){
         if (this.data['citation'])
             return this.data.citation;
@@ -87,15 +87,31 @@ export class NERDResource {
         if (this.data['authors']) {
             for (let i = 0; i < this.data['authors'].length; i++) {
                 let author = this.data['authors'][i];
-                if (author.familyName !== null && author.familyName !== undefined)
-                    out += author.familyName + ', ';
                 if (author.givenName !== null && author.givenName !== undefined)
                     out += author.givenName;
                 if (author.middleName !== null && author.middleName !== undefined && author.middleName.trim() != "")
                     out += ' ' + author.middleName.trim();
+                if (author.familyName !== null && author.familyName !== undefined)
+                    out += ' ' + author.familyName;
+
                 if (i != this.data['authors'].length - 1)
                     out += ', ';
             }
+        }
+        else if(collection != Collections.DEFAULT && this.data['facilitators']){
+            for (let facilitator of this.data['facilitators']) {
+                if (facilitator.givenName !== null && facilitator.givenName !== undefined)
+                    out += facilitator.givenName;
+                if (facilitator.middleName !== null && facilitator.middleName !== undefined && facilitator.middleName.trim() != "")
+                    out += ' ' + facilitator .middleName.trim();
+                if (facilitator.familyName !== null && facilitator.familyName !== undefined)
+                    out += " " + facilitator.familyName;
+
+                out += ', ';
+            } 
+
+            //Remove last comma
+            out = out.slice(0, -1);
         }
         else if (this.data['contactPoint'] && this.data['contactPoint']['fn']) {
             out += this.data['contactPoint']['fn'];

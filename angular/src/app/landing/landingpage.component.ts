@@ -620,7 +620,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * return text representing the recommended citation for this resource
      */
     getCitation(): string {
-        this.citetext = (new NERDResource(this.md)).getCitation();
+        this.citetext = (new NERDResource(this.md)).getCitation(this.collection);
         return this.citetext;
     }
 

@@ -189,7 +189,8 @@ describe('NERDResource', function() {
         let nrd2 = new nerdm.NERDResource(testdata['test2']);
         nrd2.data["@type"][0] = "nrdp:PublicDataResource";
         let cstr = nrd2.getCitation();
-        expect(cstr.startsWith("Doe, John, Plant, Robert (2011), Test2, National Institute of Standards and Technology, https://doi.org/XXXXX/MMMMM (Accessed ")).toBe(true);
+        console.log("cstr", cstr);
+        expect(cstr.startsWith("John Doe, Robert Plant (2011), Test2, National Institute of Standards and Technology, https://doi.org/XXXXX/MMMMM (Accessed ")).toBe(true);
         // expect(cstr).toEqual("Doe, John, Plant, Robert (2011) Test2, National Institute of Standards and Technology, https://doi.org/XXXXX/MMMMM (Accessed ");
 
         nrd2 = new nerdm.NERDResource(testdata['test1']);
