@@ -7,6 +7,7 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
 import { deepCopy } from '../../utils';
 import { CollectionService } from '../../shared/collection-service/collection.service';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
 
 @Component({
     selector: 'app-topic',
@@ -17,8 +18,11 @@ export class TopicComponent implements OnInit {
     nistTaxonomyTopics: any[] = [];
     scienceThemeTopics: any[] = [];
     recordType: string = "";
-    standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
+    // standardNISTTaxonomyURI: string = "https://data.nist.gov/od/dm/nist-themes/";
     allCollections: any = {};
+    //  Array to define the collection order
+    collectionOrder: string[] = [Collections.DEFAULT];
+    topics: any = {};
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean;   // false if running server-side
@@ -32,7 +36,10 @@ export class TopicComponent implements OnInit {
                 public collectionService: CollectionService,
                 private notificationService: NotificationService) {
 
-            this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
+            // this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
+
+            this.collectionOrder = this.collectionService.getCollectionOrder();
+            this.allCollections = this.collectionService.loadAllCollections();
     }
 
     /**
@@ -53,9 +60,6 @@ export class TopicComponent implements OnInit {
 
     ngOnInit() {
         this.updateResearchTopics();
-        this.allCollections = this.collectionService.loadAllCollections();
-        console.log("this.record", this.record);
-        console.log("this.record.topic", this.record["topic"]);
     }
 
     /**
@@ -77,18 +81,17 @@ export class TopicComponent implements OnInit {
             if (this.record['topic']) {
                 this.record['topic'].forEach(topic => {
                     if (topic['scheme'] && topic.tag) {
-                        if(topic['scheme'].indexOf(this.standardNISTTaxonomyURI) < 0){
-                            if(this.scienceThemeTopics.indexOf(topic.tag) < 0)
-                                this.scienceThemeTopics.push(topic.tag);
+                        for(let col of this.collectionOrder) {
+                            if(topic['scheme'].indexOf(this.allCollections[col].taxonomyURI) >= 0){
+                                if(!this.topics[col]) {
+                                    this.topics[col] = [topic.tag];
+                                }else if(this.topics[col].indexOf(topic.tag) < 0) {
+                                    this.topics[col].push(topic.tag);
+                                }
+                            }
                         }
-                    }
-                });
-            }
 
-            if (this.record['theme']) {
-                this.record['theme'].forEach(topic => {
-                    if(this.nistTaxonomyTopics.indexOf(topic) < 0)
-                        this.nistTaxonomyTopics.push(topic);
+                    }
                 });
             }
         }
