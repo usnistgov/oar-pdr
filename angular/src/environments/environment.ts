@@ -15,8 +15,8 @@ const largedata: any  = require('../assets/sample-data/mds2-2116.json');
 
 export const context = {
     production: false,
-    useMetadataService: false,
-    useCustomizationService: false
+    useMetadataService: true,
+    useCustomizationService: true
 };
 
 export const config: LPSConfig = {
