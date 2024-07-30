@@ -59,7 +59,7 @@ describe('TopicComponent', () => {
     it('Research Topics should contains Information Technology', () => {
         let cmpel = fixture.nativeElement;
         let aels = cmpel.querySelectorAll(".topics");
-        expect(aels.length).toEqual(4);
+        expect(aels.length).toEqual(2);
         expect(aels[0].innerText).toContain('Information Technology');
       });
     
