@@ -94,7 +94,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     modalReference: any;
     windowScrolled: boolean = false;
     showMetrics: boolean = false;
-    imageURL: string;
+    imageURL: string = "";
     theme: string;
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
@@ -191,7 +191,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         let metadataError = "";
         this.displaySpecialMessage = false;
         this.CART_ACTIONS = CartActions.cartActions;
-        this.imageURL = 'assets/images/fingerprint.jpg';
 
         // Only listen to storage change if we are not in edit mode
         if(this.inBrowser && !this.editEnabled){

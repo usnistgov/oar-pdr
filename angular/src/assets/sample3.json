@@ -11,12 +11,12 @@
   "_schema": "https://www.nist.gov/od/dm/nerdm-schema/v0.1#",
   "topic": [
     {
-      "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+      "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
       "tag": "Information Technology",
       "@type": "Concept"
     },
     {
-      "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+      "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
       "tag": "Information Technology: Biometrics",
       "@type": "Concept"
     }
