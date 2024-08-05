@@ -18,6 +18,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     // const sampleCollection: any = require('../../assets/sample-data/semiconductors-collection.json');
     const sampleCollection: any = require('../../assets/sample-data/semiconductor-realdata.json');
     
+    const sampleCollection2: any = require('../../assets/sample-data/collectionTestData.json');
+
     const fields: any = require('../../assets/sample-data/fields.json');
     // const sampleRecord: any = require('../../assets/science-theme/DNAScienceTheme.json');
 
@@ -72,7 +74,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return of(new HttpResponse({ status: 200, body: sampleData }));
         }
 
-        
         if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') 
         {
           console.log("Throw error...");
@@ -86,6 +87,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             });
         }
 
+        // if (request.method === 'PATCH') {
+        //     console.log("request.body", request.body);
+        //     return of(new HttpResponse({ status: 200, body: request.body }));
+        // }
+      
       // For e2e test
       // if (request.url.endsWith('/rmm/records/SAMPLE123456') && request.method === 'GET') {
       //   return of(new HttpResponse({ status: 200, body: sampleData }));
@@ -127,14 +133,26 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     //   }
 
       // // authenticate
-      // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
-      //     let body: ApiToken = {
-      //         userId: 'xyz@nist.gov',
-      //         token: 'fake-jwt-token'
-      //     };
-      //     console.log("logging in...")
-      //     return of(new HttpResponse({ status: 200, body }));
-      // }
+      if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
+          let body = {
+              userId: 'xyz@nist.gov',
+              token: 'fake-jwt-token',
+              userDetails: {
+                userId: "temp",
+                userName: "temp",
+                userLastName: "test",
+                userEmail: "temp@test.com"
+              }
+          };
+          console.log("logging in...")
+          return of(new HttpResponse({ status: 200, body }));
+      }
+
+      if (request.url.indexOf('test3') > -1 && request.method === 'GET') {
+        console.log("Getting collectionTestData.....")
+        return of(new HttpResponse({ status: 200, body: sampleCollection2 }));
+    }
+    
 
       // return 401 not authorised if token is null or invalid
       // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {

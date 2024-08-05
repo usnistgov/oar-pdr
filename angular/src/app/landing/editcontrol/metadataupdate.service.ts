@@ -123,7 +123,7 @@ export class MetadataUpdateService {
      *             take care of reporting the reason.  This allows the caller in charge of 
      *             getting updates to have its UI react accordingly.
      */
-    public update(subsetname: string, md: {}): Promise<boolean> {
+    public update(subsetname: string, md: {}, fullRec: NerdmRes = {} as NerdmRes): Promise<boolean> {
         if (!this.custsvc) {
             console.error("Attempted to update without authorization!  Ignoring update.");
             return new Promise<boolean>((resolve, reject) => {
@@ -137,26 +137,33 @@ export class MetadataUpdateService {
                 this.origfields[subsetname] = {};
 
             for (let prop in md) {
-                if (this.origfields[subsetname][prop] === undefined) {
-                    if (this.originalRec[prop] !== undefined) {
-                        this.origfields[subsetname][prop] = this.originalRec[prop];
+                let realProp = prop.split("-")[0];
+                if (this.origfields[subsetname][realProp] === undefined) {
+                    if (this.originalRec[realProp] !== undefined) {
+                        this.origfields[subsetname][realProp] = this.originalRec[realProp];
                     } else {
-                        this.origfields[subsetname][prop] = null;   // TODO: problematic; need to clean-up nulls
+                        this.origfields[subsetname][realProp] = null;   // TODO: problematic; need to clean-up nulls
                     }
                 }
             }
         }
 
+        let fieldName = subsetname.split("-")[0];
         // If current data is the same as original (user changed the data back to original), call undo instead. Otherwise do normal update
         if (JSON.stringify(md[subsetname]) == JSON.stringify(this.origfields[subsetname])) {
             this.undo(subsetname);
         } else {
             return new Promise<boolean>((resolve, reject) => {
-                this.custsvc.updateMetadata(md).subscribe(
+                let mdUpdate = {};
+                //Use real field name for updating
+                mdUpdate[fieldName] = md[subsetname];
+
+                this.custsvc.updateMetadata(mdUpdate).subscribe(
                     (res) => {
                         // console.log("###DBG  Draft data returned from server:\n  ", res)
                         this.stampUpdateDate();
-                        this.mdres.next(res as NerdmRes);
+                        // this.mdres.next(res as NerdmRes);
+                        this.mdres.next(fullRec as NerdmRes);
                         resolve(true);
                     },
                     (err) => {
@@ -182,13 +189,17 @@ export class MetadataUpdateService {
      * 
      * @param subsetname    the name for the metadata that was used in the call to update() which 
      *                      should be undone.
+     * @param subsetValue   Specifically for topic field. Because there are multiple collections,
+     *                      It's hard to keep track on collection here. The caller should keep track on 
+     *                      changes and provides the whole topic field to update.
+     * 
      * @return Promise<boolean>  -  result is true if the undo was successful, false if 
      *             there was an issue, including that there was nothing to undo.  Note that this 
      *             MetadataUpdateService instance will take care of reporting the reason.  This 
      *             response allows the caller in charge of getting updates to have its UI react
      *             accordingly.
      */
-    public undo(subsetname: string) {
+    public undo(subsetname: string, subsetValue: any = null) {
         if (this.origfields[subsetname] === undefined) {
             // Nothing to undo!
             console.warn("Undo called on " + subsetname + ": nothing to undo");
@@ -233,9 +244,21 @@ export class MetadataUpdateService {
         else {
             // Other updates are still registered; just undo the specified one
             return new Promise<boolean>((resolve, reject) => {
-                this.custsvc.updateMetadata(this.origfields[subsetname]).subscribe(
+                //If subset value provided, use it. Otherwise, use origfields.
+                let updateValue: any;
+                if(subsetValue){
+                    updateValue = subsetValue;
+                }else{
+                    updateValue = this.origfields[subsetname];
+                }
+
+                this.custsvc.updateMetadata(updateValue).subscribe(
                     (res) => {
+                        // Better remove this line for production. But it's ok to leave it
+                        res[subsetname.split("-")[0]] = updateValue[subsetname.split("-")[0]];
+
                         delete this.origfields[subsetname];
+
                         this.mdres.next(res as NerdmRes);
                         resolve(true);
                     },
@@ -295,7 +318,7 @@ export class MetadataUpdateService {
      * @param subsetname    the name for the set of metadata of interest.
      */
     public fieldUpdated(subsetname: string): boolean {
-        return this.origfields[subsetname] != undefined;
+        return this.origfields[subsetname];
     }
 
     /**

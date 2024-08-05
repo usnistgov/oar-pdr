@@ -15,9 +15,11 @@ export const ROW_COLOR = '#1E6BA1';
   styleUrls: ['./search-topics.component.css']
 })
 export class SearchTopicsComponent implements OnInit {
-    @Input() inputValue: any;
+    @Input() inputTopics: any;
     @Input() field: any;
     @Input() title?: string;
+    @Input() scheme: string;
+    @Input() type: string;
     @Output() returnValue: EventEmitter<any> = new EventEmitter();
 
     isVisible: boolean = true;
@@ -27,6 +29,8 @@ export class SearchTopicsComponent implements OnInit {
     taxonomyList: any[];
     taxonomyTree: TreeNode[] = [];
     toggle: Boolean = true;  
+    inputValue: any = {};
+    addMode: boolean = false;
 
     @ViewChild('panel', { read: ElementRef }) public panel: ElementRef<any>;
     @ViewChild('panel0', { read: ElementRef, static: true }) public panel0: ElementRef<any>;
@@ -37,6 +41,14 @@ export class SearchTopicsComponent implements OnInit {
         public activeModal: NgbActiveModal) { }
 
     ngOnInit() {
+        if(!this.inputTopics || !this.inputTopics[this.field] || this.inputTopics[this.field].length == 0) {
+            this.addMode = true;
+            this.inputValue[this.field] = [];
+        }else{
+            this.addMode = false;
+            this.inputValue = this.inputTopics;
+        }
+
         this.taxonomyListService.get(0).subscribe((result) => {
         if (result != null && result != undefined)
             this.buildTaxonomyTree(result);
@@ -121,6 +133,12 @@ export class SearchTopicsComponent implements OnInit {
     *   Save contact info when click on save button in pop up dialog
     */
     saveTopic() {
+        // if(!this.inputValue || this.inputValue[this.field].length == 0) {
+        //     if(this.addMode) {
+        //         return 
+        //     }
+        // }
+
         this.returnValue.emit(this.inputValue);
         this.activeModal.close('Close click');
     }
@@ -130,8 +148,8 @@ export class SearchTopicsComponent implements OnInit {
      */
     deleteTopic(index: number) {
         this.setTreeVisible(true);
-        this.searchAndExpandTaxonomyTree(this.inputValue[this.field][index], false);
-        this.inputValue[this.field] = this.inputValue[this.field].filter(topic => topic != this.inputValue[this.field][index]);
+        this.searchAndExpandTaxonomyTree(this.inputValue[this.field][index].tag, false);
+        this.inputValue[this.field] = this.inputValue[this.field].filter(topic => topic.tag != this.inputValue[this.field][index].tag);
         this.refreshTopicTree();
         console.log('this.inputValue.length', this.inputValue[this.field].length);
     }
@@ -141,15 +159,21 @@ export class SearchTopicsComponent implements OnInit {
      */
     updateTopics(rowNode: any) {
         this.toggle = false;
-        const existingTopic = this.inputValue[this.field].filter(topic => topic == rowNode.node.data.researchTopic);
-        if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0) {
-        this.inputValue[this.field].push(rowNode.node.data.researchTopic);
+        const existingTopic = this.inputValue[this.field].filter(topic => topic.tag == rowNode.node.data.researchTopic);
 
-        // Reset search text box
-        if (this.searchText != "") {
-            this.searchText = "";
-            this.onSearchTextChange();
-        }
+        if (existingTopic == undefined || existingTopic == null || existingTopic.length == 0) {
+            let topic = {
+                tag: rowNode.node.data.researchTopic,
+                scheme: this.scheme,
+                "@type": this.type 
+            }
+            this.inputValue[this.field].push(topic);
+
+            // Reset search text box
+            if (this.searchText != "") {
+                this.searchText = "";
+                this.onSearchTextChange();
+            }
         }
     }
 
