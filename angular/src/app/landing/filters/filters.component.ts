@@ -193,6 +193,107 @@ export class FiltersComponent implements OnInit {
         this.filterResults();
     }
 
+
+    /**
+     * Form the filter string and refresh the result page
+     */
+    filterResults() {
+        let lFilterString: string = "";
+        this.selectedThemes = [];
+        this.selectedComponents = [];
+        this.selectedResourceType = [];
+        let componentSelected: boolean = false;
+        let resourceTypesSelected: boolean = false;
+        let compType = '';
+        let resourceType = '';
+
+        // Resource type
+        // if (this.selectedResourceTypeNode.length > 0) {
+        //     lFilterString += "@type=";
+
+        //     for (let res of this.selectedResourceTypeNode) {
+        //         if (res && typeof res.data !== 'undefined' && res.data !== 'undefined') {
+        //             resourceTypesSelected = true;
+        //             this.selectedResourceType.push(res.data);
+        //             resourceType += res.data[0] + ',';
+
+        //             lFilterString += res.data[0].replace(/\s/g, "") + ",";
+        //         }
+        //     }
+
+        //     lFilterString = this.removeEndingComma(lFilterString);
+        // }    
+        
+        if(this.filterStrings["@type"]) {
+            if(lFilterString != '') lFilterString += "&";
+            lFilterString += this.filterStrings["@type"];
+            lFilterString = this.removeEndingComma(lFilterString);
+        }
+
+        for(let col of this.collectionOrder) {
+            if(this.filterStrings[col]) {
+                if(lFilterString != '') lFilterString += "&";
+                lFilterString += this.filterStrings[col];
+                lFilterString = this.removeEndingComma(lFilterString);
+            }   
+        }
+
+        // Record has
+        // if (this.selectedComponentsNode.length > 0) {
+        //     if(lFilterString != '') lFilterString += "&";
+
+        //     lFilterString += "components.@type=";
+
+        //     for (let comp of this.selectedComponentsNode) {
+        //         if (comp != 'undefined' && typeof comp.data !== 'undefined' && comp.data !== 'undefined') {
+        //             componentSelected = true;
+        //             this.selectedComponents.push(comp.data);
+        //             compType += comp.data[0] + ',';
+
+        //             lFilterString += comp.data[0].replace(/\s/g, "") + ",";
+        //         }
+        //     }
+        // }
+
+        if(this.filterStrings["components.@type"]) {
+            if(lFilterString != '') lFilterString += "&";
+            lFilterString += this.filterStrings["components.@type"];
+            lFilterString = this.removeEndingComma(lFilterString);
+        }
+
+        // lFilterString = this.removeEndingComma(lFilterString);
+
+        // Authors and contributors
+        if (this.selectedAuthor.length > 0) {
+            if(lFilterString != '') lFilterString += "&";
+
+            lFilterString += "contactPoint.fn=";
+
+            for (let author of this.selectedAuthor) {
+                lFilterString += author + ",";
+            }
+        }
+
+        lFilterString = this.removeEndingComma(lFilterString);
+
+        // Keywords
+        if (this.selectedKeywords.length > 0) {
+            if(lFilterString != '') lFilterString += "&";
+
+            lFilterString += "keyword=";
+            for (let keyword of this.selectedKeywords) {
+                lFilterString += this.suggestedKeywordsLkup[keyword] + ",";
+            }
+        }
+
+        lFilterString = this.removeEndingComma(lFilterString);
+        if(!lFilterString) lFilterString = "NoFilter";
+
+        // console.log('lFilterString', lFilterString);
+        this.filterString.emit(lFilterString);
+    }
+
+
     /**
      * If search value changed, clear the filters and refresh the search result.
      * @param changes - changed detected
@@ -385,7 +486,7 @@ export class FiltersComponent implements OnInit {
             compNoData = true;
             this.componentsWithCount = [];
             this.componentsTree = [{
-                label: 'Record has -',
+                label: 'Record has',
                 "expanded": true,
                 children: this.componentsWithCount,
             }];
@@ -430,14 +531,14 @@ export class FiltersComponent implements OnInit {
 
 
         this.resourceTypeTree = [{
-            label: 'Type of Resource  -',
+            label: 'Type of Resource',
             "expanded": false,
             children: this.resourceTypesWithCount
         }];
 
         if (!compNoData) {
             this.componentsTree = [{
-                label: 'Record has -',
+                label: 'Record has',
                 "expanded": false,
                 children: this.componentsWithCount,
             }];
@@ -466,92 +567,6 @@ export class FiltersComponent implements OnInit {
         this.status = (<any>error).httpStatus;
         this.msgs.push({ severity: 'error', summary: this.errorMsg + ':', detail: this.status + ' - ' + this.exception });
         this.searching = false;
-    }
-
-    /**
-     * Form the filter string and refresh the result page
-     */
-    filterResults() {
-        let lFilterString: string = "";
-        this.selectedThemes = [];
-        this.selectedComponents = [];
-        this.selectedResourceType = [];
-        let componentSelected: boolean = false;
-        let resourceTypesSelected: boolean = false;
-        let compType = '';
-        let resourceType = '';
-
-        // Resource type
-        if (this.selectedResourceTypeNode.length > 0) {
-            lFilterString += "@type=";
-
-            for (let res of this.selectedResourceTypeNode) {
-                if (res && typeof res.data !== 'undefined' && res.data !== 'undefined') {
-                    resourceTypesSelected = true;
-                    this.selectedResourceType.push(res.data);
-                    resourceType += res.data + ',';
-
-                    lFilterString += res.data.replace(/\s/g, "") + ",";
-                }
-            }
-
-            lFilterString = this.removeEndingComma(lFilterString);
-        }    
-        
-        for(let col of this.collectionOrder) {
-            if(this.filterStrings[col]) {
-                lFilterString += this.filterStrings[col];
-                lFilterString = this.removeEndingComma(lFilterString);
-            }   
-        }
-
-        // Record has
-        if (this.selectedComponentsNode.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "components.@type=";
-
-            for (let comp of this.selectedComponentsNode) {
-                if (comp != 'undefined' && typeof comp.data !== 'undefined' && comp.data !== 'undefined') {
-                    componentSelected = true;
-                    this.selectedComponents.push(comp.data);
-                    compType += comp.data + ',';
-
-                    lFilterString += comp.data.replace(/\s/g, "") + ",";
-                }
-            }
-        }
-
-        lFilterString = this.removeEndingComma(lFilterString);
-
-        // Authors and contributors
-        if (this.selectedAuthor.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "contactPoint.fn=";
-
-            for (let author of this.selectedAuthor) {
-                lFilterString += author + ",";
-            }
-        }
-
-        lFilterString = this.removeEndingComma(lFilterString);
-
-        // Keywords
-        if (this.selectedKeywords.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "keyword=";
-            for (let keyword of this.selectedKeywords) {
-                lFilterString += this.suggestedKeywordsLkup[keyword] + ",";
-            }
-        }
-
-        lFilterString = this.removeEndingComma(lFilterString);
-        if(!lFilterString) lFilterString = "NoFilter";
-
-        console.log('lFilterString', lFilterString);
-        this.filterString.emit(lFilterString);
     }
 
     /**
@@ -976,7 +991,7 @@ export class FiltersComponent implements OnInit {
                             allThemes[Collections.FORENSICS].push({ label: topicLabel, value: data });
                             allThemesArray[Collections.FORENSICS].push(topicLabel);
                         }
-                    }else{
+                    }else if(topic['scheme'].indexOf(this.taxonomyURI[Collections.DEFAULT]) >= 0){
                         topicLabel = topics[0];
 
                         if (allThemesArray[Collections.DEFAULT].indexOf(topicLabel) < 0) {

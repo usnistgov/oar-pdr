@@ -1,6 +1,6 @@
 {
     "NIST": {
-        "tag": "NIST Research",
+        "tag": "NIST R&D",
         "bannerUrl": "",
         "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes/",
         "color": {
@@ -10,7 +10,8 @@
             "dark": "#1c6022",
             "hover": "#ffffff"
         },
-        "displayOrder": 3
+        "displayOrder": 3,
+        "landongPage": true
     },
     "Forensics": {
         "tag": "Forensics",
@@ -23,7 +24,8 @@
             "dark": "#007287",
             "hover": "#ffffff"  
         },
-        "displayOrder": 2
+        "displayOrder": 2,
+        "landongPage": false
     },
     "Semiconductors": {
         "tag": "CHIPS Metrology",
@@ -32,10 +34,11 @@
         "color": {
             "default": "#003c97",
             "light": "#d6d9ff",
-            "lighter": "#f7f7ff",
+            "lighter": "#f7f7fa",
             "dark": "#00076c",
             "hover": "#ffffff"
         },
-        "displayOrder": 1
+        "displayOrder": 1,
+        "landongPage": true
     }
 }

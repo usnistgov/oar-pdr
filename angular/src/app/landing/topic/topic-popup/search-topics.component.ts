@@ -46,7 +46,7 @@ export class SearchTopicsComponent implements OnInit {
             this.inputValue[this.field] = [];
         }else{
             this.addMode = false;
-            this.inputValue = this.inputTopics;
+            this.inputValue = JSON.parse(JSON.stringify(this.inputTopics));
         }
 
         this.taxonomyListService.get(0).subscribe((result) => {

@@ -1,30 +1,33 @@
-<div style="margin-bottom: 10px; margin-left: 20px;">
+<div style="margin-bottom: 10px;">
     <h3><strong>Research Areas:</strong></h3>
 </div>
-<div style="margin-bottom: .5em; margin-left: 40px;">
+<div style="margin-bottom: .5em; margin-left: 0px;">
     <div style="display: inline-block; width: fit-content; max-width: 95%;">
         <span style="display: table;">
             <div class="editable_container">
 
-                    <div *ngFor="let col of collectionOrder; let i =index">
-                        <div *ngIf="topics[col] && topics[col].length > 0; else noTopic" style="font-weight: 500;" >
-                            <strong>{{ allCollections[col].tag }}: </strong>
-                        </div>
-                        <ng-template #noTopic>
-                            <div class="editable_field" *ngIf="mdupdsvc.isEditMode" style="padding-right: 10px !important;">
-                                <strong>Add {{ allCollections[col].tag }}: </strong>
-                            </div>
-                        </ng-template>
-                        <div class="editable_field" *ngIf="topics[col] && topics[col].length > 0" style="padding-left: 20px">
-
-                            <!-- <p-chips [(ngModel)]="topics[col]" [inputStyle]="{ display: 'none' }"></p-chips> -->
-
-                            <span style="max-width: 90%; ">
-                                <span class="topics" style="border: 1px solid rgb(236, 236, 236);background-color: #e3f9fc;padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 25px;white-space: nowrap;" *ngFor="let topic of topics[col]; let i =index">
-                                    <span style="display: inline-block">{{ topic.tag }}</span>
-                                </span> 
+                    <div *ngFor="let col of collectionOrder; let i =index" style="margin-bottom: .3em;">
+                        <div class="editable_field">
+                            <span *ngIf="topics[col] && topics[col].length > 0; else noTopic" style="font-weight: 500;white-space: nowrap;" >
+                                <strong>{{ allCollections[col].tag }}: </strong>
+                            </span>
+                            <ng-template #noTopic>
+                                <span *ngIf="mdupdsvc.isEditMode" style="padding-right: 10px !important; white-space: nowrap;">
+                                    <strong>Add {{ allCollections[col].tag }}: </strong>
+                                </span>
+                            </ng-template>
+                            <span *ngIf="topics[col] && topics[col].length > 0" style="padding-left: 20px">
+    
+                                <!-- <p-chips [(ngModel)]="topics[col]" [inputStyle]="{ display: 'none' }"></p-chips> -->
+    
+                                <span style="max-width: 90%; ">
+                                    <span class="topics" [style.background-color]="bubbleColor(topic)"  style="border: 1px solid rgb(236, 236, 236);padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 25px;white-space: nowrap;cursor: pointer;" (click)="topicClick(topic, col)" *ngFor="let topic of topicDisplay[col]; let i =index">
+                                        <span style="display: inline-block">{{ topic.tag }}</span>
+                                    </span> 
+                                </span>
                             </span>
                         </div>
+
 
                         <span class="editable_field">
                             <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal(col)"

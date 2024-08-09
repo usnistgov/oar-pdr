@@ -109,7 +109,7 @@ export class ResultlistComponent implements OnInit {
     }
 
     onPageChange(value: any){
-        console.log("this.currentPage", value.target.value);
+        // console.log("this.currentPage", value.target.value);
     }
 
     setColor() {
@@ -179,7 +179,7 @@ export class ResultlistComponent implements OnInit {
 
         this.pages = [];
         for(let i=1; i <= this.totalPages; i++) {
-            this.pages.push({name:'Page '+i+'/'+this.totalPages, value:i})
+            this.pages.push({name:'Page '+i+' of '+this.totalPages, value:i})
         }
     }
 
@@ -357,12 +357,12 @@ export class ResultlistComponent implements OnInit {
     /**
      * Reset active flags of all search result items to true (default)
      */
-    resetResult() {
+    resetResult(active: boolean = false) {
         if(this.searchResults) {
             this.searchResults.forEach((object) => {
                 object.expandIcon = "faa faa-caret-right";
                 object.isExpanded = false;
-                object.active = true;
+                object.active = active;
             })
         }
     }
@@ -376,7 +376,7 @@ export class ResultlistComponent implements OnInit {
         let filters: string[];
         
         // Reset the search result
-        this.resetResult();
+        this.resetResult(this.filterString=="NoFilter");
 
         // Handle search text box first
         this.filterResultByPhase(this.searchPhases);
@@ -388,8 +388,8 @@ export class ResultlistComponent implements OnInit {
                 switch(filter.split("=")[0]){
                     case "@type":
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
+                            if(!object.active){
+                                // object.active = false;
 
                                 object["@type"].forEach((oType) => {
                                     let types = filter.split("=")[1].split(",");
@@ -406,8 +406,8 @@ export class ResultlistComponent implements OnInit {
                         let topics = filter.split("=")[1].split(",");
                         for(let resultItem of this.searchResults) {
                             
-                            if(resultItem.active == true){
-                                resultItem.active = false;
+                            if(!resultItem.active){
+                                // resultItem.active = false;
 
                                 for(let oTopic of resultItem["topic"]) {
                                     for(let topic of topics) {
@@ -432,8 +432,8 @@ export class ResultlistComponent implements OnInit {
                     case "components.@type":
                         this.searchResults.forEach((object) => {
                             if(object["components"] != undefined) {
-                                if(object.active == true){
-                                    object.active = false;
+                                if(!object.active){
+                                    // object.active = false;
     
                                     object["components"].forEach((component) => {
                                         component["@type"].forEach((cType) => {
@@ -453,8 +453,8 @@ export class ResultlistComponent implements OnInit {
                         break;
                     case "contactPoint.fn":
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
+                            if(!object.active){
+                                // object.active = false;
                             
                                 if(object["contactPoint"]["fn"].includes(filter.split("=")[1]))
                                     object.active = true;
@@ -466,8 +466,8 @@ export class ResultlistComponent implements OnInit {
                         // Loop through each keyword in each search result. Display those that match
                         // the keywords from keyword filter
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
+                            if(!object.active){
+                                // object.active = false;
                             
                                 object["keyword"].forEach((keyword) => {
                                     //Loop through each search keyword from keyword filter
@@ -500,7 +500,7 @@ export class ResultlistComponent implements OnInit {
      * @param event sort item
      */
     onSortByChange(event: any) {
-        console.log("event", event.value);
+        // console.log("event", event.value);
         let key = event.value.value;
 
         if(key == "modified"){

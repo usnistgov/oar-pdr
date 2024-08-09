@@ -26,6 +26,12 @@ export class TopicComponent implements OnInit {
     originalTopics: any = {};   // For undo purpose
     fieldName = 'topic';
 
+    //For display
+    topicBreakPoint: number = 5;
+    topicDisplay: any = {};
+    topicShort: any = {};
+    topicLong: any = {};
+
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean;   // false if running server-side
     //05-12-2020 Ray asked to read topic data from 'theme' instead of 'topic'
@@ -39,7 +45,7 @@ export class TopicComponent implements OnInit {
 
             // this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
 
-            this.collectionOrder = this.collectionService.getCollectionOrder();
+            this.collectionOrder = this.collectionService.getCollectionForDisplay();
             this.allCollections = this.collectionService.loadAllCollections();
     }
 
@@ -106,6 +112,52 @@ export class TopicComponent implements OnInit {
                     }
                 });
             }
+        }
+
+        //For display
+        for(let col of this.collectionOrder) {
+            if(this.topics[col]) {
+                if(this.topics[col].length > 5) {
+                    this.topicShort[col] = JSON.parse(JSON.stringify(this.topics[col].slice(0, this.topicBreakPoint)));
+                    this.topicShort[col].push({tag:"Show more...", "@type":"", scheme:""});
+                    this.topicLong[col] = JSON.parse(JSON.stringify(this.topics[col]));
+                    this.topicLong[col].push({tag:"Show less...", "@type":"", scheme:""});                
+                }else {
+                    this.topicShort[col] = JSON.parse(JSON.stringify(this.topics[col]));
+                    this.topicLong[col] = JSON.parse(JSON.stringify(this.topics[col]));
+                }
+            }else {
+                this.topicShort[col] = [];
+                this.topicLong[col] = []
+            }
+        }
+
+        this.topicDisplay = JSON.parse(JSON.stringify(this.topicShort));
+    }
+
+    /**
+     * Set bubble color based on content
+     * @param topic 
+     */
+    bubbleColor(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            return "#ffffe6";
+        }else{
+            return "#ccffff";
+        }
+    }
+
+    /**
+     * Display short/long list based on which button was clicked.
+     * @param topic 
+     */
+    topicClick(topic, collection) {
+        if(topic.tag == "Show more...") {
+            this.topicDisplay[collection] = JSON.parse(JSON.stringify(this.topicLong[collection]));
+        }
+
+        if(topic.tag == "Show less...") {
+            this.topicDisplay[collection] = JSON.parse(JSON.stringify(this.topicShort[collection]));
         }
     }
 

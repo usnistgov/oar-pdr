@@ -22,11 +22,11 @@
                 <i class="faa faa-spinner faa-spin faa-stack-2x" [style.color]="defaultColor" aria-hidden="true"></i>
             </div>
 
-            <div style="padding-left: -1em;" *ngIf="isActive && !searching">
+            <div style="padding-left: -1em;padding-right: -2em;" *ngIf="isActive && !searching">
                 <!-- Loop through all themes -->
                 <div *ngFor="let key of collectionOrder">
-                    <app-taxonomy [collectionThemesTree]="allCollections[key].theme?.collectionThemesTree" [collection]="key"
-                        [backgroundColor]="lighterColor" [defaultColor]="defaultColor"
+                    <app-taxonomy [collectionThemesTree]="allCollections[key].theme?.collectionThemesTree" [collection]="key" [isCollection]="true"
+                        [backgroundColor]="lighterColor" [defaultColor]="defaultColor" [collectionNodeExpanded]="true"
                         (filterString)="updateFilterString($event, key)">
                     </app-taxonomy>
                 </div>
@@ -39,6 +39,11 @@
                 <div style="width: 100%;">
                     <div [@expandOptions]="MoreOptionsDisplayed ? 'collapsed':'expanded'">
                         <!-- Type of Resource -->
+                        <app-taxonomy [collectionThemesTree]="resourceTypeTree" collection="@type" [isCollection]="false"
+                            [backgroundColor]="lighterColor" [defaultColor]="defaultColor" [collectionNodeExpanded]="false"
+                            (filterString)="updateFilterString($event, '@type')">
+                        </app-taxonomy>
+<!-- 
                         <div class="filter-checkbox bottom-line">
                             <p-tree [value]="resourceTypeTree" selectionMode="checkbox" [style]="ResourceTypeStyle"
                                 [(selection)]="selectedResourceTypeNode" (onNodeUnselect)="filterResults()"
@@ -57,16 +62,21 @@
                                     </div>
                                 </ng-template>
                             </p-tree>
-                        </div>
+                        </div> -->
 
                         <!-- Components (Record has) -->
                         <div class="filter-checkbox bottom-line" *ngIf="componentsTree.length > 0">
-                            <p-tree [value]="componentsTree" selectionMode="checkbox" [style]="recordHasStyle"
+                            <app-taxonomy [collectionThemesTree]="componentsTree" collection="components.@type" [isCollection]="false"
+                                [backgroundColor]="lighterColor" [defaultColor]="defaultColor" [collectionNodeExpanded]="false"
+                                (filterString)="updateFilterString($event, 'components.@type')">
+                            </app-taxonomy>
+
+                            <!-- <p-tree [value]="componentsTree" selectionMode="checkbox" [style]="recordHasStyle"
                                 [(selection)]="selectedComponentsNode" (onNodeUnselect)="filterResults()"
                                 (onNodeSelect)="filterResults()">
                                 <ng-template let-node pTemplate="default">
                                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
-                                        <span *ngIf="node.label.split('---')[1] !=''; else header3">
+                                        <span *ngIf="node.count > 0; else header3">
                                             {{node.label.split("---")[0]}}&nbsp;</span>
                                         <ng-template #header3>
                                             <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
@@ -77,7 +87,7 @@
                                             {{node.count}}</span>
                                     </div>
                                 </ng-template>
-                            </p-tree>
+                            </p-tree> -->
                         </div>
                     </div>
                 </div>

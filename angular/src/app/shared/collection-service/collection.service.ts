@@ -6,8 +6,11 @@ import * as CollectionData from '../../../assets/site-constants/collections.json
   providedIn: 'root'
 })
 export class CollectionService {
-    //  Array to define the collection order
+    // Array to define the collection order
     collectionOrder: string[] = [];
+
+    // list of collections for landing page display (topics)
+    collectionForDisplay: string[] = [];
 
     allCollections: any = {};
 
@@ -17,10 +20,16 @@ export class CollectionService {
         this.collectionOrder = Object.keys(CollectionData).sort(function(a,b){return CollectionData[a]["displayOrder"]-CollectionData[b]["displayOrder"]});
 
         this.collectionOrder = this.collectionOrder.filter(function(v) { return v !== 'default' });
+
+        this.collectionForDisplay = Object.keys(CollectionData).sort(function(a,b){return CollectionData[a]["displayOrder"]-CollectionData[b]["displayOrder"]}).filter(key => CollectionData[key].landongPage); 
      }
 
     getCollectionOrder() {
         return this.collectionOrder;
+    }
+
+    getCollectionForDisplay() {
+        return this.collectionForDisplay;
     }
 
     /**

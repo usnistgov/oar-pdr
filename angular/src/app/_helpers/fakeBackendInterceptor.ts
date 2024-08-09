@@ -17,6 +17,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     const sampleData: any = require('../../assets/sample-data/semi-conductors.json');
     // const sampleCollection: any = require('../../assets/sample-data/semiconductors-collection.json');
     const sampleCollection: any = require('../../assets/sample-data/semiconductor-realdata.json');
+
+    const pdr0_0002: any = require('../../assets/sample-data/pdr0-0002-new.json');
     
     const sampleCollection2: any = require('../../assets/sample-data/collectionTestData.json');
 
@@ -64,15 +66,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return of(new HttpResponse({ status: 200, body: fields }));
         }
 
-        if (request.url.indexOf('isPartOf') > -1 && request.url.indexOf('pdr0-0002') > -1 && request.method === 'GET') {
-            console.log("Getting semiconductors collections.....")
-            return of(new HttpResponse({ status: 200, body: sampleCollection }));
-        }
+        // if (request.url.indexOf('isPartOf') > -1 && request.url.indexOf('pdr0-0002') > -1 && request.method === 'GET') {
+        //     console.log("Getting semiconductors collections.....")
+        //     return of(new HttpResponse({ status: 200, body: sampleCollection }));
+        // }
 
-        if (request.url.indexOf('pdr0-0002') > -1 && request.method === 'GET') {
-            console.log("Getting semiconductors.....")
-            return of(new HttpResponse({ status: 200, body: sampleData }));
-        }
+        // if (request.url.indexOf('pdr0-0002') > -1 && request.method === 'GET') {
+        //     console.log("Getting semiconductors.....")
+        //     return of(new HttpResponse({ status: 200, body: sampleData }));
+        // }
 
         if (request.url.indexOf('usagemetrics/files') > -1 && request.method === 'GET') 
         {
@@ -153,6 +155,10 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         return of(new HttpResponse({ status: 200, body: sampleCollection2 }));
     }
     
+    if (request.url.indexOf('oardev.nist.gov/od/id/pdr0-0002') > -1 && request.method === 'GET') {
+        console.log("Getting CHIPS pdr0-0002.....")
+        return of(new HttpResponse({ status: 200, body: pdr0_0002 }));
+    }
 
       // return 401 not authorised if token is null or invalid
       // if (request.url.indexOf('auth/_perm/') > -1 && request.method === 'GET') {
