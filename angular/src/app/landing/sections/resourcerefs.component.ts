@@ -1,7 +1,9 @@
-import { Component, OnChanges, SimpleChanges, Input } from '@angular/core';
-
+import { Component, OnChanges, SimpleChanges, Input, ViewChild, ElementRef } from '@angular/core';
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode, ColorScheme } from '../../shared/globals/globals';
+import { CollectionService } from '../../shared/collection-service/collection.service';
+import { D3Service } from '../../shared/d3-service/d3.service';
 
 /**
  * a component that lays out the "references" section of a landing page.
@@ -16,16 +18,41 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
     ]
 })
 export class ResourceRefsComponent implements OnChanges {
+    refTitle : string = "References";
+    colorScheme: ColorScheme;
+    sectionWidth: number;
+    svg: any;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
+    @Input() collection: string;
 
+    @ViewChild('refHeader') refHeader: ElementRef;
+    
     /**
      * create an instance of the Identity section
      */
-    constructor(private cfg: AppConfig)
+    constructor(
+        private cfg: AppConfig,
+        public collectionService: CollectionService,
+        public d3Service: D3Service)
     { }
+
+    ngOnInit(): void {
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
+        
+    }
+
+    ngAfterViewInit(): void {
+        if(this.refHeader) {
+            this.sectionWidth = this.refHeader.nativeElement.offsetWidth;
+            console.log("this.sectionWidth", this.sectionWidth);
+            // this.drawSectionHeaderBackground();
+            this.d3Service.drawSectionHeaderBackground(this.svg, this.refTitle, this.sectionWidth, this.colorScheme.default, 155, "#refHeader");  
+        }
+  
+    }
 
     ngOnChanges(ch: SimpleChanges) {
         if (this.record)

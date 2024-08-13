@@ -19,7 +19,7 @@
         "taxonomyURI": "https://data.nist.gov/od/dm/forensics-themes/",
         "color": {
             "default": "#008097",
-            "light": "#e3f7fd",
+            "light": "#dae9ed",
             "lighter": "#f5fbfd",
             "dark": "#007287",
             "hover": "#ffffff"  
@@ -33,7 +33,7 @@
         "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/",
         "color": {
             "default": "#003c97",
-            "light": "#d6d9ff",
+            "light": "#e1e6ed",
             "lighter": "#f7f7fa",
             "dark": "#00076c",
             "hover": "#ffffff"

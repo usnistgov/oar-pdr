@@ -28,12 +28,12 @@
 
             <!-- references -->
             <a name="references" #references></a>
-            <pdr-resource-refs [record]="md" [inBrowser]="inBrowser"></pdr-resource-refs>
+            <pdr-resource-refs [record]="md" [inBrowser]="inBrowser" [collection]="collection"></pdr-resource-refs>
 
             <!-- About This Dataset visualization and export -->
             <a name="about" #about></a>
             <a name="references2" #references2></a>
-            <pdr-resource-md [record]="md" [inBrowser]="inBrowser" [mobileMode]="mobileMode"  [metricsData]="metricsData" [showJsonViewer]='showJsonViewer' [theme]="theme">
+            <pdr-resource-md [record]="md" [inBrowser]="inBrowser" [mobileMode]="mobileMode" [collection]="collection" [metricsData]="metricsData" [showJsonViewer]='showJsonViewer' [theme]="theme">
             </pdr-resource-md>
         </div>
     </div>

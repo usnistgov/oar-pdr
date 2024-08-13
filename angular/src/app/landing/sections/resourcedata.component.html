@@ -1,7 +1,11 @@
 <div id="dataAccess">
     <div class="section-header">
-        <h3><b>Data Access</b></h3>
+        <!-- <h3><b>Data Access</b></h3>
+          -->
+        <div style="width: 100%; height: 27px; margin-bottom: 1em;" id="dataAccessHeader" #dataAccessHeader (window:resize)="onResize()">
+
     </div>
+    <div class="section-line"></div>
 
     <dl *ngIf="theme != scienceTheme">
         <dt>

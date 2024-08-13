@@ -21,6 +21,7 @@ import { ResourceRefsComponent } from './resourcerefs.component';
 import { ResourceMetadataComponent } from './resourcemetadata.component';
 import { FacilitatorsModule } from '../facilitators/facilitators.module';
 import { SearchresultModule } from '../searchresult/searchresult.module';
+import { D3Service } from '../../shared/d3-service/d3.service';
 
 /**
  * A module for components that lay out the content of a resource landing page into sections.
@@ -62,6 +63,7 @@ import { SearchresultModule } from '../searchresult/searchresult.module';
         ResourceRefsComponent, ResourceMetadataComponent
     ],
     providers: [
+        D3Service
     ],
     exports: [
         ResourceIdentityComponent, ResourceDescriptionComponent, ResourceDataComponent,

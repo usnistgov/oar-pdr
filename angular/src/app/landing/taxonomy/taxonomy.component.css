@@ -4,7 +4,6 @@
 
 .filter-checkbox {
     width: 100%;
-    margin-left: -10px;
     /* min-width: 410px; */
     overflow-x: hidden;
 }
@@ -29,3 +28,13 @@
 input[type=checkbox] {width:20px; height:20px;}
 
 .hasborder { border:1px solid #F00; float: right;}
+
+:host ::ng-deep .p-treenode-content {
+    background-color: transparent !important;
+    margin-right:-3px;
+    cursor: pointer;
+}
+
+:host ::ng-deep .p-treenode-content:hover {
+    background-color: rgb(246, 255, 255) !important;
+}

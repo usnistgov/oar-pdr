@@ -39,11 +39,10 @@ export class TaxonomyComponent implements OnInit {
     totalSelectedNodes: number = 0;
     allChecked: boolean = true;
 
-    researchTopicStyle = {'width':'100%','padding-top': '.5em', 'padding-bottom': '.5em', 'background-color': 'var(--science-theme-background-light)', 'overflow':'hidden','border-width':'0'};
+    researchTopicStyle: any;
 
     @Input() collectionThemesTree: TreeNode[] = [];
-    @Input() backgroundColor: string = "white";
-    @Input() defaultColor: string = "black";
+    @Input() colorScheme: ColorScheme;
     @Input() collection: string = Collections.DEFAULT;
     @Input() isCollection: boolean = false;
     @Input() collectionNodeExpanded: boolean = false;
@@ -56,6 +55,8 @@ export class TaxonomyComponent implements OnInit {
     ngOnInit(): void {
         this.getTotlalNode(this.collectionThemesTree);
         this.totalNodes = this.tempTotal;
+        this.researchTopicStyle = {'width':'100%','padding-top': '0.2em', 'padding-bottom': '.0em', 'background-color': this.colorScheme.lighter, 'overflow':'hidden','border-width':'0','margin-left': '-10px'};
+
         console.log("totalNodes", this.totalNodes);
         console.log("collection", this.collection);
     }

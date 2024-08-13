@@ -9,8 +9,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { SearchService } from '../../shared/search-service';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
-import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
-import * as CollectionData from '../../../assets/site-constants/collections.json';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode, ColorScheme } from '../../shared/globals/globals';
 import { CollectionService } from '../../shared/collection-service/collection.service';
 
 const SEARCH_SERVICE = 'SEARCH_SERVICE';
@@ -81,8 +80,7 @@ export class FiltersComponent implements OnInit {
     collectionOrder: string[] = [Collections.DEFAULT];
 
 //  Color
-    defaultColor: string;   //For header background
-    lighterColor: string;  //For menu item background
+    colorScheme: ColorScheme;
     collapedFilerColor: string;  //For collaped filter
 
     componentsTree: TreeNode[] = [];
@@ -158,6 +156,8 @@ export class FiltersComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.collectionService.loadAllCollections();
+
         this.collectionOrder = this.collectionService.getCollectionOrder();
         this.msgs = [];
         this.searchResultsError = [];
@@ -165,19 +165,14 @@ export class FiltersComponent implements OnInit {
         this.setFilterWidth();
 
         this.allCollections = this.collectionService.loadAllCollections();
-
-        // for(let col of this.collectionOrder) {
-        //     this.allCollections[col] = this.collectionService.localCollectionData(col);
-        // }
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
 
         // Set colors
         this.setColor();
     }
 
     setColor() {
-        this.defaultColor = this.allCollections[this.collection].color.default;
-        this.lighterColor = this.allCollections[this.collection].color.lighter;
-        this.collapedFilerColor = "linear-gradient(" +  this.defaultColor + ", white)";
+        this.collapedFilerColor = "linear-gradient(" +  this.colorScheme.default + ", white)";
     }
 
     /**

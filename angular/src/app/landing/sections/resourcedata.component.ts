@@ -1,10 +1,12 @@
-import { Component, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { NerdmRes, NerdmComp, NERDResource } from '../../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { Themes, ThemesPrefs } from '../../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode, ColorScheme } from '../../shared/globals/globals';
+import { D3Service } from '../../shared/d3-service/d3.service';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 /**
  * a component that lays out the "Data Access" section of a landing page.  This includes (as applicable)
@@ -36,6 +38,11 @@ export class ResourceDataComponent implements OnChanges {
     recordType: string = "";
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
+    sectionWidth: number;
+    backColor: string = '#003c97';
+    sectionTitle: string = "Data Access";
+    svg: any;
+    colorScheme: ColorScheme;
 
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
@@ -44,6 +51,8 @@ export class ResourceDataComponent implements OnChanges {
     @Input() theme: string;
     @Input() collection: string;
 
+    @ViewChild('dataAccessHeader') dataAccessHeader: ElementRef;
+
     // pass out download status for metrics refresh
     @Output() dlStatus: EventEmitter<string> = new EventEmitter();
 
@@ -51,11 +60,36 @@ export class ResourceDataComponent implements OnChanges {
      * create an instance of the Identity section
      */
     constructor(private cfg: AppConfig,
-                private gaService: GoogleAnalyticsService)
+                private gaService: GoogleAnalyticsService,
+                public collectionService: CollectionService,
+                public d3Service: D3Service)
     { }
 
     ngOnInit(): void {
         this.recordType = (new NERDResource(this.record)).resourceLabel();
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
+    }
+
+    ngAfterViewInit(): void {
+        //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+        //Add 'implements AfterViewInit' to the class.
+        this.sectionWidth = this.dataAccessHeader.nativeElement.offsetWidth;
+        console.log("this.sectionWidth", this.sectionWidth);
+        // this.drawSectionHeaderBackground();
+        this.d3Service.drawSectionHeaderBackground(this.svg, this.sectionTitle, this.sectionWidth, this.colorScheme.default, 165, "#dataAccessHeader");    
+    }
+
+    /**
+     * On screen resize, re-draw section header
+     */
+    onResize(){
+        if (this.inBrowser) {
+            this.sectionWidth = this.dataAccessHeader.nativeElement.offsetWidth;
+
+            // this.drawSectionHeaderBackground();
+
+            // this.d3Service.drawSectionHeaderBackground(this.svg, this.sectionTitle, this.sectionWidth, this.backColor, 165, "#dataAccessHeader");
+        }
     }
 
     /**

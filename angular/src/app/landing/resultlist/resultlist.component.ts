@@ -41,6 +41,7 @@ import { CollectionService } from '../../shared/collection-service/collection.se
 export class ResultlistComponent implements OnInit {
     searchResults: any[];
     searchResultsForDisplay: any[];
+    searchResultsForDisplayOriginal: any[];
     searchResultsOriginal: any[];
     currentIndex: number = 0;
     resultCount: number = 0;
@@ -53,19 +54,21 @@ export class ResultlistComponent implements OnInit {
 
     //Result display
     showResult: boolean = true;
+    showResultList: boolean = false;
     noSearchResult: boolean = false;
     // expandButtonAlterText: string = "Open dataset details";
 
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 10;
+    itemsPerPage: number = 20;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: any = {name:'Page 1', value:1};
 
     allCollections: any = {};
 
     //  Color
+    colorScheme: ColorScheme;
     defaultColor: string;
     lightColor: string;  
     lighterColor: string;  
@@ -85,6 +88,7 @@ export class ResultlistComponent implements OnInit {
         public gaService: GoogleAnalyticsService) { }
 
     ngOnInit(): void {
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
         this.PDRAPIURL = this.cfg.get('locations.landingPageService',
                                    'https://data.nist.gov/od/id/');
 
@@ -103,19 +107,10 @@ export class ResultlistComponent implements OnInit {
         }
 
         this.allCollections = this.collectionService.loadAllCollections();
-
-        // Set colors
-        this.setColor();
     }
 
     onPageChange(value: any){
         // console.log("this.currentPage", value.target.value);
-    }
-
-    setColor() {
-        this.defaultColor = this.allCollections[this.collection].color.default;
-        this.lighterColor = this.allCollections[this.collection].color.lighter;
-        this.lightColor = this.allCollections[this.collection].color.light;
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -130,6 +125,12 @@ export class ResultlistComponent implements OnInit {
         else {
             return this.resultWidth.substring(0, this.resultWidth.length-2)
         }
+    }
+
+    onSelected(event) {
+        console.log("event", event.target.value);
+        this.currentPage = this.pages.filter(p => p.name == event.target.value)[0];
+        console.log("this.currentPage", this.currentPage);
     }
 
     /**
@@ -158,6 +159,8 @@ export class ResultlistComponent implements OnInit {
 
         this.filterResults();
         this.sortByDate();
+
+        this.showResultList = true;
     }
 
     /**
@@ -492,6 +495,8 @@ export class ResultlistComponent implements OnInit {
             if(object.active) this.searchResultsForDisplay.push(object);
         })
 
+        this.searchResultsForDisplayOriginal = JSON.parse(JSON.stringify(this.searchResultsForDisplay));
+
         this.getTotalResultItems();
     }
 
@@ -501,7 +506,14 @@ export class ResultlistComponent implements OnInit {
      */
     onSortByChange(event: any) {
         // console.log("event", event.value);
-        let key = event.value.value;
+        if(event.target.value == "none") {
+            this.searchResultsForDisplay = JSON.parse(JSON.stringify(this.searchResultsForDisplayOriginal));
+
+            this.refreshResult();
+            return;
+        }
+
+        let key = this.options.filter(o => o.name == event.target.value)[0].value;
 
         if(key == "modified"){
             this.sortByDate();
