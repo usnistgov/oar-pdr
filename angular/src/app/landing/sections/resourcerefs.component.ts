@@ -47,9 +47,9 @@ export class ResourceRefsComponent implements OnChanges {
     ngAfterViewInit(): void {
         if(this.refHeader) {
             this.sectionWidth = this.refHeader.nativeElement.offsetWidth;
-            console.log("this.sectionWidth", this.sectionWidth);
-            // this.drawSectionHeaderBackground();
-            this.d3Service.drawSectionHeaderBackground(this.svg, this.refTitle, this.sectionWidth, this.colorScheme.default, 155, "#refHeader");  
+            
+            if(this.colorScheme)
+                this.d3Service.drawSectionHeaderBackground(this.svg, this.refTitle, this.sectionWidth, this.colorScheme.default, 155, "#refHeader");  
         }
   
     }
@@ -57,6 +57,15 @@ export class ResourceRefsComponent implements OnChanges {
     ngOnChanges(ch: SimpleChanges) {
         if (this.record)
             this.useMetadata();  // initialize internal component data based on metadata
+    }
+
+    /**
+     * On screen resize, re-draw section header
+     */
+    onResize(){
+        if (this.inBrowser) {
+            this.sectionWidth = this.refHeader.nativeElement.offsetWidth;
+        }
     }
 
     /**

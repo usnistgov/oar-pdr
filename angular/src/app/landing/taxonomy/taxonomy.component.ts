@@ -46,6 +46,7 @@ export class TaxonomyComponent implements OnInit {
     @Input() collection: string = Collections.DEFAULT;
     @Input() isCollection: boolean = false;
     @Input() collectionNodeExpanded: boolean = false;
+    @Input() clearAllCheckbox: boolean = false;
     @Output() filterString: EventEmitter<string> = new EventEmitter();
     
     constructor() { 
@@ -55,10 +56,9 @@ export class TaxonomyComponent implements OnInit {
     ngOnInit(): void {
         this.getTotlalNode(this.collectionThemesTree);
         this.totalNodes = this.tempTotal;
-        this.researchTopicStyle = {'width':'100%','padding-top': '0.2em', 'padding-bottom': '.0em', 'background-color': this.colorScheme.lighter, 'overflow':'hidden','border-width':'0','margin-left': '-10px'};
 
-        console.log("totalNodes", this.totalNodes);
-        console.log("collection", this.collection);
+        if(this.colorScheme)
+            this.researchTopicStyle = {'width':'100%','padding-top': '0.2em', 'padding-bottom': '.0em', 'background-color': this.colorScheme.lighter, 'overflow':'hidden','border-width':'0','margin-left': '-10px'};
     }
 
     ngAfterViewInit(): void {
@@ -68,9 +68,9 @@ export class TaxonomyComponent implements OnInit {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
-        //Add '${implements OnChanges}' to the class.
-        // console.log("changes", changes);
+        if(this.clearAllCheckbox){
+            this.uncheckAll();
+        }
     }
 
     get isAllChecked() {

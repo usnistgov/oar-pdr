@@ -134,3 +134,15 @@
     width: 100%;
     min-width: 1px;
 }
+
+.clearall {
+    font-size: 13px;
+    background-color: transparent !important;
+    height: 25px !important;
+    color: white;
+    float: right;
+}
+
+.clearall:hover {
+    background-color: rgb(50, 145, 240) !important;
+}

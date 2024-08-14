@@ -62,12 +62,10 @@ export class ResourceMetadataComponent implements OnChanges {
     }
 
     ngAfterViewInit(): void {
-        //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
-        //Add 'implements AfterViewInit' to the class.
         this.sectionWidth = this.aboutHeader.nativeElement.offsetWidth;
-        console.log("this.sectionWidth", this.sectionWidth);
-        // this.drawSectionHeaderBackground();
-        this.d3Service.drawSectionHeaderBackground(this.svg, this.aboutTitle, this.sectionWidth, this.colorScheme.default, 245, "#aboutHeader");    
+        
+        if(this.colorScheme)
+            this.d3Service.drawSectionHeaderBackground(this.svg, this.aboutTitle, this.sectionWidth, this.colorScheme.default, 245, "#aboutHeader");    
     }
 
     /**

@@ -138,7 +138,7 @@ export class SearchTopicsComponent implements OnInit {
         //         return 
         //     }
         // }
-
+        console.log("SaveTopic =====")
         this.returnValue.emit(this.inputValue);
         this.activeModal.close('Close click');
     }

@@ -28,8 +28,6 @@ export class CollectionService {
     }
 
     serviceInit() {
-
-
         this.loadAllCollections();
     }
 

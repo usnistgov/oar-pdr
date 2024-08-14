@@ -15,29 +15,29 @@ const largedata: any  = require('../assets/sample-data/mds2-2116.json');
 
 export const context = {
     production: false,
-    useMetadataService: false,
-    useCustomizationService: false
+    useMetadataService: true,
+    useCustomizationService: true
 };
 
 export const config: LPSConfig = {
     locations: {
         orgHome: "https://nist.gov/",
-        portalBase: "https://oardev.nist.gov/",
-        pdrHome: "https://oardev.nist.gov/pdr/",
-        pdrSearch: "https://oardev.nist.gov/sdp/",
-        mdService:   "https://oardev.nist.gov/od/id/",
-        taxonomyService: "https://oardev.nist.gov/rmm/taxonomy"
+        portalBase: "https://data.nist.gov/",
+        pdrHome: "https://data.nist.gov/pdr/",
+        pdrSearch: "https://data.nist.gov/sdp/",
+        mdService:   "https://data.nist.gov/od/id/",
+        taxonomyService: "https://data.nist.gov/rmm/taxonomy"
     },
     APIs: {
-        customization: "https://oardev.nist.gov/customization",
-        // customization: "https://oardev.nist.gov/customization",
-        // distService: "https://oardev.nist.gov/od/ds/",
-        distService: "https://oardev.nist.gov/od/ds/",
-        mdService: "https://oardev.nist.gov/od/id/",
-        mdSearch:  "https://oardev.nist.gov/rmm/",
-        metrics:   "https://oardev.nist.gov/rmm/usagemetrics",
-        taxonomy:   "https://oardev.nist.gov/rmm/taxonomy",
-        rpaBackend: "https://oardev.nist.gov/rpa/"
+        customization: "https://data.nist.gov/customization",
+        // customization: "https://data.nist.gov/customization",
+        // distService: "https://data.nist.gov/od/ds/",
+        distService: "https://data.nist.gov/od/ds/",
+        mdService: "https://data.nist.gov/od/id/",
+        mdSearch:  "https://data.nist.gov/rmm/",
+        metrics:   "https://data.nist.gov/rmm/usagemetrics",
+        taxonomy:   "https://data.nist.gov/rmm/taxonomy",
+        rpaBackend: "https://data.nist.gov/rpa/"
     },
     mode: "dev",
     status: "Dev Version",
@@ -50,7 +50,7 @@ export const config: LPSConfig = {
     bundleSizeAlert: 500000000,
     // Decide how many seconds to wait to refresh metrics after user download one/more files
     delayTimeForMetricsRefresh: 300,
-    standardNISTTaxonomyURI: "https://oardev.nist.gov/od/dm/nist-themes/"  
+    standardNISTTaxonomyURI: "https://data.nist.gov/od/dm/nist-themes/"  
 }
 
 export const testdata: {} = {
@@ -89,21 +89,21 @@ export const testdata: {} = {
                 "version": "1.0.0",
                 "issued": "2019-03-27 00:00:00",
                 "@id": "ark:/88434/mds0000fbk/pdr:v/1.0.0",
-                "location": "https://oardev.nist.gov/od/id/mds0000fbk/pdr:v/1.0.0",
+                "location": "https://data.nist.gov/od/id/mds0000fbk/pdr:v/1.0.0",
                 "description": "initial release"
             },
             {
                 "version": "1.1.0",
                 "issued": "2019-03-28 12:24:31",
                 "@id": "ark:/88434/mds0000fbk/pdr:v/1.1.0",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.0.0",
                 "description": "data file update"
             },
             {
                 "version": "1.1.2",
                 "issued": "2019-03-29 12:24:31",
                 "@id": "ark:/88434/mds0000fbk/pdr:v/1.1.2",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.1.2",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk/pdr:v/1.1.2",
                 "description": "metadata update"
             }
             ]},
@@ -135,7 +135,7 @@ export const testdata: {} = {
                 "location":"https://doi.org/10.1016/j.jnoncrysol.2019.119828",
                 "@id":"#ref:10.1016/j.jnoncrysol.2019.119828",
                 "@type":["schema:Article"],
-                "_extensionSchemas":["https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             },
             {
                 "refType":"IsCitedBy",
@@ -145,7 +145,7 @@ export const testdata: {} = {
                 "location":"https://doi.org/10.1063/1.4769995",
                 "@id":"#ref:10.1063/1.4769995",
                 "@type":["schema:Article"],
-                "_extensionSchemas":["https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             }
         ],
         "accessLevel": "public",
@@ -277,7 +277,7 @@ export const testdata: {} = {
                 "filepath": "README.txt",
                 "size": "784",
                 "mediaType": "text/plain",
-                "downloadURL": "https://oardev.nist.gov/od/ds/mds0000fbk/README.txt"
+                "downloadURL": "https://data.nist.gov/od/ds/mds0000fbk/README.txt"
             },
             {
                 "@type": [ "nrdp:Subcollection" ],
@@ -292,14 +292,14 @@ export const testdata: {} = {
                 "filepath": "data/file.csv",
                 "size": "21784",
                 "mediaType": "text/csv",
-                "downloadURL": "https://oardev.nist.gov/od/ds/mds0000fbk/data/file.csv"
+                "downloadURL": "https://data.nist.gov/od/ds/mds0000fbk/data/file.csv"
             },
             {
                 "@type": [ "nrdp:DataFile", "nrd:Hidden" ],
                 "filepath": "data/secret.csv",
                 "size": "15784",
                 "mediaType": "text/csv",
-                "downloadURL": "https://oardev.nist.gov/od/ds/mds0000fbk/data/file.csv"
+                "downloadURL": "https://data.nist.gov/od/ds/mds0000fbk/data/file.csv"
             }
         ]
     },
@@ -334,14 +334,14 @@ export const testdata: {} = {
                 "version": "1.0.0",
                 "issued": "2019-03-27 00:00:00",
                 "@id": "ark:/88434/mds0000fbk",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
                 "description": "initial release"
             },
             {
                 "version": "1.0.1",
                 "issued": "2019-03-28 00:00:00",
                 "@id": "ark:/88434/mds0000fbkmds1103vzr",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
                 "description": "metadata update"
             }
         ],
@@ -351,7 +351,12 @@ export const testdata: {} = {
         "keyword": [
             "face",
             "biometrics",
-            "forensic"
+            "forensic",
+            "semiconductors",
+            "microelectronic",
+            "thermal analysis",
+            "photonics",
+            "interatomic"
         ],
         "theme": [
             "Biometrics"
@@ -433,7 +438,7 @@ export const testdata: {} = {
                 "location":"https://doi.org/10.1016/j.jnoncrysol.2019.119828",
                 "@id":"#ref:10.1016/j.jnoncrysol.2019.119828",
                 "@type":["schema:Article"],
-                "_extensionSchemas":["https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             },
             {
                 "refType":"IsCitedBy",
@@ -443,7 +448,7 @@ export const testdata: {} = {
                 "location":"https://doi.org/10.1063/1.4769995",
                 "@id":"#ref:10.1063/1.4769995",
                 "@type":["schema:Article"],
-                "_extensionSchemas":["https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             }
         ],
         "accessLevel": "restricted public",
@@ -470,7 +475,7 @@ export const testdata: {} = {
                 ]
             },
             {
-                "accessURL": "https://oardev.nist.gov/od/rp?@id=ark:/88434/mds2-2419",
+                "accessURL": "https://data.nist.gov/od/rp?@id=ark:/88434/mds2-2419",
                 "description": "This page provides a registration form that must be completed before downloading the data.",
                 "title": "Gateway for Registered Data Access",
                 "@type": [
@@ -480,7 +485,7 @@ export const testdata: {} = {
                 ],
                 "@id": "#pdr?@id=ark:/88434/mds2-2419",
                 "_extensionSchemas": [
-                  "https://oardev.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
                 ]
             },
             {
@@ -523,7 +528,7 @@ export const testdata: {} = {
                   "dcat:Distribution"
                 ],
                 "_extensionSchemas": [
-                  "https://oardev.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+                  "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
                 ],
                 "filepath": "nfiq2_conformance_expected_output.csv",
                 "mediaType": "text/csv",
@@ -607,14 +612,14 @@ export const testdata: {} = {
                 "version": "1.0.0",
                 "issued": "2019-03-27 00:00:00",
                 "@id": "ark:/88434/mds0000fbk",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
                 "description": "initial release"
             },
             {
                 "version": "1.0.2",
                 "issued": "2019-03-28 12:24:31",
                 "@id": "ark:/88434/mds0000fbkmds1103vzr",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds0000fbk",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds0000fbk",
                 "description": "metadata update"
             }
         ],
@@ -646,7 +651,7 @@ export const testdata: {} = {
                 "location":"https://doi.org/10.1016/j.jnoncrysol.2019.119828",
                 "@id":"#ref:10.1016/j.jnoncrysol.2019.119828",
                 "@type":["schema:Article"],
-                "_extensionSchemas":["https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             },
             {
                 "refType":"IsCitedBy",
@@ -656,7 +661,7 @@ export const testdata: {} = {
                 "location":"https://doi.org/10.1063/1.4769995",
                 "@id":"#ref:10.1063/1.4769995",
                 "@type":["schema:Article"],
-                "_extensionSchemas":["https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
+                "_extensionSchemas":["https://data.nist.gov/od/dm/nerdm-schema/v0.2#/definitions/DCiteReference"]
             }
         ],
         "accessLevel": "public",
@@ -739,10 +744,10 @@ export const testdata: {} = {
         ]
     },
     DNAScienceTheme: {
-        "_schema": "https://oardev.nist.gov/od/dm/nerdm-schema/v0.5#",
+        "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
         "topic": [
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes-forensics/v1.0",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
                 "tag": "Forensics: DNA and biological evidence",
                 "@type": "Concept"
             }
@@ -752,8 +757,8 @@ export const testdata: {} = {
             "dna"
         ],
         "_extensionSchemas": [
-            "https://oardev.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource",
-            "https://oardev.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/Aggregation"
+            "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource",
+            "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/Aggregation"
         ],
         "landingPage": "https://www.nist.gov/itl/iad/image-group",
         "title": "NIST Research in DNA and biological evidence.",
@@ -765,7 +770,7 @@ export const testdata: {} = {
             "006:045"
         ],
         "@context": [
-            "https://oardev.nist.gov/od/dm/nerdm-pub-context.jsonld",
+            "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             {
                 "@base": "ark:/88434/mds991133"
             }
@@ -798,7 +803,7 @@ export const testdata: {} = {
                 "issued": "2021-12-31",
                 "version": "1.0.0",
                 "@id": "ark:/88434/mds991122",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds991122",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds991122",
                 "description": "initial release"
             }
         ],
@@ -847,7 +852,7 @@ export const testdata: {} = {
                     "nrdp:SearchPage"
                 ],
                 "_extensionSchemas": [
-                    "https://oardev.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/DynamicResourceSet"
+                    "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/DynamicResourceSet"
                 ],
                 "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991133",
                 "name": "DNA and Biological Evidence data"
@@ -865,15 +870,15 @@ export const testdata: {} = {
         ]
     },
     BiometricsScienceTheme: {
-        "_schema": "https://oardev.nist.gov/od/dm/nerdm-schema/v0.5#",
+        "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.5#",
         "topic": [
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes-forensics/v1.0",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
                 "tag": "Forensics: Biometrics",
                 "@type": "Concept"
             },
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes/v1.1",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
                 "tag": "Information Technology: Biometrics",
                 "@type": "Concept"
             }
@@ -884,8 +889,8 @@ export const testdata: {} = {
             "forensics"
         ],
         "_extensionSchemas": [
-            "https://oardev.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource",
-            "https://oardev.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/Aggregation"
+            "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.5#/definitions/PublicDataResource",
+            "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/Aggregation"
         ],
         "landingPage": "https://www.nist.gov/itl/iad/image-group",
         "title": "NIST Research in Biometric forensics.",
@@ -898,7 +903,7 @@ export const testdata: {} = {
             "006:045"
         ],
         "@context": [
-            "https://oardev.nist.gov/od/dm/nerdm-pub-context.jsonld",
+            "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             {
                 "@base": "ark:/88434/mds991122"
             }
@@ -931,7 +936,7 @@ export const testdata: {} = {
                 "issued": "2021-12-31",
                 "version": "1.0.0",
                 "@id": "ark:/88434/mds991122",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds991122",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds991122",
                 "description": "initial release"
             }
         ],
@@ -980,7 +985,7 @@ export const testdata: {} = {
                     "nrdp:SearchPage"
                 ],
                 "_extensionSchemas": [
-                    "https://oardev.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/DynamicResourceSet"
+                    "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.1#/definitions/DynamicResourceSet"
                 ],
                 "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991122",
                 "name": "Biometrics Data"
@@ -998,25 +1003,25 @@ export const testdata: {} = {
         ]
     },
     forensics:{
-        "_schema": "https://oardev.nist.gov/od/dm/nerdm-schema/v0.2#",
+        "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.2#",
         "topic": [
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes-forensics/v1.0",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
                 "tag": "Forensics: Biometrics",
                 "@type": "Concept"
             },
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes-forensics/v1.0",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes-forensics/v1.0",
                 "tag": "Forensics",
                 "@type": "Concept"
             },
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes/v1.1",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
                 "tag": "Forensics",
                 "@type": "Concept"
             },
             {
-                "scheme": "https://oardev.nist.gov/od/dm/nist-themes/v1.1",
+                "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
                 "tag": "Information Technology: Biometrics",
                 "@type": "Concept"
             }
@@ -1028,8 +1033,8 @@ export const testdata: {} = {
             "forensics"
         ],
         "_extensionSchemas": [
-            "https://oardev.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource",
-            "https://oardev.nist.gov/od/dm/nerdm-schema/science-initiative-schema/v0.1#/definitions/ResearchInitiative"
+            "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.2#/definitions/PublicDataResource",
+            "https://data.nist.gov/od/dm/nerdm-schema/science-initiative-schema/v0.1#/definitions/ResearchInitiative"
         ],
         "landingPage": "https://www.nist.gov/forensic-science/research-focus-areas",
         "title": "NIST Forensics Research Data",
@@ -1043,7 +1048,7 @@ export const testdata: {} = {
             "006:045"
         ],
         "@context": [
-            "https://oardev.nist.gov/od/dm/nerdm-pub-context.jsonld",
+            "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
             {
                 "@base": "ark:/88434/mds9911"
             }
@@ -1075,7 +1080,7 @@ export const testdata: {} = {
                 "issued": "2021-12-25",
                 "version": "1.0.0",
                 "@id": "ark:/88434/mds90911",
-                "location": "https://oardev.nist.gov/od/id/ark:/88434/mds9911",
+                "location": "https://data.nist.gov/od/id/ark:/88434/mds9911",
                 "description": "initial release"
             }
         ],
@@ -1208,7 +1213,7 @@ export const testdata: {} = {
                     "nrda:DynamicResourceSet", "nrdp:SearchPage"
                 ],
                 "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991133",
-                "accessURL": "https://oardev.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991133&alternateView=forensics",
+                "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991133&alternateView=forensics",
                 "title": "DNA and Biological Evidence data collection",
                 "description": "Search URL for the DNA and Biological evidence data collection."
             },
@@ -1217,7 +1222,7 @@ export const testdata: {} = {
                     "nrda:DynamicResourceSet", "nrdp:SearchPage"
                 ],
                 "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/mds991122",
-                "accessURL": "https://oardev.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991122&alternateView=forensics",
+                "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/mds991122&alternateView=forensics",
                 "title": "Biometrics Data Collection",
                 "description": "Search URL for the biometrics data collection."
             }

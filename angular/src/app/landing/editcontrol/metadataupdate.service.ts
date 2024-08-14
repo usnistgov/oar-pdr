@@ -160,10 +160,10 @@ export class MetadataUpdateService {
 
                 this.custsvc.updateMetadata(mdUpdate).subscribe(
                     (res) => {
-                        // console.log("###DBG  Draft data returned from server:\n  ", res)
+                        console.log("###DBG  Draft data returned from server:\n  ", res)
                         this.stampUpdateDate();
-                        // this.mdres.next(res as NerdmRes);
-                        this.mdres.next(fullRec as NerdmRes);
+                        this.mdres.next(res as NerdmRes);
+                        // this.mdres.next(fullRec as NerdmRes);
                         resolve(true);
                     },
                     (err) => {

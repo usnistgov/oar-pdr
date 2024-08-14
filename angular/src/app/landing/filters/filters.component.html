@@ -10,10 +10,13 @@
                     data-target="#demo"><span *ngIf="filterWidthNum > 170">Filters </span><i
                         [ngClass]="getFilterImgClass()" style="zoom: 100%;color: #fff;cursor: pointer;"></i></a>
 
-                <a href="#" id="clear-all" data-toggle="tooltip" title="Clear all filters"
+                <!-- <a href="#" id="clear-all" data-toggle="tooltip" title="Clear all filters"
                     (click)="$event.preventDefault();clearFilters()">
                     <i style="vertical-align: middle;zoom: 70%;margin-right: .3em;" class="faa faa-remove">
-                    </i><span *ngIf="filterWidthNum > 170">Clear All</span></a>
+                    </i><span *ngIf="filterWidthNum > 170">Clear All</span></a> -->
+
+                <button pButton label="Clear all" type="button" class="p-button-sm clearall" 
+                    icon="faa faa-remove" iconPos="left" style="padding: 3px 10px;" (click)="clearFilters()"></button>
             </div>
 
             <!-- Filter body -->
@@ -26,7 +29,7 @@
                 <!-- Loop through all themes -->
                 <div *ngFor="let key of collectionOrder">
                     <app-taxonomy [collectionThemesTree]="allCollections[key].theme?.collectionThemesTree" [collection]="key" [isCollection]="true"
-                        [colorScheme]="colorScheme" [collectionNodeExpanded]="true"
+                        [colorScheme]="colorScheme" [collectionNodeExpanded]="true" [clearAllCheckbox]="clearAllCheckbox"
                         (filterString)="updateFilterString($event, key)">
                     </app-taxonomy>
                 </div>
@@ -40,14 +43,14 @@
                     <div [@expandOptions]="MoreOptionsDisplayed ? 'collapsed':'expanded'">
                         <!-- Type of Resource -->
                         <app-taxonomy [collectionThemesTree]="resourceTypeTree" collection="@type" [isCollection]="false"
-                        [colorScheme]="colorScheme" [collectionNodeExpanded]="false"
+                        [colorScheme]="colorScheme" [collectionNodeExpanded]="false" [clearAllCheckbox]="clearAllCheckbox"
                             (filterString)="updateFilterString($event, '@type')">
                         </app-taxonomy>
 
                         <!-- Components (Record has) -->
                         <div class="filter-checkbox bottom-line" *ngIf="componentsTree.length > 0">
                             <app-taxonomy [collectionThemesTree]="componentsTree" collection="components.@type" [isCollection]="false"
-                            [colorScheme]="colorScheme" [collectionNodeExpanded]="false"
+                            [colorScheme]="colorScheme" [collectionNodeExpanded]="false" [clearAllCheckbox]="clearAllCheckbox"
                                 (filterString)="updateFilterString($event, 'components.@type')">
                             </app-taxonomy>
                         </div>

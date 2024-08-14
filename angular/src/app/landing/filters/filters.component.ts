@@ -69,6 +69,7 @@ export class FiltersComponent implements OnInit {
     allUnspecifiedCount: any = {};
     unspecifiedCount: number = 0;
     showMoreLink: boolean = true;
+    clearAllCheckbox: boolean = false;
 
     collectionThemesWithCount: FilterTreeNode[] = [];
     filterStrings = {};
@@ -731,32 +732,37 @@ export class FiltersComponent implements OnInit {
         this.selectedAuthorDropdown = false;
         this.selectedResourceType = [];
         this.selectedResourceTypeNode = [];
-        this.resourceTypes = this.collectResourceTypes(this.searchResults);
-        this.collectResourceTypesWithCount();
-        this.authors = this.collectAuthors(this.searchResults);
-        this.suggestedKeywords = this.collectKeywords(this.searchResults);
-        this.components = this.collectComponents(this.searchResults);
-        this.collectComponentsWithCount();
-        this.collectThemes(this.searchResults);
+        // this.resourceTypes = this.collectResourceTypes(this.searchResults);
+        // this.collectResourceTypesWithCount();
+        // this.authors = this.collectAuthors(this.searchResults);
+        // this.suggestedKeywords = this.collectKeywords(this.searchResults);
+        // this.components = this.collectComponents(this.searchResults);
+        // this.collectComponentsWithCount();
+        // this.collectThemes(this.searchResults);
 
-        this.collectThemesWithCount(Collections.DEFAULT);
-        this.collectThemesWithCount(this.collection);
+        // this.collectThemesWithCount(Collections.DEFAULT);
+        // this.collectThemesWithCount(this.collection);
 
-        this.componentsTree = [{
-            label: 'Record has -',
-            "expanded": false,
-            children: this.componentsWithCount
-        }];
+        // this.componentsTree = [{
+        //     label: 'Record has -',
+        //     "expanded": false,
+        //     children: this.componentsWithCount
+        // }];
 
-        this.resourceTypeTree = [{
-            label: 'Resource Type -',
-            "expanded": false,
-            children: this.resourceTypesWithCount
-        }];
+        // this.resourceTypeTree = [{
+        //     label: 'Resource Type -',
+        //     "expanded": false,
+        //     children: this.resourceTypesWithCount
+        // }];
 
         this.nodeExpanded = false;
         this.collectionNodeExpanded = true;
-        this.filterResults()
+        
+        this.clearAllCheckbox = true;
+        setTimeout(() => {
+            this.clearAllCheckbox = false;
+        }, 0)
+        // this.filterResults()
     }
 
     /**

@@ -175,6 +175,7 @@ export class WebCustomizationService extends CustomizationService {
         // To transform the output with proper error handling, we wrap the
         // HttpClient.patch() Observable with our own Observable
         //
+        console.log("Web ===========")
         return new Observable<Object>(subscriber => {
             let url = this.endpoint + this.draftapi + this.resid;
             let body = JSON.stringify(md);
