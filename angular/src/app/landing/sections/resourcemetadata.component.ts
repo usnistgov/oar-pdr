@@ -64,7 +64,7 @@ export class ResourceMetadataComponent implements OnChanges {
     ngAfterViewInit(): void {
         this.sectionWidth = this.aboutHeader.nativeElement.offsetWidth;
         
-        if(this.colorScheme)
+        if(this.inBrowser && this.colorScheme)
             this.d3Service.drawSectionHeaderBackground(this.svg, this.aboutTitle, this.sectionWidth, this.colorScheme.default, 245, "#aboutHeader");    
     }
 

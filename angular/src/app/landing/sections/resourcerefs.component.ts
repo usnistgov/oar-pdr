@@ -48,7 +48,7 @@ export class ResourceRefsComponent implements OnChanges {
         if(this.refHeader) {
             this.sectionWidth = this.refHeader.nativeElement.offsetWidth;
             
-            if(this.colorScheme)
+            if(this.inBrowser && this.colorScheme)
                 this.d3Service.drawSectionHeaderBackground(this.svg, this.refTitle, this.sectionWidth, this.colorScheme.default, 155, "#refHeader");  
         }
   

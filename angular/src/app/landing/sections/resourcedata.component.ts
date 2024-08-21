@@ -75,7 +75,7 @@ export class ResourceDataComponent implements OnChanges {
         //Add 'implements AfterViewInit' to the class.
         this.sectionWidth = this.dataAccessHeader.nativeElement.offsetWidth;
 
-        if(this.colorScheme)
+        if(this.inBrowser && this.colorScheme)
             this.d3Service.drawSectionHeaderBackground(this.svg, this.sectionTitle, this.sectionWidth, this.colorScheme.default, 165, "#dataAccessHeader");    
     }
 

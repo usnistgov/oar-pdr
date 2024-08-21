@@ -48,7 +48,7 @@ export class ResourceDescriptionComponent implements OnChanges {
     ngAfterViewInit(): void {
         this.sectionWidth = this.sectionHeader.nativeElement.offsetWidth;
 
-        if(this.colorScheme)
+        if(this.inBrowser && this.colorScheme)
             this.d3Service.drawSectionHeaderBackground(this.svg, this.desctitle, this.sectionWidth, this.colorScheme.default, 155, "#sectionHeader");    
     }
 
