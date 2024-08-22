@@ -16,7 +16,7 @@
     "Forensics": {
         "tag": "Forensics",
         "bannerUrl": "assets/images/fingerprint.jpg",
-        "taxonomyURI": "https://data.nist.gov/od/dm/forensics-themes/",
+        "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes-forensics/",
         "color": {
             "default": "#008097",
             "light": "#dbf7ff",
