@@ -189,6 +189,20 @@ export class FiltersComponent implements OnInit {
         this.filterResults();
     }
 
+    /**
+     * Replace reserved chars with char name to avoid problems
+     * when parsing filter string in the result list component.
+     * For example, replace "&" with "aaamp". result list component
+     * restore "aaamp" back to "&".
+     * @param strng input string
+     */
+    escapeReservedChars(inputStrng: string) {
+        let outputString: string;
+        if(!inputStrng || inputStrng.trim() == "")
+            return "";
+        else    
+            return inputStrng.replace(new RegExp("&", "g"), "aaamp")
+    }
 
     /**
      * Form the filter string and refresh the result page
@@ -203,61 +217,28 @@ export class FiltersComponent implements OnInit {
         let compType = '';
         let resourceType = '';
 
-        // Resource type
-        // if (this.selectedResourceTypeNode.length > 0) {
-        //     lFilterString += "@type=";
-
-        //     for (let res of this.selectedResourceTypeNode) {
-        //         if (res && typeof res.data !== 'undefined' && res.data !== 'undefined') {
-        //             resourceTypesSelected = true;
-        //             this.selectedResourceType.push(res.data);
-        //             resourceType += res.data[0] + ',';
-
-        //             lFilterString += res.data[0].replace(/\s/g, "") + ",";
-        //         }
-        //     }
-
-        //     lFilterString = this.removeEndingComma(lFilterString);
-        // }    
-        
+        // Resource type        
         if(this.filterStrings["@type"]) {
             if(lFilterString != '') lFilterString += "&";
-            lFilterString += this.filterStrings["@type"];
+            lFilterString += this.escapeReservedChars(this.filterStrings["@type"]);
             lFilterString = this.removeEndingComma(lFilterString);
         }
 
+        // Collections
         for(let col of this.collectionOrder) {
             if(this.filterStrings[col]) {
                 if(lFilterString != '') lFilterString += "&";
-                lFilterString += this.filterStrings[col];
+                lFilterString += this.escapeReservedChars(this.filterStrings[col]);
                 lFilterString = this.removeEndingComma(lFilterString);
             }   
         }
 
         // Record has
-        // if (this.selectedComponentsNode.length > 0) {
-        //     if(lFilterString != '') lFilterString += "&";
-
-        //     lFilterString += "components.@type=";
-
-        //     for (let comp of this.selectedComponentsNode) {
-        //         if (comp != 'undefined' && typeof comp.data !== 'undefined' && comp.data !== 'undefined') {
-        //             componentSelected = true;
-        //             this.selectedComponents.push(comp.data);
-        //             compType += comp.data[0] + ',';
-
-        //             lFilterString += comp.data[0].replace(/\s/g, "") + ",";
-        //         }
-        //     }
-        // }
-
         if(this.filterStrings["components.@type"]) {
             if(lFilterString != '') lFilterString += "&";
-            lFilterString += this.filterStrings["components.@type"];
+            lFilterString += this.escapeReservedChars(this.filterStrings["components.@type"]);
             lFilterString = this.removeEndingComma(lFilterString);
         }
-
-        // lFilterString = this.removeEndingComma(lFilterString);
 
         // Authors and contributors
         if (this.selectedAuthor.length > 0) {
@@ -278,7 +259,7 @@ export class FiltersComponent implements OnInit {
 
             lFilterString += "keyword=";
             for (let keyword of this.selectedKeywords) {
-                lFilterString += this.suggestedKeywordsLkup[keyword] + ",";
+                lFilterString += this.escapeReservedChars(this.suggestedKeywordsLkup[keyword]) + ",";
             }
         }
 

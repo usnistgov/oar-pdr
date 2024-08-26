@@ -61,7 +61,7 @@ export class ResultlistComponent implements OnInit {
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 10;
+    itemsPerPage: number = 20;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: any = {name:'Page 1', value:1};
 
@@ -371,6 +371,17 @@ export class ResultlistComponent implements OnInit {
     }
 
     /**
+     * Restore reserved chars. For example, change "aaamp" back to "&".
+     * @param inputString 
+     */
+    restoreReservedChars(inputString: string) {
+        if(!inputString || inputString.trim() == "")
+            return "";
+        else
+            return inputString.replace(new RegExp("aaamp", "g"), "&"); 
+    }
+
+    /**
      * Apply filters from left side panel and the search word(s) from the search text box
      */
     filterResults() {
@@ -397,7 +408,7 @@ export class ResultlistComponent implements OnInit {
                                 object["@type"].forEach((oType) => {
                                     let types = filter.split("=")[1].split(",");
                                     types.forEach(type => {
-                                        if(oType.toLowerCase().includes(type.toLowerCase()))
+                                        if(oType.toLowerCase().includes(this.restoreReservedChars(type).toLowerCase()))
                                             object.active = true;
                                     });
                                 })
@@ -415,7 +426,7 @@ export class ResultlistComponent implements OnInit {
                                 for(let oTopic of resultItem["topic"]) {
                                     for(let topic of topics) {
                                         let collection = topic.split("----")[0];
-                                        let topicValue = topic.split("----")[1];
+                                        let topicValue = this.restoreReservedChars(topic.split("----")[1]);
 
                                         if(oTopic['scheme'].indexOf(this.taxonomyURI[collection]) >= 0) {
                                             if(collection == Collections.DEFAULT) {
@@ -442,7 +453,7 @@ export class ResultlistComponent implements OnInit {
                                         component["@type"].forEach((cType) => {
                                             let types = filter.split("=")[1].split(",");
                                             types.forEach(type => {
-                                                if(cType.toLowerCase().includes(type.toLowerCase()))
+                                                if(cType.toLowerCase().includes(this.restoreReservedChars(type).toLowerCase()))
                                                     object.active = true;
                                             });
                                         })
@@ -475,7 +486,7 @@ export class ResultlistComponent implements OnInit {
                                 object["keyword"].forEach((keyword) => {
                                     //Loop through each search keyword from keyword filter
                                     filter.split("=")[1].split(",").forEach(kw => {
-                                        if(keyword.toLowerCase().includes(kw)){
+                                        if(keyword.toLowerCase().includes(this.restoreReservedChars(kw))){
                                             object.active = true;
                                         }
                                     })   
@@ -511,6 +522,7 @@ export class ResultlistComponent implements OnInit {
             this.searchResultsForDisplay = JSON.parse(JSON.stringify(this.searchResultsForDisplayOriginal));
 
             this.refreshResult();
+            event.target.value = "";
             return;
         }
 

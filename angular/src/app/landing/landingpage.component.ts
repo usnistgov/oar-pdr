@@ -191,7 +191,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         let metadataError = "";
         this.displaySpecialMessage = false;
         this.CART_ACTIONS = CartActions.cartActions;
-        this.imageURL = 'assets/images/fingerprint.jpg';
+        this.imageURL = '';
 
         // Only listen to storage change if we are not in edit mode
         if(this.inBrowser && !this.editEnabled){
