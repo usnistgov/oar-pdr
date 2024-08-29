@@ -1,1 +1,77 @@
-<p>resultitem works!</p>
+<div class="result-contsiner">
+        <div class="item-title" [style.background-color]="colorScheme.default">
+                <!-- Title button -->
+                <div class="title-btn">
+                        <a class="parent-element" style="color: white;" href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank" rel="noopener">
+                                <i class="faa faa-link vertical-center"></i>
+                                <span style="display: table-cell;">
+                                        {{resultItem.title}}
+                                </span>
+                        </a>
+                </div>
+
+                <!-- Home button -->
+                <div class="title-btn vertical-center" style="width: 130px;">
+                        <a  class="parent-element" 
+                        href="{{homeBtnURL}}" target="_blank" rel="noopener">
+                                <i [class]="titleIconClass"></i>
+                                Home Page
+                        </a>
+                </div>
+        </div>
+        <div class="item-details">
+                <div [@detailExpand]="resultItem.isExpanded ? 'expanded' : 'collapsed'" style="overflow: hidden;">
+                        <div *ngIf="!expanded">
+                                {{contentShort}}
+                                <span class="show-more-less" (click)="toggleDetails()">Show more ...</span>
+                        </div>
+
+                        <div *ngIf="expanded">
+                                <div class="ui-grid-row" style="margin-bottom:.5em">
+                                {{resultItem.description}}
+                                
+                                </div>
+                                <div class="ui-grid-row details">
+                                <div class="ui-grid-col-12"><b>Point of Contact: </b> <i style="color: gray;">
+                                        <a *ngIf="hasEmail(resultItem)" href="{{resultItem.contactPoint.hasEmail}}" target="_top">
+                                                {{resultItem.contactPoint.fn}}</a>
+                                        <span *ngIf="!hasEmail(resultItem)">{{resultItem.contactPoint.fn}}</span>
+                                        </i>
+                                </div>
+                                </div>
+                                <div class="ui-grid-row details">
+                                <div class="ui-grid-col-12"><b>Research Topic: </b>
+                                        <span *ngFor="let topic of resultItem.topic; let i = index">
+                                        <i>
+                                                {{topic.tag}}
+                                                <span *ngIf="i < resultItem.topic.length-1">, </span>
+                                        </i>
+                                        </span>
+                                </div>
+                                </div>
+                                <div class="ui-grid-row details">
+                                <div class="ui-grid-col-12"><b>Subject Keywords: </b>
+                                        <i>{{resultItem.keyword.join(', ')}}</i>
+                                </div>
+                                </div>
+                                <div class="ui-grid-row details">
+                                <span class="ui-grid-col-1"><b>DOI: </b> </span>
+                                <span class="ui-grid-col-11" *ngIf="resultItem.doi != null">
+                                        <i> <a href="{{doiUrl(resultItem)}}" target="_blank">{{resultItem.doi}}</a></i>
+                                </span>
+                                <span class="ui-grid-col-11" style="color:#000;" *ngIf="resultItem.doi == null">None</span>
+                                </div>
+                                <div class="ui-grid-row details">
+                                        <span class="ui-grid-col-1"><b>Last modified: </b> </span>
+                                        <span class="ui-grid-col-11" *ngIf="resultItem.modified != null">
+                                                {{lastModified(resultItem) || ""}}</span>
+
+                                                <span class="show-more-less" style="float: right;" (click)="toggleDetails()">Show less ...</span>
+                                </div>
+
+                                
+                        </div>
+                </div>
+        </div>
+    
+</div>

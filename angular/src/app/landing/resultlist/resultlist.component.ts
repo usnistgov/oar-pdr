@@ -62,7 +62,7 @@ export class ResultlistComponent implements OnInit {
     //Pagination
     totalResultItems: number = 0;
     totalPages: number = 0;
-    itemsPerPage: number = 20;
+    itemsPerPage: number = 10;
     pages = [{name:'Page 1', value:1},{name:'Page 2', value:2}];
     currentPage: any = {name:'Page 1', value:1};
 

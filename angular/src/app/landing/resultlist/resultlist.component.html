@@ -1,4 +1,4 @@
-<div style="width: 100%;height: 53px;margin: 38px 0 20px 0px; padding: 10px 10px 0px 0px;" *ngIf="showResultList">
+<div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 0px 0px;" *ngIf="showResultList">
     <div id="table" style="height: 44px !important; overflow: hidden;" *ngIf="searchResultsForDisplay">
         <div class="tr result-header" [style.background-color]="colorScheme.default">
             <!-- Number of search result -->
@@ -46,8 +46,13 @@
     <!-- Search result -->
      <div *ngIf="showResult">
         <div *ngFor="let resultItem of searchResultsForDisplay; let i = index"
-            style="width: 100%; padding: 0px 0px 0px 20px;">
-            <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"
+            style="width: 100%; padding: 0px 0px 0px 0px;">
+
+            <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"  style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: .5em; padding-bottom: .2em;">
+                <app-resultitem [resultItem]="resultItem" [PDRAPIURL]="PDRAPIURL" [colorScheme]="colorScheme"></app-resultitem>
+            </div>
+
+            <!-- <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"
                 style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: .5em; padding-bottom: .2em;">
                 <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.3em;"
                     href="{{resultItem.landingPage}}" target="_blank" rel="noopener">
@@ -119,7 +124,7 @@
                             {{lastModified(resultItem) || ""}}</span>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 
