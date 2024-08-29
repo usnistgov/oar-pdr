@@ -1,60 +1,67 @@
-<div>
-    <h3><strong>Research Areas:</strong></h3>
-</div>
-<div style="margin-bottom: .5em; margin-left: 0px;">
-    <div style="display: inline-block; width: fit-content; max-width: 95%;">
-        <span style="display: table;">
-            <div class="editable_container">
+<div style="border: 1px solid rgb(210, 210, 210);border-radius: 10px;padding: 10px;margin-bottom: 0.5em;">
+    <div style="margin-top: -1.3em; margin-bottom: 0px; background-color: white;width: fit-content;padding-left: 10px;padding-right: 10px;font-size:larger;">
+        <strong>Research Areas</strong>
+    </div>
 
-                    <div *ngFor="let col of collectionOrder; let i =index" style="margin-bottom: .3em;">
-                        <div class="editable_field">
-                            <span *ngIf="topics[col] && topics[col].length > 0; else noTopic" style="font-weight: 500;white-space: nowrap;" >
-                                <strong>{{ allCollections[col].tag }}: </strong>
-                            </span>
-                            <ng-template #noTopic>
-                                <span *ngIf="mdupdsvc.isEditMode" style="padding-right: 10px !important; white-space: nowrap;">
-                                    <strong>Add {{ allCollections[col].tag }}: </strong>
+    <!-- <div style="text-decoration-line: underline;margin-top: -1.5em;">
+        <strong>Research Areas:</strong>
+    </div> -->
+
+    <div style="margin-bottom: 0em; margin-left: 10px;margin-bottom: -15px;">
+        <div style="display: inline-block; width: fit-content; max-width: 95%;">
+            <span style="display: table;">
+                <div class="editable_container" style="border: 1px solid grey;">
+
+                        <div *ngFor="let col of collectionOrder; let i =index" style="margin-bottom: .3em;">
+                            <div class="editable_field">
+                                <span *ngIf="topics[col] && topics[col].length > 0; else noTopic" style="font-weight: 500;white-space: nowrap;" >
+                                    <strong>{{ allCollections[col].tag }}: </strong>
                                 </span>
-                            </ng-template>
-                            <span *ngIf="topics[col] && topics[col].length > 0" style="padding-left: 20px">
-    
-                                <!-- <p-chips [(ngModel)]="topics[col]" [inputStyle]="{ display: 'none' }"></p-chips> -->
-    
-                                <span style="max-width: 90%; ">
-                                    <span class="topics" [style.background-color]="bubbleColor(topic)"  style="border: 1px solid rgb(236, 236, 236);padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 25px;white-space: nowrap;cursor: pointer;" (click)="topicClick(topic, col)" *ngFor="let topic of topicDisplay[col]; let i =index">
-                                        <span style="display: inline-block">{{ topic.tag }}</span>
-                                    </span> 
+                                <ng-template #noTopic>
+                                    <span *ngIf="mdupdsvc.isEditMode" style="padding-right: 10px !important; white-space: nowrap;">
+                                        <strong>Add {{ allCollections[col].tag }}: </strong>
+                                    </span>
+                                </ng-template>
+                                <span *ngIf="topics[col] && topics[col].length > 0" style="padding-left: 20px;">
+        
+                                    <!-- <p-chips [(ngModel)]="topics[col]" [inputStyle]="{ display: 'none' }"></p-chips> -->
+        
+                                    <span style="max-width: 90%; ">
+                                        <span class="topics" [style.background-color]="bubbleColor(topic)" [style.border]="borderStyle(topic)" (mouseenter)="mouseEnter(topic)" (mouseover)="mouseEnter(topic)" (mouseout)="mouseOut(topic)" [style.cursor]="setCursor(topic)" style="padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 25px;white-space: nowrap;" (click)="topicClick(topic, col)" *ngFor="let topic of topicDisplay[col]; let i =index">
+                                            <span style="display: inline-block">{{ topic.tag }}</span>
+                                        </span> 
+                                    </span>
                                 </span>
+                            </div>
+
+
+                            <span class="editable_field">
+                                <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal(col)"
+                                    aria-label="edit button">
+                                    <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit topic"></i>
+                                </button>
+                                <button class="undo_button" *ngIf="mdupdsvc.isEditMode" type="button" [disabled]="!updated(col)"
+                                    (click)="undoEditing(col)" aria-label="undo button">
+                                    <i class="faa faa-undo" [ngClass]="{'icon_enabled': updated(col), 'icon_disabled':!updated(col) }"
+                                        data-toggle="tooltip" title="Undo topic"></i>
+                                </button>
                             </span>
                         </div>
 
-
-                        <span class="editable_field">
-                            <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal(col)"
-                                aria-label="edit button">
-                                <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit topic"></i>
-                            </button>
-                            <button class="undo_button" *ngIf="mdupdsvc.isEditMode" type="button" [disabled]="!updated(col)"
-                                (click)="undoEditing(col)" aria-label="undo button">
-                                <i class="faa faa-undo" [ngClass]="{'icon_enabled': updated(col), 'icon_disabled':!updated(col) }"
-                                    data-toggle="tooltip" title="Undo topic"></i>
-                            </button>
-                        </span>
-                    </div>
-
-            </div>
-
-            <!-- <div *ngFor="let col of collectionOrder; let i =index">
-                <div *ngIf="topics[col] && topics[col].length > 0">
-                    <strong>{{ allCollections[col].tag }}: </strong>
-                    <span class="topics" style="border: 1px solid rgb(236, 236, 236);background-color: #e3f9fc;padding: 2px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;" *ngFor="let topic of topics[col]; let i =index">
-                        {{ topic }}
-                    </span> 
                 </div>
-            </div> -->
-        </span>
+
+                <!-- <div *ngFor="let col of collectionOrder; let i =index">
+                    <div *ngIf="topics[col] && topics[col].length > 0">
+                        <strong>{{ allCollections[col].tag }}: </strong>
+                        <span class="topics" style="border: 1px solid rgb(236, 236, 236);background-color: #e3f9fc;padding: 2px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;" *ngFor="let topic of topics[col]; let i =index">
+                            {{ topic }}
+                        </span> 
+                    </div>
+                </div> -->
+            </span>
+        </div>
+        <div *ngIf="mdupdsvc.isEditMode"
+            style="color: rgb(173, 0, 0); display: inline-block;width: fit-content; max-width:5%;vertical-align: top;text-align: left; padding-left: .5em;">
+            *</div>
     </div>
-    <div *ngIf="mdupdsvc.isEditMode"
-        style="color: rgb(173, 0, 0); display: inline-block;width: fit-content; max-width:5%;vertical-align: top;text-align: left; padding-left: .5em;">
-        *</div>
 </div>

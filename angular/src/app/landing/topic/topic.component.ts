@@ -7,7 +7,7 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
 import { deepCopy } from '../../utils';
 import { CollectionService } from '../../shared/collection-service/collection.service';
-import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode, ColorScheme } from '../../shared/globals/globals';
 
 @Component({
     selector: 'app-topic',
@@ -25,12 +25,14 @@ export class TopicComponent implements OnInit {
     topics: any = {};
     originalTopics: any = {};   // For undo purpose
     fieldName = 'topic';
+    hovered: boolean = false;
 
     //For display
     topicBreakPoint: number = 5;
     topicDisplay: any = {};
     topicShort: any = {};
     topicLong: any = {};
+    colorScheme: ColorScheme;
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean;   // false if running server-side
@@ -74,6 +76,7 @@ export class TopicComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
         this.updateResearchTopics();
         this.originalTopics = JSON.parse(JSON.stringify(this.topics));
     }
@@ -141,9 +144,51 @@ export class TopicComponent implements OnInit {
      */
     bubbleColor(topic) {
         if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
-            return "#ffffe6";
+            return "#e6ecff";
         }else{
-            return "#ccffff";
+            return "#ededed";
+        }
+    }
+
+    /**
+     * Set cursor type for "More..." and "Less..." button
+     * @param topic 
+     * @returns 
+     */
+    setCursor(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            return "pointer";
+        }else{
+            return "";
+        }
+    }
+
+    /**
+     * Set border for "More..." and "Less..." button when mouse over
+     * @param keyword 
+     * @returns 
+     */    
+    borderStyle(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            if(this.hovered){
+                return "1px solid blue";
+            }else{
+                return "1px solid #ededed";
+            }
+        }else{
+            return "1px solid #ededed";
+        }
+    }
+
+    mouseEnter(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            this.hovered = true;
+        }
+    }
+
+    mouseOut(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            this.hovered = false;
         }
     }
 
@@ -159,6 +204,8 @@ export class TopicComponent implements OnInit {
         if(topic.tag == "Show less...") {
             this.topicDisplay[collection] = JSON.parse(JSON.stringify(this.topicShort[collection]));
         }
+
+        this.hovered = false;
     }
 
     /**

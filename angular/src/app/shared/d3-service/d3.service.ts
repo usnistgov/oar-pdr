@@ -15,8 +15,6 @@ export class D3Service {
 
         // var width = 170;
         var height = 25;
-        console.log("width", width)
-        console.log("height", height)
         var data = [{x: 0, y: 0}, {x: width-30, y: 0}, {x: width, y: height}, {x: 0, y: height}]
 
         var curveFunc = d3.area()

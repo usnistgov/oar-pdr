@@ -17,6 +17,7 @@ export class KeywordComponent implements OnInit {
     keywordLong: string[] = [];
     keywordBreakPoint: number = 5;
     keywordDisplay: string[] = [];
+    hovered: boolean = false;
 
     constructor(public mdupdsvc : MetadataUpdateService,        
                 private ngbModal: NgbModal,     
@@ -81,9 +82,51 @@ export class KeywordComponent implements OnInit {
      */
     bubbleColor(keyword) {
         if(keyword == "Show more..." || keyword == "Show less..." ) {
-            return "#ffffe6";
+            return "#e6ecff";
         }else{
-            return "#cceeff";
+            return "#ededed";
+        }
+    }
+
+    /**
+     * Set cursor type for "More..." and "Less..." button
+     * @param keyword
+     * @returns 
+     */
+    setCursor(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            return "pointer";
+        }else{
+            return "";
+        }
+    }
+
+    /**
+     * Set border for "More..." and "Less..." button when mouse over
+     * @param keyword 
+     * @returns 
+     */
+    borderStyle(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            if(this.hovered){
+                return "1px solid blue";
+            }else{
+                return "1px solid #ededed";
+            }
+        }else{
+            return "1px solid #ededed";
+        }
+    }
+
+    mouseEnter(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            this.hovered = true;
+        }
+    }
+
+    mouseOut(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            this.hovered = false;
         }
     }
 
@@ -99,6 +142,8 @@ export class KeywordComponent implements OnInit {
         if(keyword == "Show less...") {
             this.keywordDisplay = this.keywordShort;
         }
+
+        this.hovered = false;
     }
 
     /**

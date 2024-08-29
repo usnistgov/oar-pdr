@@ -150,7 +150,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
           return of(new HttpResponse({ status: 200, body }));
       }
 
-      if (request.url.indexOf('test3') > -1 && request.method === 'GET') {
+      if (request.url.indexOf('od/id/test3') > -1 && request.method === 'GET') {
         console.log("Getting collectionTestData.....")
         return of(new HttpResponse({ status: 200, body: sampleCollection2 }));
     }

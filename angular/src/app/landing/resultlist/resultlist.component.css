@@ -19,14 +19,17 @@
 .visit-home-page {
     font-size: 13px;
     width: 120px;
-    background-color: var(--nist-green-default);
+    /* background-color: var(--nist-green-default); */
+    background-color: white;
     height: 30px !important;
-    color: white;
-    float: right;
+    color: rgb(44, 44, 175);
+    /* float: right; */
 }
 
 .visit-home-page:hover {
-    background-color: var(--nist-green-light);
+    background-color: var(--background-hover);
+    color: rgb(44, 44, 175);
+    /* background-color: rgb(202, 202, 202); */
 }
 
 .search-button {
@@ -109,4 +112,16 @@ option[value=""][disabled] {
   
 option {
     color: black;
+}
+
+.panel-footer {
+    display:flex;
+}
+
+.header-footer-item {
+    text-align: right;
+}
+
+.header-footer-item {
+    align-self: center;
 }

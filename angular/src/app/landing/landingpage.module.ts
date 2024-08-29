@@ -23,7 +23,8 @@ import { ErrorComponent, UserErrorComponent } from './error.component';
 // import { ForensicslandingbodyModule } from './forensicslandingbody/forensicslandingbody.module';
 // import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
 import { SearchresultModule } from './searchresult/searchresult.module';
-import { CollectionService } from '../shared/collection-service/collection.service'
+import { CollectionService } from '../shared/collection-service/collection.service';
+import { ResultitemComponent } from './resultitem/resultitem.component'
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -43,7 +44,7 @@ import { CollectionService } from '../shared/collection-service/collection.servi
     ],
     declarations: [
         LandingPageComponent, LandingBodyComponent, DoneComponent, DownloadstatusComponent,
-        ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent
+        ErrorComponent, UserErrorComponent, NoidComponent, NerdmComponent, ResultitemComponent
     ],
     providers: [
         MetadataUpdateService, TaxonomyListService, DatePipe, CollectionService

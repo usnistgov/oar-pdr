@@ -52,7 +52,7 @@
                 <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.3em;"
                     href="{{resultItem.landingPage}}" target="_blank" rel="noopener">
                     <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page" 
-                    [style.--background-default]="colorScheme.default"
+                    [style.--background-default]="homeBtnBackColor"
                     [style.--background-lighter]="colorScheme.lighter"
                     [style.--background-hover]="colorScheme.light"
                         icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
@@ -62,7 +62,7 @@
                     href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
                     (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
                     <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page" 
-                    [style.--background-default]="colorScheme.default"
+                    [style.--background-default]="homeBtnBackColor"
                     [style.--background-lighter]="colorScheme.lighter"
                     [style.--background-hover]="colorScheme.light"
                         icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>

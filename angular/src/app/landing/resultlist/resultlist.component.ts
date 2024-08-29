@@ -51,6 +51,7 @@ export class ResultlistComponent implements OnInit {
     searchFields: string[] = ["title", "description", "keyword"];
     PDRAPIURL: string = "https://data.nist.gov/lps/";
     isEmail: boolean = false;
+    homeBtnBackColor: string = "white";
 
     //Result display
     showResult: boolean = true;

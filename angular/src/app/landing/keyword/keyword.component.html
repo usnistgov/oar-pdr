@@ -10,7 +10,7 @@
             
             <span class="editable_field ind" style="max-width: 90%;">
                 <span style="white-space: nowrap;"><strong>Keywords: </strong></span>
-                <span class="keywords" [style.background-color]="bubbleColor(keyword)" style="border: 1px solid rgb(236, 236, 236);padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;line-height: 25px;white-space: nowrap;margin-right: 5px;cursor: pointer;" (click)="keywordClick(keyword)" *ngFor="let keyword of keywordDisplay; let i =index">
+                <span class="keywords" [style.background-color]="bubbleColor(keyword)" [style.border]="borderStyle(keyword)" (mouseenter)="mouseEnter(keyword)" (mouseover)="mouseEnter(keyword)" (mouseout)="mouseOut(keyword)" [style.cursor]="setCursor(keyword)" style="padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;line-height: 25px;white-space: nowrap;margin-right: 5px;" (click)="keywordClick(keyword)" *ngFor="let keyword of keywordDisplay; let i =index">
                     <span style="display: inline-block">{{ keyword }}</span>
                 </span> 
             </span>
