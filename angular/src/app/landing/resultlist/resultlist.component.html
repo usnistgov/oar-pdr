@@ -48,83 +48,9 @@
         <div *ngFor="let resultItem of searchResultsForDisplay; let i = index"
             style="width: 100%; padding: 0px 0px 0px 0px;">
 
-            <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"  style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: .5em; padding-bottom: .2em;">
+            <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"  style="margin-bottom: .2em; padding-bottom: .2em;">
                 <app-resultitem [resultItem]="resultItem" [PDRAPIURL]="PDRAPIURL" [colorScheme]="colorScheme"></app-resultitem>
             </div>
-
-            <!-- <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"
-                style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: .5em; padding-bottom: .2em;">
-                <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.3em;"
-                    href="{{resultItem.landingPage}}" target="_blank" rel="noopener">
-                    <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page" 
-                    [style.--background-default]="homeBtnBackColor"
-                    [style.--background-lighter]="colorScheme.lighter"
-                    [style.--background-hover]="colorScheme.light"
-                        icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
-                </a>
-
-                <a *ngIf="!resultItem.landingPage" style="float: right; margin-top: -0.5em;"
-                    href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
-                    (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
-                    <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page" 
-                    [style.--background-default]="homeBtnBackColor"
-                    [style.--background-lighter]="colorScheme.lighter"
-                    [style.--background-hover]="colorScheme.light"
-                        icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
-                </a>
-
-                <div style="width: 80% !important;">
-                    <a href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank" class="title">
-                        {{resultItem.title}}
-                    </a>
-                    <span style="margin-left: 5px;">
-                        <i [ngClass]="resultItem.expandIcon" style="cursor: pointer;color: #1471AE;" data-toggle="tooltip"
-                            [title]="expandButtonAlterText(resultItem)" [aria-label]="expandButtonAlterText(resultItem)"
-                            (click)="toggleDetails(resultItem, i)"></i>
-                    </span>
-                </div>
-
-                <div [@detailExpand]="resultItem.isExpanded ? 'expanded' : 'collapsed'" style="overflow: hidden;">
-                    <div class="ui-grid-row" style="margin-bottom:.5em">
-                        {{resultItem.description}}
-                    </div>
-                    <div class="ui-grid-row details">
-                        <div class="ui-grid-col-12"><b>Point of Contact: </b> <i style="color: gray;">
-                                <a *ngIf="hasEmail(resultItem)" href="{{resultItem.contactPoint.hasEmail}}" target="_top">
-                                    {{resultItem.contactPoint.fn}}</a>
-                                <span *ngIf="!hasEmail(resultItem)">{{resultItem.contactPoint.fn}}</span>
-                            </i>
-                        </div>
-                    </div>
-                    <div class="ui-grid-row details">
-                        <div class="ui-grid-col-12"><b>Research Topic: </b>
-                            <span *ngFor="let topic of resultItem.topic; let i = index">
-                                <i>
-                                    {{topic.tag}}
-                                    <span *ngIf="i < resultItem.topic.length-1">, </span>
-                                </i>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="ui-grid-row details">
-                        <div class="ui-grid-col-12"><b>Subject Keywords: </b>
-                            <i>{{resultItem.keyword.join(', ')}}</i>
-                        </div>
-                    </div>
-                    <div class="ui-grid-row details">
-                        <span class="ui-grid-col-1"><b>DOI: </b> </span>
-                        <span class="ui-grid-col-11" *ngIf="resultItem.doi != null">
-                            <i> <a href="{{doiUrl(resultItem)}}" target="_blank">{{resultItem.doi}}</a></i>
-                        </span>
-                        <span class="ui-grid-col-11" style="color:#000;" *ngIf="resultItem.doi == null">None</span>
-                    </div>
-                    <div class="ui-grid-row details">
-                        <span class="ui-grid-col-1"><b>Last modified: </b> </span>
-                        <span class="ui-grid-col-11" *ngIf="resultItem.modified != null">
-                            {{lastModified(resultItem) || ""}}</span>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
 

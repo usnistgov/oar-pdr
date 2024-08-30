@@ -29,7 +29,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
   ] 
 })
 export class ResultitemComponent implements OnInit {
-    titleIconClass: string;
+    homeIconClass: string;
     homeBtnURL: string;
     contentShort: string = "";
     expanded: boolean = false;
@@ -41,19 +41,17 @@ export class ResultitemComponent implements OnInit {
     constructor() { }
 
     ngOnInit(): void {
-
-
       if(this.resultItem.landingPage) {
         this.homeBtnURL = this.resultItem.landingPage;
 
         if(this.resultItem.landingPage.indexOf(this.resultItem.ediid.split("/").at(-1)) >= 0) {
-          this.titleIconClass = "faa faa-link vertical-center";
+          this.homeIconClass = "pi pi-arrow-up-right btn-icon";
         } else {
-          this.titleIconClass = "faa faa-external-link vertical-center";
+          this.homeIconClass = "faa faa-external-link vertical-center";
         }
       }else{
         this.homeBtnURL = this.PDRAPIURL + this.resultItem.ediid;
-        this.titleIconClass = "faa faa-external-link vertical-center";
+        this.homeIconClass = "faa faa-external-link vertical-center";
       }
 
       if(this.resultItem.description)
