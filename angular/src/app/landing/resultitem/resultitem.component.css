@@ -4,9 +4,8 @@
 
 .item-title {
         display: table; /* table display*/
-        border-spacing:15px;
+        border-spacing:10px;
         width: 100%; 
-        background-color: #12659c;
         color: #fff !important;
         border-radius: 10px 10px 0 0;
 }
