@@ -41,6 +41,7 @@ import { CollectionService } from '../../shared/collection-service/collection.se
 export class ResultlistComponent implements OnInit {
     searchResults: any[];
     searchResultsForDisplay: any[];
+    searchResultsForDisplayOriginal: any[];
     searchResultsOriginal: any[];
     currentIndex: number = 0;
     resultCount: number = 0;
@@ -50,9 +51,11 @@ export class ResultlistComponent implements OnInit {
     searchFields: string[] = ["title", "description", "keyword"];
     PDRAPIURL: string = "https://data.nist.gov/lps/";
     isEmail: boolean = false;
+    homeBtnBackColor: string = "white";
 
     //Result display
     showResult: boolean = true;
+    showResultList: boolean = false;
     noSearchResult: boolean = false;
     // expandButtonAlterText: string = "Open dataset details";
 
@@ -66,6 +69,7 @@ export class ResultlistComponent implements OnInit {
     allCollections: any = {};
 
     //  Color
+    colorScheme: ColorScheme;
     defaultColor: string;
     lightColor: string;  
     lighterColor: string;  
@@ -85,6 +89,7 @@ export class ResultlistComponent implements OnInit {
         public gaService: GoogleAnalyticsService) { }
 
     ngOnInit(): void {
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
         this.PDRAPIURL = this.cfg.get('locations.landingPageService',
                                    'https://data.nist.gov/od/id/');
 
@@ -103,19 +108,10 @@ export class ResultlistComponent implements OnInit {
         }
 
         this.allCollections = this.collectionService.loadAllCollections();
-
-        // Set colors
-        this.setColor();
     }
 
     onPageChange(value: any){
-        console.log("this.currentPage", value.target.value);
-    }
-
-    setColor() {
-        this.defaultColor = this.allCollections[this.collection].color.default;
-        this.lighterColor = this.allCollections[this.collection].color.lighter;
-        this.lightColor = this.allCollections[this.collection].color.light;
+        // console.log("this.currentPage", value.target.value);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -130,6 +126,12 @@ export class ResultlistComponent implements OnInit {
         else {
             return this.resultWidth.substring(0, this.resultWidth.length-2)
         }
+    }
+
+    onSelected(event) {
+        console.log("event", event.target.value);
+        this.currentPage = this.pages.filter(p => p.name == event.target.value)[0];
+        console.log("this.currentPage", this.currentPage);
     }
 
     /**
@@ -158,6 +160,8 @@ export class ResultlistComponent implements OnInit {
 
         this.filterResults();
         this.sortByDate();
+
+        this.showResultList = true;
     }
 
     /**
@@ -179,7 +183,7 @@ export class ResultlistComponent implements OnInit {
 
         this.pages = [];
         for(let i=1; i <= this.totalPages; i++) {
-            this.pages.push({name:'Page '+i+'/'+this.totalPages, value:i})
+            this.pages.push({name:'Page '+i+' of '+this.totalPages, value:i})
         }
     }
 
@@ -357,14 +361,25 @@ export class ResultlistComponent implements OnInit {
     /**
      * Reset active flags of all search result items to true (default)
      */
-    resetResult() {
+    resetResult(active: boolean = false) {
         if(this.searchResults) {
             this.searchResults.forEach((object) => {
                 object.expandIcon = "faa faa-caret-right";
                 object.isExpanded = false;
-                object.active = true;
+                object.active = active;
             })
         }
+    }
+
+    /**
+     * Restore reserved chars. For example, change "aaamp" back to "&".
+     * @param inputString 
+     */
+    restoreReservedChars(inputString: string) {
+        if(!inputString || inputString.trim() == "")
+            return "";
+        else
+            return inputString.replace(new RegExp("aaamp", "g"), "&"); 
     }
 
     /**
@@ -376,7 +391,7 @@ export class ResultlistComponent implements OnInit {
         let filters: string[];
         
         // Reset the search result
-        this.resetResult();
+        this.resetResult(this.filterString=="NoFilter");
 
         // Handle search text box first
         this.filterResultByPhase(this.searchPhases);
@@ -388,13 +403,13 @@ export class ResultlistComponent implements OnInit {
                 switch(filter.split("=")[0]){
                     case "@type":
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
+                            if(!object.active){
+                                // object.active = false;
 
                                 object["@type"].forEach((oType) => {
                                     let types = filter.split("=")[1].split(",");
                                     types.forEach(type => {
-                                        if(oType.toLowerCase().includes(type.toLowerCase()))
+                                        if(oType.toLowerCase().includes(this.restoreReservedChars(type).toLowerCase()))
                                             object.active = true;
                                     });
                                 })
@@ -406,13 +421,13 @@ export class ResultlistComponent implements OnInit {
                         let topics = filter.split("=")[1].split(",");
                         for(let resultItem of this.searchResults) {
                             
-                            if(resultItem.active == true){
-                                resultItem.active = false;
+                            if(!resultItem.active){
+                                // resultItem.active = false;
 
                                 for(let oTopic of resultItem["topic"]) {
                                     for(let topic of topics) {
                                         let collection = topic.split("----")[0];
-                                        let topicValue = topic.split("----")[1];
+                                        let topicValue = this.restoreReservedChars(topic.split("----")[1]);
 
                                         if(oTopic['scheme'].indexOf(this.taxonomyURI[collection]) >= 0) {
                                             if(collection == Collections.DEFAULT) {
@@ -432,14 +447,14 @@ export class ResultlistComponent implements OnInit {
                     case "components.@type":
                         this.searchResults.forEach((object) => {
                             if(object["components"] != undefined) {
-                                if(object.active == true){
-                                    object.active = false;
+                                if(!object.active){
+                                    // object.active = false;
     
                                     object["components"].forEach((component) => {
                                         component["@type"].forEach((cType) => {
                                             let types = filter.split("=")[1].split(",");
                                             types.forEach(type => {
-                                                if(cType.toLowerCase().includes(type.toLowerCase()))
+                                                if(cType.toLowerCase().includes(this.restoreReservedChars(type).toLowerCase()))
                                                     object.active = true;
                                             });
                                         })
@@ -453,8 +468,8 @@ export class ResultlistComponent implements OnInit {
                         break;
                     case "contactPoint.fn":
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
+                            if(!object.active){
+                                // object.active = false;
                             
                                 if(object["contactPoint"]["fn"].includes(filter.split("=")[1]))
                                     object.active = true;
@@ -466,13 +481,13 @@ export class ResultlistComponent implements OnInit {
                         // Loop through each keyword in each search result. Display those that match
                         // the keywords from keyword filter
                         this.searchResults.forEach((object) => {
-                            if(object.active == true){
-                                object.active = false;
+                            if(!object.active){
+                                // object.active = false;
                             
                                 object["keyword"].forEach((keyword) => {
                                     //Loop through each search keyword from keyword filter
                                     filter.split("=")[1].split(",").forEach(kw => {
-                                        if(keyword.toLowerCase().includes(kw)){
+                                        if(keyword.toLowerCase().includes(this.restoreReservedChars(kw))){
                                             object.active = true;
                                         }
                                     })   
@@ -492,7 +507,10 @@ export class ResultlistComponent implements OnInit {
             if(object.active) this.searchResultsForDisplay.push(object);
         })
 
+        this.searchResultsForDisplayOriginal = JSON.parse(JSON.stringify(this.searchResultsForDisplay));
+
         this.getTotalResultItems();
+        this.currentPage = this.pages[0];
     }
 
     /**
@@ -500,8 +518,16 @@ export class ResultlistComponent implements OnInit {
      * @param event sort item
      */
     onSortByChange(event: any) {
-        console.log("event", event.value);
-        let key = event.value.value;
+        // console.log("event", event.value);
+        if(event.target.value == "none") {
+            this.searchResultsForDisplay = JSON.parse(JSON.stringify(this.searchResultsForDisplayOriginal));
+
+            this.refreshResult();
+            event.target.value = "";
+            return;
+        }
+
+        let key = this.options.filter(o => o.name == event.target.value)[0].value;
 
         if(key == "modified"){
             this.sortByDate();

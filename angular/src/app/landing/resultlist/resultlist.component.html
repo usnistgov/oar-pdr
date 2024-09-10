@@ -1,9 +1,9 @@
-<div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 20px 0px; " *ngIf="showResult">
-    <div id="table" style="height: 25px !important;" *ngIf="searchResultsForDisplay">
-        <div class="tr result-header" [style.background-color]="defaultColor">
+<div style="width: 100%;margin: 38px 0 20px 0px; padding: 10px 10px 0px 0px;" *ngIf="showResultList">
+    <div id="table" style="height: 44px !important; overflow: hidden;" *ngIf="searchResultsForDisplay">
+        <div class="tr result-header" [style.background-color]="colorScheme.default">
             <!-- Number of search result -->
-            <div class="td" style="width: 20%;margin-bottom: 0px;">
-                <span style="padding-left: 20px;font-weight: bold;position:relative;top: -3px;">
+            <div class="td" style="width: 20%;">
+                <span class="text-wrapper" style="padding-left: 20px;font-weight: bold;margin-top: -20px;">
                     {{totalResultItems}}
                     <span *ngIf="resultWidthNum > 830">datasets </span>
                     <span *ngIf="resultWidthNum > 500">found</span>
@@ -11,107 +11,45 @@
             </div>
 
             <!-- Pagination -->
-            <div class="td" style="padding-right: 5px;width: 30px;">
-                <p-dropdown [options]="pages" [(ngModel)]="currentPage" optionLabel="name" styleClass="dropdown1"
-                    autoHeight="auto"
-                    [style]="{'text-align': 'left', 'height':'35px','vertical-align' : 'top','width': resultWidthNum > 500?'120px':'60px','margin-top':'-9px','margin-bottom':'0px'}">
-                </p-dropdown>
+            <div class="td" style="width: 40px;height: 20px;">
+                <div class="wrapper">
+                    <select (change)="onSelected($event)" style="width: 140px; height:30px; padding: 0 10px 0 5px;">
+                        <option *ngFor="let page of pages">{{page.name}}</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Sorting -->
-            <div class="td" style="padding-right: 5px;width: 30px;">
-                <p-dropdown [options]="options" [(ngModel)]="optionSelected" optionLabel="name"
-                    (onChange)="onSortByChange($event)" placeholder="Sorted by"
-                    [style]="{'text-align': 'left', 'height':'35px','vertical-align':'top','width': resultWidthNum > 500?'140px':'60px','margin-top':'-9px','margin-bottom':'0px'}"></p-dropdown>
+            <div class="td" style="width: 30px;">
+                <div class="wrapper">
+                    <select required (change)="onSortByChange($event)" style="width: 140px; height:30px; padding-left: 5px;padding-right: 10px;">
+                        <option value="" disabled selected>Sorted by...</option>
+                        <option value="none">None</option>
+                        <option *ngFor="let option of options">{{option.name}}</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Search text -->
             <div class="td" style="width: auto;padding-right: 5px;">
-                <span class="p-input-icon-right" style="width: 100%;position:relative;top: -3px;">
+                <span class="p-input-icon-right search-wrapper" style="width: 100%;">
                     <i class="pi pi-search" style="top: 25px;"></i>
                     <label for="freeTextSearch" class="sr-only">Free Text Search</label>
                     <input id="freeTextSearch" type="text" pInputText [(ngModel)]="searchPhases"
                         placeholder="Search for" (input)="filterResults()"
-                        [style]="{'text-align': 'left', 'height':'35px','width': '100%','padding-bottom':'0px','padding-top':'0px','margin-bottom':'0px','border-radius':'3px'}">
+                        [style]="{'text-align': 'left', 'height':'30px','width': '100%','padding-bottom':'0px','padding-top':'0px','margin-bottom':'0px','border-radius':'3px'}">
                 </span>
             </div>
         </div>
     </div>
 
     <!-- Search result -->
-    <div *ngFor="let resultItem of searchResultsForDisplay; let i = index"
-        style="width: 100%; padding: 0px 0px 0px 20px;">
-        <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"
-            style="border-bottom: 1px solid rgb(202, 202, 202);margin-bottom: 1em; ">
-            <a *ngIf="resultItem.landingPage" style="float: right; margin-top: -0.5em;"
-                href="{{resultItem.landingPage}}" target="_blank" rel="noopener">
-                <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page" 
-                [style.--background-default]="defaultColor"
-                [style.--background-lighter]="lighterColor"
-                [style.--background-hover]="lightColor"
-                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
-            </a>
+     <div *ngIf="showResult">
+        <div *ngFor="let resultItem of searchResultsForDisplay; let i = index"
+            style="width: 100%; padding: 0px 0px 0px 0px;">
 
-            <a *ngIf="!resultItem.landingPage" style="float: right; margin-top: -0.5em;"
-                href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank"
-                (click)="gaService.gaTrackEvent('outbound', $event, 'Visit to homepage',resultItem.landingPage)">
-                <button pButton label="Home Page" type="button" class="p-button-sm visit-home-page" 
-                [style.--background-default]="defaultColor"
-                [style.--background-lighter]="lighterColor"
-                [style.--background-hover]="lightColor"
-                    icon="faa faa-external-link" iconPos="left" style="padding: 3px 10px;"></button>
-            </a>
-
-            <div style="width: 80% !important;">
-                <a href="{{PDRAPIURL}}{{resultItem.ediid}}" target="_blank" class="title">
-                    {{resultItem.title}}
-                </a>
-                <span style="margin-left: 5px;">
-                    <i [ngClass]="resultItem.expandIcon" style="cursor: pointer;color: #1471AE;" data-toggle="tooltip"
-                        [title]="expandButtonAlterText(resultItem)" [aria-label]="expandButtonAlterText(resultItem)"
-                        (click)="toggleDetails(resultItem, i)"></i>
-                </span>
-            </div>
-
-            <div [@detailExpand]="resultItem.isExpanded ? 'expanded' : 'collapsed'" style="overflow: hidden;">
-                <div class="ui-grid-row" style="margin-bottom:.5em">
-                    {{resultItem.description}}
-                </div>
-                <div class="ui-grid-row details">
-                    <div class="ui-grid-col-12"><b>Point of Contact: </b> <i style="color: gray;">
-                            <a *ngIf="hasEmail(resultItem)" href="{{resultItem.contactPoint.hasEmail}}" target="_top">
-                                {{resultItem.contactPoint.fn}}</a>
-                            <span *ngIf="!hasEmail(resultItem)">{{resultItem.contactPoint.fn}}</span>
-                        </i>
-                    </div>
-                </div>
-                <div class="ui-grid-row details">
-                    <div class="ui-grid-col-12"><b>Research Topic: </b>
-                        <span *ngFor="let topic of resultItem.topic; let i = index">
-                            <i>
-                                {{topic.tag}}
-                                <span *ngIf="i < resultItem.topic.length-1">, </span>
-                            </i>
-                        </span>
-                    </div>
-                </div>
-                <div class="ui-grid-row details">
-                    <div class="ui-grid-col-12"><b>Subject Keywords: </b>
-                        <i>{{resultItem.keyword.join(', ')}}</i>
-                    </div>
-                </div>
-                <div class="ui-grid-row details">
-                    <span class="ui-grid-col-1"><b>DOI: </b> </span>
-                    <span class="ui-grid-col-11" *ngIf="resultItem.doi != null">
-                        <i> <a href="{{doiUrl(resultItem)}}" target="_blank">{{resultItem.doi}}</a></i>
-                    </span>
-                    <span class="ui-grid-col-11" style="color:#000;" *ngIf="resultItem.doi == null">None</span>
-                </div>
-                <div class="ui-grid-row details">
-                    <span class="ui-grid-col-1"><b>Last modified: </b> </span>
-                    <span class="ui-grid-col-11" *ngIf="resultItem.modified != null">
-                        {{lastModified(resultItem) || ""}}</span>
-                </div>
+            <div *ngIf="resultItem.active && i >= (currentPage.value-1)*itemsPerPage && i <= currentPage.value*itemsPerPage-1"  style="margin-bottom: .2em; padding-bottom: .2em;">
+                <app-resultitem [resultItem]="resultItem" [PDRAPIURL]="PDRAPIURL" [colorScheme]="colorScheme"></app-resultitem>
             </div>
         </div>
     </div>

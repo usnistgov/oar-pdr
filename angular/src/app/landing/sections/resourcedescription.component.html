@@ -1,9 +1,12 @@
 <div class="grid" id="description">
     <div class="col-12 col-md-12 col-lg-12 col-sm-12">
         <div class="section-header">
-            <h3 style="display: inline-block;" name="description"><b>{{desctitle}}</b></h3>
+            <!-- <h3 style="display: inline-block;" name="description"><b>{{desctitle}}</b></h3> -->
+            <div name="description" style="width: 100%; height: 27px; margin-bottom: 1em;" id="sectionHeader" #sectionHeader (window:resize)="onResize()"></div>
         </div>
-        <div>
+        <div class="section-line"></div>
+
+        <div style="margin-top: 1em;">
             <app-description [record]="record" [inBrowser]="inBrowser"></app-description>
         </div>
         <app-topic [record]="record" [inBrowser]="inBrowser" [collection]="collection"></app-topic>

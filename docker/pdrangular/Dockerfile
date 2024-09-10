@@ -11,9 +11,9 @@
 
 # The parent should be an ancestor image of the operational container
 # 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
-RUN sed -e '/buster-updates/ s/^deb/#deb/' /etc/apt/sources.list \
+RUN sed -e '/bullseye-updates/ s/^deb/#deb/' /etc/apt/sources.list \
     > /tmp/sources.list && mv /tmp/sources.list /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y --no-install-recommends zip wget ca-certificates git xz-utils \
@@ -23,7 +23,7 @@ COPY cacerts/README.md cacerts/*.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 ENV NODE_EXTRA_CA_CERTS /etc/ssl/certs/ca-certificates.crt
 
-ARG node_ver=v14.19.0
+ARG node_ver=v16.17.1
 COPY node-*-sha256.txt /tmp/
 RUN arch=`dpkg --print-architecture` && \
     { [ "$arch" != "amd64" ] || arch="x64"; } && echo $arch > /etc/plat-arch

@@ -40,7 +40,7 @@ describe('TopicComponent', () => {
     }));
 
     beforeEach(() => {
-        let record: any = require('../../../assets/sample3.json');
+        let record: any = require('../../../assets/sample-data/pdr0-0002-new.json');
         console.log('record.topic', record.topic);
         fixture = TestBed.createComponent(TopicComponent);
         component = fixture.componentInstance;
@@ -56,11 +56,11 @@ describe('TopicComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('Research Topics should contains Information Technology', () => {
+    it('Research Topics should contains Materials: Ceramics', () => {
         let cmpel = fixture.nativeElement;
         let aels = cmpel.querySelectorAll(".topics");
-        expect(aels.length).toEqual(4);
-        expect(aels[0].innerText).toContain('Information Technology');
+        expect(aels.length).toEqual(6);
+        expect(aels[0].innerText).toContain('Materials: Ceramics');
       });
     
 });

@@ -18,3 +18,11 @@
 .indent-content {
     padding-left:20px;
 }
+
+.section-line{
+    width:100%;
+    height : 1px;
+    margin-top : -19px;
+
+    background-image: linear-gradient(90deg, rgb(37, 37, 178), rgb(255, 255, 255))
+}

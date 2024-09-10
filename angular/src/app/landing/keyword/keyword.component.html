@@ -1,28 +1,39 @@
-<div style="display: table">
-        <div class="editable_container">
-          <div class="editable_field" *ngIf="isEmpty; else hasKeyword">
+<div style="display: table; ">
+    <div class="editable_container">
+        
+        <div class="editable_field" *ngIf="isEmpty; else hasKeyword">
             <div class="editable_field" *ngIf="mdupdsvc.isEditMode" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)">
-              Add subject keywords:&nbsp;&nbsp;
+            Add subject keywords:&nbsp;&nbsp;
             </div>
-          </div>
-          <ng-template #hasKeyword>
-            <div class="editable_field" style="max-width:calc(100% - 4em);" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
-              <strong>Subject Keywords: </strong>
-              <span class="keywords" contenteditable="false"
+        </div>
+        <ng-template #hasKeyword>
+            
+            <span class="editable_field ind" style="max-width: 90%;">
+                <span style="white-space: nowrap;"><strong>Keywords: </strong></span>
+                <span class="keywords" [style.background-color]="bubbleColor(keyword)" [style.border]="borderStyle(keyword)" (mouseenter)="mouseEnter(keyword)" (mouseover)="mouseEnter(keyword)" (mouseout)="mouseOut(keyword)" [style.cursor]="setCursor(keyword)" style="padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;line-height: 25px;white-space: nowrap;margin-right: 5px;" (click)="keywordClick(keyword)" *ngFor="let keyword of keywordDisplay; let i =index">
+                    <span style="display: inline-block">{{ keyword }}</span>
+                </span> 
+            </span>
+
+            <!-- <div class="editable_field" style="max-width:calc(100% - 4em);display: flex;flex-wrap: wrap" [ngStyle]="mdupdsvc.getFieldStyle(fieldName)" (click)="openModal()">
+            <strong>Subject Keywords: </strong>
+            <span class="keywords" style="border: 1px solid rgb(236, 236, 236);background-color: #eaeefc;padding: 2px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 1.8;" contenteditable="false"
                 *ngFor="let keyword of record['keyword']; let i =index">
-                <i>{{ keyword }}</i><span *ngIf="i < record['keyword'].length-1 ">, </span>
-              </span> &nbsp; &nbsp;
-            </div>
-          </ng-template>
-          <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal()" aria-label="edit button">
+                {{ keyword }}
+            </span> 
+            </div> -->
+        </ng-template>
+
+        <button class="edit_button" *ngIf="mdupdsvc.isEditMode" type="button" (click)="openModal()" aria-label="edit button">
             <i class="faa faa-pencil icon_enabled" data-toggle="tooltip" title="Edit keyword"></i>
-          </button>
-          <button class="undo_button" *ngIf="mdupdsvc.isEditMode" type="button" [disabled]="!updated"
+        </button>
+        <button class="undo_button" *ngIf="mdupdsvc.isEditMode" type="button" [disabled]="!updated"
             (click)="undoEditing()" aria-label="undo button">
             <i class="faa faa-undo"
-              [ngClass]="{'icon_enabled': updated, 'icon_disabled':!updated }"
-              data-toggle="tooltip" title="Undo keyword"></i>
-          </button>
-          <span *ngIf="mdupdsvc.isEditMode" style="color: rgb(173, 0, 0);margin-left: .5em;">*</span>
-        </div>
-      </div>
+            [ngClass]="{'icon_enabled': updated, 'icon_disabled':!updated }"
+            data-toggle="tooltip" title="Undo keyword"></i>
+        </button>
+
+        <span *ngIf="mdupdsvc.isEditMode" style="color: rgb(173, 0, 0);margin-left: .5em;">*</span>
+    </div>
+</div>

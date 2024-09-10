@@ -1,19 +1,29 @@
 <div class="bottom-line" *ngIf="collectionThemesTree && collectionThemesTree.length > 0">
+    <!-- Header -->
+    <div style="padding: 5px;background-color: rgb(202, 219, 255);" [ngStyle]="{'background-color': colorScheme.light}"><b><i [class]="expandIcon()" style="margin-right: 5px; cursor: pointer;" (click)="collectionNodeExpanded = !collectionNodeExpanded"></i>
+        <span style="float: right;margin-right: 5px;margin-top: -3px;">
+            <p-checkbox [(ngModel)]="allChecked" [binary]="true" inputId="binary" (click)="updateCheckbox()" > </p-checkbox>
+            <!-- <i class="faa faa-minus-square" style="color: rgb(0, 157, 255);font-size: 20px;"></i> -->
+        </span>
+        <span style="cursor: pointer;" (click)="collectionNodeExpanded = !collectionNodeExpanded">
+            {{collectionThemesTree[0].label}}
+        </span></b>
+    </div>
+
+    <!-- tree -->
     <div class="filter-checkbox">
-        <div [@expand]="collectionNodeExpanded? collectionShowMoreLink ? 'collapsed':'expanded':'closed'" >
-            <p-tree id="collectionThemes" [value]="collectionThemesTree" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="collectionSelectedThemesNode" 
+        <div [@expand]="collectionNodeExpanded? collectionShowMoreLink ? 'collapsed':'expanded':'closed'">
+            <p-tree id="collectionThemes" [value]="collectionThemesTree[0].children" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="collectionSelectedThemesNode" 
                 (onNodeUnselect)="filterResults()"
-                (onNodeSelect)="filterResults()" 
-                (onNodeExpand)="onNodeExpand($event)"
-                (onNodeCollapse)="onNodeCollapse($event)">
+                (onNodeSelect)="filterResults()">
                 <ng-template let-node pTemplate="default">
-                    <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)">
+                    <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)" >
                         <span *ngIf="node.count > 0; else header1" class="invisible-scrollbar" > {{node.label.split("---")[0]}}&nbsp;</span>
                         <ng-template #header1>
                             <span><b> {{node.label.split("---")[0]}}&nbsp;</b></span>
                         </ng-template>
 
-                        <span class="w3-badge badge-notify badge-style" [style.background-color]="defaultColor"
+                        <span class="w3-badge badge-notify badge-style" [style.background-color]="colorScheme.default"
                             *ngIf="node.count > 0">
                             {{node.count}}</span> 
                     </div>
@@ -21,10 +31,10 @@
             </p-tree>
         </div>
     </div>
-    <div class="show-more-less" (click)="$event.preventDefault(); collectionShowMoreLink = false" [style.background-color]="backgroundColor" 
+    <div class="show-more-less" (click)="$event.preventDefault(); collectionShowMoreLink = false" [style.background-color]="colorScheme.lighter" 
         *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == true && collectionThemesTree[0]?.children.length > 5">Show More...
     </div>
-    <div class="show-more-less" (click)="$event.preventDefault();collectionShowMoreLink = true" [style.background-color]="backgroundColor" 
+    <div class="show-more-less" (click)="$event.preventDefault();collectionShowMoreLink = true" [style.background-color]="colorScheme.lighter" 
         *ngIf="collectionNodeExpanded == true && collectionShowMoreLink == false && collectionThemesTree[0]?.children.length > 5">Show Less
     </div>
 </div>

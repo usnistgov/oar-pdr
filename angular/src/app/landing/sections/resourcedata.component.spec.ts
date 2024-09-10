@@ -14,9 +14,10 @@ import { UserMessageService } from '../../frame/usermessage.service';
 import { AuthService, WebAuthService, MockAuthService } from '../editcontrol/auth.service';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { CartService } from '../../datacart/cart.service';
-
+import { D3Service } from '../../shared/d3-service/d3.service';
 import { config, testdata } from '../../../environments/environment';
 import { Themes, ThemesPrefs } from '../../shared/globals/globals';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 describe('ResourceDataComponent', () => {
     let component: ResourceDataComponent;
@@ -31,12 +32,20 @@ describe('ResourceDataComponent', () => {
             providers: [
                 { provide: AppConfig, useValue: cfg },
                 GoogleAnalyticsService, UserMessageService, MetadataUpdateService, DatePipe,
-                CartService
+                CartService, D3Service, CollectionService
             ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(ResourceDataComponent);
         component = fixture.componentInstance;
+        component.colorScheme = {
+            default: "#003c97",
+            light: "#e3efff",
+            lighter: "#f7f7fa",
+            dark: "#00076c",
+            hover: "#ffffff"
+        };
+        console.log("component.colorScheme.default", component.colorScheme.default)
     }
 
     beforeEach(waitForAsync(() => {
@@ -44,6 +53,7 @@ describe('ResourceDataComponent', () => {
         component.inBrowser = true;
         component.record = JSON.parse(JSON.stringify(rec));
         component.theme = Themes.DEFAULT_THEME;
+
         component.ngOnChanges({});
         fixture.detectChanges();
     }));
@@ -52,11 +62,6 @@ describe('ResourceDataComponent', () => {
         expect(component).toBeTruthy();
         let cmpel = fixture.nativeElement;
         expect(cmpel.querySelector("#dataAccess")).toBeTruthy();
-
-        // has a title
-        let el = cmpel.querySelector("h3");
-        expect(el).toBeTruthy();
-        expect(el.textContent).toContain("Data Access");
 
         // lists access pages
         expect(cmpel.querySelector("#accessPages")).toBeTruthy();

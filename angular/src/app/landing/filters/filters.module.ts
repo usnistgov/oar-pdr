@@ -16,6 +16,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
 import { TaxonomyModule } from '../taxonomy/taxonomy.module';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   declarations: [FiltersComponent],
@@ -34,7 +35,8 @@ import { TaxonomyModule } from '../taxonomy/taxonomy.module';
     ProgressSpinnerModule,
     MultiSelectModule,
     FormsModule,
-    TaxonomyModule
+    TaxonomyModule,
+    ButtonModule
   ],
   exports: [
     FiltersComponent

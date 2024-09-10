@@ -9,8 +9,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 import { SearchService } from '../../shared/search-service';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
-import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
-import * as CollectionData from '../../../assets/site-constants/collections.json';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode, ColorScheme } from '../../shared/globals/globals';
 import { CollectionService } from '../../shared/collection-service/collection.service';
 
 const SEARCH_SERVICE = 'SEARCH_SERVICE';
@@ -70,6 +69,7 @@ export class FiltersComponent implements OnInit {
     allUnspecifiedCount: any = {};
     unspecifiedCount: number = 0;
     showMoreLink: boolean = true;
+    clearAllCheckbox: boolean = false;
 
     collectionThemesWithCount: FilterTreeNode[] = [];
     filterStrings = {};
@@ -81,8 +81,7 @@ export class FiltersComponent implements OnInit {
     collectionOrder: string[] = [Collections.DEFAULT];
 
 //  Color
-    defaultColor: string;   //For header background
-    lighterColor: string;  //For menu item background
+    colorScheme: ColorScheme;
     collapedFilerColor: string;  //For collaped filter
 
     componentsTree: TreeNode[] = [];
@@ -158,6 +157,8 @@ export class FiltersComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.collectionService.loadAllCollections();
+
         this.collectionOrder = this.collectionService.getCollectionOrder();
         this.msgs = [];
         this.searchResultsError = [];
@@ -165,19 +166,14 @@ export class FiltersComponent implements OnInit {
         this.setFilterWidth();
 
         this.allCollections = this.collectionService.loadAllCollections();
-
-        // for(let col of this.collectionOrder) {
-        //     this.allCollections[col] = this.collectionService.localCollectionData(col);
-        // }
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
 
         // Set colors
         this.setColor();
     }
 
     setColor() {
-        this.defaultColor = this.allCollections[this.collection].color.default;
-        this.lighterColor = this.allCollections[this.collection].color.lighter;
-        this.collapedFilerColor = "linear-gradient(" +  this.defaultColor + ", white)";
+        this.collapedFilerColor = "linear-gradient(" +  this.colorScheme.default + ", white)";
     }
 
     /**
@@ -192,6 +188,88 @@ export class FiltersComponent implements OnInit {
 
         this.filterResults();
     }
+
+    /**
+     * Replace reserved chars with char name to avoid problems
+     * when parsing filter string in the result list component.
+     * For example, replace "&" with "aaamp". result list component
+     * restore "aaamp" back to "&".
+     * @param strng input string
+     */
+    escapeReservedChars(inputStrng: string) {
+        let outputString: string;
+        if(!inputStrng || inputStrng.trim() == "")
+            return "";
+        else    
+            return inputStrng.replace(new RegExp("&", "g"), "aaamp")
+    }
+
+    /**
+     * Form the filter string and refresh the result page
+     */
+    filterResults() {
+        let lFilterString: string = "";
+        this.selectedThemes = [];
+        this.selectedComponents = [];
+        this.selectedResourceType = [];
+        let componentSelected: boolean = false;
+        let resourceTypesSelected: boolean = false;
+        let compType = '';
+        let resourceType = '';
+
+        // Resource type        
+        if(this.filterStrings["@type"]) {
+            if(lFilterString != '') lFilterString += "&";
+            lFilterString += this.escapeReservedChars(this.filterStrings["@type"]);
+            lFilterString = this.removeEndingComma(lFilterString);
+        }
+
+        // Collections
+        for(let col of this.collectionOrder) {
+            if(this.filterStrings[col]) {
+                if(lFilterString != '') lFilterString += "&";
+                lFilterString += this.escapeReservedChars(this.filterStrings[col]);
+                lFilterString = this.removeEndingComma(lFilterString);
+            }   
+        }
+
+        // Record has
+        if(this.filterStrings["components.@type"]) {
+            if(lFilterString != '') lFilterString += "&";
+            lFilterString += this.escapeReservedChars(this.filterStrings["components.@type"]);
+            lFilterString = this.removeEndingComma(lFilterString);
+        }
+
+        // Authors and contributors
+        if (this.selectedAuthor.length > 0) {
+            if(lFilterString != '') lFilterString += "&";
+
+            lFilterString += "contactPoint.fn=";
+
+            for (let author of this.selectedAuthor) {
+                lFilterString += author + ",";
+            }
+        }
+
+        lFilterString = this.removeEndingComma(lFilterString);
+
+        // Keywords
+        if (this.selectedKeywords.length > 0) {
+            if(lFilterString != '') lFilterString += "&";
+
+            lFilterString += "keyword=";
+            for (let keyword of this.selectedKeywords) {
+                lFilterString += this.escapeReservedChars(this.suggestedKeywordsLkup[keyword]) + ",";
+            }
+        }
+
+        lFilterString = this.removeEndingComma(lFilterString);
+        if(!lFilterString) lFilterString = "NoFilter";
+
+        // console.log('lFilterString', lFilterString);
+        this.filterString.emit(lFilterString);
+    }
+
 
     /**
      * If search value changed, clear the filters and refresh the search result.
@@ -385,7 +463,7 @@ export class FiltersComponent implements OnInit {
             compNoData = true;
             this.componentsWithCount = [];
             this.componentsTree = [{
-                label: 'Record has -',
+                label: 'Record has',
                 "expanded": true,
                 children: this.componentsWithCount,
             }];
@@ -430,14 +508,14 @@ export class FiltersComponent implements OnInit {
 
 
         this.resourceTypeTree = [{
-            label: 'Type of Resource  -',
+            label: 'Type of Resource',
             "expanded": false,
             children: this.resourceTypesWithCount
         }];
 
         if (!compNoData) {
             this.componentsTree = [{
-                label: 'Record has -',
+                label: 'Record has',
                 "expanded": false,
                 children: this.componentsWithCount,
             }];
@@ -466,92 +544,6 @@ export class FiltersComponent implements OnInit {
         this.status = (<any>error).httpStatus;
         this.msgs.push({ severity: 'error', summary: this.errorMsg + ':', detail: this.status + ' - ' + this.exception });
         this.searching = false;
-    }
-
-    /**
-     * Form the filter string and refresh the result page
-     */
-    filterResults() {
-        let lFilterString: string = "";
-        this.selectedThemes = [];
-        this.selectedComponents = [];
-        this.selectedResourceType = [];
-        let componentSelected: boolean = false;
-        let resourceTypesSelected: boolean = false;
-        let compType = '';
-        let resourceType = '';
-
-        // Resource type
-        if (this.selectedResourceTypeNode.length > 0) {
-            lFilterString += "@type=";
-
-            for (let res of this.selectedResourceTypeNode) {
-                if (res && typeof res.data !== 'undefined' && res.data !== 'undefined') {
-                    resourceTypesSelected = true;
-                    this.selectedResourceType.push(res.data);
-                    resourceType += res.data + ',';
-
-                    lFilterString += res.data.replace(/\s/g, "") + ",";
-                }
-            }
-
-            lFilterString = this.removeEndingComma(lFilterString);
-        }    
-        
-        for(let col of this.collectionOrder) {
-            if(this.filterStrings[col]) {
-                lFilterString += this.filterStrings[col];
-                lFilterString = this.removeEndingComma(lFilterString);
-            }   
-        }
-
-        // Record has
-        if (this.selectedComponentsNode.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "components.@type=";
-
-            for (let comp of this.selectedComponentsNode) {
-                if (comp != 'undefined' && typeof comp.data !== 'undefined' && comp.data !== 'undefined') {
-                    componentSelected = true;
-                    this.selectedComponents.push(comp.data);
-                    compType += comp.data + ',';
-
-                    lFilterString += comp.data.replace(/\s/g, "") + ",";
-                }
-            }
-        }
-
-        lFilterString = this.removeEndingComma(lFilterString);
-
-        // Authors and contributors
-        if (this.selectedAuthor.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "contactPoint.fn=";
-
-            for (let author of this.selectedAuthor) {
-                lFilterString += author + ",";
-            }
-        }
-
-        lFilterString = this.removeEndingComma(lFilterString);
-
-        // Keywords
-        if (this.selectedKeywords.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "keyword=";
-            for (let keyword of this.selectedKeywords) {
-                lFilterString += this.suggestedKeywordsLkup[keyword] + ",";
-            }
-        }
-
-        lFilterString = this.removeEndingComma(lFilterString);
-        if(!lFilterString) lFilterString = "NoFilter";
-
-        console.log('lFilterString', lFilterString);
-        this.filterString.emit(lFilterString);
     }
 
     /**
@@ -721,32 +713,37 @@ export class FiltersComponent implements OnInit {
         this.selectedAuthorDropdown = false;
         this.selectedResourceType = [];
         this.selectedResourceTypeNode = [];
-        this.resourceTypes = this.collectResourceTypes(this.searchResults);
-        this.collectResourceTypesWithCount();
-        this.authors = this.collectAuthors(this.searchResults);
-        this.suggestedKeywords = this.collectKeywords(this.searchResults);
-        this.components = this.collectComponents(this.searchResults);
-        this.collectComponentsWithCount();
-        this.collectThemes(this.searchResults);
+        // this.resourceTypes = this.collectResourceTypes(this.searchResults);
+        // this.collectResourceTypesWithCount();
+        // this.authors = this.collectAuthors(this.searchResults);
+        // this.suggestedKeywords = this.collectKeywords(this.searchResults);
+        // this.components = this.collectComponents(this.searchResults);
+        // this.collectComponentsWithCount();
+        // this.collectThemes(this.searchResults);
 
-        this.collectThemesWithCount(Collections.DEFAULT);
-        this.collectThemesWithCount(this.collection);
+        // this.collectThemesWithCount(Collections.DEFAULT);
+        // this.collectThemesWithCount(this.collection);
 
-        this.componentsTree = [{
-            label: 'Record has -',
-            "expanded": false,
-            children: this.componentsWithCount
-        }];
+        // this.componentsTree = [{
+        //     label: 'Record has -',
+        //     "expanded": false,
+        //     children: this.componentsWithCount
+        // }];
 
-        this.resourceTypeTree = [{
-            label: 'Resource Type -',
-            "expanded": false,
-            children: this.resourceTypesWithCount
-        }];
+        // this.resourceTypeTree = [{
+        //     label: 'Resource Type -',
+        //     "expanded": false,
+        //     children: this.resourceTypesWithCount
+        // }];
 
         this.nodeExpanded = false;
         this.collectionNodeExpanded = true;
-        this.filterResults()
+        
+        this.clearAllCheckbox = true;
+        setTimeout(() => {
+            this.clearAllCheckbox = false;
+        }, 0)
+        // this.filterResults()
     }
 
     /**
@@ -976,7 +973,7 @@ export class FiltersComponent implements OnInit {
                             allThemes[Collections.FORENSICS].push({ label: topicLabel, value: data });
                             allThemesArray[Collections.FORENSICS].push(topicLabel);
                         }
-                    }else{
+                    }else if(topic['scheme'].indexOf(this.taxonomyURI[Collections.DEFAULT]) >= 0){
                         topicLabel = topics[0];
 
                         if (allThemesArray[Collections.DEFAULT].indexOf(topicLabel) < 0) {

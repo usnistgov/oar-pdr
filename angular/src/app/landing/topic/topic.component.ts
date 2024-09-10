@@ -7,7 +7,7 @@ import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { AppConfig } from '../../config/config';
 import { deepCopy } from '../../utils';
 import { CollectionService } from '../../shared/collection-service/collection.service';
-import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
+import { Themes, ThemesPrefs, Collections, Collection, CollectionThemes, FilterTreeNode, ColorScheme } from '../../shared/globals/globals';
 
 @Component({
     selector: 'app-topic',
@@ -23,12 +23,21 @@ export class TopicComponent implements OnInit {
     //  Array to define the collection order
     collectionOrder: string[] = [Collections.DEFAULT];
     topics: any = {};
+    originalTopics: any = {};   // For undo purpose
+    fieldName = 'topic';
+    hovered: boolean = false;
+
+    //For display
+    topicBreakPoint: number = 5;
+    topicDisplay: any = {};
+    topicShort: any = {};
+    topicLong: any = {};
+    colorScheme: ColorScheme;
 
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean;   // false if running server-side
     //05-12-2020 Ray asked to read topic data from 'theme' instead of 'topic'
-    fieldName = 'theme';
-    @Input() collection: string;
+    @Input() collection: string = Collections.DEFAULT;
 
     constructor(public mdupdsvc: MetadataUpdateService,
                 private ngbModal: NgbModal,
@@ -38,28 +47,38 @@ export class TopicComponent implements OnInit {
 
             // this.standardNISTTaxonomyURI = this.cfg.get("standardNISTTaxonomyURI", "https://data.nist.gov/od/dm/nist-themes/");
 
-            this.collectionOrder = this.collectionService.getCollectionOrder();
+            this.collectionOrder = this.collectionService.getCollectionForDisplay();
             this.allCollections = this.collectionService.loadAllCollections();
     }
 
     /**
      * a field indicating if this data has beed edited
      */
-    get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
+    // get updated() { return this.mdupdsvc.fieldUpdated(this.fieldName); }
+    updated(collection: string = Collections.DEFAULT) { 
+        return this.mdupdsvc.fieldUpdated(this.fieldName + "-" + collection); 
+    }
 
     /**
      * a field indicating whether there are no keywords are set.  
      */
-    get isEmpty() {
-        if(this.recordType == "Science Theme"){
-            return this.scienceThemeTopics.length <= 0 && this.nistTaxonomyTopics.length <= 0;
-        }else{
-            return this.nistTaxonomyTopics.length <= 0;
+    get hasTopics() {
+        let hasTopic: boolean = false;
+
+        for(let col of this.collectionOrder) {
+            if(this.topics[col] && this.topics[col].length > 0) {
+                hasTopic = true;
+                break;
+            }
         }
+
+        return hasTopic;
     }
 
     ngOnInit() {
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
         this.updateResearchTopics();
+        this.originalTopics = JSON.parse(JSON.stringify(this.topics));
     }
 
     /**
@@ -70,23 +89,25 @@ export class TopicComponent implements OnInit {
         this.updateResearchTopics();
     }
 
+    hasTopic(collection: string = Collections.DEFAULT) {
+        return this.topics[collection] && this.topics[collection].length > 0; 
+    }
+
     /**
      * Update the research topic lists
      */
     updateResearchTopics() {
+        this.topics = {};
         if(this.record) {
-            this.scienceThemeTopics = [];
-            this.nistTaxonomyTopics = [];
-            
-            if (this.record['topic']) {
-                this.record['topic'].forEach(topic => {
+            if (this.record[this.fieldName]) {
+                this.record[this.fieldName].forEach(topic => {
                     if (topic['scheme'] && topic.tag) {
                         for(let col of this.collectionOrder) {
                             if(topic['scheme'].indexOf(this.allCollections[col].taxonomyURI) >= 0){
                                 if(!this.topics[col]) {
-                                    this.topics[col] = [topic.tag];
-                                }else if(this.topics[col].indexOf(topic.tag) < 0) {
-                                    this.topics[col].push(topic.tag);
+                                    this.topics[col] = [topic];
+                                }else if(this.topics[col].indexOf(topic) < 0) {
+                                    this.topics[col].push(topic);
                                 }
                             }
                         }
@@ -95,12 +116,119 @@ export class TopicComponent implements OnInit {
                 });
             }
         }
+
+        //For display
+        for(let col of this.collectionOrder) {
+            if(this.topics[col]) {
+                if(this.topics[col].length > 5) {
+                    this.topicShort[col] = JSON.parse(JSON.stringify(this.topics[col].slice(0, this.topicBreakPoint)));
+                    this.topicShort[col].push({tag:"Show more...", "@type":"", scheme:""});
+                    this.topicLong[col] = JSON.parse(JSON.stringify(this.topics[col]));
+                    this.topicLong[col].push({tag:"Show less...", "@type":"", scheme:""});                
+                }else {
+                    this.topicShort[col] = JSON.parse(JSON.stringify(this.topics[col]));
+                    this.topicLong[col] = JSON.parse(JSON.stringify(this.topics[col]));
+                }
+            }else {
+                this.topicShort[col] = [];
+                this.topicLong[col] = []
+            }
+        }
+
+        this.topicDisplay = JSON.parse(JSON.stringify(this.topicShort));
+    }
+
+    /**
+     * Set bubble color based on content
+     * @param topic 
+     */
+    bubbleColor(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            return "#e6ecff";
+        }else{
+            return "#ededed";
+        }
+    }
+
+    /**
+     * Set cursor type for "More..." and "Less..." button
+     * @param topic 
+     * @returns 
+     */
+    setCursor(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            return "pointer";
+        }else{
+            return "";
+        }
+    }
+
+    /**
+     * Set border for "More..." and "Less..." button when mouse over
+     * @param keyword 
+     * @returns 
+     */    
+    borderStyle(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            if(this.hovered){
+                return "1px solid blue";
+            }else{
+                return "1px solid #ededed";
+            }
+        }else{
+            return "1px solid #ededed";
+        }
+    }
+
+    mouseEnter(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            this.hovered = true;
+        }
+    }
+
+    mouseOut(topic) {
+        if(topic.tag == "Show more..." || topic.tag == "Show less..." ) {
+            this.hovered = false;
+        }
+    }
+
+    /**
+     * Display short/long list based on which button was clicked.
+     * @param topic 
+     */
+    topicClick(topic, collection) {
+        if(topic.tag == "Show more...") {
+            this.topicDisplay[collection] = JSON.parse(JSON.stringify(this.topicLong[collection]));
+        }
+
+        if(topic.tag == "Show less...") {
+            this.topicDisplay[collection] = JSON.parse(JSON.stringify(this.topicShort[collection]));
+        }
+
+        this.hovered = false;
+    }
+
+    /**
+     * Restore topics to Nerdm format
+     */
+    restoreTopics(inputTopics: any) {
+        let topics: any[] = [];
+
+        for(let col of this.collectionOrder) {
+            if(inputTopics[col] && inputTopics[col].length > 0) {
+                for(let topic of inputTopics[col]) {
+                    topics.push(topic);
+                }
+            }
+        }
+
+        return topics;
     }
 
     /**
      * Open topic pop up window
      */
-    openModal() {
+    openModal(collection: string = Collections.DEFAULT) {
         // Do nothing if it's not in edit mode. 
         // This should never happen because the edit button should be disabled.
         if (!this.mdupdsvc.isEditMode) return;
@@ -117,25 +245,35 @@ export class TopicComponent implements OnInit {
 
         const modalRef = this.ngbModal.open(SearchTopicsComponent, ngbModalOptions);
 
-        let val: string[] = [];
-        if (this.record[this.fieldName])
-            val = JSON.parse(JSON.stringify(this.nistTaxonomyTopics));
+        let val: any[] = [];
+        // if (this.record[this.fieldName])
+            // val = JSON.parse(JSON.stringify(this.nistTaxonomyTopics));
+        val = this.topics[collection];
+        let field = this.fieldName + "-" + collection;
 
-        modalRef.componentInstance.inputValue = {};
-        modalRef.componentInstance.inputValue[this.fieldName] = val;
-        modalRef.componentInstance['field'] = this.fieldName;
-        modalRef.componentInstance['title'] = "Research Topics";
+        modalRef.componentInstance.inputTopics = {};
+        modalRef.componentInstance.inputTopics[field] = val;
+        modalRef.componentInstance['field'] = field;
+        modalRef.componentInstance['title'] = this.allCollections[collection].tag;
+        modalRef.componentInstance['scheme'] = this.allCollections[collection].taxonomyURI + "v1.0";
+        modalRef.componentInstance['type'] = "Concept";
 
         modalRef.componentInstance.returnValue.subscribe((returnValue) => {
             console.log("returnValue", returnValue);
             if (returnValue) {
                 var postMessage: any = {};
-                postMessage[this.fieldName] = returnValue[this.fieldName];
-                this.mdupdsvc.update(this.fieldName, postMessage).then((updateSuccess) => {
+
+                this.topics[collection] = returnValue[field];
+                
+                postMessage[field] = this.restoreTopics(this.topics);
+                let newRec = JSON.parse(JSON.stringify(this.record));
+                newRec[this.fieldName] = postMessage[field];
+
+                this.mdupdsvc.update(field, postMessage, newRec).then((updateSuccess) => {
                     // console.log("###DBG  update sent; success: "+updateSuccess.toString());
                     if (updateSuccess) {
                         this.notificationService.showSuccessWithTimeout("Research topics updated.", "", 3000);
-
+                        this.record[this.fieldName] = postMessage[field];
                         this.updateResearchTopics();
                     } else
                         console.error("acknowledge topic update failure");
@@ -147,8 +285,13 @@ export class TopicComponent implements OnInit {
     /*
      *  Undo editing. If no more field was edited, delete the record in staging area.
      */
-    undoEditing() {
-        this.mdupdsvc.undo(this.fieldName).then((success) => {
+    undoEditing(collection: string) {
+        let topics: any = this.topics;
+        topics[collection] = this.originalTopics[collection];
+        let subsetValue: any = {}; 
+        subsetValue[this.fieldName]= this.restoreTopics(topics);
+
+        this.mdupdsvc.undo(this.fieldName+"-"+collection, subsetValue).then((success) => {
             if (success) {
                 this.notificationService.showSuccessWithTimeout("Reverted changes to research topic.", "", 3000);
 

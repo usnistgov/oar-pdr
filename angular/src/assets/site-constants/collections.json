@@ -1,6 +1,6 @@
 {
     "NIST": {
-        "tag": "NIST Research Topics",
+        "tag": "NIST R&D",
         "bannerUrl": "",
         "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes/",
         "color": {
@@ -10,32 +10,35 @@
             "dark": "#1c6022",
             "hover": "#ffffff"
         },
-        "displayOrder": 3
+        "displayOrder": 3,
+        "landongPage": true
     },
     "Forensics": {
-        "tag": "Forensics Topics",
+        "tag": "Forensics",
         "bannerUrl": "assets/images/fingerprint.jpg",
-        "taxonomyURI": "https://data.nist.gov/od/dm/forensics-themes/",
+        "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes-forensics/",
         "color": {
             "default": "#008097",
-            "light": "#e3f7fd",
+            "light": "#dbf7ff",
             "lighter": "#f5fbfd",
             "dark": "#007287",
             "hover": "#ffffff"  
         },
-        "displayOrder": 2
+        "displayOrder": 2,
+        "landongPage": false
     },
     "Semiconductors": {
-        "tag": "CHIPS Metrology Topics",
+        "tag": "CHIPS Metrology",
         "bannerUrl": "assets/images/METIS-Banner-Op1.png",
         "taxonomyURI": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/",
         "color": {
             "default": "#003c97",
-            "light": "#d6d9ff",
-            "lighter": "#f7f7ff",
+            "light": "#e3efff",
+            "lighter": "#f7f7fa",
             "dark": "#00076c",
             "hover": "#ffffff"
         },
-        "displayOrder": 1
+        "displayOrder": 1,
+        "landongPage": true
     }
 }

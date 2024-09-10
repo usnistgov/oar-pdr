@@ -39,6 +39,7 @@ import { AuthorPopupComponent } from './landing/author/author-popup/author-popup
 import { ContactPopupComponent } from './landing/contact/contact-popup/contact-popup.component';
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
+import { D3Service } from './shared/d3-service/d3.service';
 
 enableProdMode();
 
@@ -75,7 +76,8 @@ enableProdMode();
         AppErrorHandler,
         { provide: ErrorHandler, useClass: AppErrorHandler },
         GoogleAnalyticsService,
-        // fakeBackendProvider,
+        D3Service,
+        fakeBackendProvider,
         DatePipe
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]

@@ -44,11 +44,6 @@ describe('ResourceMetadataComponent', () => {
         expect(component).toBeTruthy();
         let cmpel = fixture.nativeElement;
         expect(cmpel.querySelector("#about")).toBeTruthy();
-
-        // has a section heading
-        let el = cmpel.querySelector("h3");
-        expect(el).toBeTruthy();
-        expect(el.textContent).toContain("About This Dataset");
     });
 
 });

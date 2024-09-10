@@ -49,11 +49,6 @@ describe('ResourceDescriptionComponent', () => {
 
     it('should initialize', () => {
         expect(component).toBeDefined();
-        let cmpel = fixture.nativeElement;
-        
-        let el = cmpel.querySelector("h3");
-        expect(el).not.toBeNull();
-        expect(el.textContent).toContain("Description");
     });
 
     it('isDataPublication', () => {
@@ -64,10 +59,5 @@ describe('ResourceDescriptionComponent', () => {
         component.record['@type'].push("nrdp:DataPublication");
         expect(component.isDataPublication()).toBeTruthy();
         component.useMetadata();
-        
-        fixture.detectChanges();
-        let el = cmpel.querySelector("h3");
-        expect(el).not.toBeNull();
-        expect(el.textContent).toContain("Abstract");
     });
 })

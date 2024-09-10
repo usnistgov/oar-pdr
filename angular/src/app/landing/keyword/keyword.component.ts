@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DescriptionPopupComponent } from '../description/description-popup/description-popup.component';
 import { NotificationService } from '../../shared/notification-service/notification.service';
@@ -7,12 +7,17 @@ import { MetadataUpdateService } from '../editcontrol/metadataupdate.service';
 @Component({
     selector: 'app-keyword',
     templateUrl: './keyword.component.html',
-    styleUrls: ['../landing.component.css']
+    styleUrls: ['../landing.component.css', './keyword.component.css']
 })
 export class KeywordComponent implements OnInit {
     @Input() record: any[];
     @Input() inBrowser: boolean;   // false if running server-side
     fieldName: string = 'keyword';
+    keywordShort: string[] = [];
+    keywordLong: string[] = [];
+    keywordBreakPoint: number = 5;
+    keywordDisplay: string[] = [];
+    hovered: boolean = false;
 
     constructor(public mdupdsvc : MetadataUpdateService,        
                 private ngbModal: NgbModal,     
@@ -37,8 +42,114 @@ export class KeywordComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.keywordInit();
+        
     }
 
+    /**
+     * Once input record changed, refresh the topic list 
+     * @param changes 
+     */
+    ngOnChanges(changes: SimpleChanges): void {
+        this.keywordInit();
+    }
+
+    /**
+     * Generate short and long keyword list for display
+     */
+    keywordInit() {
+        if(this.record['keyword']) {
+            if(this.record['keyword'].length > 5) {
+                this.keywordShort = JSON.parse(JSON.stringify(this.record['keyword'])).slice(0, this.keywordBreakPoint);
+                this.keywordShort.push("Show more...");
+                this.keywordLong = JSON.parse(JSON.stringify(this.record['keyword']));
+                this.keywordLong.push("Show less...");                
+            }else {
+                this.keywordShort = JSON.parse(JSON.stringify(this.record['keyword']));
+                this.keywordLong = JSON.parse(JSON.stringify(this.record['keyword']));
+            }
+        }else{
+            this.keywordShort = [];
+            this.keywordLong = [];
+        }
+
+        this.keywordDisplay = this.keywordShort;
+    }
+
+    /**
+     * Set bubble color based on content
+     * @param keyword 
+     */
+    bubbleColor(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            return "#e6ecff";
+        }else{
+            return "#ededed";
+        }
+    }
+
+    /**
+     * Set cursor type for "More..." and "Less..." button
+     * @param keyword
+     * @returns 
+     */
+    setCursor(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            return "pointer";
+        }else{
+            return "";
+        }
+    }
+
+    /**
+     * Set border for "More..." and "Less..." button when mouse over
+     * @param keyword 
+     * @returns 
+     */
+    borderStyle(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            if(this.hovered){
+                return "1px solid blue";
+            }else{
+                return "1px solid #ededed";
+            }
+        }else{
+            return "1px solid #ededed";
+        }
+    }
+
+    mouseEnter(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            this.hovered = true;
+        }
+    }
+
+    mouseOut(keyword) {
+        if(keyword == "Show more..." || keyword == "Show less..." ) {
+            this.hovered = false;
+        }
+    }
+
+    /**
+     * Display short/long list based on which button was clicked.
+     * @param keyword 
+     */
+    keywordClick(keyword) {
+        if(keyword == "Show more...") {
+            this.keywordDisplay = this.keywordLong;
+        }
+
+        if(keyword == "Show less...") {
+            this.keywordDisplay = this.keywordShort;
+        }
+
+        this.hovered = false;
+    }
+
+    /**
+     * Open popup for editing
+     * @returns 
+     */
     openModal() {
         if (! this.mdupdsvc.isEditMode) return;
 

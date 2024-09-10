@@ -19,7 +19,7 @@
             <!-- Save button -->
             <button pButton type="submit" class="btn-labeled" id="btn-save"
                 (click)="saveTopic();" label="Save" icon="faa faa-save faa-1x icon-white" iconPos="left"
-                [disabled]="inputValue[field].length==0">
+                [disabled]="inputValue[field].length==0 && addMode">
             </button>
         </div>
     </p-toolbar>
@@ -39,12 +39,12 @@
             style="border-bottom:1pt solid black; background-color: ivory;" height="2em">
             <td style="padding-left: 2em;">
                 <span (click)="searchAndExpandTaxonomyTree(topic, true)"
-                    style="color: #1E6BA1; cursor: pointer;">{{topic}}</span>
+                    style="color: #1E6BA1; cursor: pointer;">{{topic.tag}}</span>
             </td>
             <td width="50px">
                 <i class="faa faa-trash" (click)="deleteTopic(i)"
                     style="float: right;cursor: pointer;color:grey; margin: .5em;" data-toggle="tooltip"
-                    title="Delete affiliation"></i>
+                    title="Delete topic"></i>
             </td>
         </tr>
     </table>
