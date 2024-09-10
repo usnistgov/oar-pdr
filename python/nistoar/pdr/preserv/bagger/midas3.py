@@ -165,9 +165,11 @@ class MIDASSIP(object):
 
         recnum = _midadid_to_dirname(midasid)
         revdir = os.path.join(reviewdir, recnum)
-        upldir = os.path.join(uploaddir, recnum)
-        if not os.path.isdir(upldir):
-            upldir = None
+        upldir = None
+        if uploaddir:
+            upldir = os.path.join(uploaddir, recnum)
+            if not os.path.isdir(upldir):
+                upldir = None
 
         out = cls(nerd.get('ediid'), revdir, upldir, nerdrec=nerd)
 
