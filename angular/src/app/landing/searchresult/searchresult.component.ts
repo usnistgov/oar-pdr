@@ -1,7 +1,8 @@
 import { Component, OnInit, Input, HostListener, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-
+import { CollectionService } from '../../shared/collection-service/collection.service';
+import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes, FilterTreeNode } from '../../shared/globals/globals';
 
 @Component({
     selector: 'app-searchresult',
@@ -20,7 +21,7 @@ export class SearchresultComponent implements OnInit {
     mobHeight: number;
     mobWidth: number;
     mobileMode: boolean = false; // set mobile mode to true if window width < 641
-    filterWidth: number = 39; // Filter expanded by default
+    filterWidth: number = 499; // Filter expanded by default
     filterWidthStr: string;
     filterMode: string = "normal";
     resultWidth: any;
@@ -32,6 +33,8 @@ export class SearchresultComponent implements OnInit {
     mouseDragging: boolean = false;
     prevMouseX: number = 0;
     prevFilterWidth: number = 0;
+    taxonomyURI: any = {};
+    allCollections: any = {};
 
     @ViewChild('parentDiv')
     topLevelDiv: ElementRef;
@@ -40,11 +43,17 @@ export class SearchresultComponent implements OnInit {
     @Input() inBrowser: boolean = false;
     @Input() collection: string;
 
-    constructor(private cdr: ChangeDetectorRef) {
+    constructor(
+        private cdr: ChangeDetectorRef,
+        public collectionService: CollectionService,
+    ) {
     }
 
     ngOnInit(): void {
-
+        this.allCollections = this.collectionService.loadAllCollections();
+        this.taxonomyURI[Collections.DEFAULT] = this.allCollections[Collections.DEFAULT].taxonomyURI;
+        this.taxonomyURI[Collections.FORENSICS] = this.allCollections[Collections.FORENSICS].taxonomyURI;
+        this.taxonomyURI[Collections.SEMICONDUCTORS] = this.allCollections[Collections.SEMICONDUCTORS].taxonomyURI;
     }
 
     ngAfterViewInit(): void {
@@ -111,7 +120,7 @@ export class SearchresultComponent implements OnInit {
             }
 
             if(this.filterMode == 'normal'){
-                this.filterWidth = this.mobWidth / 4;                
+                this.filterWidth = this.mobWidth / 4;                  
                 this.filterToggler = 'expanded';
             }else{
                 this.filterWidth = 39;

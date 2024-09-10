@@ -1,0 +1,243 @@
+{
+    "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.7#",
+    "firstIssued": "2024-04-11",
+    "issued": "2024-04-11",
+    "modified": "2024-04-11",
+    "annotated": "2024-04-11",
+    "topic": [
+      {
+        "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+        "tag": "Materials: Ceramics",
+        "@type": "Concept"
+      },
+      {
+        "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+        "tag": "Standards: Reference data",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Physics: Condensed matter",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Materials: Modeling and computational material science",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Electronics: Thin-film electronics",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Electronics: Optoelectronics",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Chemistry: Molecular characterization",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Chemistry: Theoretical chemistry and modeling",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Nanotechnology:Nanoelectronics",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Chemistry: Chemical thermodynamics and chemical properties",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Electronics: Semiconductors",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Electronics: Electronics",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Materials: Materials characterization",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      },
+      {
+        "tag": "Physics: Optical physics",
+        "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
+        "@type": "Concept"
+      }
+    ],
+    "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/PublicDataResource",
+      "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.2#/definitions/ScienceTheme"
+    ],
+    "landingPage": "https://data.nist.gov/od/id/ark:/88434/pdr0-0002",
+    "title": "Chips Metrology Digital Assets",
+    "version": "1.0.0",
+    "programCode": [
+      "006:045"
+    ],
+    "@context": [
+      "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+      {
+        "@base": "ark:/88434/pdr0-0002"
+      }
+    ],
+    "description": [
+      "This digital collection portal provides finding aids for Chips Metrology digital assets including data,  code,  and tools related to semiconductor and microelectronics science that is generated from Chips Metrology grand challenge work areas. It includes multiple discipline working areas: Semiconductors, Simulations, Microelectronics, and other multimedia. In addition to NIST physical reference standards, these digital assets support commercial industry and partner laboratories validate their analytical methods and ensure provenance and traceability."
+    ],
+    "language": [
+      "en"
+    ],
+    "bureauCode": [
+      "006:55"
+    ],
+    "contactPoint": {
+      "hasEmail": "mailto:gretchen.greene@nist.gov",
+      "fn": "Gretchen Greene"
+    },
+    "accessLevel": "public",
+    "@id": "ark:/88434/pdr0-0002",
+    "publisher": {
+      "name": "National Institute of Standards and Technology",
+      "@type": "org:Organization"
+    },
+    "license": "https://www.nist.gov/open/license",
+    "keyword": [
+      "semiconductors",
+      "microelectronic",
+      "thermal analysis",
+      "photonics",
+      "interatomic",
+      "simulations",
+      "molecular dynamics",
+      "materials modeling",
+      "drugs and trace evidence",
+      "video and multimedia evidence",
+      "Semiconductor metrology",
+      "dimensional metrology",
+      "small angle x-ray scattering"
+    ],
+    "facilitators": [
+      {
+        "jobTitle": "Chips Metrology Director",
+        "familyName": "Dowell",
+        "givenName": "Marla",
+        "@type": "foaf:Person",
+        "fn": "Marla Dowell"
+      },
+      {
+        "jobTitle": "Chips Metrology Deputy Director",
+        "familyName": "Hale",
+        "givenName": "Paul",
+        "@type": "foaf:Person",
+        "fn": "Paul Hale"
+      },
+      {
+        "jobTitle": "Grand Challenge 1 & 6 Program Manager",
+        "familyName": "Keller",
+        "givenName": "Bob",
+        "@type": "foaf:Person",
+        "fn": "Bob Keller"
+      },
+      {
+        "jobTitle": "Grand Challenge 1 Program Manager",
+        "familyName": "Keller",
+        "givenName": "Bob",
+        "@type": "foaf:Person",
+        "fn": "Bob Keller"
+      },
+      {
+        "jobTitle": "Grand Challenge 2 Program Manager",
+        "familyName": "Cordova",
+        "givenName": "Isvar",
+        "@type": "foaf:Person",
+        "fn": "Isvar Cordova"
+      },
+      {
+        "jobTitle": "Grand Challenge 3 Program Manager",
+        "familyName": "Nandi",
+        "givenName": "Antara",
+        "@type": "foaf:Person",
+        "fn": "Antara Nandi"
+      },
+      {
+        "jobTitle": "Grand Challenge 4 & 5 Program Manager",
+        "familyName": "Routson",
+        "givenName": "Becca",
+        "@type": "foaf:Person",
+        "fn": "Becca Routson"
+      },
+      {
+        "jobTitle": "Grand Challenge 7 Program Manager",
+        "familyName": "Hoskins",
+        "givenName": "Brian",
+        "@type": "foaf:Person",
+        "fn": "Brian Hoskins"
+      },
+      {
+        "jobTitle": "Data Planning Program Manager",
+        "familyName": "Lau",
+        "givenName": "June",
+        "@type": "foaf:Person",
+        "fn": "June Lau"
+      }
+    ],
+    "ediid": "ark:/88434/pdr0-0002",
+    "components": [
+      {
+        "accessURL": "https://data.nist.gov/sdp/#/search?q=isPartOf.@id%3Dark:/88434/pdr0-0002&alternateView=chips",
+        "description": "The search URL here queries all the data which is part of Chips Metrology data collection.",
+        "@type": [
+          "nrda:DynamicResourceSet",
+          "nrdp:SearchPage"
+        ],
+        "searchURL": "/rmm/records?isPartOf.@id=ark:/88434/pdr0-0002",
+        "title": "Chips Metrology Digital Assets",
+        "_extensionSchemas": [
+          "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/SearchPage",
+          "https://data.nist.gov/od/dm/nerdm-schema/agg/v0.2#/definitions/DynamicResourceSet"
+        ]
+      },
+      {
+        "accessURL": "https://www.nist.gov/chips/research-development-programs/metrology-program",
+        "@type": [
+          "nrdp:AccessPage",
+          "dcat:Distribution"
+        ],
+        "_extensionSchemas": [
+          "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/AccessPage"
+        ],
+        "description": "NIST Chips Metrology oveview, areas of research, policy, and practice",
+        "title": "NIST Chips Metrology Website"
+      }
+    ],
+    "@type": [
+      "nrda:ScienceTheme",
+      "nrdp:PublicDataResource"
+    ],
+    "releaseHistory": {
+      "@id": "ark:/88434/pdr0-0002/pdr:v",
+      "@type": [
+        "nrdr:ReleaseHistory"
+      ],
+      "hasRelease": [
+        {
+          "issued": "2024-04-11",
+          "version": "1.0.0",
+          "@id": "ark:/88434/pdr0-0002/pdr:v/1.0.0",
+          "location": "https://data.nist.gov/od/id/ark:/88434/pdr0-0002/pdr:v/1.0.0",
+          "description": "initial release"
+        }
+      ]
+    }
+  }

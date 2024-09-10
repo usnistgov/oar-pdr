@@ -1,0 +1,16 @@
+.bubble {
+    border: 1px solid rgb(236, 236, 236);
+    background-color: #c0e6ff !important;
+    padding: 2px 5px;
+    margin: 3px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.row {
+    white-space: nowrap;
+}
+  
+.row > div {
+    display: inline-block;
+}

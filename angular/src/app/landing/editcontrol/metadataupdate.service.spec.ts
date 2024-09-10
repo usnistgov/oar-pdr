@@ -72,12 +72,13 @@ describe('MetadataUpdateService', () => {
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
-        svc.update('gurn', {'goober': "gurn", 'title': "Dr."});
+        svc.update('title', {'goober': "gurn", 'title': "Dr."});
         expect(md['title']).toBe("Dr.");
         expect(md['accessLevel']).toBe("public");
+        svc.update('goober', {'goober': "gurn", 'title': "Dr."});
         expect(md['goober']).toBe("gurn");
 
-        expect(svc.fieldUpdated('gurn')).toBeTruthy();
+        expect(svc.fieldUpdated('title')).toBeTruthy();
         expect(upd).toBeTruthy();
         expect(svc.lastUpdate).not.toBe({} as UpdateDetails);
     });
@@ -91,16 +92,17 @@ describe('MetadataUpdateService', () => {
             next: (res) => { md = res; },
             error: (err) => { throw err; }
         }); 
-        svc.update('gurn', {'goober': "gurn", 'title': "Dr."});
-        expect(svc.fieldUpdated('gurn')).toBeTruthy();
+        svc.update('title', {'goober': "gurn", 'title': "Dr."});
+        expect(svc.fieldUpdated('title')).toBeTruthy();
         expect(md['title']).toBe("Dr.");
+        svc.update('goober', {'goober': "gurn", 'title': "Dr."});
         expect(md['goober']).toBe("gurn");
         expect(md['description'].length).toEqual(1);
         svc.update("description", { description: rec['description'].concat(['Hah!']) });
         expect(md['description'].length).toEqual(2);
         expect(md['description'][1]).toEqual("Hah!");
 
-        svc.undo('gurn');
+        svc.undo('goober');
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
         expect(md['goober']).toBe(null);
         expect(md['title']).toContain("Multiple Encounter");
@@ -113,16 +115,17 @@ describe('MetadataUpdateService', () => {
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
 
         var md = null;
-        svc.setOriginalMetadata(rec);
+        
         svc.subscribe({
-            next: (res) => { md = res; },
+            next: (res) => { md = res;},
             error: (err) => { throw err; }
         }); 
-        svc.update('gurn', {'goober': "gurn", 'title': "Dr."});
-        expect(svc.fieldUpdated('gurn')).toBeTruthy();
+        svc.setOriginalMetadata(rec);
+        svc.update('title', {'goober': "gurn", 'title': "Dr."});
+        expect(svc.fieldUpdated('title')).toBeTruthy();
         expect(md['title']).toBe("Dr.");
 
-        svc.undo('gurn');
+        svc.undo('title');
         expect(svc.fieldUpdated('gurn')).toBeFalsy();
         expect(md['goober']).toBe(undefined);
         expect(md['title']).toContain("Multiple Encounter");

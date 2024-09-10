@@ -4,14 +4,15 @@ import { ResultlistComponent } from './resultlist.component';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
+import { ResultitemComponent } from '../resultitem/resultitem.component';
 
 @NgModule({
-  declarations: [ResultlistComponent],
+  declarations: [ResultlistComponent, ResultitemComponent],
   imports: [
     CommonModule, ButtonModule, FormsModule, DropdownModule
   ],
   exports: [
-    ResultlistComponent
+    ResultlistComponent, ResultitemComponent
   ]
 })
 export class ResultlistModule { }

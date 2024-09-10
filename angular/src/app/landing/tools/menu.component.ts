@@ -76,7 +76,7 @@ export class MenuComponent implements OnInit {
         }
 
     ngOnInit(): void {
-        this.allCollections = this.collectionService.loadCollections(this.collection.toLowerCase());
+        this.allCollections = this.collectionService.loadAllCollections();
 
         this.setColor();
 
@@ -113,6 +113,19 @@ export class MenuComponent implements OnInit {
             }
         }
 
+        let facilitatorlist = "";
+        if (this.record['facilitators']) {
+            for (let i = 0; i < this.record['facilitators'].length; i++) {
+                if(i > 0) facilitatorlist += ',';
+                let facilitator_fn = this.record['facilitators'][i]['fn'];
+
+                if (facilitator_fn != null && facilitator_fn != undefined && facilitator_fn.trim().indexOf(" ") > 0)
+                    facilitatorlist += '"'+ facilitator_fn.trim() + '"';
+                else    
+                    facilitatorlist += facilitator_fn.trim();
+            }
+        }
+
         let contactPoint = "";
         if (this.record['contactPoint'] && this.record['contactPoint'].fn) {
             contactPoint = this.record['contactPoint'].fn.trim();
@@ -121,10 +134,18 @@ export class MenuComponent implements OnInit {
             }
         }
 
-        // If authlist is empty, use contact point instead
+        // If authlist is empty, use contact point for NIST collection,
+        // use facilitators for other collections
         let authorSearchString: string = "";
         if(_.isEmpty(authlist)){
-            authorSearchString = "/#/search?q=contactPoint.fn%3D" + contactPoint;
+            if(this.collection == Collections.DEFAULT)
+                authorSearchString = "/#/search?q=contactPoint.fn%3D" + contactPoint;
+            else{
+                if(facilitatorlist)
+                    authorSearchString = "/#/search?q=facilitators.fn%3D" + facilitatorlist; 
+                else
+                    authorSearchString = "/#/search?q=contactPoint.fn%3D" + contactPoint;
+            }
         }else{
             authorSearchString = "/#/search?q=authors.fn%3D" + authlist + "%20OR%20contactPoint.fn%3D" + contactPoint;
         }
@@ -177,9 +198,9 @@ export class MenuComponent implements OnInit {
      * Set color variables
      */
     setColor() {
-        this.defaultColor = this.allCollections[this.collection.toLowerCase()].color.default;
-        this.lighterColor = this.allCollections[this.collection.toLowerCase()].color.lighter;
-        this.hoverColor = this.allCollections[this.collection.toLowerCase()].color.hover;
+        this.defaultColor = this.allCollections[this.collection].color.default;
+        this.lighterColor = this.allCollections[this.collection].color.lighter;
+        this.hoverColor = this.allCollections[this.collection].color.hover;
     }   
     
     /**

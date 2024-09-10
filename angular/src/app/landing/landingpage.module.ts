@@ -23,7 +23,7 @@ import { ErrorComponent, UserErrorComponent } from './error.component';
 // import { ForensicslandingbodyModule } from './forensicslandingbody/forensicslandingbody.module';
 // import { ForensicssearchresultModule } from './forensicssearchresult/forensicssearchresult.module';
 import { SearchresultModule } from './searchresult/searchresult.module';
-import { CollectionService } from '../shared/collection-service/collection.service'
+import { CollectionService } from '../shared/collection-service/collection.service';
 
 /**
  * A module supporting the complete display of landing page content associated with 

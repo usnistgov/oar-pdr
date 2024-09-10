@@ -15,8 +15,8 @@ const largedata: any  = require('../assets/sample-data/mds2-2116.json');
 
 export const context = {
     production: false,
-    useMetadataService: false,
-    useCustomizationService: false
+    useMetadataService: true,
+    useCustomizationService: true
 };
 
 export const config: LPSConfig = {
@@ -43,7 +43,7 @@ export const config: LPSConfig = {
     status: "Dev Version",
     appVersion: "v1.3.X",
     production: context.production,
-    editEnabled: false,
+    editEnabled: true,
     gacode: "not-set",
     ga4code: "not-set",
     screenSizeBreakPoint: 1060,
@@ -351,18 +351,83 @@ export const testdata: {} = {
         "keyword": [
             "face",
             "biometrics",
-            "forensic"
+            "forensic",
+            "semiconductors",
+            "microelectronic",
+            "thermal analysis",
+            "photonics",
+            "interatomic"
         ],
         "theme": [
             "Biometrics"
         ],
         "topic": [
             {
-                "@type": "Concept",
-                "scheme": "https://www.nist.gov/od/dm/nist-themes/v1.0",
-                "tag": "Information Technology: Biometrics"
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+              "tag": "Materials: Ceramics",
+              "@type": "Concept"
+            },
+            {
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+              "tag": "Standards: Reference data",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Physics: Condensed matter",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Materials: Modeling and computational material science",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Electronics: Thin-film electronics",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Electronics: Optoelectronics",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Chemistry: Molecular characterization",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Chemistry: Theoretical chemistry and modeling",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Nanotechnology:Nanoelectronics",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Chemistry: Chemical thermodynamics and chemical properties",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Electronics: Semiconductors",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes-chipsmetrology/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Materials: Materials characterization",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
+            },
+            {
+              "tag": "Physics: Optical physics",
+              "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.0",
+              "@type": "Concept"
             }
-        ],
+          ],
         "references": [
             {
                 "refType":"IsDocumentedBy",

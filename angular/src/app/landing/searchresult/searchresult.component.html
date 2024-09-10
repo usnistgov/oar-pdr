@@ -5,7 +5,7 @@
 
         <!-- Left side filters -->
         <div [@filterStatus]="filterToggler" style="vertical-align: top;" [ngStyle]="{'width': filterWidthStr}">
-                <app-filters [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [collection]="collection" [mobileMode]="mobileMode" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
+                <app-filters [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [filterWidthNum]="filterWidth" [parent]="parentDiv" [collection]="collection" [mobileMode]="mobileMode" [taxonomyURI]="taxonomyURI" (filterMode)="updateWidth($event)" (filterString)="updateFilterString($event)"></app-filters>
 
         </div>
 
@@ -16,7 +16,7 @@
         
         <!-- Search result list -->
         <div style="vertical-align: top;margin-top: -3em;" [ngStyle]="{'width': resultWidth}">
-                <app-resultlist [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [mobWidth]="mobWidth" [resultWidth]="resultWidth" [filterString]="filterString" [collection]="collection"></app-resultlist>
+                <app-resultlist [md]="record" [searchValue]='searchValue' [searchTaxonomyKey]='searchTaxonomyKey' [mobWidth]="mobWidth" [resultWidth]="resultWidth" [filterString]="filterString" [collection]="collection" [taxonomyURI]="taxonomyURI"></app-resultlist>
         </div>
     </div>
 </div>

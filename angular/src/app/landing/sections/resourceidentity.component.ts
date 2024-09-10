@@ -6,7 +6,8 @@ import { VersionComponent } from '../version/version.component';
 import { GoogleAnalyticsService } from '../../shared/ga-service/google-analytics.service';
 import { EditStatusService } from '../../landing/editcontrol/editstatus.service';
 import { LandingConstants } from '../../landing/constants';
-import { Themes, ThemesPrefs } from '../../shared/globals/globals';
+import { ColorScheme, Themes, ThemesPrefs } from '../../shared/globals/globals';
+import { CollectionService } from '../../shared/collection-service/collection.service';
 
 /**
  * a component that lays out the "identity" section of a landing page
@@ -29,27 +30,35 @@ export class ResourceIdentityComponent implements OnChanges {
     isPartOf: string[] = null;
     scienceTheme = Themes.SCIENCE_THEME;
     defaultTheme = Themes.DEFAULT_THEME;
-
+    colorScheme: ColorScheme;
+    
     // passed in by the parent component:
     @Input() record: NerdmRes = null;
     @Input() inBrowser: boolean = false;
     @Input() theme: string;
+    @Input() collection: string;
 
     /**
      * create an instance of the Identity section
      */
     constructor(private cfg: AppConfig,
                 public editstatsvc: EditStatusService,
-                private gaService: GoogleAnalyticsService)
+                private gaService: GoogleAnalyticsService,
+                public collectionService: CollectionService)
     { }
 
     ngOnInit(): void {
         this.EDIT_MODES = LandingConstants.editModes;
+        this.colorScheme = this.collectionService.getColorScheme(this.collection);
 
         // Watch current edit mode set by edit controls
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
         });
+    }
+
+    get isScienceTheme() {
+        return this.theme == this.scienceTheme;
     }
 
     /**

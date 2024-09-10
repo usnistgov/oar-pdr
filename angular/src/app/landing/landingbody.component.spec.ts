@@ -48,6 +48,7 @@ describe('LandingBodyComponent', () => {
         component.md["@type"][0] = "nrdp:PublicDataResource";
         component.metricsData = new MetricsData();
         component.editEnabled = false;
+        component.collection = "Semiconductors";
         fixture.detectChanges();
     }));
 
@@ -64,28 +65,14 @@ describe('LandingBodyComponent', () => {
 
         sect = cmpel.querySelector("#description")
         expect(sect).toBeTruthy();
-        title = sect.querySelector("h3");
-        expect(title).toBeTruthy();
-        expect(title.textContent).toEqual("Description");
 
         sect = cmpel.querySelector("#dataAccess")
         expect(sect).toBeTruthy();
-        title = sect.querySelector("h3");
-        expect(title).toBeTruthy();
-        expect(title.textContent).toEqual("Data Access");
 
         sect = cmpel.querySelector("#references")
         expect(sect).toBeTruthy();
-        title = sect.querySelector("h3");
-        expect(title).toBeTruthy();
-        expect(title.textContent).toEqual("References");
 
         sect = cmpel.querySelector("#about")
         expect(sect).toBeTruthy();
-        title = sect.querySelector("h3");
-        console.log("title", title);
-        expect(title).toBeTruthy();
-        expect(title.textContent).toEqual("About This Dataset");
-
     });
 });

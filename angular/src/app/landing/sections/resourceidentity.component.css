@@ -19,13 +19,16 @@
     padding-right: 1em;
 }
 
-.version {
-    background-color:var(--science-theme-background-default);
+.beta-label {
     margin-left: 0.5em; 
     color: white;
-    font-size: 12px;
-    vertical-align: top;
-    margin-top: .2em;
+    position:relative;
+    top: 0px;
+    left: 0px;
+    font-weight: bold;
+    font-size: small;
+    border-radius: 5px;
+    padding: 2px 6px 2px 2px;
 }
 
 #ispartof {

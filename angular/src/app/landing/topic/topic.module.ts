@@ -10,7 +10,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { TopicComponent } from './topic.component';
 import { SearchTopicsComponent } from './topic-popup/search-topics.component';
 import { ButtonModule } from 'primeng/button';
-
+import { ChipsModule } from 'primeng/chips';
+import { ChipModule } from "primeng/chip";
 /**
  * module that provide support for rendering and managing a resource's list of 
  * applicable research topics
@@ -23,6 +24,8 @@ import { ButtonModule } from 'primeng/button';
         TreeTableModule,
         OverlayPanelModule,
         ButtonModule,
+        ChipsModule,
+        ChipModule,
         ToastrModule.forRoot()
     ],
     declarations: [

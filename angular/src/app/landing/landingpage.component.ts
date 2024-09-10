@@ -191,7 +191,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         let metadataError = "";
         this.displaySpecialMessage = false;
         this.CART_ACTIONS = CartActions.cartActions;
-        this.imageURL = 'assets/images/fingerprint.jpg';
+        this.imageURL = '';
 
         // Only listen to storage change if we are not in edit mode
         if(this.inBrowser && !this.editEnabled){
@@ -313,7 +313,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     }
 
     loadBannerUrl() {
-        this.collectionObj = CollectionData[this.collection.toLowerCase()] as any;
+        this.collectionObj = CollectionData[this.collection] as any;
 
         switch(this.collection) { 
             case Collections.FORENSICS: { 
@@ -620,7 +620,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * return text representing the recommended citation for this resource
      */
     getCitation(): string {
-        this.citetext = (new NERDResource(this.md)).getCitation();
+        this.citetext = (new NERDResource(this.md)).getCitation(this.collection);
         return this.citetext;
     }
 

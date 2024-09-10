@@ -1,8 +1,8 @@
-<div class="grid" id="identity">
+<div class="grid" id="identity" style="margin-left: 0px;">
     <div style="width:100%">
         <span class="recordType">
             <b>{{recordType}}</b>
-            <span *ngIf="theme == scienceTheme" class="badge version"> Beta</span>
+            <span *ngIf="isScienceTheme" class="w3-badge beta-label" [style.background-color]="colorScheme.default"> Beta</span>
         </span>
         <br>
         <app-title [record]="record" [inBrowser]="inBrowser"></app-title>
