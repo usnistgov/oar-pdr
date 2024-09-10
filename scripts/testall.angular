@@ -15,6 +15,7 @@ PACKAGE_DIR=`(cd $execdir/.. > /dev/null 2>&1; pwd)`
 set -x
 cd $PACKAGE_DIR/angular
 
+echo node version: `node --version`
 [ -d "node_modules/@angular/cli" ] || npm install
 npm test
 

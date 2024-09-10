@@ -11,9 +11,9 @@
 
 # The parent should be an ancestor image of the operational container
 # 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
-RUN sed -e '/buster-updates/ s/^deb/#deb/' /etc/apt/sources.list \
+RUN sed -e '/bullseye-updates/ s/^deb/#deb/' /etc/apt/sources.list \
     > /tmp/sources.list && mv /tmp/sources.list /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y --no-install-recommends zip wget ca-certificates git xz-utils \
