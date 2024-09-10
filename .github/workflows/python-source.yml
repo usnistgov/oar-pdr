@@ -25,7 +25,7 @@ jobs:
           OAR_DOCKERHUB_CRED: ${{ secrets.OAR_DOCKERHUB_CRED }}
         run: |
           bash scripts/dhsetup.sh
-          cd docker && bash ./dockbuild.sh python
+          cd docker && bash ./dockbuild.sh pdrtest
 
       - name: Run Unit Tests via Docker
         run: cd docker && ./testall -D python

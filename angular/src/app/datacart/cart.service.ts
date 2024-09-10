@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 import { DataCart } from '../datacart/cart';
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
 import { AppConfig } from '../config/config';
+import { throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 interface CartLookup {
     /**
@@ -49,29 +51,56 @@ export class CartService {
         let backend: string = this.rpaBackend + id;
 
         return new Observable<any>(subscriber => {
-            return this._getRpaCart(backend).subscribe(
+            return this._getRpaCart(backend).pipe(
+                catchError(err => {
+                    // Check if the error is a 404 and has the specific message
+                    if (err.status === 404 && err.error?.message === "metadata not found: metadata list is empty") {
+                        // Propagate a user-friendly error message
+                        return throwError(() => new Error("Dataset no longer available for download"));
+                    }
+                    // Propagate other errors as they are
+                    return throwError(() => err);
+                })
+            ).subscribe(
                 (result) => {
                     let data = {};
-                    result.metadata.forEach((d) =>{
-                        let key = cartName+'/'+d.filePath;
+                    result.metadata.forEach((d) => {
+                        let key = cartName + '/' + d.filePath;
                         d['key'] = key;
                         d["isSelected"] = true;
                         data[key] = d;
-                    })
+                    });
                     let out: DataCart = new DataCart(cartName, data, null, 0);
                     subscriber.next(out);
                     subscriber.complete();
-                }, (err) =>{
-                    console.log("err", err);
-                    subscriber.next(null);
+                }, 
+                (err) => {
+                    // Log the error or handle it if needed
+                    const errorMessage = this.getErrorMessage(err);
+                    console.error("Error in getRpaCart:", errorMessage);
+                    subscriber.error(errorMessage); // Propagate the error to the component
                     subscriber.complete();
                 }
-            )
-        })
+            );
+        });
     }
 
+    
     public _getRpaCart(url: string) : Observable<any> {
         return this.http.get(url);
+    }
+
+    /**
+     * Utility function to get the error message
+     * @param error The error object or a function returning an error object
+     * @returns The extracted error message
+     */  
+    private getErrorMessage(error: any): string {
+        // Check if the error is a function and call it to get the Error object
+        const errorObj = typeof error === 'function' ? error() : error;
+        
+        // Return the error message
+        return errorObj.message;
     }
 
     /**

@@ -1,6 +1,7 @@
 """
 This module provides the base validator class
 """
+import sys, traceback
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import Sequence, OrderedDict
 
@@ -10,6 +11,10 @@ REC   = 4
 ALL   = 7
 PROB  = 3
 issuetypes = [ ERROR, WARN, REC ]
+
+def _fmt_exc():
+    return "".join(traceback.format_exception(*sys.exc_info()))
+    
 
 class Validator(object):
     """
@@ -433,7 +438,7 @@ class ValidatorBase(Validator):
                 out._err( ValidationIssue(self.profile[0], self.profile[1],
                                           "validator failure", ERROR, 
                                      "test method, {0}, raised an exception: {1}"
-                                            .format(test, str(ex)), False),
+                                            .format(test, _fmt_exc()), False),
                           False )
         return out
 

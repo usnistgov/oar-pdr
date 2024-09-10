@@ -37,9 +37,9 @@ setup_build
 
 log_intro   # record start of build into log
 
-$codedir/oar-metadata/docker/dockbuild.sh $BUILD_IMAGES
-
 if { echo " $BUILD_IMAGES " | grep -qs " pdrtest "; }; then
+    $codedir/oar-metadata/docker/dockbuild.sh
+
     echo '+' docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest | logit
     docker build $BUILD_OPTS -t $PACKAGE_NAME/pdrtest pdrtest 2>&1 | logit
 fi
