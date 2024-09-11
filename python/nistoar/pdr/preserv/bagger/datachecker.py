@@ -339,7 +339,7 @@ class DataChecker(object):
                                mbagname, str(ex))
             return False
 
-        except DistribServiceError as ex:
+        except DistribServiceException as ex:
             if self.log:
                 self.log.error("unexpected error while querying on %s: %s",
                                mbagname, str(ex))
