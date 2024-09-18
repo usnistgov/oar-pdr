@@ -77,7 +77,7 @@ enableProdMode();
         { provide: ErrorHandler, useClass: AppErrorHandler },
         GoogleAnalyticsService,
         D3Service,
-        fakeBackendProvider,
+        // fakeBackendProvider,
         DatePipe
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]

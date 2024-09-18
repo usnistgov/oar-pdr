@@ -44,7 +44,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
-      console.log("request.url", request.url);
+        alert("You are using fake backend!");
+
+        console.log("request.url", request.url);
 
         // RPA
         if (request.url.indexOf('/rpa') > -1 && request.method === 'GET') {
