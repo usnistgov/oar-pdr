@@ -86,7 +86,15 @@ export class ResultlistComponent implements OnInit {
     constructor(private searchService: SearchService, 
         private cfg: AppConfig,
         public collectionService: CollectionService,
-        public gaService: GoogleAnalyticsService) { }
+        public gaService: GoogleAnalyticsService) { 
+
+            this.searchService.watchClearAll((clearAll: boolean) => {
+                if(clearAll) {
+                    this.searchPhases = "";
+                    this.filterResults();
+                }
+            });
+        }
 
     ngOnInit(): void {
         this.colorScheme = this.collectionService.getColorScheme(this.collection);
@@ -292,7 +300,8 @@ export class ResultlistComponent implements OnInit {
             let searchWord: string = "";
 
             if(searchPhase != ""){
-                filteredResults = JSON.parse(JSON.stringify(this.searchResultsOriginal));
+                // filteredResults = JSON.parse(JSON.stringify(this.searchResultsOriginal));
+                filteredResults = JSON.parse(JSON.stringify(this.searchResults));
 
                 // Restore the contents in quotes
                 if(searchPhase.indexOf('Quooooote') >= 0) {
@@ -303,59 +312,48 @@ export class ResultlistComponent implements OnInit {
                     searchWord = searchPhase.replace(/"/g, '');
                 }
 
-                // Do search
-                filteredResults = this.filterResultByWord(filteredResults, searchWord);
-
-                filteredResults.forEach((object)=>{
-                    finalFilteredResults.push(object);
-                })
-                
-                finalFilteredResults.map(item => item["@id"])
-                    .filter((value, index, self) => self.indexOf(value) === index);
+                // Filter by word
+                this.filterResultByWord(this.searchResults, searchWord);
             }
         })
-        
-        this.searchResults = finalFilteredResults;
     }
 
     /**
      * Filter search result using searchString
      * @param searchResults The result list to be searched
      * @param searchString search string
-     * @returns filtered result list
      */
     filterResultByWord(searchResults:any[], searchString: string) {
         let retuenVal: any[] = [];
         let found: boolean = false;
 
+        // Filter by word means only remove items, never add items
         for(let object of searchResults) {
-            found = false;
-            for(let key of this.searchFields) {
-                if(Array.isArray(object[key])) {
-                    for(let val of object[key]) {
-                        if(val.toLowerCase().includes(searchString.trim().toLowerCase())) {
+            if(object.active){
+                found = false;
+                for(let key of this.searchFields) {
+                    if(Array.isArray(object[key])) {
+                        for(let val of object[key]) {
+                            if(val.toLowerCase().includes(searchString.trim().toLowerCase())) {
+                                retuenVal.push(object);
+                                found = true;
+                                break;
+                            }
+                        }
+                    }else{
+                        if(object[key].toLowerCase().includes(searchString.toLowerCase())) {
                             retuenVal.push(object);
                             found = true;
                             break;
                         }
                     }
-                }else{
-                    if(object[key].toLowerCase().includes(searchString.toLowerCase())) {
-                        retuenVal.push(object);
-                        found = true;
-                        break;
-                    }
-                }
 
-                if(found) break;
-            };
+                    if(found) break;
+                };
+
+                object.active = found; 
+            }
         }
-
-        // Remove items with duplicated @id
-        retuenVal.map(item => item["@id"])
-                .filter((value, index, self) => self.indexOf(value) === index);
-
-        return retuenVal;
     }
 
     /**
@@ -392,9 +390,6 @@ export class ResultlistComponent implements OnInit {
         
         // Reset the search result
         this.resetResult(this.filterString=="NoFilter");
-
-        // Handle search text box first
-        this.filterResultByPhase(this.searchPhases);
 
         // Handle filters
         if(this.filterString != "noFilter" && this.filterString != ""){
@@ -501,6 +496,9 @@ export class ResultlistComponent implements OnInit {
                 }
             })
         }
+
+        // Handle search text box first
+        this.filterResultByPhase(this.searchPhases);
 
         this.searchResultsForDisplay = [];
         this.searchResults.forEach((object) => {

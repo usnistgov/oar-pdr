@@ -50,6 +50,18 @@ export class SearchService {
         this.portalBase = cfg.get("locations.portalBase", "/unconfigured");
     }
 
+   /**
+     * Signal clear all action.  
+     */
+    _clearAll : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    public setClearAll(val : boolean) { 
+        this._clearAll.next(val); 
+    }
+    public watchClearAll(subscriber) {
+        this._clearAll.subscribe(subscriber);
+    }
+
+
     searchById(searchValue: string, browserside: boolean = false) {
         let backend: string = this.rmmBackend
 
