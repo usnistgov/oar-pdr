@@ -697,6 +697,11 @@ export class FiltersComponent implements OnInit {
      * clear filters
      */
     clearFilters() {
+        this.searchService.setClearAll(true);
+        setTimeout(() => {
+            this.searchService.setClearAll(false);
+        }, 0)
+
         this.filterStrings = {};
         this.filterStrings[Collections.DEFAULT] = "";
         this.filterStrings[Collections.FORENSICS] = "";        
