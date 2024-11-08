@@ -27,7 +27,7 @@
                                     <!-- <p-chips [(ngModel)]="topics[col]" [inputStyle]="{ display: 'none' }"></p-chips> -->
         
                                     <span style="max-width: 90%; ">
-                                        <span class="topics" [style.background-color]="bubbleColor(topic)" [style.border]="borderStyle(topic)" (mouseenter)="mouseEnter(topic)" (mouseover)="mouseEnter(topic)" (mouseout)="mouseOut(topic)" [style.cursor]="setCursor(topic)" style="padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 25px;white-space: nowrap;" (click)="topicClick(topic, col)" *ngFor="let topic of topicDisplay[col]; let i =index">
+                                        <span class="topics"  *ngFor="let topic of topicDisplay[col]; let i =index" [style.background-color]="bubbleColor(topic)" [style.border]="borderStyle(topic)" (mouseenter)="mouseEnter(topic)" (mouseover)="mouseEnter(topic)" (mouseout)="mouseOut(topic)" [style.cursor]="setCursor(topic)" style="padding: 0px 5px;margin: 3px;border-radius: 20px;text-align: center;margin-right: 5px;line-height: 25px;" (click)="topicClick(topic, col)">
                                             <span style="display: inline-block">{{ topic.tag }}</span>
                                         </span> 
                                     </span>
