@@ -6,10 +6,17 @@ import { userInfo } from 'os';
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
-
+    _storage: Storage = null; 
   constructor(private http: HttpClient) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    //Read local storage, if exist, set the flag so the alert will not display again
+    //Otherwise, set storage and display alert
+    if(!localStorage.getItem("fakebackend")) {
+        localStorage.setItem("fakebackend", "true"); 
+        alert("You are using fake backend!");
+    }
+
     // array in local storage for registered users
 
     // const sampleData: any = require('../../assets/science-theme/BiometricsScienceTheme.json');
@@ -44,8 +51,6 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
-        alert("You are using fake backend!");
-
         console.log("request.url", request.url);
 
         // RPA

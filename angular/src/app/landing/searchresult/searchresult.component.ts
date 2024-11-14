@@ -28,7 +28,7 @@ export class SearchresultComponent implements OnInit {
     searchTaxonomyKey: string;
     page: number = 1;
     filterToggler: string = 'expanded';
-    filterString: string = "";
+    filterObjs: any[] = [];
     mouse: any = {x:0, y:0};
     mouseDragging: boolean = false;
     prevMouseX: number = 0;
@@ -138,11 +138,11 @@ export class SearchresultComponent implements OnInit {
     }
 
     /**
-     * Update the filter string
-     * @param filterString 
+     * Update the filter object
+     * @param filterObjs 
      */
-    updateFilterString(filterString: string) {
-        this.filterString = filterString;
+    updateFilterObjs(filterObjs: any[]) {
+        this.filterObjs = filterObjs;
     }
 
     /**
