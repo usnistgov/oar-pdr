@@ -307,7 +307,7 @@ export class BundleplanComponent implements OnInit {
 
         // Sending data to _bundle_plan and get back the plan
         this.downloadFiles = this.dataCart.getSelectedFiles();
-        let bundleBaseName = this.generateZipFileName(this.dataCart.getName());
+        let bundleBaseName = this.generateZipFileName("NIST-Data");
         
         this.bundlePlanRef = this.downloadService.getBundlePlan(bundleBaseName, this.downloadFiles).subscribe(
             blob => {
