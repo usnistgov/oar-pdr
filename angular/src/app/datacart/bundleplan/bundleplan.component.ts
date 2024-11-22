@@ -285,12 +285,13 @@ export class BundleplanComponent implements OnInit {
         this.downloadService.download(zip, this.zipData, this.dataCart);
     }
 
-    private generateZipFileName(base : string = null) : string {
-        const MIN : number = 0;
-        const MAX : number = 100000;
-        let suffix = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
-        return base + suffix;
-    }
+    private generateZipFileName(base: string = "NIST-Data"): string {
+        // current timestamp 
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 16).replace(":", "-");
+
+        return `${base}-${timestamp}`;
+    } 
 
     /**
      * download the selected files from this cart.
