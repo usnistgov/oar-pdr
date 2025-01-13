@@ -47,7 +47,7 @@ export class TaxonomyComponent implements OnInit {
     @Input() isCollection: boolean = false;
     @Input() collectionNodeExpanded: boolean = false;
     @Input() clearAllCheckbox: boolean = false;
-    @Output() filterString: EventEmitter<string> = new EventEmitter();
+    @Output() filterObj: EventEmitter<any> = new EventEmitter();
     
     constructor() { 
 
@@ -92,12 +92,12 @@ export class TaxonomyComponent implements OnInit {
         if(this.collectionThemesTree && this.collectionThemesTree.length > 0)
             this.preselectNodes(this.collectionThemesTree[0].children);
 
-        this.filterResults();
+        this.createFilterObj();
     }
 
     uncheckAll() {
         this.collectionSelectedThemesNode = [];
-        this.filterResults();
+        this.createFilterObj();
     }
 
     preselectNodes(allNodes: TreeNode[]): void {
@@ -140,41 +140,39 @@ export class TaxonomyComponent implements OnInit {
     /**
      * Form the filter string and refresh the result page
      */
-    filterResults() {
+    createFilterObj() {
         this.allChecked = this.isAllChecked;
-        let lFilterString: string = "";
+        let lFilterObj: any = {
+            value: []
+        };
+
         let themeSelected: boolean = false;
         // let themeType = '';
 
+        if(this.isCollection) {
+            lFilterObj.type = "topic.tag";
+        }else{
+            lFilterObj.type = this.collection;
+        }
         // Collection Research topics
         
-            if (this.collectionSelectedThemesNode.length > 0) {
-                for (let theme of this.collectionSelectedThemesNode) {
-                    if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data[0] !== 'undefined') {
-                        themeSelected = true;
-                        for(let i = 0; i < theme.data.length; i++ ){
-                            if(this.isCollection) {
-                                // themeType += theme.data[i] + ',';
-                                lFilterString += this.collection + "----" + theme.data[i].trim() + ",";
-                            }else{
-                                lFilterString += theme.data[i].trim().replace(/\s/g, "") + ",";
-                            }
+        if (this.collectionSelectedThemesNode.length > 0) {
+            for (let theme of this.collectionSelectedThemesNode) {
+                if (theme != 'undefined' && typeof theme.data !== 'undefined' && theme.data[0] !== 'undefined') {
+                    themeSelected = true;
+                    for(let i = 0; i < theme.data.length; i++ ){
+                        if(this.isCollection) {
+                            // themeType += theme.data[i] + ',';
+                            lFilterObj.value.push(this.collection + "----" + theme.data[i].trim());
+                        }else{
+                            lFilterObj.value.push(theme.data[i].trim().replace(/\s/g, ""));
                         }
                     }
                 }
             }
+        }
 
-            lFilterString = this.removeEndingComma(lFilterString);
-            if(!lFilterString) lFilterString = "";
-            else {
-                if(this.isCollection) {
-                    lFilterString = "topic.tag=" + lFilterString;
-                }else{
-                    lFilterString = this.collection + "=" + lFilterString;
-                }
-            } 
-
-        this.filterString.emit(lFilterString);
+        this.filterObj.emit(lFilterObj);
     }
 
     /**

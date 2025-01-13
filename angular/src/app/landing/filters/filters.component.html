@@ -28,10 +28,12 @@
             <div style="padding-left: -1em;padding-right: -2em;" *ngIf="isActive && !searching">
                 <!-- Loop through all themes -->
                 <div *ngFor="let key of collectionOrder">
-                    <app-taxonomy [collectionThemesTree]="allCollections[key].theme?.collectionThemesTree" [collection]="key" [isCollection]="true"
-                        [colorScheme]="colorScheme" [collectionNodeExpanded]="true" [clearAllCheckbox]="clearAllCheckbox"
-                        (filterString)="updateFilterString($event, key)">
-                    </app-taxonomy>
+                    <div *ngIf="allCollections[key].theme">
+                        <app-taxonomy [collectionThemesTree]="allCollections[key].theme.collectionThemesTree" [collection]="key" [isCollection]="true"
+                            [colorScheme]="colorScheme" [collectionNodeExpanded]="true" [clearAllCheckbox]="clearAllCheckbox"
+                            (filterObj)="updateFilterObj($event, key)">
+                        </app-taxonomy>
+                    </div>
                 </div>
 
                 <div *ngIf="theme=='ScienceTheme'" style="width: 100%;">
@@ -44,14 +46,14 @@
                         <!-- Type of Resource -->
                         <app-taxonomy [collectionThemesTree]="resourceTypeTree" collection="@type" [isCollection]="false"
                         [colorScheme]="colorScheme" [collectionNodeExpanded]="false" [clearAllCheckbox]="clearAllCheckbox"
-                            (filterString)="updateFilterString($event, '@type')">
+                            (filterObj)="updateFilterObj($event, '@type')">
                         </app-taxonomy>
 
                         <!-- Components (Record has) -->
                         <div class="filter-checkbox bottom-line" *ngIf="componentsTree.length > 0">
                             <app-taxonomy [collectionThemesTree]="componentsTree" collection="components.@type" [isCollection]="false"
                             [colorScheme]="colorScheme" [collectionNodeExpanded]="false" [clearAllCheckbox]="clearAllCheckbox"
-                                (filterString)="updateFilterString($event, 'components.@type')">
+                                (filterObj)="updateFilterObj($event, 'components.@type')">
                             </app-taxonomy>
                         </div>
                     </div>
@@ -66,7 +68,7 @@
                         <label for="suggestedauthor" class="hideLabel">Search Input</label>
                         <p-autoComplete [(ngModel)]="selectedAuthor" inputId="suggestedauthor"
                             [suggestions]="suggestedAuthors" (completeMethod)="filterAuthors($event)"
-                            (onSelect)="filterResults()" (onUnselect)="filterResults()" [multiple]="true"
+                            (onSelect)="createFilterObj()" (onUnselect)="createFilterObj()" [multiple]="true"
                             [minLength]="1" [maxlength]="30" [style]="filterStyle">
                             <ng-template let-author pTemplate="item">
                                 <div data-toggle="tooltip" [title]="author">{{author}}</div>
@@ -84,7 +86,7 @@
                         <label for="keyword" class="hideLabel">Keyword</label>
                         <p-autoComplete inputId="keyword" [(ngModel)]="selectedKeywords"
                             [suggestions]="suggestedKeywords" (completeMethod)="updateSuggestedKeywords($event)"
-                            [multiple]="true" (onSelect)="filterResults()" (onUnselect)="filterResults()"
+                            [multiple]="true" (onSelect)="createFilterObj()" (onUnselect)="createFilterObj()"
                             [minLength]="1" [maxlength]="30" [style]="filterStyle" [inputStyle]="{'width':'100%'}">
                             <ng-template let-keyword pTemplate="item">
                                 <div data-toggle="tooltip" [title]="suggestedKeywordsLkup[keyword]">{{keyword}}</div>

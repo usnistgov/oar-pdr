@@ -14,7 +14,7 @@
                         href="{{record.contactPoint.hasEmail}}" target="_top">
                         {{record.contactPoint.fn}}</a>
                     <span *ngIf="!isEmail">{{record.contactPoint.fn}}</span>
-                </strong>..
+                </strong>.
                 <i style="cursor: pointer; margin-left: 5px;" class="faa"
                     [ngClass]="expandIconClass"
                     aria-hidden="true" data-toggle="tooltip" [title]="expandButtonAlterText" [aria-label]="expandButtonAlterText" (click)="toggleExpand()"></i>
