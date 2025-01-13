@@ -203,7 +203,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         //Clean up fabebackend in local storage so an alert will display if fake back end is used.
         //If fake back end is used, the alert will show up only once. 
-        if(localStorage.getItem("fakebackend")) {
+        if(this.inBrowser && localStorage.getItem("fakebackend")) {
             localStorage.removeItem("fakebackend"); 
         }
 
