@@ -79,7 +79,7 @@ export class ResultlistComponent implements OnInit {
     @Input() searchTaxonomyKey: string;
     @Input() mobWidth: number = 1920;
     @Input() resultWidth: string = '400px';
-    @Input() filterString: string = '';
+    @Input() filterObjs: any[] = [];
     @Input() collection: string = Collections.FORENSICS;
     @Input() taxonomyURI: any = {};
 
@@ -91,7 +91,7 @@ export class ResultlistComponent implements OnInit {
             this.searchService.watchClearAll((clearAll: boolean) => {
                 if(clearAll) {
                     this.searchPhases = "";
-                    this.filterResults();
+                    this.filterResultsNew();
                 }
             });
         }
@@ -123,8 +123,8 @@ export class ResultlistComponent implements OnInit {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if(changes.filterString != null && changes.filterString != undefined) {
-            this.filterResults();
+        if(changes.filterObjs != null && changes.filterObjs != undefined) {
+            this.filterResultsNew();
         }
     }
 
@@ -166,7 +166,7 @@ export class ResultlistComponent implements OnInit {
             item.active = true;
         }
 
-        this.filterResults();
+        this.filterResultsNew();
         this.sortByDate();
 
         this.showResultList = true;
@@ -383,27 +383,23 @@ export class ResultlistComponent implements OnInit {
     /**
      * Apply filters from left side panel and the search word(s) from the search text box
      */
-    filterResults() {
+    filterResultsNew() {
         if(this.searchResults == undefined) return;
 
         let filters: string[];
-        
-        // Reset the search result
-        this.resetResult(this.filterString=="NoFilter");
+        this.resetResult(this.filterObjs[0].type == "NoFilter");
 
         // Handle filters
-        if(this.filterString != "noFilter" && this.filterString != ""){
-            filters = this.filterString.split("&");
-            filters.forEach((filter) => {
-                switch(filter.split("=")[0]){
+        if(this.filterObjs && this.filterObjs.length > 0){
+            this.filterObjs.forEach((filter) => {
+                switch(filter.type){
                     case "@type":
                         this.searchResults.forEach((object) => {
                             if(!object.active){
                                 // object.active = false;
 
                                 object["@type"].forEach((oType) => {
-                                    let types = filter.split("=")[1].split(",");
-                                    types.forEach(type => {
+                                    filter.value.forEach(type => {
                                         if(oType.toLowerCase().includes(this.restoreReservedChars(type).toLowerCase()))
                                             object.active = true;
                                     });
@@ -413,14 +409,13 @@ export class ResultlistComponent implements OnInit {
 
                         break;
                     case "topic.tag":
-                        let topics = filter.split("=")[1].split(",");
                         for(let resultItem of this.searchResults) {
                             
                             if(!resultItem.active){
                                 // resultItem.active = false;
 
                                 for(let oTopic of resultItem["topic"]) {
-                                    for(let topic of topics) {
+                                    for(let topic of filter.value) {
                                         let collection = topic.split("----")[0];
                                         let topicValue = this.restoreReservedChars(topic.split("----")[1]);
 
@@ -447,8 +442,7 @@ export class ResultlistComponent implements OnInit {
     
                                     object["components"].forEach((component) => {
                                         component["@type"].forEach((cType) => {
-                                            let types = filter.split("=")[1].split(",");
-                                            types.forEach(type => {
+                                            filter.value.forEach(type => {
                                                 if(cType.toLowerCase().includes(this.restoreReservedChars(type).toLowerCase()))
                                                     object.active = true;
                                             });
@@ -465,8 +459,8 @@ export class ResultlistComponent implements OnInit {
                         this.searchResults.forEach((object) => {
                             if(!object.active){
                                 // object.active = false;
-                            
-                                if(object["contactPoint"]["fn"].includes(filter.split("=")[1]))
+                                if(filter.value.find((str) => str === object["contactPoint"]["fn"]))
+                                // if(object["contactPoint"]["fn"].includes(filter.value[0]))
                                     object.active = true;
                             }
                         });
@@ -481,8 +475,8 @@ export class ResultlistComponent implements OnInit {
                             
                                 object["keyword"].forEach((keyword) => {
                                     //Loop through each search keyword from keyword filter
-                                    filter.split("=")[1].split(",").forEach(kw => {
-                                        if(keyword.toLowerCase().includes(this.restoreReservedChars(kw))){
+                                    filter.value.forEach(kw => {
+                                        if(keyword.toLowerCase().includes(kw)){
                                             object.active = true;
                                         }
                                     })   
@@ -496,6 +490,7 @@ export class ResultlistComponent implements OnInit {
                 }
             })
         }
+
 
         // Handle search text box first
         this.filterResultByPhase(this.searchPhases);

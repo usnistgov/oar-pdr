@@ -8,9 +8,9 @@
 </div>
 
 <!-- landing page panel -->
-<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad">
+<div *ngIf="!displaySpecialMessage && _showContent" class="p-grid p-grid-responsive p-grid-pad" style="width:100%;" >
     <!-- <div *ngIf="!displaySpecialMessage"> -->
-    <div [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'">
+    <div [ngClass]="mobileMode ? 'landingcard-mobile' : 'landingcard'" style="width:100%;">
         <!-- <div> -->
         <div *ngIf="md === null && edstatsvc.authorized && !edstatsvc.hasError">
             <div class="col-12 col-md-10 col-lg-10 col-sm-12" style="padding-left: 1%">
@@ -19,12 +19,15 @@
         </div>
 
         <!-- Menu button and the popup menu (mobile mode only) -->
-        <div style="width: 100%; height: 0px; margin-top: 1em;" class="sticky-button">
+        <div
+            #stickyPopupMenu
+            class="stickyPopupMenu"
+            [ngStyle]="{'top': stickPopupMenuTop + 'px'}">
             <!-- div to keep track of the menu button position -->
             <div #stickyButton></div>
 
             <button #menubtn *ngIf="md !== null && inBrowser && mobileMode"
-                [ngClass]="windowScrolled ? 'sticky-button' : 'rightmenu-button'" type="button" pButton
+                type="button" pButton
                 icon="faa faa-list" class="ui-button ui-button-icon-only"
                 (click)="toggleMenu($event)">
             </button>

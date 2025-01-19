@@ -102,6 +102,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     collectionObj: any;
 
     buttonTop: number = 20;
+    stickPopupMenuDiv: any;
+    stickPopupMenuTop: number = 176;
 
     showStickMenu: boolean = false;
 
@@ -115,12 +117,25 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     @ViewChild(LandingBodyComponent)
     landingBodyComponent: LandingBodyComponent;
 
+    @ViewChild('stickyPopupMenu') stickyPopupMenu: ElementRef;
+
     // @ViewChild(MetricsinfoComponent)
     // metricsinfoComponent: MetricsinfoComponent;
 
     @ViewChild('stickyButton') btnElement: ElementRef;
     @ViewChild('stickyMenu') menuElement: ElementRef;
     @ViewChild('test') test: ElementRef;
+
+    @HostListener('window:scroll', ['$event'])
+    onScroll(event: Event) {
+        // Get the current scroll position
+        const scrollY = window.scrollY;
+        // Do something based on the scroll position
+        let dif = 176 - scrollY;
+        if (dif < 20) {
+            this.stickPopupMenuTop = scrollY + 20;
+        }
+    }
 
     /**
      * create the component.
@@ -186,6 +201,12 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
      * the Angular rendering infrastructure.
      */
     ngOnInit() {
+        //Clean up fabebackend in local storage so an alert will display if fake back end is used.
+        //If fake back end is used, the alert will show up only once. 
+        if(this.inBrowser && localStorage.getItem("fakebackend")) {
+            localStorage.removeItem("fakebackend"); 
+        }
+
         this.recordLevelMetrics = new RecordLevelMetrics();
         var showError: boolean = true;
         let metadataError = "";
@@ -303,6 +324,25 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /**
+     * apply housekeeping after view has been initialized
+     */
+    ngAfterViewInit() {
+        if(this.inBrowser) {
+            this.stickPopupMenuDiv = this.stickyPopupMenu.nativeElement.getBoundingClientRect();
+            //Set the position of the sticky menu (or menu button)
+            setTimeout(() => {
+                this.setMenuPosition();
+            }, 0);
+        }
+
+        if (this.md && this.inBrowser) {
+            this.useFragment();
+
+            window.history.replaceState({}, '', '/od/id/' + this.reqId);
+        }
+    }
+
     getCollection() {
         if(this.pdrid.includes("pdr0-0001"))
             this.collection = Collections.FORENSICS;
@@ -391,11 +431,11 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
     /**
      * Detect window scroll
      */
-    @HostListener("window:scroll", [])
-    onWindowScroll() {
-        if(this.mobileMode)
-            this.buttonTop = window.pageYOffset > 200? 10 : 200 - window.pageYOffset;
-    }
+    // @HostListener("window:scroll", [])
+    // onWindowScroll() {
+    //     if(this.mobileMode)
+    //         this.buttonTop = window.pageYOffset > 200? 10 : 200 - window.pageYOffset;
+    // }
 
     /**
      * When storage changed, if it's dataCartStatus and action is "set download completed", 
@@ -460,24 +500,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit {
             return formatBytes(this.recordLevelMetrics.DataSetMetrics[0].total_size, 2);
         else
             return "";
-    }
-
-    /**
-     * apply housekeeping after view has been initialized
-     */
-    ngAfterViewInit() {
-        if(this.inBrowser) {
-            //Set the position of the sticky menu (or menu button)
-            setTimeout(() => {
-                this.setMenuPosition();
-            }, 0);
-        }
-
-        if (this.md && this.inBrowser) {
-            this.useFragment();
-
-            window.history.replaceState({}, '', '/od/id/' + this.reqId);
-        }
     }
 
     /**

@@ -13,7 +13,7 @@ export class CollectionService {
     // list of collections for landing page display (topics)
     collectionForDisplay: string[] = [];
 
-    allCollections: any = {};
+    allCollections: any = null;
     colorSchemes: any = {};
     colorSchemeSub = new BehaviorSubject<ColorScheme[]>([] as ColorScheme[]);
 
@@ -66,9 +66,12 @@ export class CollectionService {
      * @returns collection object list that contains nist and collection data
      */
     loadAllCollections() {
-        for(let col of this.collectionOrder) {
-            this.allCollections[col] = this.loadCollection(col);
-            this.colorSchemes[col] = this.allCollections[col].color;
+        if(!this.allCollections) {
+            this.allCollections = {};
+            for(let col of this.collectionOrder) {
+                this.allCollections[col] = this.loadCollection(col);
+                this.colorSchemes[col] = this.allCollections[col].color;
+            }
         }
 
         return this.allCollections;

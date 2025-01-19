@@ -14,8 +14,8 @@
     <div class="filter-checkbox">
         <div [@expand]="collectionNodeExpanded? collectionShowMoreLink ? 'collapsed':'expanded':'closed'">
             <p-tree id="collectionThemes" [value]="collectionThemesTree[0].children" selectionMode="checkbox" [style]="researchTopicStyle" [(selection)]="collectionSelectedThemesNode" 
-                (onNodeUnselect)="filterResults()"
-                (onNodeSelect)="filterResults()">
+                (onNodeUnselect)="createFilterObj()"
+                (onNodeSelect)="createFilterObj()">
                 <ng-template let-node pTemplate="default">
                     <div class="text-nowrap" data-toggle="tooltip" [title]="filterTooltip(node)" >
                         <span *ngIf="node.count > 0; else header1" class="invisible-scrollbar" > {{node.label.split("---")[0]}}&nbsp;</span>

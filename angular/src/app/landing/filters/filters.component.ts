@@ -72,7 +72,7 @@ export class FiltersComponent implements OnInit {
     clearAllCheckbox: boolean = false;
 
     collectionThemesWithCount: FilterTreeNode[] = [];
-    filterStrings = {};
+    filterObjs = {};
 
 //  Object that hold all themes: Forensics, NIST, ...
     allCollections: any = {};
@@ -144,7 +144,7 @@ export class FiltersComponent implements OnInit {
     @Input() collection: string = Collections.FORENSICS;
     @Input() taxonomyURI: any = {};
     @Output() filterMode = new EventEmitter<string>();  // normal or collapsed
-    @Output() filterString = new EventEmitter<string>();  
+    @Output() filterObjsOut = new EventEmitter<any[]>();  
 
     constructor(
         public taxonomyListService: TaxonomyListService,
@@ -157,7 +157,7 @@ export class FiltersComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.collectionService.loadAllCollections();
+        // this.collectionService.loadAllCollections();
 
         this.collectionOrder = this.collectionService.getCollectionOrder();
         this.msgs = [];
@@ -180,96 +180,75 @@ export class FiltersComponent implements OnInit {
      * Update the filter string object based on the input filter string
      * @param $event filter string returned from app-taxonomy
      */
-    updateFilterString(event, collection: string) {
-        let _filterString = event;
-        if(!event) _filterString = "";
+    updateFilterObj(event, collection: string) {
+        let _filterObj = event;
+        if(!event) _filterObj = null;
 
-        this.filterStrings[collection] = _filterString;
+        this.filterObjs[collection] = _filterObj;
 
-        this.filterResults();
-    }
-
-    /**
-     * Replace reserved chars with char name to avoid problems
-     * when parsing filter string in the result list component.
-     * For example, replace "&" with "aaamp". result list component
-     * restore "aaamp" back to "&".
-     * @param strng input string
-     */
-    escapeReservedChars(inputStrng: string) {
-        let outputString: string;
-        if(!inputStrng || inputStrng.trim() == "")
-            return "";
-        else    
-            return inputStrng.replace(new RegExp("&", "g"), "aaamp")
+        this.createFilterObj();
     }
 
     /**
      * Form the filter string and refresh the result page
      */
-    filterResults() {
-        let lFilterString: string = "";
-        this.selectedThemes = [];
-        this.selectedComponents = [];
-        this.selectedResourceType = [];
-        let componentSelected: boolean = false;
-        let resourceTypesSelected: boolean = false;
-        let compType = '';
-        let resourceType = '';
+    createFilterObj() {
+        let lFilterObjs: any[] = [];
 
         // Resource type        
-        if(this.filterStrings["@type"]) {
-            if(lFilterString != '') lFilterString += "&";
-            lFilterString += this.escapeReservedChars(this.filterStrings["@type"]);
-            lFilterString = this.removeEndingComma(lFilterString);
+        if(this.filterObjs["@type"] && this.filterObjs["@type"].value.length>0) {
+            lFilterObjs.push(this.filterObjs["@type"]);
         }
 
         // Collections
         for(let col of this.collectionOrder) {
-            if(this.filterStrings[col]) {
-                if(lFilterString != '') lFilterString += "&";
-                lFilterString += this.escapeReservedChars(this.filterStrings[col]);
-                lFilterString = this.removeEndingComma(lFilterString);
+            if(this.filterObjs[col] && this.filterObjs[col].value && this.filterObjs[col].value.length>0) {
+                lFilterObjs.push(this.filterObjs[col]);
             }   
         }
 
         // Record has
-        if(this.filterStrings["components.@type"]) {
-            if(lFilterString != '') lFilterString += "&";
-            lFilterString += this.escapeReservedChars(this.filterStrings["components.@type"]);
-            lFilterString = this.removeEndingComma(lFilterString);
+        if(this.filterObjs["components.@type"] && this.filterObjs["components.@type"].value.length>0) {
+            lFilterObjs.push(this.filterObjs["components.@type"]);
         }
 
         // Authors and contributors
         if (this.selectedAuthor.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
-
-            lFilterString += "contactPoint.fn=";
-
+            let authors: string[] = [];
+            
             for (let author of this.selectedAuthor) {
-                lFilterString += author + ",";
+                authors.push(author);
             }
-        }
 
-        lFilterString = this.removeEndingComma(lFilterString);
+            lFilterObjs.push({
+                "type": "contactPoint.fn",
+                "value": authors
+            })
+        }
 
         // Keywords
         if (this.selectedKeywords.length > 0) {
-            if(lFilterString != '') lFilterString += "&";
+            let keywords: string[] = [];
 
-            lFilterString += "keyword=";
             for (let keyword of this.selectedKeywords) {
-                lFilterString += this.escapeReservedChars(this.suggestedKeywordsLkup[keyword]) + ",";
+                keywords.push(this.suggestedKeywordsLkup[keyword]);
             }
+
+            lFilterObjs.push({
+                "type": "keyword",
+                "value": keywords
+            })
         }
 
-        lFilterString = this.removeEndingComma(lFilterString);
-        if(!lFilterString) lFilterString = "NoFilter";
+        if(!lFilterObjs || lFilterObjs.length == 0) {
+            lFilterObjs.push({
+                "type": "NoFilter",
+                "value": ""
+            })
+        }
 
-        // console.log('lFilterString', lFilterString);
-        this.filterString.emit(lFilterString);
+        this.filterObjsOut.emit(lFilterObjs);
     }
-
 
     /**
      * If search value changed, clear the filters and refresh the search result.
@@ -506,7 +485,6 @@ export class FiltersComponent implements OnInit {
             }
         }
 
-
         this.resourceTypeTree = [{
             label: 'Type of Resource',
             "expanded": false,
@@ -702,11 +680,7 @@ export class FiltersComponent implements OnInit {
             this.searchService.setClearAll(false);
         }, 0)
 
-        this.filterStrings = {};
-        this.filterStrings[Collections.DEFAULT] = "";
-        this.filterStrings[Collections.FORENSICS] = "";        
-        this.filterStrings[Collections.SEMICONDUCTORS] = "";
-
+        this.filterObjs = {};
         this.suggestedThemes = [];
         this.suggestedKeywords = [];
         this.suggestedAuthors = [];
@@ -748,7 +722,6 @@ export class FiltersComponent implements OnInit {
         setTimeout(() => {
             this.clearAllCheckbox = false;
         }, 0)
-        // this.filterResults()
     }
 
     /**
