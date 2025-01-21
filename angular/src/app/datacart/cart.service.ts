@@ -64,6 +64,8 @@ export class CartService {
             ).subscribe(
                 (result) => {
                     let data = {};
+                    // Extract the dataset ID to use as the display name
+                    const datasetId = result.metadata[0]?.aipid || cartName;
                     result.metadata.forEach((d) => {
                         let key = cartName + '/' + d.filePath;
                         d['key'] = key;
@@ -71,6 +73,11 @@ export class CartService {
                         data[key] = d;
                     });
                     let out: DataCart = new DataCart(cartName, data, null, 0);
+                    // Set the display name to the dataset ID
+                    out.setDisplayName(datasetId);
+
+                    // Save the cart
+                    out.save();
                     subscriber.next(out);
                     subscriber.complete();
                 }, 
