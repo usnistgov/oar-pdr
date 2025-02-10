@@ -44,28 +44,8 @@
     border-radius: 10px;
 }
 
-.badge-notify {
-    background-color: green;
-    color: white;
-    position: relative;
-    top: -10px;
-    left: -5px;
-    font-size: 9px;
-    height: 20px;
-    width: 20px;
-    padding: 5px 3px 3px 3px ;
-}
-
 a:link, a:hover, a:visited{
   color: white;
   background-color: transparent;
   text-decoration: none;
-}
-
-.badge-style {
-    background-color: var(--nist-green-default);
-    color: white;
-    border-radius: 100%;
-    padding: 2px 2px 2px 2px;
-    font-size: small;
 }
