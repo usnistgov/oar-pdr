@@ -190,20 +190,6 @@
   padding: 0.5em;
 }
 
-.badge-notify{
-  background-color: green;
-  color: white;
-  position:relative;
-  top: -10px;
-  left: 20px;
-  font-size: 9px;
-  font-weight: bold;
-  height:15px;
-  width:15px;
-  padding:3px 3px 3px 3px ;
-  border-radius: 25px;
-}
-
 .app-loading {
   position: relative;
   display: flex;
@@ -539,3 +525,21 @@ a:visited {
 .grey-background-color{
   background-color:rgb(107, 107, 107);
 }
+
+.badge-notify {
+    background-color: green;
+    color: white;
+    position: relative;
+    top: -10px;
+    left: -5px;
+    font-size: small;
+    padding: 2px 2px 2px 2px;
+    border-radius: 100%;
+}
+
+.badge-pill{
+    height:15px;
+    width:15px;
+    padding:2px 3px 3px 3px ;
+}
+

@@ -26,7 +26,7 @@ import { isPlatformBrowser } from '@angular/common';
     moduleId: module.id,
     selector: 'pdr-headbar',
     templateUrl: 'headbar.component.html',
-    styleUrls: ['headbar.component.css']
+    styleUrls: ['../landing/landing.component.css', 'headbar.component.css']
 })
 export class HeadbarComponent {
 
