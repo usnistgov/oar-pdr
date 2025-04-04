@@ -12,6 +12,8 @@ import { EditStatusService } from '../../landing/editcontrol/editstatus.service'
 import { LandingConstants } from '../../landing/constants';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
+import { NgbModalOptions, NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { BulkConfirmComponent } from './bulk-confirm/bulk-confirm.component';
 
 // Define the maximum and minimum height for the virtual scroll window of the tree table.
 // We set maximum window size because the bigger the size the slower the performance.
@@ -86,8 +88,8 @@ interface DataFileItem {
     providers: [ ],
     animations: [
         trigger('detailExpand', [
-          state('collapsed', style({height: '0px', minHeight: '0'})),
-          state('expanded', style({height: '*'})),
+          state('collapsed', style({height: '0px', opacity: 0})),
+          state('expanded', style({height: '*', opacity: 1})),
           transition('expanded <=> collapsed', animate('625ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
         ]),
         trigger('detailExpand2', [
@@ -153,9 +155,14 @@ export class DataFilesComponent implements OnInit, OnChanges {
     searchText: string = "";
     rapWithAccessUrl: boolean = false; // Indicate if there is a restricted access page with access url
     accessURL: string = "";
-
+    downloadableFileLimit: number = 300; // Max number of files downloadable through lps 
+    isMouseOver: boolean = false;
+    
     // The key of treenode whose details is currently displayed
     currentKey: string = '';
+
+    bulkDownloadURL: string;
+    modalRef: any; // For bulk download confirm pop up
 
     @ViewChild('tt', { read: ElementRef }) public treeTable: ElementRef<any>;
 
@@ -163,6 +170,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
                 private cartService: CartService,
                 private gaService: GoogleAnalyticsService,
                 public editstatsvc: EditStatusService,
+                private modalService: NgbModal,
                 public breakpointObserver: BreakpointObserver,
                 ngZone: NgZone)
     {
@@ -186,6 +194,8 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
+        this.downloadableFileLimit = +this.cfg.get("downloadableFileLimit", "300");
+
         this.editstatsvc.watchEditMode((editMode) => {
             this.editMode = editMode;
         });
@@ -231,6 +241,17 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
     }
 
+    get fileCountColor() {
+        if(this.largeDataset)
+            return "red";
+        else    
+            return "color:rgb(107, 107, 107)";
+    }
+
+    get largeDataset() {
+        return this.fileCount > this.downloadableFileLimit;
+    }
+
     ngOnChanges(ch: SimpleChanges) {
         if (this.record && ch.record)
             this.useMetadata();
@@ -266,6 +287,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
     useMetadata() {
         this.ediid = this.record['ediid'];
+        this.bulkDownloadURL = '/bulkdownload/' + this.ediid.replace('ark:/88434/', '');
 
         if(this.record['accessLevel'] === 'restricted public') {
             this.checkAccessPageType();
@@ -731,51 +753,61 @@ export class DataFilesComponent implements OnInit, OnChanges {
     }
 
     /** 
-     * Either add/remove all files to/from the global data cart.  This responds to the user clicking 
+     * If this is a large dataset (number of files exceeds the limit), do bulk download.
+     * Otherwise, either add/remove all files to/from the global data cart.  This responds to the user clicking 
      * on the "add all to cart" icon.  If all files are already in the cart, all files will be removed;
      * otherwise, all not in the cart will be added.
      */
     toggleAllFilesInGlobalCart() : void {
-        if (! this.globalDataCart) return;
-        this.isTogglingAllInGlobalCart = true;
-        setTimeout(() => {
-            if (this.allInCart) {
-                console.log("Removing all files from "+this.ediid+" from cart");
-                this.globalDataCart.removeMatchingFiles(this.ediid, '', false);
-                this.allInCart = false;
-            }
-            else {
-                console.log("Adding all files from "+this.ediid+" to cart");
-                for (let child of this.files) 
-                    this._addAllWithinToCart(child, this.globalDataCart, false);
-                this.allInCart = true;
-            }
-            this.globalDataCart.save();
-            this.isTogglingAllInGlobalCart = false;
-        }, 0);
+        if(this.largeDataset) {
+            this.bulkDownloadConfirm();
+        }else{
+            if (! this.globalDataCart) return;
+            this.isTogglingAllInGlobalCart = true;
+            setTimeout(() => {
+                if (this.allInCart) {
+                    console.log("Removing all files from "+this.ediid+" from cart");
+                    this.globalDataCart.removeMatchingFiles(this.ediid, '', false);
+                    this.allInCart = false;
+                }
+                else {
+                    console.log("Adding all files from "+this.ediid+" to cart");
+                    for (let child of this.files) 
+                        this._addAllWithinToCart(child, this.globalDataCart, false);
+                    this.allInCart = true;
+                }
+                this.globalDataCart.save();
+                this.isTogglingAllInGlobalCart = false;
+            }, 0);
+        }
     }
 
     /**
-     * open up an exclusive cart and start to download all files from this dataset.  This
+     * If this is a large dataset (number of files exceeds the limit), do bulk download.
+     * Otherwise, open up an exclusive cart and start to download all files from this dataset.  This
      * responds to the user clicking on the download-all icon.  
      */
     downloadAllFiles() {
-        let cartName : string = this.ediid;
-        if (cartName.startsWith("ark:/"))
-            cartName = cartName.replace(/^ark:\/\d+\//, '');
-        let downloadAllCart = this.cartService.getCart(cartName);
-        downloadAllCart.setDisplayName(this.record['title'], false);
-        this.isAddingToDownloadAllCart = true;
-        this.dlStatus.emit("downloading"); // for reseting metrics refresh flag
-        
-        setTimeout(() => {
-            for (let child of this.files) 
-                this._addAllWithinToCart(child, downloadAllCart, true);
+        if(this.largeDataset) {
+            this.bulkDownloadConfirm();
+        }else{
+            let cartName : string = this.ediid;
+            if (cartName.startsWith("ark:/"))
+                cartName = cartName.replace(/^ark:\/\d+\//, '');
+            let downloadAllCart = this.cartService.getCart(cartName);
+            downloadAllCart.setDisplayName(this.record['title'], false);
+            this.isAddingToDownloadAllCart = true;
+            this.dlStatus.emit("downloading"); // for reseting metrics refresh flag
+            
+            setTimeout(() => {
+                for (let child of this.files) 
+                    this._addAllWithinToCart(child, downloadAllCart, true);
 
-            downloadAllCart.save();
-            this.isAddingToDownloadAllCart = false;
-            window.open('/datacart/'+cartName+'?downloadSelected=true', cartName);
-        }, 0);
+                downloadAllCart.save();
+                this.isAddingToDownloadAllCart = false;
+                window.open('/datacart/'+cartName+'?downloadSelected=true', cartName);
+            }, 0);
+        }
     }
 
     /**
@@ -950,4 +982,28 @@ export class DataFilesComponent implements OnInit, OnChanges {
     googleAnalytics(url: string, event, title) {
         this.gaService.gaTrackEvent('homepage', event, title, url);
     }    
+
+    bulkDownloadConfirm() {
+        let ngbModalOptions: NgbModalOptions = {
+            backdrop: 'static',
+            keyboard: false,
+            windowClass: "modal-small",
+            size: 'lg'
+        };
+
+        this.modalRef = this.modalService.open(BulkConfirmComponent, ngbModalOptions);
+        this.modalRef.componentInstance.returnValue.subscribe(
+            (submit) => {
+                if ( submit ) {
+                    console.log("Return value", submit);
+                    window.open(this.bulkDownloadURL, "_blank");
+                }else{
+                    console.log("User canceled submit.");//Do nothing
+                }
+            }, 
+            (reason) => {
+                console.log("User canceled submit.");//Do nothing
+            }
+        );
+    }
 }

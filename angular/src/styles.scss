@@ -170,7 +170,6 @@ a {
 .linked-text {
     cursor: pointer; 
     color:var(--nist-blue-default);
-    margin-left: 1em;
 }
 
 .highlight {
@@ -207,4 +206,17 @@ a {
     margin-bottom: 1em;
     border-bottom: 1px solid rgba(189, 189, 189);
     // background-image: linear-gradient(90deg, rgb(37, 37, 178), rgb(255, 255, 255))
+}
+
+.labelStyle{
+    color:#1E6BA1;
+    font-size: 40px;
+}
+.smlabelStyle{
+    color:#1E6BA1;
+    font-size: 25px;
+}
+.bodyTextSize{
+    font-size: 20px;
+    line-height: 30px;
 }

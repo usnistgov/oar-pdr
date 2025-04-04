@@ -10,6 +10,7 @@ import { DatacartComponent } from './datacart/datacart.component';
 import { DoneComponent } from './landing/done/done.component';
 import { DatacartRoutes } from './datacart/datacart.routes';
 import { MetricsComponent } from './metrics/metrics.component';
+import { BulkDownloadComponent } from './bulk-download/bulk-download.component';
 
 const routes: Routes = [
     ...DatacartRoutes,
@@ -41,7 +42,11 @@ const routes: Routes = [
       ]
     },
     { path: 'metrics/:id',         component: MetricsComponent },
-    { path: '**',                    component: NotFoundComponent      }
+
+    { path: 'bulkdownload/:id',         component: BulkDownloadComponent },
+
+    { path: '**',                    component: NotFoundComponent      },
+
 ];
 
 @NgModule({

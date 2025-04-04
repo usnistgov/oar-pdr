@@ -1,0 +1,35 @@
+<div class="title">
+    Bulk Downloads for Large Collections
+</div>
+<div style="margin: 1em;">
+This dataset is very large. So we have built a special area for accessing it. <p>
+
+Click "Proceed Bulk Download" to continue downloading. Or click on "Cancel Bulk Download" to cancel.
+</div>
+<hr>
+<div class="controls">
+    <div class="control-buttons">
+        <!-- Buttons are arranged from right to left -->
+            <!-- Continue Submit button -->
+            <button 
+                pButton 
+                class="btn btn-labeled" 
+                id="btn-submit" 
+                (click)="continueBulkDownload()"
+                label="Proceed Bulk Download" 
+                iconPos="left">
+                <i class="faa faa-download faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
+            </button>
+
+            <!-- Cancel button -->
+            <button 
+                pButton 
+                class="btn btn-labeled" 
+                id="btn-cancel" 
+                (click)="cancelBulkDownload()"
+                label="Cancel Bulk Download" 
+                iconPos="left">
+                <i class="faa faa-times faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
+            </button>
+    </div>
+</div>
