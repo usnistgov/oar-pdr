@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BulkConfirmComponent } from './bulk-confirm.component';
 
 describe('BulkConfirmComponent', () => {
@@ -8,7 +8,8 @@ describe('BulkConfirmComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ BulkConfirmComponent ]
+      declarations: [ BulkConfirmComponent ],
+      providers: [ NgbActiveModal ]
     })
     .compileComponents();
   });

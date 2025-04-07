@@ -253,26 +253,6 @@ export class MenuComponent implements OnInit {
     }    
 
     bulkdownload() {
-        let ngbModalOptions: NgbModalOptions = {
-            backdrop: 'static',
-            keyboard: false,
-            windowClass: "modal-small",
-            size: 'lg'
-        };
-
-        this.modalRef = this.modalService.open(BulkConfirmComponent, ngbModalOptions);
-        this.modalRef.componentInstance.returnValue.subscribe(
-            (submit) => {
-                if ( submit ) {
-                    console.log("Return value", submit);
-                    window.open(this.bulkDownloadURL, "_blank");
-                }else{
-                    console.log("User canceled submit.");//Do nothing
-                }
-            }, 
-            (reason) => {
-                console.log("User canceled submit.");//Do nothing
-            }
-        );    
+        window.open(this.bulkDownloadURL, "_blank");  
     }
 }
