@@ -1,38 +1,93 @@
 <div class="ui-grid ui-grid-responsive ui-grid-pad center" style="min-height:61vh;">
     <div class="" style="padding: 2.5rem 2.5rem 2.5rem 2.5rem">
-      <label class="labelStyle" style="margin-bottom: 1em;">Bulk Downloads for Large Collections (Placeholder)</label>
+      <label class="labelStyle" style="margin-bottom: 1em;">Downloading Dataeset Files in Bulk</label>
       <div class="bodyTextSize">
       <p>
-        The current implementation of the PDR’s Data Cart is not scaling well to large collections.  This page addresses the way to bulk-download large collections of data.  
+You can download a single data file from a dataset by clicking on the download icon
+(<span class="faa faa-download"></span>) to the right of file's name in the file listing; however,
+more often you will want many files from the dataset, so the bulk download features of the PDR are
+more helpful.
       </p>
       <p>
-        The PDR is designed as a <b>trusted repository</b>, one which complies with long term data preservation and publication
-        standards.   It is built using community open source software (See
-        <a href="https://github.com/usnistgov/oar-developer">Github repository</a> for more details).
-        Each record has a persistent identifier,  and may be viewed on a unique web <b>“landing page”</b> which includes user-friendly and readable views
-        of key  metadata, high level terms which detail the nature of the record dataset.
-        Additionally the PDR landing page provides access to Download public data files and citation (See <b>NIST</b><a href="https://www.nist.gov/topics/data/public-access-nist-research/copyright-fair-use-and-licensing-statements-srd-data-and"> <b> Fair Use
-          Policy and Citation</b>)</a>.
+You download files in bulk in a few ways:
+<ul>
+  <li> <a href="#download-all">Downloading all files with the Data Cart</a> </li>
+  <li> <a href="#add-to-cart">Downloading a subset of files with the Data Cart</a> </li>
+  <li> <a href="#pyscript">Download data with the <code>pdrdownload.py</code> script</a> (necessary
+       for large datasets) </li>
+</ul>
       </p>
-      <p class="smlabelStyle">The NIST PDR provides the following capabilities:</p>
-      <ul style="background-color:#F2F2F2">
-        <i>
-      <li>Search and Navigation for NIST public datasets</li>
-      <li>Citation for data with persistent Digital Object Identifiers (DOIs)</li>
-      <li>Find related data publications</li>
-      <li>Access to Download data files</li>
-      <li>Interoperability through machine readable standard data format and protocol</li>
-      <li>Long term digital preservation</li>
-        </i>
-      </ul>
-  
+      <p class="smlabelStyle">Downloading large datasets with <code>pdrdownload.py</code></p>
       <p>
-        The top right banner “Search”
-        navigates to the <a href="https://data.nist.gov"><b>NIST Science Data Portal</b></a> where users may discover data
-      of interest and perform advanced queries.  Each PDR record includes descriptive information (metadata) about a
-      public data resource and is also an entry in the NIST bureau Enterprise Data Inventory.  Records may be searched
-      via the <a href="https://data.nist.gov/sdp/#/api"><b>API</b></a>, and are also available in a machine-readible standard
-      open data format and are compliant with <a href="https://resources.data.gov">Federal Data resource guidance </a>.  
+When PDR demand is high and the dataset you want to download contains a large number of files, the
+Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
+recommend you try using <a href="/od/tools/pdrdownload.py">pdrdownload.py</a>, a Python scripts that
+will conveniently and reliably download data from the PDR.  For users that can run a python script,
+this script has several advantages:
+<ul>
+  <li> It can give you preview of what you'll be downloading, showing the number of files and total
+       number of bytes. </li>
+  <li> Files are downloaded into the same folder hierarchy that you see on the dataset home
+       page. </li>
+  <li> The script automatically checks to ensure that each file download was successful, fully
+       matching the original file on our servers. </li>
+  <li> If the download process is interrupted for any reason, the scripts can be rerun, and it will
+       pick up where it left off. </li>
+</ul>
+
+To run this script, you must have at least Python 3.8 installed on the computer where you will be
+download data to. 
+      </p>
+      <p>
+To see a preview of what you will be downloading from your dataset, type:
+<verbatim>
+   python3 pdrdownload.py -I {ediid}
+</verbatim>
+This will construct and save locally a list of the files in the dataset with the identifier,
+{ediid}, and it will display the total number of files and the total number of bytes available as
+part of this dataset.  
+      </p>
+      <p>
+To start the download, type:
+<verbatim>
+   python3 pdrdownload.py -I {ediid} -D
+</verbatim>
+      </p>
+      <p>
+The script has other useful features like downloading subsets, more verbose output, and others.  To
+see the full list of options available, type:
+<verbatim>
+   python3 pdrdownload.py --help
+</verbatim>
+      </p>
+      <p class="smlabelStyle">Download all files through the Data Cart</p>
+      <p>
+For smaller datasets, all the files can be easily downloaded through the browser using the PDR Data
+Cart. On the dataset's home page, just click on the "Download-All" icon
+(<span class="faa faa-download faa-stack-1x"></span>) above and to the left of the file listing.
+This will open the a Data Cart (in a separate tab) with all of files from the dataset in it.  You
+will see a spinner icon in that page as it prepares the download.  Eventually, it will show you a
+list of one or more zip files containing the files from the dataset.  Click the "Start Download"
+button to start downloading those Zip files.  
+      </p>
+      <p class="smlabelStyle">Download selected portions of a dataset with the Data Cart</p>
+      <p>
+In the PDR, you have a general Data Cart available for downloading in bulk a variety of files from
+multiple datasets. To use this feature, add files or folders of files from a dataset to your cart
+either by clicking on "Add-to-Cart" icons (<span class="faa faa-cart-plus green-cart"></span>) on
+the right side of the file listing.  Alternatively, add all the files from a dataset to your cart by
+clicking the "Add-all-to-Cart" icon (<span class="faa-stack fa-lg icon-cart"></span>) above and to
+the left of the file listing.  
+      </p>
+      <p>
+After adding the files of interest, you can open up your view of the Cart by clicking either the
+"Cart" link in the most top-right corner of any dataset's home page or the "Data Cart" link in the
+navigation bar on the right side of the dataset's page.  You will see a listing of the files and
+folders you have added to the cart.  You can browse list, download individual files, or select the
+files you wish to download in bulk by clicking the selection boxes at the left.  Click to the
+"Download Selected" button to prepare download.  Like withe the "download-all" feature, a pop-up
+will show you a list of one or more Zip files containing the selected files; click the "Start
+Download" to start the actual download.
       </p>
       </div>
     </div>
