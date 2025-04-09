@@ -43,7 +43,8 @@ const routes: Routes = [
     },
     { path: 'metrics/:id',         component: MetricsComponent },
 
-    { path: 'bulkdownload/:id',         component: BulkDownloadComponent },
+    { path: 'bulkdownload/:id',     component: BulkDownloadComponent },
+    { path: 'bulkdownload',         component: BulkDownloadComponent },
 
     { path: '**',                    component: NotFoundComponent      },
 
