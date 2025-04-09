@@ -4,7 +4,7 @@
       <div class="bodyTextSize">
       <p>
 You can download a single data file from a dataset by clicking on the download icon
-(<span class="faa faa-download"></span>) to the right of file's name in the file listing; however,
+(<span class="faa faa-download" style="color: '#1E6BA1';"></span>) to the right of file's name in the file listing; however,
 more often you will want many files from the dataset, so the bulk download features of the PDR are
 more helpful.
       </p>
@@ -42,9 +42,30 @@ download data to.
       <p>
 To see a preview of what you will be downloading from your dataset, type:
       </p>
-<pre>
-   python pdrdownload.py -I {{ ediid }}
-</pre>
+
+<div style="margin: 1em 0em;" id="cite">
+    <span
+        style="margin-left: 35px;" 
+        [ngClass]="{'highlight': previewCopied}" 
+        [@enterAnimation]>
+        {{previewCommand}}
+    </span>
+    <span 
+        id="copy-to-clipboard" 
+        (click)="copyToClipboard(previewCommand, 'preview')" 
+        data-toggle="tooltip" 
+        title="Copy to clipboard">
+        <i class="faa faa-clone" style="color: rgb(1, 90, 255);cursor: pointer;"></i>
+    </span>
+    <span 
+        [@enterAnimation]
+        *ngIf="previewCopied" 
+        class="badge"
+        style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">
+        Command copied to clipboard.
+    </span>
+</div>
+
       <p>
 This will construct and save locally a list of the files in the dataset with the identifier,
 <code>{{ ediid }}</code>, and it will display the total number of files and the total number of bytes 
@@ -53,33 +74,85 @@ available as part of this dataset.
       <p>
 To start the download, type:
       </p>
-<pre>
-   python pdrdownload.py -I {{ ediid }} -D
-</pre>
+
+      <div style="margin: 1em 0em;" id="cite">
+        <span
+            style="margin-left: 35px;" 
+            [ngClass]="{'highlight': startDownloadCopied}" 
+            [@enterAnimation]>
+            {{startDownloadCommand}}
+        </span>
+        <span 
+            id="copy-to-clipboard" 
+            (click)="copyToClipboard(startDownloadCommand, 'startDownload')" 
+            data-toggle="tooltip" 
+            title="Copy to clipboard">
+            <i class="faa faa-clone" style="color: rgb(1, 90, 255);cursor: pointer;"></i>
+        </span>
+        <span 
+            [@enterAnimation]
+            *ngIf="startDownloadCopied" 
+            class="badge"
+            style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">
+            Command copied to clipboard.
+        </span>
+    </div>
+
       <p>
 The script has other useful features like downloading subsets, more verbose output, and others.  To
 see the full list of options available, type:
       </p>
-<pre>
-   python pdrdownload.py --help
-</pre>
+
+      <div style="margin: 1em 0em;" id="cite">
+        <span
+            style="margin-left: 35px;" 
+            [ngClass]="{'highlight': helpCopied}" 
+            [@enterAnimation]>
+            {{helpCommand}}
+        </span>
+        <span 
+            id="copy-to-clipboard" 
+            (click)="copyToClipboard(helpCommand, 'help')" 
+            data-toggle="tooltip" 
+            title="Copy to clipboard">
+            <i class="faa faa-clone" style="color: rgb(1, 90, 255);cursor: pointer;"></i>
+        </span>
+        <span 
+            [@enterAnimation]
+            *ngIf="helpCopied" 
+            class="badge"
+            style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">
+            Command copied to clipboard.
+        </span>
+    </div>
+
       <p class="smlabelStyle">Download all files through the Data Cart</p>
-      <p>
+      <!-- <p> -->
+<div>        
 For smaller datasets, all the files can be easily downloaded through the browser using the PDR Data
 Cart. On the dataset's home page, just click on the "Download-All" icon
-(<i class="faa faa-download faa-stack-1x"></i>) above and to the left of the file listing.
+( 
+<span style="color: '#1E6BA1';"> <i class="faa faa-download" aria-hidden="true"></i>
+    <i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
+</span>
+) above and to the left of the file listing.
 This will open the a Data Cart (in a separate tab) with all of files from the dataset in it.  You
 will see a spinner icon in that page as it prepares the download.  Eventually, it will show you a
 list of one or more zip files containing the files from the dataset.  Click the "Start Download"
 button to start downloading those Zip files.  
-      </p>
+</div>
+<p>
       <p class="smlabelStyle">Download selected portions of a dataset with the Data Cart</p>
       <p>
 In the PDR, you have a general Data Cart available for downloading in bulk a variety of files from
 multiple datasets. To use this feature, add files or folders of files from a dataset to your cart
-either by clicking on "Add-to-Cart" icons (<span class="faa faa-cart-plus green-cart"></span>) on
+either by clicking on "Add-to-Cart" icons (<span class="faa faa-cart-plus green-cart" style="color: '#1E6BA1';"></span>) on
 the right side of the file listing.  Alternatively, add all the files from a dataset to your cart by
-clicking the "Add-all-to-Cart" icon (<span class="faa-stack fa-lg icon-cart"></span>) above and to
+clicking the "Add-all-to-Cart" icon (
+<span style="color: '#1E6BA1';"> <i class="faa faa-cart-plus" aria-hidden="true"></i>
+    <i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
+</span>
+) above and to
 the left of the file listing.  
       </p>
       <p>

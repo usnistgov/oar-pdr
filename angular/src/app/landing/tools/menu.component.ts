@@ -8,7 +8,6 @@ import * as _ from 'lodash-es';
 import { isPlatformBrowser } from '@angular/common';
 import { MetricsData } from "../metrics-data";
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { BulkConfirmComponent } from '../data-files/bulk-confirm/bulk-confirm.component';
 
 export class menuItem {
     title: string;
@@ -53,7 +52,6 @@ export class MenuComponent implements OnInit {
     recordType: string = "";
     scienceTheme = Themes.SCIENCE_THEME;
     inBrowser: boolean = false;
-    modalRef: any; // For bulk download confirm pop up
     bulkDownloadURL: string;
 
     // the resource record metadata that the tool menu data is drawn from

@@ -156,7 +156,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     rapWithAccessUrl: boolean = false; // Indicate if there is a restricted access page with access url
     accessURL: string = "";
     downloadableFileLimit: number = 300; // Max number of files downloadable through lps 
-    isMouseOver: boolean = false;
+    showBulkDesc: boolean = false;
     
     // The key of treenode whose details is currently displayed
     currentKey: string = '';
@@ -983,6 +983,9 @@ export class DataFilesComponent implements OnInit, OnChanges {
         this.gaService.gaTrackEvent('homepage', event, title, url);
     }    
 
+    /**
+     * Popup dialog to confirm bulk download.
+     */
     bulkDownloadConfirm() {
         let ngbModalOptions: NgbModalOptions = {
             backdrop: 'static',

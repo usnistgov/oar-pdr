@@ -69,7 +69,7 @@
                     Total No. files: 
                     <span 
                         [ngStyle]="{color: fileCountColor}"
-                        (click)="isMouseOver = !isMouseOver"
+                        (click)="showBulkDesc = !showBulkDesc"
                         style="cursor:pointer">
                         {{ fileCount }}
                         <!-- Info button -->
@@ -80,7 +80,7 @@
                     </span>
                 </div>  
             </div>
-            <div [@detailExpand]="isMouseOver ? 'expanded' : 'collapsed'"
+            <div [@detailExpand]="showBulkDesc ? 'expanded' : 'collapsed'"
                 style="width: 100%; text-align: right;background-color: rgb(254, 250, 219);padding-right: 10px;" 
                 *ngIf="largeDataset">
                 This dataset is very large. So we have built a special area for accessing it. See our  
