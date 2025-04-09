@@ -43,7 +43,7 @@ download data to.
 To see a preview of what you will be downloading from your dataset, type:
       </p>
 <pre>
-   python3 pdrdownload.py -I {{ ediid }}
+   python pdrdownload.py -I {{ ediid }}
 </pre>
       <p>
 This will construct and save locally a list of the files in the dataset with the identifier,
@@ -54,14 +54,14 @@ available as part of this dataset.
 To start the download, type:
       </p>
 <pre>
-   python3 pdrdownload.py -I {{ ediid }} -D
+   python pdrdownload.py -I {{ ediid }} -D
 </pre>
       <p>
 The script has other useful features like downloading subsets, more verbose output, and others.  To
 see the full list of options available, type:
       </p>
 <pre>
-   python3 pdrdownload.py --help
+   python pdrdownload.py --help
 </pre>
       <p class="smlabelStyle">Download all files through the Data Cart</p>
       <p>
