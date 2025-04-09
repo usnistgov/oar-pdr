@@ -10,13 +10,13 @@ more helpful.
       </p>
       <p>
 You download files in bulk in a few ways:
+      </p>
 <ul>
   <li> <a href="#download-all">Downloading all files with the Data Cart</a> </li>
   <li> <a href="#add-to-cart">Downloading a subset of files with the Data Cart</a> </li>
   <li> <a href="#pyscript">Download data with the <code>pdrdownload.py</code> script</a> (necessary
        for large datasets) </li>
 </ul>
-      </p>
       <p class="smlabelStyle">Downloading large datasets with <code>pdrdownload.py</code></p>
       <p>
 When PDR demand is high and the dataset you want to download contains a large number of files, the
@@ -24,6 +24,7 @@ Data Cart will struggle to provide the data.  When the number of files is larger
 recommend you try using <a href="/od/tools/pdrdownload.py">pdrdownload.py</a>, a Python scripts that
 will conveniently and reliably download data from the PDR.  For users that can run a python script,
 this script has several advantages:
+      </p>
 <ul>
   <li> It can give you preview of what you'll be downloading, showing the number of files and total
        number of bytes. </li>
@@ -34,37 +35,39 @@ this script has several advantages:
   <li> If the download process is interrupted for any reason, the scripts can be rerun, and it will
        pick up where it left off. </li>
 </ul>
-
+      <p>
 To run this script, you must have at least Python 3.8 installed on the computer where you will be
 download data to. 
       </p>
       <p>
 To see a preview of what you will be downloading from your dataset, type:
-<verbatim>
-   python3 pdrdownload.py -I {ediid}
-</verbatim>
+      </p>
+<pre>
+   python3 pdrdownload.py -I {{ ediid }}
+</pre>
+      <p>
 This will construct and save locally a list of the files in the dataset with the identifier,
-{ediid}, and it will display the total number of files and the total number of bytes available as
-part of this dataset.  
+<code>{{ ediid }}</code>, and it will display the total number of files and the total number of bytes 
+available as part of this dataset.  
       </p>
       <p>
 To start the download, type:
-<verbatim>
-   python3 pdrdownload.py -I {ediid} -D
-</verbatim>
       </p>
+<pre>
+   python3 pdrdownload.py -I {{ ediid }} -D
+</pre>
       <p>
 The script has other useful features like downloading subsets, more verbose output, and others.  To
 see the full list of options available, type:
-<verbatim>
-   python3 pdrdownload.py --help
-</verbatim>
       </p>
+<pre>
+   python3 pdrdownload.py --help
+</pre>
       <p class="smlabelStyle">Download all files through the Data Cart</p>
       <p>
 For smaller datasets, all the files can be easily downloaded through the browser using the PDR Data
 Cart. On the dataset's home page, just click on the "Download-All" icon
-(<span class="faa faa-download faa-stack-1x"></span>) above and to the left of the file listing.
+(<i class="faa faa-download faa-stack-1x"></i>) above and to the left of the file listing.
 This will open the a Data Cart (in a separate tab) with all of files from the dataset in it.  You
 will see a spinner icon in that page as it prepares the download.  Eventually, it will show you a
 list of one or more zip files containing the files from the dataset.  Click the "Start Download"
