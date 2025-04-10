@@ -161,6 +161,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
     // The key of treenode whose details is currently displayed
     currentKey: string = '';
 
+    pdrHome: string;
     bulkDownloadURL: string;
     modalRef: any; // For bulk download confirm pop up
 
@@ -191,6 +192,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
         }
         
         this.EDIT_MODES = LandingConstants.editModes;
+        this.pdrHome = cfg.get<string>("locations.pdrHome");
     }
 
     ngOnInit() {
@@ -287,7 +289,7 @@ export class DataFilesComponent implements OnInit, OnChanges {
 
     useMetadata() {
         this.ediid = this.record['ediid'];
-        this.bulkDownloadURL = '/bulkdownload/' + this.ediid.replace('ark:/88434/', '');
+        this.bulkDownloadURL = this.pdrHome + 'bulkdownload/' + this.ediid.replace('ark:/88434/', '');
 
         if(this.record['accessLevel'] === 'restricted public') {
             this.checkAccessPageType();
