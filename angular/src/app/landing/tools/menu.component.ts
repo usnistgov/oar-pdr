@@ -111,7 +111,7 @@ export class MenuComponent implements OnInit {
         this.useMenu.push(new menuItem("Repository Metadata", "Metadata", "", this.lighterColor, false, "faa faa-angle-double-right"));
         this.useMenu.push(new menuItem("Fair Use Statement","", this.record['license'], this.lighterColor, false, "faa faa-external-link"));
         this.useMenu.push(new menuItem("Data Cart", "", this.globalCartUrl, this.lighterColor, false, "faa faa-cart-plus"));
-        this.useMenu.push(new menuItem("Bulk Download", "bulk", "", this.lighterColor, false, "faa faa-download"));
+        // this.useMenu.push(new menuItem("Bulk Download", "bulk", "", this.lighterColor, false, "faa faa-download"));
 
         let searchbase = this.cfg.get("locations.pdrSearch","/sdp/")
         if (searchbase.slice(-1) != '/') searchbase += "/"

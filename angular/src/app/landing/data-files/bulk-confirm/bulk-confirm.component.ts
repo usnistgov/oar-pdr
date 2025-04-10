@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -7,7 +7,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./bulk-confirm.component.css']
 })
 export class BulkConfirmComponent implements OnInit {
-
+    @Input() bulkDownloadURL: string;
     @Output() returnValue: EventEmitter<boolean> = new EventEmitter();
     
     constructor(public activeModal: NgbActiveModal) { }

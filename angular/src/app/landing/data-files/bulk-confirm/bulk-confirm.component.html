@@ -11,15 +11,17 @@ Click "Proceed Bulk Download" to continue downloading. Or click on "Cancel Bulk 
     <div class="control-buttons">
         <!-- Buttons are arranged from right to left -->
             <!-- Continue Submit button -->
-            <button 
-                pButton 
-                class="btn btn-labeled" 
-                id="btn-submit" 
-                (click)="continueBulkDownload()"
-                label="Proceed Bulk Download" 
-                iconPos="left">
-                <i class="faa faa-download faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
-            </button>
+            <a href="{{bulkDownloadURL}}" target="_blank">
+                <button 
+                    pButton 
+                    class="btn btn-labeled" 
+                    id="btn-submit" 
+                    (click)="continueBulkDownload()"
+                    label="Proceed Bulk Download" 
+                    iconPos="left">
+                    <i class="faa faa-download faa-1x icon-white" style="color: #fff; margin-right: 10px;"></i>
+                </button>
+            </a>
 
             <!-- Cancel button -->
             <button 

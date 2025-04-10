@@ -995,11 +995,12 @@ export class DataFilesComponent implements OnInit, OnChanges {
         };
 
         this.modalRef = this.modalService.open(BulkConfirmComponent, ngbModalOptions);
+        this.modalRef.componentInstance.bulkDownloadURL = this.bulkDownloadURL;
         this.modalRef.componentInstance.returnValue.subscribe(
             (submit) => {
                 if ( submit ) {
                     console.log("Return value", submit);
-                    window.open(this.bulkDownloadURL, "_blank");
+                    // window.open(this.bulkDownloadURL, "_blank");
                 }else{
                     console.log("User canceled submit.");//Do nothing
                 }

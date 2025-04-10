@@ -6,6 +6,10 @@ describe('BulkConfirmComponent', () => {
   let component: BulkConfirmComponent;
   let fixture: ComponentFixture<BulkConfirmComponent>;
 
+  beforeAll(() => {
+    window.onbeforeunload = () => 'Oh no!';
+  });
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ BulkConfirmComponent ],
