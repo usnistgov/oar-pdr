@@ -181,7 +181,7 @@
                                         Added
                                     </div>
                                     <ng-template #not_in_cart>
-                                        <div *ngIf="rowData.comp.downloadURL" style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
+                                        <div *ngIf="rowData.comp.downloadURL || !isLeaf(rowData)" style="padding-left:10px;" (click)="addToGlobalCart(rowData)">
                                             <i class="faa faa-cart-plus blue-cart" aria-hidden="true"
                                                 data-toggle="tooltip" title="Add to cart"></i>
                                         </div>
