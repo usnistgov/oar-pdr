@@ -146,26 +146,28 @@
                         </td>
                         <td [ngStyle]="statusStyle()">
                             <div style="display: flex;">
-                                <!-- 02/10/2025: Display download button if downloadURL is available.
+                                <!-- 04/10/2025: Display nothing for folders. Otherwise display download button if downloadURL is available.
                                      Otherwise display a lock icon. -->
-                                <div *ngIf="rowData.comp.downloadURL; else display_lock">
-                                    <a *ngIf="rowData.downloadStatus != 'downloading'" style="margin-left: 10px;"
-                                        href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
-                                        data-toggle="tooltip" title="Direct download" rel="noopener"
-                                        (click)="setFileDownloaded(rowData)">
-                                        <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
-                                            aria-hidden="true"></i>
-                                        <span class="sr-only">Hidden text for 508 compliance</span>
-                                    </a>
-                                    <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
-                                        [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}">
-                                    </p-progressSpinner>
+                                <div *ngIf="isLeaf(rowData)">
+                                    <div *ngIf="rowData.comp.downloadURL; else display_lock">
+                                        <a *ngIf="rowData.downloadStatus != 'downloading'" style="margin-left: 10px;"
+                                            href='{{rowData.comp.downloadURL}}' target='_blank' download="download"
+                                            data-toggle="tooltip" title="Direct download" rel="noopener"
+                                            (click)="setFileDownloaded(rowData)">
+                                            <i class="faa faa-download" [ngStyle]="{'color':getDownloadBtnColor(rowData)}"
+                                                aria-hidden="true"></i>
+                                            <span class="sr-only">Hidden text for 508 compliance</span>
+                                        </a>
+                                        <p-progressSpinner *ngIf="rowData.downloadStatus == 'downloading'"
+                                            [style]="{width: '12px', height: '12px', 'margin-right': '.5em'}">
+                                        </p-progressSpinner>
+                                    </div>
+                                    <ng-template #display_lock>
+                                        <i class="faa faa-lock blue-cart" style="margin-left: 10px;"
+                                            (click)="googleAnalytics(rowData.comp['accessURL'], $event, 'Request access')"
+                                            aria-hidden="true" data-toggle="tooltip" title="Request access"></i>
+                                    </ng-template>
                                 </div>
-                                <ng-template #display_lock>
-                                    <i class="faa faa-lock blue-cart" style="margin-left: 10px;"
-                                        (click)="googleAnalytics(rowData.comp['accessURL'], $event, 'Request access')"
-                                        aria-hidden="true" data-toggle="tooltip" title="Request access"></i>
-                                </ng-template>
 
                                 <!-- 02/10/2025: Display cart ison if downloadURL is available.
                                      Otherwise display nothing. -->
