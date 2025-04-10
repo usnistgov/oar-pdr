@@ -52,6 +52,7 @@ export class MenuComponent implements OnInit {
     recordType: string = "";
     scienceTheme = Themes.SCIENCE_THEME;
     inBrowser: boolean = false;
+    pdrHome: string;
     bulkDownloadURL: string;
 
     // the resource record metadata that the tool menu data is drawn from
@@ -76,11 +77,13 @@ export class MenuComponent implements OnInit {
         @Inject(PLATFORM_ID) private platformId: Object,
         private cfg : AppConfig) { 
             this.inBrowser = isPlatformBrowser(platformId);
+            this.pdrHome = cfg.get<string>("locations.pdrHome", "/");
         }
 
     ngOnInit(): void {
         if(this.record)
-            this.bulkDownloadURL = '/bulkdownload/' + this.record.ediid.replace('ark:/88434/', '');
+            this.bulkDownloadURL = this.pdrHome + 'bulkdownload/' +
+                                   this.record.ediid.replace('ark:/88434/', '');
 
         this.allCollections = this.collectionService.loadAllCollections();
 
@@ -93,7 +96,8 @@ export class MenuComponent implements OnInit {
 
     ngOnChanges(ch: SimpleChanges) {
         if (this.record && ch.record)
-            this.bulkDownloadURL = '/bulkdownload/' + this.record.ediid.replace('ark:/88434/', '');
+            this.bulkDownloadURL = this.pdrHome + 'bulkdownload/' +
+                                   this.record.ediid.replace('ark:/88434/', '');
     }
 
     /**

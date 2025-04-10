@@ -2,6 +2,7 @@ import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { AppConfig } from '../config/config';
 
 @Component({
     selector: 'app-bulk-download',
@@ -26,17 +27,20 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 export class BulkDownloadComponent implements OnInit {
     inBrowser: boolean = false;
     ediid: string = "dataset-id";
-    previewCommand: string;
+    previewCommand: string = "python pdrdownload.py -I " + this.ediid;
     previewCopied: boolean = false;
-    startDownloadCommand: string;
+    startDownloadCommand: string = "python pdrdownload.py -I " + this.ediid + " -D";
     startDownloadCopied: boolean = false;
-    helpCommand: string;
+    helpCommand: string = "python pdrdownload.py --help";
     helpCopied: boolean = false;
+    pdrbase: string;
 
     constructor(private route: ActivatedRoute,
-                @Inject(PLATFORM_ID) private platformId: Object)
+                @Inject(PLATFORM_ID) private platformId: Object,
+                private cfg : AppConfig)
     {
         this.inBrowser = isPlatformBrowser(platformId);
+        this.pdrbase = cfg.get<string>("locations.portalBase", "/");
     }
 
     ngOnInit(): void {
@@ -46,7 +50,6 @@ export class BulkDownloadComponent implements OnInit {
                     this.ediid = queryParams.id;
                     this.previewCommand = "python pdrdownload.py -I " + this.ediid;
                     this.startDownloadCommand = "python pdrdownload.py -I " + this.ediid + " -D";
-                    this.helpCommand = "python pdrdownload.py --help";
                 }
             });
         }

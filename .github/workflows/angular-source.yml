@@ -22,7 +22,7 @@ jobs:
           node-version: 16.17
 
       - name: Setup dependency caching
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('angular/package-lock.json') }}
