@@ -41,6 +41,8 @@ export class BulkDownloadComponent implements OnInit {
     {
         this.inBrowser = isPlatformBrowser(platformId);
         this.pdrbase = cfg.get<string>("locations.portalBase", "/");
+        if (! this.pdrbase.endsWith('/'))
+            this.pdrbase += '/';
     }
 
     ngOnInit(): void {
