@@ -3,28 +3,32 @@
       <label class="labelStyle" style="margin-bottom: 1em;">Downloading Dataset Files in Bulk</label>
       <div class="bodyTextSize">
       <p>
-You can download a single data file from a dataset by clicking on the download icon
-(<span class="faa faa-download" style="color: '#1E6BA1';"></span>) to the right of file's name in the file listing; however,
-more often you will want many files from the dataset, so the bulk download features of the PDR are
-more helpful.
+The NIST Public Data Repository allows users to download a single data file from a dataset by clicking 
+on the download icon (<span class="faa faa-download" style="color: '#1E6BA1';"></span>) to the right of file's name in the file listing; 
+however, more often you will want many files from the dataset.  
       </p>
       <p>
 You download files in bulk in a few ways:
       </p>
 <ul>
-  <li> <a href="#download-all">Downloading all files with the Data Cart</a> </li>
+  <li> <a href="#pyscript">Download data using python (recommended for datasets with more than 300 files)</a> </li>
+  <li> <a href="#download-all">Downloading all files with the Data Cart (less than 300 files)</a> </li>
   <li> <a href="#add-to-cart">Downloading a subset of files with the Data Cart</a> </li>
-  <li> <a href="#pyscript">Download data with the <code>pdrdownload.py</code> script</a> (necessary
-       for large datasets) </li>
+  <li> <a href="#add-to-cart">Programmatic access to NIST data products</a> </li>
 </ul>
       <a name="pyscript"></a>
-      <p class="smlabelStyle">Downloading large datasets with <code>pdrdownload.py</code></p>
-      <p>
+      <p class="smlabelStyle">Downloading large datasets using python</p>
+ <p>
+<code></code>This script requires Python 3.8 or higher</code>
+      </p>
+    <p>
 When PDR demand is high and the dataset you want to download contains a large number of files, the
 Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
 recommend you try using <a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a>, a Python scripts that
 will conveniently and reliably download data from the PDR.  For users that can run a python script,
 this script has several advantages:
+For large datasets (larger than 300 files,  see count indication at top right of the file listing)we recommend
+using this python script (Download pdrdownload.py) that will conveniently and reliably download data from the system. This script has several advantages:
       </p>
 <ul>
   <li> It can give you preview of what you'll be downloading, showing the number of files and total
@@ -36,10 +40,7 @@ this script has several advantages:
   <li> If the download process is interrupted for any reason, the scripts can be rerun, and it will
        pick up where it left off. </li>
 </ul>
-      <p>
-To run this script, you must have at least Python 3.8 installed on the computer where you will
-download data to. 
-      </p>
+     
       <p>
 To see a preview of what you will be downloading from your dataset, type:
       </p>
