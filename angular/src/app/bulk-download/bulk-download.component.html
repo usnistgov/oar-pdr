@@ -4,27 +4,27 @@
       <div class="bodyTextSize">
       <p>
 The NIST Public Data Repository allows users to download a single data file from a dataset by clicking 
-on the download icon (<span class="faa faa-download" style="color: '#1E6BA1';"></span>) to the right of file's name in the file listing; 
+on the download icon (<span class="faa faa-download" style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"></span>) to the right of file's name in the file listing; 
 however, more often you will want many files from the dataset.  
       </p>
       <p>
 You download files in bulk in a few ways:
       </p>
 <ul>
-  <li> <a href="#pyscript">Download data using python (recommended for datasets with more than 300 files)</a> </li>
-  <li> <a href="#download-all">Downloading all files with the Data Cart (less than 300 files)</a> </li>
-  <li> <a href="#add-to-cart">Downloading a subset of files with the Data Cart</a> </li>
-  <li> <a href="#add-to-cart">Programmatic access to NIST data products</a> </li>
+  <li> <span class="linked-text" (click)="goToSection('pyscript')">Download data using python (recommended for datasets with more than 300 files) </span></li>
+  <li> <span class="linked-text" (click)="goToSection('downloadAll')">Downloading all files with the Data Cart (less than 300 files)</span> </li>
+  <li> <span class="linked-text" (click)="goToSection('addToCart')">Downloading a subset of files with the Data Cart </span></li>
+  <li> <span class="linked-text" (click)="goToSection('addToCart')">Programmatic access to NIST data products </span></li>
 </ul>
-      <a name="pyscript"></a>
+      <a name="pyscript" #pyscript></a>
       <p class="smlabelStyle">Downloading large datasets using python</p>
  <p>
-<code></code>This script requires Python 3.8 or higher</code>
+<code>This script requires Python 3.8 or higher</code>
       </p>
     <p>
 When PDR demand is high and the dataset you want to download contains a large number of files, the
 Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
-recommend you try using <a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a>, a Python scripts that
+recommend you try using <span [ngClass]="{'highlight': downloadscriptCopied}"><a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a></span>, a Python scripts that
 will conveniently and reliably download data from the PDR.  For users that can run a python script,
 this script has several advantages:
 For large datasets (larger than 300 files,  see count indication at top right of the file listing)we recommend
@@ -128,14 +128,13 @@ see the full list of options available, type:
         </span>
     </div>
 
-      <a name="download-all"></a>
-      <p class="smlabelStyle">Download all files through the Data Cart</p>
-      <!-- <p> -->
+    <a name="download-all" #downloadall></a>
+    <p class="smlabelStyle">Download all files through the Data Cart</p>
 <div>        
 For smaller datasets, all the files can be easily downloaded through the browser using the PDR Data
 Cart. On the dataset's home page, just click on the "Download-All" icon
 ( 
-<span style="color: '#1E6BA1';"> <i class="faa faa-download" aria-hidden="true"></i>
+<span style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"> <i class="faa faa-download" aria-hidden="true"></i>
     <i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
 </span>
 ) above and to the left of the file listing.
@@ -145,16 +144,16 @@ list of one or more zip files containing the files from the dataset.  Click the 
 button to start downloading those Zip files.  
 </div>
 <p>
-      <a name="add-to-cart"></a>
+      <a name="add-to-cart" #addtocart></a>
       <p class="smlabelStyle">Download selected portions of a dataset with the Data Cart</p>
       <p>
 In the PDR, you have a general Data Cart available for downloading in bulk a variety of files from
 multiple datasets. To use this feature, add files or folders of files from a dataset to your cart
 by clicking on "Add-to-Cart" icons
-(<span class="faa faa-cart-plus green-cart" style="color: '#1E6BA1';"></span>) on the right side of
+(<span class="faa faa-cart-plus green-cart" style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"></span>) on the right side of
 the file listing.  Alternatively, add all the files from a dataset to your cart by clicking the
 "Add-all-to-Cart" icon
-(<span style="color: '#1E6BA1';"> <i class="faa faa-cart-plus" aria-hidden="true"></i>
+(<span style="color: '#1E6BA1';padding-left: 5px;padding-right: 8px;"> <i class="faa faa-cart-plus" aria-hidden="true"></i>
 <i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
 </span>) above and to the left of the file listing.  
       </p>

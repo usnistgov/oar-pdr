@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { trigger, state, style, animate, transition } from '@angular/animations';
@@ -34,6 +34,11 @@ export class BulkDownloadComponent implements OnInit {
     helpCommand: string = "python pdrdownload.py --help";
     helpCopied: boolean = false;
     pdrbase: string;
+    downloadscriptCopied: boolean = false;
+
+    @ViewChild('downloadall') downloadAll: ElementRef;
+    @ViewChild('pyscript') pyscript: ElementRef;
+    @ViewChild('addtocart') addToCart: ElementRef;
 
     constructor(private route: ActivatedRoute,
                 @Inject(PLATFORM_ID) private platformId: Object,
@@ -57,6 +62,11 @@ export class BulkDownloadComponent implements OnInit {
         }
     }
 
+    /**
+     * Copy the given string to clipboard
+     * @param val - input string to be copied to clipboard
+     * @param command - indicate which command was copied so the command will be highlighted.
+     */
     copyToClipboard(val: string, command: string){
         const selBox = document.createElement('textarea');
         selBox.style.position = 'fixed';
@@ -90,5 +100,40 @@ export class BulkDownloadComponent implements OnInit {
                 }, 2000);
                 break;
         }
+    }
+
+    /**
+     * Scroll to a specific section of the page
+     * @param sectionId - the section the page will scroll to.
+     */
+    goToSection(sectionId) {
+        if(sectionId == null) sectionId = "top";
+
+        switch(sectionId) { 
+            case "downloadAll": { 
+                this.downloadAll.nativeElement.scrollIntoView({behavior: 'smooth'}); 
+                break; 
+            } 
+            case "pyscript": { 
+                this.pyscript.nativeElement.scrollIntoView({behavior: 'smooth'}); 
+                this.downloadscriptCopied = true;
+                setTimeout(() => {
+                    this.downloadscriptCopied = false;
+                }, 2000);
+                break; 
+            } 
+            case "addToCart": {
+                this.addToCart.nativeElement.scrollIntoView({behavior: 'smooth'}); 
+                break;
+            }
+            default: { // GO TOP
+                window.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth'
+                  });
+                break; 
+            } 
+        } 
     }
 }
