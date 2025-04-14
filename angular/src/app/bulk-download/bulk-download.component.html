@@ -5,18 +5,62 @@
       <p>
 The NIST Public Data Repository allows users to download a single data file from a dataset by clicking 
 on the download icon (<span class="faa faa-download" style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"></span>) to the right of file's name in the file listing; 
-however, more often you will want many files from the dataset.  
+however, more often you will want to download many files from the dataset.  
       </p>
       <p>
-You download files in bulk in a few ways:
+There are a few options to download files in bulk:
       </p>
 <ul>
-  <li> <span class="linked-text" (click)="goToSection('pyscript')">Download data using python (recommended for datasets with more than 300 files) </span></li>
   <li> <span class="linked-text" (click)="goToSection('downloadAll')">Downloading all files with the Data Cart (less than 300 files)</span> </li>
   <li> <span class="linked-text" (click)="goToSection('addToCart')">Downloading a subset of files with the Data Cart </span></li>
+  <li> <span class="linked-text" (click)="goToSection('pyscript')">Download data using python script (recommended for datasets with more than 300 files) </span></li>
   <li> <span class="linked-text" (click)="goToSection('addToCart')">Programmatic access to NIST data products </span></li>
 </ul>
-      <a name="pyscript" #pyscript></a>
+
+
+    <a name="download-all" #downloadall></a>
+    <p class="smlabelStyle">Download all files through the Data Cart</p>
+<div>        
+For smaller datasets, all the files can be easily downloaded through the browser using the PDR Data
+Cart. On the dataset's home page, just click on the "Download-All" icon
+( 
+<span style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"> <i class="faa faa-download" aria-hidden="true"></i>
+    <i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
+</span>
+) above and to the left of the file listing.
+This will open a Data Cart (in a separate tab) with all of files from the dataset in it.  You
+will see a spinner icon in that page as it prepares the download.  Eventually, it will show you a
+list of one or more zip files containing the files from the dataset.  Click the "Start Download"
+button to start downloading those Zip files.  
+</div>
+<p>
+      <a name="add-to-cart" #addtocart></a>
+      <p class="smlabelStyle">Download selected portions of a dataset with the Data Cart</p>
+      <p>
+In the PDR, you have a general Data Cart available for downloading in bulk a variety of files from
+multiple datasets. To use this feature, add files or folders of files from a dataset to your cart
+by clicking on "Add-to-Cart" icons
+(<span class="faa faa-cart-plus green-cart" style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"></span>) on the right side of
+the file listing.  Alternatively, add all the files from a dataset to your cart by clicking the
+"Add-all-to-Cart" icon
+(<span style="color: '#1E6BA1';padding-left: 5px;padding-right: 8px;"> <i class="faa faa-cart-plus" aria-hidden="true"></i>
+<i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
+</span>) above and to the left of the file listing.  
+      </p>
+      <p>
+After adding the files of interest, you can open up your view of the Cart by clicking either the
+"Cart" link in the most top-right corner of any dataset's home page or the "Data Cart" link in the
+navigation bar on the right side of the dataset's page.  You will see a listing of the files and
+folders you have added to the cart.  You can browse list, download individual files, or select the
+files you wish to download in bulk by clicking the selection boxes at the left.  Click to the
+"Download Selected" button to prepare download.  Like withe the "download-all" feature, a pop-up
+will show you a list of one or more Zip files containing the selected files; click the "Start
+Download" to start the actual download.
+      </p>
+      </div>
+    </div>
+  </div>
+        <a name="pyscript" #pyscript></a>
       <p class="smlabelStyle">Downloading large datasets using python</p>
  <p>
 <code>This script requires Python 3.8 or higher</code>
@@ -127,47 +171,3 @@ see the full list of options available, type:
             Command copied to clipboard.
         </span>
     </div>
-
-    <a name="download-all" #downloadall></a>
-    <p class="smlabelStyle">Download all files through the Data Cart</p>
-<div>        
-For smaller datasets, all the files can be easily downloaded through the browser using the PDR Data
-Cart. On the dataset's home page, just click on the "Download-All" icon
-( 
-<span style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"> <i class="faa faa-download" aria-hidden="true"></i>
-    <i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
-</span>
-) above and to the left of the file listing.
-This will open a Data Cart (in a separate tab) with all of files from the dataset in it.  You
-will see a spinner icon in that page as it prepares the download.  Eventually, it will show you a
-list of one or more zip files containing the files from the dataset.  Click the "Start Download"
-button to start downloading those Zip files.  
-</div>
-<p>
-      <a name="add-to-cart" #addtocart></a>
-      <p class="smlabelStyle">Download selected portions of a dataset with the Data Cart</p>
-      <p>
-In the PDR, you have a general Data Cart available for downloading in bulk a variety of files from
-multiple datasets. To use this feature, add files or folders of files from a dataset to your cart
-by clicking on "Add-to-Cart" icons
-(<span class="faa faa-cart-plus green-cart" style="color: '#1E6BA1';padding-left: 2px;padding-right: 3px;"></span>) on the right side of
-the file listing.  Alternatively, add all the files from a dataset to your cart by clicking the
-"Add-all-to-Cart" icon
-(<span style="color: '#1E6BA1';padding-left: 5px;padding-right: 8px;"> <i class="faa faa-cart-plus" aria-hidden="true"></i>
-<i class="faa faa-circle-thin" aria-hidden="true" style="scale: 1.7;margin-left: -17px;"></i>
-</span>) above and to the left of the file listing.  
-      </p>
-      <p>
-After adding the files of interest, you can open up your view of the Cart by clicking either the
-"Cart" link in the most top-right corner of any dataset's home page or the "Data Cart" link in the
-navigation bar on the right side of the dataset's page.  You will see a listing of the files and
-folders you have added to the cart.  You can browse list, download individual files, or select the
-files you wish to download in bulk by clicking the selection boxes at the left.  Click to the
-"Download Selected" button to prepare download.  Like withe the "download-all" feature, a pop-up
-will show you a list of one or more Zip files containing the selected files; click the "Start
-Download" to start the actual download.
-      </p>
-      </div>
-    </div>
-  </div>
-  
