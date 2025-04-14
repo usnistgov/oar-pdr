@@ -14,7 +14,7 @@ There are a few options to download files in bulk:
   <li> <span class="linked-text" (click)="goToSection('downloadAll')">Downloading all files with the Data Cart (less than 300 files)</span> </li>
   <li> <span class="linked-text" (click)="goToSection('addToCart')">Downloading a subset of files with the Data Cart </span></li>
   <li> <span class="linked-text" (click)="goToSection('pyscript')">Download data using python script (recommended for datasets with more than 300 files) </span></li>
-  <li> <span class="linked-text" (click)="goToSection('addToCart')">Programmatic access to NIST data products </span></li>
+  <li> <span class="linked-text" (click)="goToSection('downloadAPI')">Programmatic access to NIST data products </span></li>
 </ul>
 
 
@@ -171,3 +171,11 @@ see the full list of options available, type:
             Command copied to clipboard.
         </span>
     </div>
+
+<p></p>
+    <a name="download-api" #downloadAPI></a>
+    <p class="smlabelStyle">Programmatic access to NIST data products</p>
+<div>        
+The NIST Public Data Repository API interface (https://data.nist.gov/rmm/) allows for queries to be performed programmatically 
+rather than through the Discovery Portal.  There are multiple API endpoints.   Clicking on each endpoint will provide users with options for 
+using cURL (a https://curl.se/) command or an API URL for programmatic access.   
