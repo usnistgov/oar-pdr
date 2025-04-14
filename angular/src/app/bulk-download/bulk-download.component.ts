@@ -39,6 +39,8 @@ export class BulkDownloadComponent implements OnInit {
     @ViewChild('downloadall') downloadAll: ElementRef;
     @ViewChild('pyscript') pyscript: ElementRef;
     @ViewChild('addtocart') addToCart: ElementRef;
+    @ViewChild('downloadAPI') downloadAPI: ElementRef;
+    
 
     constructor(private route: ActivatedRoute,
                 @Inject(PLATFORM_ID) private platformId: Object,
@@ -124,6 +126,10 @@ export class BulkDownloadComponent implements OnInit {
             } 
             case "addToCart": {
                 this.addToCart.nativeElement.scrollIntoView({behavior: 'smooth'}); 
+                break;
+            }
+            case "downloadAPI": {
+                this.downloadAPI.nativeElement.scrollIntoView({behavior: 'smooth'}); 
                 break;
             }
             default: { // GO TOP
