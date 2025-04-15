@@ -8,6 +8,8 @@
   text-decoration: none; /* Remove underline */
   margin-right: 10px;
   text-align: left;
-  background-color: black; /* Set background color */
-  cursor: default;
+  background-color:var(--nist-blue-default);
+  cursor: pointer;
+  border-radius: 8px;
+  height: 40px;
 }

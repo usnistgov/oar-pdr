@@ -64,22 +64,25 @@
             <a name="pyscript" #pyscript></a>
             <p class="smlabelStyle">Downloading large datasets using the Python script, pdrdownload.py</p>
             <p style="margin-left: 2em;">
-      <a href="{{pdrbase}}od/tools/pdrdownload.py"
-         target="_blank"
-         rel="noopener"
-         icon="faa faa-download"
-         label="Download pdrdownload.py"
-         class="anchor-button p-button">Download pdr-download.py
-      </a>
+
+            <a href="{{pdrbase}}od/tools/pdrdownload.py"
+                target="_blank"
+                rel="noopener"
+                pButton
+                icon="faa faa-download"
+                label="Download pdrdownload.py"
+                class="anchor-button p-button">
+            </a>
+
             <code style="padding-left: 1em;">This script requires Python 3.8 or higher</code>
             </p>
             <p>
-When PDR demand is high and the dataset you want to download contains a large number of files, the
-Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
-recommend you try using
-<span [ngClass]="{'highlight': downloadscriptCopied}"><a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a></span>,
-a Python script that will conveniently and reliably download data from the PDR.  For users that can
-run a python script, this script has several advantages:
+                When PDR demand is high and the dataset you want to download contains a large number of files, the
+                Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
+                recommend you try using
+                <span [ngClass]="{'highlight': downloadscriptCopied}"><a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a></span>,
+                a Python script that will conveniently and reliably download data from the PDR.  For users that can
+                run a python script, this script has several advantages:
             </p>
             <ul>
                 <li> It displays a preview of number of files and total number of bytes. </li>
@@ -97,7 +100,7 @@ run a python script, this script has several advantages:
                     style="margin-left: 35px;" 
                     [ngClass]="{'highlight': previewCopied}" 
                     [@enterAnimation]>
-                    {{previewCommand}}
+                    <code style="color: black;">{{previewCommand}}</code>
                 </span>
                 <span 
                     id="copy-to-clipboard" 
@@ -129,7 +132,7 @@ run a python script, this script has several advantages:
                     style="margin-left: 35px;" 
                     [ngClass]="{'highlight': startDownloadCopied}" 
                     [@enterAnimation]>
-                    {{startDownloadCommand}}
+                    <code style="color: black;">{{startDownloadCommand}}</code>
                 </span>
                 <span 
                     id="copy-to-clipboard" 
@@ -157,7 +160,7 @@ run a python script, this script has several advantages:
                     style="margin-left: 35px;" 
                     [ngClass]="{'highlight': helpCopied}" 
                     [@enterAnimation]>
-                    {{helpCommand}}
+                    <code style="color: black;">{{helpCommand}}</code>
                 </span>
                 <span 
                     id="copy-to-clipboard" 
@@ -178,38 +181,12 @@ run a python script, this script has several advantages:
             <p></p>
                 <a name="download-api" #downloadAPI></a>
                 <p class="smlabelStyle">Programmatic access to NIST data products</p>
-<p>
-The NIST Public Data Repository API interface allows users to create their own scripts for downloading 
-files in bulk.  In particular, one can download
-<a href="{{pdrbase}}od/id/{{ediid}}?format=nerdm">a JSON-encoded metadata description of a dataset</a> 
-which provides the URLs for downloadable files along with other useful information for tracking the data.
-</p>
-<!--
-<p>
-Your custom script can follow a recipe like this to download the files:
-</p>
-<ol>
-  <li> Download the dataset's JSON metadata with the URL,
-       <a href="{{pdrbase}}od/id/{{ediid}}?format=nerdm">{{pdrbase}}od/id/{{ediid}}?format=nerdm</a>.</li>
-  <li> In the metadata, extract value of the <code>components</code> property, a list of the things
-       contained in the dataset, including downloadable files. </li>
-  <li> From the <code>components</code> list, selected out the objects whose <code>@type</code> property
-       contains <code>nrdp:DataFile</code>. </li>
-  <li> From each file object, extract the download URL and other useful properties; these include:
-       <ul>
-         <li> <code>downloadURL</code> -- the URL you use to download the file </li>
-         <li> <code>filepath</code> -- the /-delimited path name the spells out its location in the
-              file folder hierarchy; use this as a location to store the file locally. </l>
-         <li> <code>size</code> -- the size of the file in bytes </li>
-         <li> <code>checksum</code> -- an object that provides a checksum value that can be used to verify
-              the download was successful.  The <code>hash</code> sub-property provides the actual
-              checksum hash value, and the <code>algorithm</code> indicates the checksum algorithm that was 
-              used to calculate the hash (e.g. <code>sha256</code>).
-       </ul>
-  <li> Use the download URL to download each available file. </li>
-</ol>
- -->
-
+            <p>
+                The NIST Public Data Repository API interface allows users to create their own scripts for downloading 
+                files in bulk.  In particular, one can download
+                <a href="{{pdrbase}}od/id/{{ediid}}?format=nerdm">a JSON-encoded metadata description of a dataset</a> 
+                which provides the URLs for downloadable files along with other useful information for tracking the data.
+            </p>
         </div>
     </div>
 </div>
