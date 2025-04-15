@@ -74,21 +74,20 @@
             <code style="padding-left: 1em;">This script requires Python 3.8 or higher</code>
             </p>
             <p>
-                When PDR demand is high and the dataset you want to download contains a large number of files, the
-                Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
-                recommend you try using <span [ngClass]="{'highlight': downloadscriptCopied}"><a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a></span>, a Python scripts that
-                will conveniently and reliably download data from the PDR.  For users that can run a python script,
-                this script has several advantages:
-                For large datasets (larger than 300 files,  see count indication at top right of the file listing)we recommend
-                using this python script (Download pdrdownload.py) that will conveniently and reliably download data from the system. This script has several advantages:
+When PDR demand is high and the dataset you want to download contains a large number of files, the
+Data Cart will struggle to provide the data.  When the number of files is larger than about 300, we
+recommend you try using
+<span [ngClass]="{'highlight': downloadscriptCopied}"><a href="{{pdrbase}}od/tools/pdrdownload.py">pdrdownload.py</a></span>,
+a Python script that will conveniently and reliably download data from the PDR.  For users that can
+run a python script, this script has several advantages:
             </p>
             <ul>
-                <li> Gives preview of number of files and total number of bytes. </li>
-                <li> Downloads same folder hierarchy as seen in dataset home page file listing.</li>
-                <li> Auto checks successful file download. </li>
-                <li> Script will resume file download upon interruption. </li>
+                <li> It displays a preview of number of files and total number of bytes. </li>
+                <li> It downloads files into the same folder hierarchy as seen in dataset home
+                     page file listing.</li>
+                <li> It automatically checks that files downloaded with out error or corruption. </li>
+                <li> Restarting the script will resume file downloads after an interruption. </li>
             </ul>
-        
             <p>
                 To see a preview of what you will be downloading from your dataset, type:
             </p>
