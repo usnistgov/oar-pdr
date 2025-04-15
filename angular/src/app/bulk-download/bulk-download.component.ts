@@ -2,6 +2,7 @@ import { Component, OnInit, Inject, PLATFORM_ID, ViewChild, ElementRef } from '@
 import { ActivatedRoute } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { ButtonModule } from 'primeng/button';
 import { AppConfig } from '../config/config';
 
 @Component({

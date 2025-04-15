@@ -209,12 +209,16 @@ a {
 }
 
 .labelStyle{
-    color:#1E6BA1;
+    // color:#1E6BA1;  // light-blue
+    color: #000000;    // black
     font-size: 40px;
+    font-weight: bold;
 }
 .smlabelStyle{
-    color:#1E6BA1;
+    // color:#1E6BA1;  // light-blue
+    color: #020202;    // lighter black
     font-size: 25px;
+    font-weight: bold;
 }
 .bodyTextSize{
     font-size: 20px;
