@@ -5,18 +5,42 @@
                   'menu-layout-horizontal': (layoutMode=='horizontal') }">
     <div class="topbar clearfix header-background">
       <div class="header-div">
-        <span [ngStyle]="{'cursor': getCursor()}" (click)="openRootPage()" title="NIST Public Data Repository"
-          class="header__logo-link" rel="home">
-          <img class="Fleft top_bar" src="./assets/images/nist_logo_reverse.png" alt="NIST Public Data Repository">
-          <span class="Fleft"
-            style="font-weight:bold;line-height: 16.5px;display: table-cell;vertical-align: text-top;color: #FFFFFF;font-size:14px;padding-left: 0.5em">PUBLIC
-            <br> DATA REPOSITORY </span>
-        </span>
+        <div 
+            [ngStyle]="{'cursor': getCursor()}" 
+            (click)="openRootPage()" 
+            title="NIST Public Data Repository"
+            class="header__logo-link" 
+            style="display:inline-block;"
+            rel="home">
+            <!-- Logo -->
+            <div class="logo-container">
+                <div class="image-container">
+                <img src="assets/images/f_nist-logo-brand-white_nist-logo-brand-white.png" alt="Your Image" class="scaled-image" />
+                </div>
+            </div>
 
-        <span *ngIf="appVersion" class="badge" id="appVersion"
-          style="background-color:#f0f0f0; margin-left: 0.5em; color: black;">{{appVersion}}</span>
-        &nbsp;&nbsp;
-        <span *ngIf="status" class="badge" id="appStatus" style="background-color:rgb(0, 114, 114)">{{ status }}</span>
+            <div style="display:inline-block;">
+                <div class="logo-text">PUBLIC </div>
+                <div class="logo-text">DATA REPOSITORY</div>
+            </div>
+        </div>
+
+        <div style="display:inline-block; height: 29px;vertical-align: bottom;">
+            <div *ngIf="appVersion" class="badge" id="appVersion">
+                {{appVersion}}
+            </div>
+
+
+            &nbsp;&nbsp;
+            <span 
+                *ngIf="status" 
+                class="badge" 
+                id="appStatus" 
+                style="background-color:rgb(0, 114, 114);">
+                {{ status }}
+            </span>
+        </div>
+
         <div class="header-links" style="float: right; vertical-align: bottom;">
           <a href="/pdr/about" target="_blank"><b>About</b></a> |
           <a href="{{contactLink}}" target="_blank"><b>Help</b></a> |
