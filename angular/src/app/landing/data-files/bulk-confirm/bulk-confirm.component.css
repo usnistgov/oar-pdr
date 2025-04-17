@@ -1,0 +1,37 @@
+.title {
+    background-color: rgb(28, 62, 126);
+    color: white;
+    font-size: xx-large;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+}
+
+#btn-submit {
+    width:250px; 
+    background-color:var(--nist-green-default);
+    color:white;
+    margin-right: 1em;
+}
+
+#btn-cancel {
+    width:250px;
+    background-color:var(--nist-green-default);
+    color:white;
+    /* border-color: grey; */
+    margin-right: 20px;
+}
+
+.control-buttons {
+    width:fit-content;
+    height: 50px;
+    color:white;
+    margin: 1em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.controls {
+    width: 100%;
+    position: relative;
+}

@@ -23,6 +23,18 @@
             {{menuitem.title}}
         </td>
     </tr>
+    <tr>
+        <td class="menu-item menu-body" scope="row"
+            [style.--background-default]="lighterColor" 
+            [style.--background-lighter]="lighterColor"
+            [style.--background-hover]="hoverColor" 
+        >
+            <a href="{{bulkDownloadURL}}" target="_blank">
+                <i class="faa faa-download"></i>
+                Bulk Download
+            </a>
+        </td>
+    </tr>
 </table>
 
 <!-- Find menu-->

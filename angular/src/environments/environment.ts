@@ -43,11 +43,12 @@ export const config: LPSConfig = {
     status: "Dev Version",
     appVersion: "v1.3.X",
     production: context.production,
-    editEnabled: true,
+    editEnabled: false,
     gacode: "not-set",
     ga4code: "not-set",
     screenSizeBreakPoint: 1060,
     bundleSizeAlert: 500000000,
+    downloadableFileLimit: 300,
     // Decide how many seconds to wait to refresh metrics after user download one/more files
     delayTimeForMetricsRefresh: 300,
     standardNISTTaxonomyURI: "https://data.nist.gov/od/dm/nist-themes/"  
