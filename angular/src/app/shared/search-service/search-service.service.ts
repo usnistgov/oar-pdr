@@ -42,7 +42,7 @@ export class SearchService {
                 @Inject(PLATFORM_ID) private platformId: Object,
                 private cfg: AppConfig)
     {
-        this.rmmBackend = cfg.get("APIs.mdSearch", "/unconfigured");
+        this.rmmBackend = cfg.get("APIs.mdService", "/rmm");
         if (this.rmmBackend == "/unconfigured")
             throw new Error("APIs.mdSearch endpoint not configured!");
 
@@ -65,10 +65,21 @@ export class SearchService {
     searchById(searchValue: string, browserside: boolean = false) {
         let backend: string = this.rmmBackend
 
-        if (searchValue.startsWith('ark:'))
+        // if (searchValue.startsWith('ark:'))
+        //     backend += 'records?@id=';
+        // else 
+        //     backend += 'records/';
+
+        if(browserside){
+            backend = this.rmmBackend;
+        }
+
+        if (_.includes(backend, 'rmm') && _.includes(searchValue, 'ark'))
             backend += 'records?@id=';
-        else 
-            backend += 'records/';
+        else if (_.includes(backend, 'rmm')) {
+            if(!_.includes(backend, 'records'))
+                backend += 'records/';
+        }
 
         // console.log("Querying backend:", backend + searchValue);
         return this.http.get(backend + searchValue, { headers: new HttpHeaders({ timeout: '${10000}' }) });
