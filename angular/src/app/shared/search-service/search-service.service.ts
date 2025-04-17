@@ -65,11 +65,6 @@ export class SearchService {
     searchById(searchValue: string, browserside: boolean = false) {
         let backend: string = this.rmmBackend
 
-        // if (searchValue.startsWith('ark:'))
-        //     backend += 'records?@id=';
-        // else 
-        //     backend += 'records/';
-
         if(browserside){
             backend = this.rmmBackend;
         }
