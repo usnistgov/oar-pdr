@@ -11,6 +11,7 @@ import { DataFilesComponent } from './data-files.component';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
+import { BulkConfirmComponent } from './bulk-confirm/bulk-confirm.component';
 
 /**
  * module that provides support for rendering the listing of data file
@@ -21,7 +22,8 @@ import {InputTextModule} from 'primeng/inputtext';
         TreeTableModule, OverlayPanelModule, ProgressSpinnerModule, FormsModule,
     ],
     declarations: [
-        DataFilesComponent
+        DataFilesComponent,
+        BulkConfirmComponent
     ],
     providers: [ ],
     exports: [

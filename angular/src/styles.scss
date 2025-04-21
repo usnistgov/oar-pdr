@@ -170,11 +170,10 @@ a {
 .linked-text {
     cursor: pointer; 
     color:var(--nist-blue-default);
-    margin-left: 1em;
 }
 
 .highlight {
-    background-color: var(--nist-blue-light);
+    background-color: yellow;
     color: white;
 }
 
@@ -207,4 +206,28 @@ a {
     margin-bottom: 1em;
     border-bottom: 1px solid rgba(189, 189, 189);
     // background-image: linear-gradient(90deg, rgb(37, 37, 178), rgb(255, 255, 255))
+}
+
+.labelStyle{
+    // color:#1E6BA1;  // light-blue
+    color: #000000;    // black
+    font-size: 40px;
+    font-weight: bold;
+}
+.smlabelStyle{
+    // color:#1E6BA1;  // light-blue
+    color: #020202;    // lighter black
+    font-size: 25px;
+    font-weight: bold;
+}
+.bodyTextSize{
+    font-size: 20px;
+    line-height: 30px;
+}
+
+code {
+    font-family: monospace;
+    background-color: #f5f5f5;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
 }

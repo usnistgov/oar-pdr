@@ -14,6 +14,7 @@ import { AngularEnvironmentConfigService } from './config/config.service';
 import { CartService } from './datacart/cart.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ToastrModule } from 'ngx-toastr';
+import { By } from '@angular/platform-browser';
 
 describe('AppComponent', () => {
     let cfg: AppConfig;
@@ -55,9 +56,8 @@ describe('AppComponent', () => {
 
         fixture.whenStable().then(() => {
             fixture.detectChanges();
-            const compiled = fixture.debugElement.nativeElement;
-            console.log("span", compiled.querySelector('span').textContent);
-            expect(compiled.querySelector('span').textContent).toContain('DATA REPOSITORY');
+            const compiled = fixture.debugElement.query(By.css('.logo-text')).nativeElement;
+            expect(compiled.textContent).toContain('PUBLIC');
         })
     }));
 });

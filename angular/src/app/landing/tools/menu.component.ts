@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, HostListener, Inject, PLATFORM_ID, SimpleChanges } from '@angular/core';
 import { CollectionService } from '../../shared/collection-service/collection.service';
 import { Themes, ThemesPrefs, Collections, Collection, ColorScheme, CollectionThemes } from '../../shared/globals/globals';
 import { NerdmRes, NERDResource } from '../../nerdm/nerdm';
@@ -7,6 +7,7 @@ import { AppConfig } from '../../config/config';
 import * as _ from 'lodash-es';
 import { isPlatformBrowser } from '@angular/common';
 import { MetricsData } from "../metrics-data";
+import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 
 export class menuItem {
     title: string;
@@ -51,6 +52,8 @@ export class MenuComponent implements OnInit {
     recordType: string = "";
     scienceTheme = Themes.SCIENCE_THEME;
     inBrowser: boolean = false;
+    pdrHome: string;
+    bulkDownloadURL: string;
 
     // the resource record metadata that the tool menu data is drawn from
     @Input() record : NerdmRes|null = null;    
@@ -70,12 +73,18 @@ export class MenuComponent implements OnInit {
 
     constructor(
         public collectionService: CollectionService,
+        private modalService: NgbModal,
         @Inject(PLATFORM_ID) private platformId: Object,
         private cfg : AppConfig) { 
             this.inBrowser = isPlatformBrowser(platformId);
+            this.pdrHome = cfg.get<string>("locations.pdrHome", "/");
         }
 
     ngOnInit(): void {
+        if(this.record)
+            this.bulkDownloadURL = this.pdrHome + 'bulkdownload/' +
+                                   this.record.ediid.replace('ark:/88434/', '');
+
         this.allCollections = this.collectionService.loadAllCollections();
 
         this.setColor();
@@ -85,6 +94,15 @@ export class MenuComponent implements OnInit {
         this.buildMenu();
     }
 
+    ngOnChanges(ch: SimpleChanges) {
+        if (this.record && ch.record)
+            this.bulkDownloadURL = this.pdrHome + 'bulkdownload/' +
+                                   this.record.ediid.replace('ark:/88434/', '');
+    }
+
+    /**
+     * Building menu
+     */
     buildMenu() {
         this.gotoMenu.push(new menuItem("Go To...", "", "", this.defaultColor, true));
         this.gotoMenu.push(new menuItem("Top", "top", "", this.lighterColor, false, "faa faa-arrow-circle-right menuicon"));
@@ -97,6 +115,7 @@ export class MenuComponent implements OnInit {
         this.useMenu.push(new menuItem("Repository Metadata", "Metadata", "", this.lighterColor, false, "faa faa-angle-double-right"));
         this.useMenu.push(new menuItem("Fair Use Statement","", this.record['license'], this.lighterColor, false, "faa faa-external-link"));
         this.useMenu.push(new menuItem("Data Cart", "", this.globalCartUrl, this.lighterColor, false, "faa faa-cart-plus"));
+        // this.useMenu.push(new menuItem("Bulk Download", "bulk", "", this.lighterColor, false, "faa faa-download"));
 
         let searchbase = this.cfg.get("locations.pdrSearch","/sdp/")
         if (searchbase.slice(-1) != '/') searchbase += "/"
@@ -218,6 +237,10 @@ export class MenuComponent implements OnInit {
                 this.toggleCitation();
                 break; 
             } 
+            case "bulk": { 
+                this.bulkdownload();
+                break; 
+            } 
             case "": { 
                 if(url)
                     window.open(url,'_blank');
@@ -230,4 +253,8 @@ export class MenuComponent implements OnInit {
          } 
         
     }    
+
+    bulkdownload() {
+        window.open(this.bulkDownloadURL, "_blank");  
+    }
 }

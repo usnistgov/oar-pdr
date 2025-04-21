@@ -40,6 +40,7 @@ import { ContactPopupComponent } from './landing/contact/contact-popup/contact-p
 import { GoogleAnalyticsService} from "./shared/ga-service/google-analytics.service";
 import { fakeBackendProvider } from './_helpers/fakeBackendInterceptor';
 import { D3Service } from './shared/d3-service/d3.service';
+import { BulkDownloadModule } from './bulk-download/bulk-download.module';
 
 enableProdMode();
 
@@ -60,6 +61,7 @@ enableProdMode();
         DirectivesModule,
         DatacartModule,
         MetricsModule,
+        BulkDownloadModule,
         SharedModule.forRoot(),
         // FragmentPolyfillModule.forRoot({
         //     smooth: true

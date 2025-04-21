@@ -58,9 +58,9 @@ describe('HeadbarComponent', () => {
 
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("#appVersion"); 
-        expect(el.textContent).toBe(component.appVersion);
+        expect(el.textContent.trim()).toBe(component.appVersion);
         el = cmpel.querySelector("#appStatus");
-        expect(el.textContent).toBe(component.status);
+        expect(el.textContent.trim()).toBe(component.status);
 
         let aels = cmpel.querySelectorAll(".header-links a")
         expect(aels.length).toBeGreaterThan(0);
