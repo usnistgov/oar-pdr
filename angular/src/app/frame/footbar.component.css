@@ -332,7 +332,7 @@ ul, menu, dir {
     margin-left: 12px;
     cursor: pointer;
     vertical-align: bottom;
-    background-image: url(/assets/images/x_white.svg);
+    background-image: url(assets/images/x_white.svg);
 }
 
 .x-icon {
