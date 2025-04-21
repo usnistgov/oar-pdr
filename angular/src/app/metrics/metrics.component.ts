@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, Inject, PLATFORM_ID, HostListener, ElementRef } from '@angular/core';
 import { userInfo } from 'os';
 import { CommonFunctionService } from '../shared/common-function/common-function.service';
-import { ActivatedRoute } from '@angular/router';
 import { MetricsService } from '../shared/metrics-service/metrics.service';
 import { AppConfig } from '../config/config';
 import { TreeNode } from 'primeng/api';
@@ -14,6 +13,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { NerdmRes } from '../nerdm/nerdm';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
 import { HttpEventType } from '@angular/common/http';
+import { MetadataService } from '../nerdm/nerdm.service';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { IDNotFound } from '../errors/error';
 
 const MOBIL_LABEL_LIMIT = 20;
 const DESKTOP_LABEL_LIMIT = 50;
@@ -88,10 +90,12 @@ export class MetricsComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private cfg: AppConfig,
+        private router: Router,
         @Inject(PLATFORM_ID) private platformId: Object,
         public commonFunctionService: CommonFunctionService,
         private datePipe: DatePipe,
         private searchService: SearchService,
+        private mdserv: MetadataService,
         public gaService: GoogleAnalyticsService,
         public metricsService: MetricsService) { 
 
@@ -100,6 +104,7 @@ export class MetricsComponent implements OnInit {
         }
 
     ngOnInit() {
+        let metadataError = "";
         this.lps = this.cfg.get("locations.landingPageService", "/od/id/");
 
         this.detectScreenSize();
@@ -113,32 +118,44 @@ export class MetricsComponent implements OnInit {
         // Expend the data tree to level one
         this.yAxisLabel = "";
 
-        if(this.inBrowser){
-            this.route.params.subscribe(queryParams => {
-                this.ediid = queryParams.id;
-                this.pdrHomeUrl = this.lps + this.ediid;
-                // Get dataset title
-                this.searchService.searchById(this.ediid, true).subscribe(md => {
-                    if(md) {
-                        this.record = md as NerdmRes;
-                        this.datasetTitle = md['title'];
-                        this.pdrid = md['@id'];
-        
-                        this.createNewDataHierarchy();
-                        if (this.files.length != 0){
-                            this.files = <TreeNode[]>this.files[0].data;
-                        }else{
-                            this.noChartData = true;
-                        }
-        
-                        this.expandToLevel(this.files, true, 0, 1);
-
-                        //Fetch metrics data regardless if there is chat data or not
-                        this.getMetricsData();
+        this.route.params.subscribe(queryParams => {
+            this.ediid = queryParams.id;
+            this.pdrHomeUrl = this.lps + this.ediid;
+            // Get dataset
+            this.mdserv.getMetadata(this.ediid).subscribe(
+                (md) => {
+                    // successful metadata request
+                    this.record = md as NerdmRes;
+                    this.datasetTitle = md['title'];
+                    this.pdrid = md['@id'];
+    
+                    this.createNewDataHierarchy();
+                    if (this.files.length != 0){
+                        this.files = <TreeNode[]>this.files[0].data;
+                    }else{
+                        this.noChartData = true;
                     }
-                })                              
-            });
-        }
+    
+                    this.expandToLevel(this.files, true, 0, 1);
+
+                    //Fetch metrics data regardless if there is chat data or not
+                    this.getMetricsData();
+                },
+                (err) => {
+                    console.error("Failed to retrieve metadata: ", err);
+                    if (err instanceof IDNotFound) {
+                        metadataError = "not-found";
+                        this.router.navigateByUrl("not-found/" + this.ediid, { skipLocationChange: true });
+                    }
+                    else {
+                        metadataError = "int-error";
+                        // this.router.navigateByUrl("int-error/" + this.reqId, { skipLocationChange: true });
+                        this.router.navigateByUrl("int-error/" + this.ediid, { skipLocationChange: true });
+                    }
+                }
+            );
+        });
+
     }
 
     /**
