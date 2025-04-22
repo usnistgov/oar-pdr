@@ -128,18 +128,20 @@ export class MetricsComponent implements OnInit {
                     this.record = md as NerdmRes;
                     this.datasetTitle = md['title'];
                     this.pdrid = md['@id'];
-    
-                    this.createNewDataHierarchy();
-                    if (this.files.length != 0){
-                        this.files = <TreeNode[]>this.files[0].data;
-                    }else{
-                        this.noChartData = true;
-                    }
-    
-                    this.expandToLevel(this.files, true, 0, 1);
 
-                    //Fetch metrics data regardless if there is chat data or not
-                    this.getMetricsData();
+                    if (this.inBrowser) {
+                        this.createNewDataHierarchy();
+                        if (this.files.length != 0){
+                            this.files = <TreeNode[]>this.files[0].data;
+                        }else{
+                            this.noChartData = true;
+                        }
+        
+                        this.expandToLevel(this.files, true, 0, 1);
+
+                        //Fetch metrics data regardless if there is chat data or not
+                        this.getMetricsData();
+                    }
                 },
                 (err) => {
                     console.error("Failed to retrieve metadata: ", err);
