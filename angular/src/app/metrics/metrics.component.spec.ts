@@ -11,6 +11,10 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DatePipe } from '@angular/common';
 import { SearchService } from '../shared/search-service/search-service.service';
 import { GoogleAnalyticsService } from '../shared/ga-service/google-analytics.service';
+import { RouterTestingModule } from '@angular/router/testing';
+import { MetadataTransfer, NerdmRes } from '../nerdm/nerdm'
+import { MetadataService, TransferMetadataService } from '../nerdm/nerdm.service'
+import { testdata } from '../../environments/environment';
 
 let fileLevelData = {
     "FilesMetricsCount": 3,
@@ -74,6 +78,14 @@ describe('MetricsComponent', () => {
     let cfg : AppConfig;
     let plid : Object = "browser";
     let ts : TransferState = new TransferState();
+    let router : Router;
+    let mdt : MetadataTransfer;
+    let mds : MetadataService;
+    let nrd10 : NerdmRes;
+
+    let routes : Routes = [
+        { path: '**', component: MetricsComponent }
+    ];
 
     beforeEach(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
@@ -81,6 +93,7 @@ describe('MetricsComponent', () => {
         cfg.status = "Unit Testing";
         cfg.appVersion = "2.test";
         cfg.editEnabled = false;
+        nrd10 = JSON.parse(JSON.stringify(testdata['test1']));
 
         let path = "/metrics";
         let params = {};
@@ -89,20 +102,30 @@ describe('MetricsComponent', () => {
         path = path + "/" + id;
         params['id'] = id;
 
+        mdt = new MetadataTransfer();
+        mdt.set("goober/gurn", nrd10)
+        mds = new TransferMetadataService(mdt);
+
         let r : unknown = new mock.MockActivatedRoute(path, params);
         route = r as ActivatedRoute;
 
         TestBed.configureTestingModule({
             declarations: [  ],
-            imports: [FormsModule, MetricsModule, HttpClientTestingModule],
+            imports: [
+                FormsModule, 
+                MetricsModule, 
+                HttpClientTestingModule,
+                RouterTestingModule.withRoutes(routes), ],
             providers: [
                 GoogleAnalyticsService,
+                { provide: MetadataService, useValue: mds },
                 { provide: ActivatedRoute,  useValue: route },
                 { provide: AppConfig,       useValue: cfg }, DatePipe, SearchService, TransferState
             ]
         })
         .compileComponents();
 
+        router = TestBed.inject(Router);
         fixture = TestBed.createComponent(MetricsComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
