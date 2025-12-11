@@ -35,7 +35,7 @@ def clean_pod_props(podfile):
 
     try:
         with open(podfile, 'w') as fd:
-            json.dump(pod, fd)
+            json.dump(pod, fd, indent=4)
     except Exception as ex:
         raise FatalError("%s: Failed to write out modified POD as JSON: %s" %
                          (podfile, str(ex)))
