@@ -57,7 +57,7 @@ def main(args):
     try:
         out = json_differences(args[0], args[1])
         if out:
-            print " ".join(out)
+            print "\n".join(out)
     except FatalError as ex:
         raise
     except Exception as ex:
