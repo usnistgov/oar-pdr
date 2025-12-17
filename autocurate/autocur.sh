@@ -12,16 +12,27 @@ STAGE_DIR="$PDR_DIR/stage.midas_review"
 MIDAS_SIP_LOGDIR="$LOG_DIR/preserver/MIDAS3-SIP"
 DPKEY="XXXX"
 
+# write a message to standard error
+# @param words...  the message to write
+# 
 function advise {
     echo "$@" 1>&2
 }
 
+# execute a python curate command
+# @param cmd      the name of the command to run
+# @param args...  the arguments to pass to the command
+# 
 function expycmd {
     cmd=$1
     shift
     python -m curate.cmd.$cmd "$@"
 }
 
+# find the latest head bag for a specified publication and return its path
+# @param aipid     the AIP ID for the publication
+# @param bagcache  (optional, for testing) a directory where head bags are cached
+# 
 function latest_headbag {
     bagcache="$2"
     [ -n "$bagcache" ] || bagcache=$STAGE_DIR
@@ -30,6 +41,11 @@ function latest_headbag {
     echo $headbag
 }
 
+# find the latest head bag for a specified publication, unzip it in the current
+# directory, and return the bag name (i.e. its root directory).
+# @param aipid     the AIP ID for the publication
+# @param bagcache  (optional, for testing) a directory where head bags are cached
+# 
 function unzip_latest_headbag {
     bagfile=`latest_headbag $1 $2`
     [ "$?" -eq 0 -a -n "$bagfile" ] || return 1
@@ -38,12 +54,24 @@ function unzip_latest_headbag {
     echo $bagfile
 }
 
+# return true if it appears that preservation of a specified publication is
+# currently in progress.  This looks for artifacts of the process (rather than
+# the process itself).
+# @param aipid    the AIP identifier for the publicaiton
+# @param logdir   (optional, for testing) the directory for preservation logs
+# 
 function preservation_in_progress {
     logdir=$2
     [ -n "$logdir" ] || logdir=$MIDAS_SIP_LOGDIR
     test -f $logdir/$1.log
 }
 
+# return true if it appears that preservation of a specified publication has
+# been queued but not necessarily started.  
+# @param aipid    the AIP identifier for the publicaiton
+# @param bagsdir  (optional, for testing) the directory containing metadata bags
+#                 (for publications currently being edited).
+# 
 function preservation_queued {
     bagparent=$2
     [ -n "$bagparent" ] || bagparent=$MDBAGS_DIR
@@ -55,6 +83,17 @@ function preservation_queued {
     return 0
 }
 
+# ensure that a publication is in a state ready to undergo revision.  It is ready if:
+#  1. a metadata bag (indicating a publication under edit) does not exist, or
+#  2. the metadata contains no updates since its last publication, and
+#  3. preservation is neither currently in progress or queued
+# If (3) is true but (2) is false (i.e. edits are present), then the metadata will be 
+# moved out of the way (to be returned after we're done with our revisions).  If (3) is
+# false, then an error is returned.
+# @param aipid      the AIP identifier for the publicaiton
+# @param headbag    the open head bag for the last published version of the AIP
+# @param bagparent  (optional, for testing) the directory containing cached head bags
+# 
 function ensure_revision_ready {
     id=$1
     [ -n "$id" ] || return 1
@@ -112,6 +151,9 @@ function ensure_revision_ready {
     return 0
 }
 
+# return the MIDAS record number for a given EDI or AIP identifier
+# @param id   the AIP or EDI identifier for the publicaiton
+# 
 function midas_record_no {
     id=$1
     [ -n "$id" ] || return 1
@@ -132,6 +174,13 @@ function midas_record_no {
     echo $out
 }
 
+# ensure that a MIDAS data directory is in a state ready for our revision.  If it
+# appears to contain data files, the directory will be moved out of the way and
+# replaced with an empty directory.
+# @param id        the AIP or EDI identifier for the publicaiton to be revised
+# @param datadir   the parent directory to search for a corresponding data directory.
+#                  This is typically the path to either the review or uploads directory.
+# 
 function ensure_data_dir {
     id=$1
     [ -n "$id" ] || return 1
@@ -160,6 +209,11 @@ function ensure_data_dir {
     fi
 }
 
+# start the revision process of a publication by initializing the metadata bag based 
+# on the POD record from last published version.  It is assumed that the publication
+# is in a state ready to do this.  
+# @param bagdir   the open head bag for the last published version of the publication
+# 
 function init_bag_with_pod {
     bagdir=$1
     [ -n "$bagdir" ] || return 1
