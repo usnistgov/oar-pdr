@@ -12,6 +12,7 @@ from nistoar.pdr.preserv.bagit.bag import NISTBag
 
 from . import *
 from ..utils import latest
+from ..utils.versions import OARVersion
 
 old_relhist_ext = re.compile("\.rel$")
 RESOLVER_URL = "https://data.nist.gov/od/id/"
@@ -73,6 +74,7 @@ def fix_release_history(nerd, id=None):
                 more.append(ref)
     if more:
         nerd['releaseHistory']['hasRelease'] = more + nerd['releaseHistory']['hasRelease']
+        nerd['releaseHistory']['hasRelease'].sort(key=lambda r: OARVersion(r.get('version','0')))
     if 'versionHistory' in nerd:
         del nerd['versionHistory']
 

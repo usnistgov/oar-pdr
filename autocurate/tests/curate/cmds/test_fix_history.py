@@ -23,7 +23,7 @@ def tearDownModule():
     if os.path.isdir(tmpdir):
         shutil.rmtree(tmpdir)
 
-class TestMergeCollMD(test.TestCase):
+class TestFixHistory(test.TestCase):
 
     def test_hist_not_up_to_date(self):
         self.assertTrue(cmd.hist_not_up_to_date(None))

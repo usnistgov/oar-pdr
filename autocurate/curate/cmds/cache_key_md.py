@@ -45,7 +45,7 @@ def usage(prog=None, pkg=None):
         prog = "cache_key_md"
     if pkg:
         prog = "python -m %s.%s" % (pkg, prog)
-    return "%s BAGDIR ID KEY [ KEY ... ]" % prog
+    return "%s BAGDIR MDFILE KEY [ KEY ... ]" % prog
 
 def main(args):
     if len(args) < 2:
