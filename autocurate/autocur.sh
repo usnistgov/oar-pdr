@@ -7,10 +7,17 @@ execdir=`dirname $0`
 
 OARDATA_DIR="/oar/data"
 PDR_DIR="$OARDATA_DIR/pdr"
+MDBAG_DIR="$PDR_DIR/mdbags"
 LOG_DIR="$OARDATA_DIR/logs"
 STAGE_DIR="$PDR_DIR/stage.midas_review"
 MIDAS_SIP_LOGDIR="$LOG_DIR/preserver/MIDAS3-SIP"
 DPKEY="XXXX"
+UPLOADS_PARENT=/share/midas_uploads
+REVIEW_PARENT=/share/midas_review
+
+[ -n "$PDR_CONFIG" ] || PDR_CONFIG=pdr.conf
+[ -n "$LOG" ] || LOG=autocur.log
+[ -n "$WORKDIR" ] || WORKDIR="$PWD/autocur.work"
 
 # write a message to standard error
 # @param words...  the message to write
@@ -26,7 +33,7 @@ function advise {
 function expycmd {
     cmd=$1
     shift
-    python -m curate.cmd.$cmd "$@"
+    python -m curate.cmds.$cmd "$@"
 }
 
 # find the latest head bag for a specified publication and return its path
@@ -52,6 +59,19 @@ function unzip_latest_headbag {
     unzip -q "$bagfile" 
     bagfile=`basename $bagfile | sed -Ee 's/\.[^\.]*$//'`
     echo $bagfile
+}
+
+# clean out a POD file so that it can be used to initialize a draft metadata bag
+# @param PODFILE   the POD file to update
+#
+function clean_pod_file {
+    podf=$1
+    [ -n "$podf" ] || return 1
+    [ -f "$podf" ] || {
+        advise ${podf}: not found as a file
+        return 1
+    }
+    expycmd clean_pod_file $podf
 }
 
 # return true if it appears that preservation of a specified publication is
@@ -135,6 +155,8 @@ function ensure_revision_ready {
 
     # has the NERDm metadata been updated?
     diffs=`expycmd json_difference $headbag/metadata/annot.json $bagparent/$id/metadata/annot.json | grep -Pv '^_'`
+    diffs=`echo $diffs | sed -e 's/versionHistory//' -e 's/releaseHistory//' -e 's/version//'`
+    diffs=`echo $diffs`
     [ -z "$diffs" ] || {
         # temporarily move the metadata bag out of the way
         dest="$bagparent/$id.nerdupated"
@@ -144,11 +166,45 @@ function ensure_revision_ready {
         }
         advise "${id}: unpreserved updates detected in bag; migrating to holding dir"
         mv $bagparent/$id $dest
-        expycmd cache_key_md $dest nerdm.json $diffs
+        expycmd cache_key_md $dest annot.json $diffs
         # return 0
     }
 
     return 0
+}
+
+function restore_inprog_cached {
+    id=$1
+    [ -n "$id" ] || return 1
+    bagparent=$2
+    [ -n "$bagparent" ] || bagparent=$MDBAGS_DIR
+    [ -d "$bagparent" ] || return 1
+
+    bagdir=$bagparent/$id
+    [ \! -e "$bagdir" ] || {
+        advise "${aipid}: Bag directory exists; won't restore on top of it"
+        return 1
+    }
+
+    cached="$bagparent/$aipid.podupdated"
+    [ -d "$cached" ] || cached="$bagparent/$aipid.nerdupdated"
+    if [ -d "$cached" ]; then
+        init_bag_with_pod "$cached"
+        if [ -f "$cached/metadata/__annot.json.update" ]; then
+            mdir="$cached/metadata"
+            expycmd merge_into $mdir/__annot.json.update $mdir/annot.json || {
+                advise "${aipid}: Failed to restore in-progress editing (via annot.json)"
+                return 1
+            }
+            [ -d "$bagdir" ] || {
+                advise "${aipdi}: Failed to restore in progress editing"
+                return 1
+            }
+            # rm -rf $cached
+        fi
+    else
+        advise "FYI: No previous draft bag in progress"
+    fi
 }
 
 # return the MIDAS record number for a given EDI or AIP identifier
@@ -209,6 +265,10 @@ function ensure_data_dir {
     fi
 }
 
+function restore_cached_data_dir {
+    false
+}
+
 # start the revision process of a publication by initializing the metadata bag based 
 # on the POD record from last published version.  It is assumed that the publication
 # is in a state ready to do this.  
@@ -230,3 +290,96 @@ function init_bag_with_pod {
         return 1
     }
 }
+
+# add or upgrade the release history of the dataset
+# @param aipid     the AIPID identifier for an open metadata bag that should be repaired
+# @param bagparent (optional) the directory to look for the metadata bag in
+#
+function fix_history {
+    aipid=$1
+    bagparent=$2
+    [ -n "$bagparent" ] || bagparent=$MDBAGS_DIR
+    bagdir=$bagparent/$aipid
+    [ -d "$bagdir" ] || {
+        advise ${aipid}: "can't find metadata bag:" $bagdir
+        return 1
+    }
+    expycmd fix_history "$@"
+}
+
+# merge the new collection metadata into the metadata bag
+# @param mdfile   the path to the file containing the updated NERDm metadata to merge
+# @param scheme   (optional) the taxonomy scheme label (or URI) to merge; default: "additiveman"
+# @param aipid    (optional) the AIP identifier to assume; if not provided, the ID in mdfile
+#                 will be assumed
+# @param outfile  the output (annotation) file to merge the collection metadata file into; if
+#                 not provided, it will be written into the metadata bag's annot.json.
+# 
+function collmdmerge {
+    expycmd merge_coll_md "$@"
+}
+
+# increment the version on the metadata bag in preparation for preservation
+# @param aipid    the AIP for the dataset with an open metadata bag
+# @param descrip  the message to record as the reason for the update (usually something like
+#                 "added to Additive Manufacturing collection")
+function update_version {
+    AIPID=$1
+    desc=$2
+    advise '+' pdr -l $LOG -c $PDR_CONFIG pub setver -am $AIPID -b $MDBAG_DIR
+    pdr -l $LOG -c $PDR_CONFIG pub setver -am $AIPID -b $MDBAG_DIR || return 1
+    advise '+' pdr -l $LOG -c $PDR_CONFIG pub setver -aH "$desc" $AIPID -b $MDBAG_DIR
+    pdr -l $LOG -c $PDR_CONFIG pub setver -aH "$desc" $AIPID -b $MDBAG_DIR || return 1
+}
+
+# cache a NERDm record for perviewing the record over the web
+# @param aipid   the AIP identifier for the dataset to cache
+#
+function servenerd {
+    AIPID=$1
+    advise '+' pdr -l $LOG -c $PDR_CONFIG pub servenerd $AIPID -b $MDBAG_DIR
+    pdr -l $LOG -c $PDR_CONFIG pub servenerd $AIPID -b $MDBAG_DIR
+}
+
+function init {
+    AIPID=$1
+    [ -n "$AIPID" ] || return 1
+
+    [ -d "$WORKDIR" ] || mkdir $WORKDIR || {
+        advise Unable to create working directory: $WORDIR
+        return 1
+    }
+    cd $WORKDIR
+
+    # unpack the last published headbag
+    bagdir=`unzip_latest_headbag $AIPID`
+    [ "$?" -eq 0 ] || {
+        advise Failed to unpack latest head bag
+        return 1
+    }
+
+    # clean the POD file from head bag
+    clean_pod_file $bagdir/metadata/pod.json || {
+        advise Failed to clean POD file, $bagdir/metadata/pod.json
+        return 1
+    }
+
+    # if necessary, protect any MIDAS updates in progress
+    ensure_revision_ready $AIPID $bagdir || {
+        advise Unable to protect revisions in progress
+        return 1
+    }
+
+    # if necessary protect the corresponding uploads and review directories
+    ensure_data_dir $UPLOADS_PARENT || return $?
+    ensure_data_dir $REVIEW_PARENT || return $?
+
+    # now establish the draft metadata bag that will accept new collection metadata
+    init_bag_with_pod $bagdir
+}
+
+
+    
+    
+            
+        
