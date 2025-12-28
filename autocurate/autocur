@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+set -e
+prog=`basename $0`
+execdir=`dirname $0`
+[ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+
+source $PWD/autocur.sh
+
+function do_cmd {
+    eval "$@" || {
+        excode=$?
+        advise "${1}: command failure"
+        return $excode
+    }
+}
+
+function help {
+
+    cat <<EOF
+Usage:
+   autocur CMD ARG ...
+
+Primary Commands:
+   colladd UPDMDFILE
+                 create the ready-to-preserve metadata bag with with the new collection
+                 metadata merged in.  (runs init, collmdmerge, updver, servenerd)
+   preserve AIPID
+                 submit the revision of AIPID for preservation
+   cleanup AIPID 
+                 clean-up after revision publication; restoring any previous MIDAS state
+
+Secondary Commands (normally called via primary commands):
+   init AIPID    initialize the metadata bag for AIPID to be ready to accept 
+                 collection metadata (runs ...)
+   collmdmerge UPDMDFILE
+                 add collection metadata from UPDMDFILE into metadata bag for AIPID
+   updver AIPID  increment the version and update/fix the version history
+                 (runs update_version, fix_history)
+   servenerd AIPID
+                 make latest updates to metadata bag available for previewing on the web
+
+   latest_headbag AIPID
+                 print the path to the last published head bag for AIPID
+   unzip_latest_headbag AIPID 
+                 unzip the latest headbag into the current directory and print the name
+                 of the bag's root directory (runs latest_headbag)
+   ensure_revision_ready AIPID BAGDIR
+                 ensure that collection revisions can be made to the AIPID dataset.  In 
+                 particular, using that last published head bag (given by BAGDIR) as a 
+                 reference, ensure that there isn't editing in progress.  
+   init_bag_with_pod BAGIDR
+                 initialize a metadata bag with the POD record from the last published 
+                 head bag given by BAGDIR
+   ensure_data_dir AIPID REVIEWROOT
+                 ensure that a review (or uploads) directory exists for AIPID
+EOF
+}
+
+declare -a ARGS
+while [ "$1" != "" ]; do
+  case "$1" in
+    --help|-h)
+        help
+        exit 0
+        ;;
+    --log=*)
+        LOG=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    --log|-l)
+        shift
+        LOG=$1
+        ;;
+    --work-dir=*)
+        WORKDIR=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    --work-dir|-w)
+        shift
+        WORKDIR=$1
+        ;;
+    --config=*)
+        PDR_CONFIG=`echo $1 | sed -e 's/[^=]*=//'`
+        ;;
+    --config|-c)
+        shift
+        PDR_CONFIG=$1
+        ;;
+    *)
+        ARGS[${#ARGS[@]}]=$1
+        ;;
+  esac
+  shift
+done
+
+[ ${#ARGS[@]} -ge 1 ] || {
+    advise Missing command
+    echo Usage: ${prog} CMD ARG ...
+    exit 5
+}
+if [ "${ARGS[0]}" == help ]; then
+    help
+    exit 0
+fi
+[ ${#ARGS[@]} -ge 2 ] || {
+    advise Missing command arguments
+    echo Usage: ${prog} CMD ARG ...
+    exit 5
+}
+
+{ echo init_bag_with_pod init preserve | grep -vqs ${ARGS[0]}; } || [ -n "$DBKEY" ] || {
+    advise "setting DPKEY environment variable is required"
+    exit 4
+}
+
+do_cmd "${ARGS[@]}" |& tee -a $LOG
+
+
+
