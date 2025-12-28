@@ -11,7 +11,7 @@ MDBAG_DIR="$PDR_DIR/mdbags"
 LOG_DIR="$OARDATA_DIR/logs"
 STAGE_DIR="$PDR_DIR/stage.midas_review"
 MIDAS_SIP_LOGDIR="$LOG_DIR/preserver/MIDAS3-SIP"
-DPKEY="XXXX"
+DPKEY=
 UPLOADS_PARENT=/share/midas_uploads
 REVIEW_PARENT=/share/midas_review
 
@@ -23,6 +23,7 @@ REVIEW_PARENT=/share/midas_review
 # @param words...  the message to write
 # 
 function advise {
+    [ -z "$prog" ] || echo -n "${prog}: "
     echo "$@" 1>&2
 }
 
@@ -97,7 +98,7 @@ function preservation_queued {
     [ -n "$bagparent" ] || bagparent=$MDBAGS_DIR
     annot="$MDBAGS_DIR/$1/metadata/annot.json"
     [ -f "$annot" ] || return 1
-    version=`cat $annot | jq '.version'`
+    version=`cat $annot | jq -r '.version'`
     [ "$version" != "null" ] || return 1
     { echo $version | grep -qs '+'; } || return 1
     return 0
@@ -285,7 +286,7 @@ function init_bag_with_pod {
         advise Failed to init md-bag via /latest "(status: $stat)"
         return 1
     }
-    grep -qs 200 || {
+    { echo $stat | grep -qs 200; } || {
         advise Failed to init md-bag via /latest "(status: $stat)"
         return 1
     }
@@ -378,8 +379,97 @@ function init {
     init_bag_with_pod $bagdir
 }
 
+# Create a draft revision of a publication with the given collection metadata merged
+# into it.
+# @param updmdfile  the NERDM metadata file containing the collection metadata to merge
+# @param colllabel  (optional) the collection short name (default: additiveman)
+# 
+function colladd {
+    mdfile=$1
+    [ -f "$mdfile" ] || {
+        advise "${mdfile}: not found as a file"
+        return 1
+    }
+    colllabel=$2
+    [ -n "$colllabel" ] || colllabel="additiveman"
+    id=`cat $mdfile | jq -r '.ediid'`
+    [ -n "$id" ] || id=`cat $mdfile | jq -r '."@id"'`
+    aipid=`echo $id | sed -re 's/ark:\/\d+\///'`
 
+    # initialize the draft metadata bag
+    init $aipid || {
+        advise Failed to initialize draft metadata bag
+        return 1
+    }
+
+    # merge in the collection metadata
+    collmdmerge $mdfile $colllabel $aipid
+
+    # set the new version
+    update_version $aipid "added to $colllabel collection" || return 1
+    fix_history $aipid || return 1
+
+    # make update previewable
+    servenerd $aipid
+
+    echo $aipid is ready for review at https://datapub.nist.gov/od/id/$aipid
+}
+
+function preserve {
+    aipid=$1
+    [ -n "$aipid" ] || return 1
+
+    bagdir=$MDBAG_DIR/$aipid
+    [ -d "$bagdir" ] || {
+        advise "${aipid}: draft metadata bag not found"
+        return 1
+    }
+
+    annotf=$bagdir/metadata/annot.json
+    [ -f "$annotf" ] || {
+        advise "${aipid}: draft metadata bag not ready: missing annot.json"
+        return 1
+    }
+    ready=`cat $annotf | jq '.isPartOf'`
+    [ -n "$ready" -a "$ready" != "null" ] || {
+        advise "${aipid}: draft metadata bag not ready: isPartOf not found"
+        return 1
+    }
     
-    
-            
-        
+    podf=$bagdir/metadata/pod.json
+    [ -f "$podf" ] || {
+        advise "${aipid}: draft metadata bag not ready: missing POD file"
+        return 1
+    }
+
+    # Now submit for preservation
+    advise '+' curl -vk -X PATCH --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid
+    stat=`curl -vk -X PATCH --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid |& grep HTTP/ | tail -1 | sed -e 's/^.* HTTP/\d\w+ //'`
+    [ "$?" -eq 0 ] || {
+        advise Failed to submit $aipid for preservation "(status: $stat)"
+        return 1
+    }
+    { echo $stat | grep -qs 200; } || {
+        advise Failed to submit $aipid for preservation "(status: $stat)"
+        return 1
+    }
+
+    echo ${aipid} submitted for preservation
+}
+
+function presstatus {
+    aipid=$1
+    [ -n "$aipid" ] || return 1
+    advise '+' curl -k --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid
+    curl -k --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid | jq -r '.message'
+    [ "$?" -eq 0 ] || {
+        advise Failed to get status of $aipid preservation
+        return 1
+    }
+}
+
+function cleanup {
+    advise Failed to clean-up: not implemented
+    return 1
+}
+
