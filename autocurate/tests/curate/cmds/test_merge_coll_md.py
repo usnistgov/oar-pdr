@@ -12,11 +12,16 @@ tmpdir = None
 def setUpModule():
     global tmpdir
     tmpdir = tempfile.mkdtemp(prefix="_testcmd_")
+    cmd.logstrm = open("/dev/null", 'w')
 
 def tearDownModule():
     global tmpdir
     if os.path.isdir(tmpdir):
         shutil.rmtree(tmpdir)
+    if cmd.logstrm != sys.stderr:
+        if cmd.logstrm:
+            cmd.logstrm.close()
+        cmd.logstrm = sys.stderr
 
 class TestMergeCollMD(test.TestCase):
 
@@ -37,7 +42,7 @@ class TestMergeCollMD(test.TestCase):
         self.assertTrue(unerd.get("isPartOf"))
         self.assertEqual(len(unerd['topic']), 4)
 
-        cmd.merge_coll_md(updatedf, "forensics", outf=mergedf)
+        cmd.merge_coll_md(updatedf, "forensics", destf=mergedf)
 
         mnerd = read_nerd(updatedf)
         self.assertEqual(mnerd.get('isPartOf'), unerd['isPartOf'])

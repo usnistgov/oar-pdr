@@ -19,13 +19,15 @@ TAXON_SCHEME = {
 _taxon_version_path_re = re.compile(r"/v\d+\.\d+[^/\s]*$")
 DEF_METADATABAG_DIR = "/oar/data/pdr/mdbags"
 
+logstrm = sys.stderr
+
 def base_schema(schemauri):
     """
     return the base schema URI for the given schema URI by dropping its version field.
     """
     return _taxon_version_path_re.sub('/', schemauri)
 
-def merge_coll_md(newnerdf, topicscheme, id=None, outf=None, bagparent=None):
+def merge_coll_md(newnerdf, topicscheme, id=None, destf=None, bagparent=None):
     """
     merge the collection-related metadata found in the given NERDm into the publication's 
     annotation data.  Specifically, it will merge the ``isPartOf`` property as well as 
@@ -36,10 +38,11 @@ def merge_coll_md(newnerdf, topicscheme, id=None, outf=None, bagparent=None):
                           we need to capture and merge.  
     :param str id:  the AIP ID for the publication being revised; if not given, this is
                     taken from the ``newnerdf`` parameter
-    :param str outf:  the path to the file to write the merged data to.  If the file exists,
+    :param str destf:  the path to the file to write the merged data to.  If the file exists,
                     the metadata found there will be the basis for the merge; otherwise,
                     the basis will be taken from the established metadata bag for the 
-                    revision.
+                    revision.  If not provided, the metadata bag's annot.json file will be 
+                    assumed.
     """
     if not os.path.isfile(newnerdf):
         raise FatalError("%s: not a found as a file" % newnerdf)
@@ -60,14 +63,11 @@ def merge_coll_md(newnerdf, topicscheme, id=None, outf=None, bagparent=None):
     if any([not c.get('@id') for c in nerd['isPartOf']]):
         raise FatalError("%s: 'isPartOf' element(s) missing '@id' property" % newnerdf)
 
-    if not outf:
-        recno = midas2recno(id)
-        outf = "%sannot.json"
+#    if not outf:
+#        recno = midas2recno(id)
+#        outf = "%sannot.json" % recno
 
-    inf = outf
-    if not os.path.isfile(inf):
-        if os.path.exists(inf):
-            raise FatalError("%s: exists but it not a file!" % outf)
+    def mdbag_annot_file():
         if not bagparent:
             bagparent = DEF_METADATABAG_DIR
         if not os.path.isdir(bagparent):
@@ -75,9 +75,19 @@ def merge_coll_md(newnerdf, topicscheme, id=None, outf=None, bagparent=None):
         bagdir = os.path.join(bagparent, aipid)
         if not os.path.isdir(bagdir):
             raise FatalError("%s: metadata bag not established, yet" % aipid)
-        inf = os.path.join(bagdir, 'metadata', 'annnot.json')
-        if not os.path.isfile(inf):
+        annotf = os.path.join(bagdir, 'metadata', 'annot.json')
+        if not os.path.isfile(annotf):
             raise FatalError("%s: can't find annot.json" % aipid)
+        return annotf
+
+    if not destf:
+        destf = mdbag_annot_file()
+
+    inf = destf
+    if not os.path.isfile(inf):
+        if os.path.exists(inf):
+            raise FatalError("%s: exists but it not a file!" % destf)
+        inf = mdbag_annot_file()
 
     annot = read_nerd(inf)   # may raise NERDError
 
@@ -108,8 +118,9 @@ def merge_coll_md(newnerdf, topicscheme, id=None, outf=None, bagparent=None):
             outtops.append(newtopic)
 
     # save the merged annotations
+    print >> logstrm, "Saving collection metadata to", destf
     try:
-        write_json(annot, outf)
+        write_json(annot, destf)
     except Exception as ex:
         raise FatalError("%s: failed to write updated annot data: %s" % (outf, str(ex)))
 

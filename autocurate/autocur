@@ -4,8 +4,11 @@ set -e
 prog=`basename $0`
 execdir=`dirname $0`
 [ "$execdir" = "" -o "$execdir" = "." ] && execdir=$PWD
+[ "$execdir" = ".." ] && execdir=`dirname $PWD`
 
-source $PWD/autocur.sh
+PYTHONPATH=${execdir}:$execdir/pdr/lib/python
+
+source $execdir/autocur.sh
 
 function do_cmd {
     eval "$@" || {
@@ -107,7 +110,7 @@ fi
     exit 5
 }
 
-{ echo init_bag_with_pod init preserve | grep -vqs ${ARGS[0]}; } || [ -n "$DBKEY" ] || {
+{ echo init_bag_with_pod init preserve | grep -vqs ${ARGS[0]}; } || [ -n "$DPKEY" ] || {
     advise "setting DPKEY environment variable is required"
     exit 4
 }

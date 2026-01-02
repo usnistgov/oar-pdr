@@ -11,7 +11,7 @@ MDBAG_DIR="$PDR_DIR/mdbags"
 LOG_DIR="$OARDATA_DIR/logs"
 STAGE_DIR="$PDR_DIR/stage.midas_review"
 MIDAS_SIP_LOGDIR="$LOG_DIR/preserver/MIDAS3-SIP"
-DPKEY=
+# DPKEY=
 UPLOADS_PARENT=/share/midas_uploads
 REVIEW_PARENT=/share/midas_review
 
@@ -262,8 +262,17 @@ function ensure_data_dir {
                 advise Failed to migrate existing $src
                 return $stat
             }
+            advise "+" mkdir $src
+            mkdir $src
         }
+    else
+        advise "+" mkdir $src
+        mkdir $src
     fi
+    [ -d "$src" ] || {
+        advise Failed to ensure data dir, $src
+        return 1
+    }
 }
 
 function restore_cached_data_dir {
@@ -281,12 +290,12 @@ function init_bag_with_pod {
     podfile="$bagdir/metadata/pod.json"
     [ -f "$podfile" ] || return 1
     advise '+' curl -vk --data @$podfile  -H "'Content-type: application/json'" -H "'Authorization: Bearer *****'" https://datapub.nist.gov/pdr/pod/latest
-    stat=`curl -vk --data @$podfile  -H 'Content-type: application/json' -H "Authorization: Bearer $DPKEY" https://datapub.nist.gov/pdr/pod/latest |& grep HTTP/ | tail -1 | sed -e 's/^.* HTTP/\d\w+ //'`
+    stat=`curl -vk --data @$podfile  -H 'Content-type: application/json' -H "Authorization: Bearer $DPKEY" https://datapub.nist.gov/pdr/pod/latest |& grep HTTP/ | tail -1 | sed -e 's/^.* HTTP\/1\.[0-9] //'`
     [ "$?" -eq 0 ] || {
         advise Failed to init md-bag via /latest "(status: $stat)"
         return 1
     }
-    { echo $stat | grep -qs 200; } || {
+    { echo $stat | egrep -qs '200|201'; } || {
         advise Failed to init md-bag via /latest "(status: $stat)"
         return 1
     }
@@ -317,6 +326,7 @@ function fix_history {
 #                 not provided, it will be written into the metadata bag's annot.json.
 # 
 function collmdmerge {
+    [ -n "$2" ] || set -- "$1" additiveman
     expycmd merge_coll_md "$@"
 }
 
@@ -372,8 +382,8 @@ function init {
     }
 
     # if necessary protect the corresponding uploads and review directories
-    ensure_data_dir $UPLOADS_PARENT || return $?
-    ensure_data_dir $REVIEW_PARENT || return $?
+    ensure_data_dir $AIPID $UPLOADS_PARENT || return $?
+    ensure_data_dir $AIPID $REVIEW_PARENT || return $?
 
     # now establish the draft metadata bag that will accept new collection metadata
     init_bag_with_pod $bagdir
