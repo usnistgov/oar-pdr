@@ -535,8 +535,8 @@ function preserve {
 function presstatus {
     aipid=$1
     [ -n "$aipid" ] || return 1
-    advise '+' curl -k --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid
-    curl -k --data @$podf -H "Authorization: Bearer $DPKEY" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid | jq -r '.message + " " + .updated'
+    advise '+' curl -k -H "'Authorization: Bearer ******'" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid
+    curl -k -H "Authorization: Bearer $DPKEY" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid | jq -r '.message + " " + .updated'
     [ "$?" -eq 0 ] || {
         advise Failed to get status of $aipid preservation
         return 1
