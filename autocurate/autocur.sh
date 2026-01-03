@@ -174,6 +174,12 @@ function ensure_revision_ready {
     return 0
 }
 
+# restore a metadata bag that was cached because it appeared to have edits in progress.
+# The updates will be merged into the last published version (usually the one that added
+# the dataset to the target collection).
+# @param id         the AIP ID of the dataset
+# @param bagparent  (optional) the directory containing metadata bags
+#
 function restore_inprog_cached {
     id=$1
     [ -n "$id" ] || return 1
@@ -201,6 +207,7 @@ function restore_inprog_cached {
                 advise "${aipdi}: Failed to restore in progress editing"
                 return 1
             }
+            advise 'o' rm -rf $cached
             # rm -rf $cached
         fi
     else
@@ -537,7 +544,20 @@ function presstatus {
 }
 
 function cleanup {
-    advise Failed to clean-up: not implemented
-    return 1
+    id=$1
+    [ -n "$id" ] || return 1
+    bagparent=$2
+    [ -n "$bagparent" ] || bagparent=$MDBAGS_DIR
+    [ -d "$bagparent" ] || return 1
+
+    [ \! -d "$bagparent/$id" ] || {
+        advise Unpreserved metadata bag exists for $id
+        return 1
+    }
+
+    restore_cached_data_dir $id $UPLOADS_PARENT || return $?
+    restore_cached_data_dir $id $REVIEW_PARENT || return $?
+
+    restore_inprog_cached $id $bagparent
 }
 
