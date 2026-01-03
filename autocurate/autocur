@@ -88,6 +88,9 @@ while [ "$1" != "" ]; do
         shift
         PDR_CONFIG=$1
         ;;
+    --debug)
+        DEBUG=1
+        ;;
     *)
         ARGS[${#ARGS[@]}]=$1
         ;;
@@ -115,7 +118,7 @@ fi
     exit 4
 }
 
+[ -z "$DEBUG" ] || set -x
 do_cmd "${ARGS[@]}" |& tee -a $LOG
-
 
 

@@ -67,12 +67,12 @@ def merge_coll_md(newnerdf, topicscheme, id=None, destf=None, bagparent=None):
 #        recno = midas2recno(id)
 #        outf = "%sannot.json" % recno
 
-    def mdbag_annot_file():
-        if not bagparent:
-            bagparent = DEF_METADATABAG_DIR
-        if not os.path.isdir(bagparent):
+    def mdbag_annot_file(bagp, aipid):
+        if not bagp:
+            bagp = DEF_METADATABAG_DIR
+        if not os.path.isdir(bagp):
             raise FatalError("%s: does not exist as a directory")
-        bagdir = os.path.join(bagparent, aipid)
+        bagdir = os.path.join(bagp, aipid)
         if not os.path.isdir(bagdir):
             raise FatalError("%s: metadata bag not established, yet" % aipid)
         annotf = os.path.join(bagdir, 'metadata', 'annot.json')
@@ -81,13 +81,13 @@ def merge_coll_md(newnerdf, topicscheme, id=None, destf=None, bagparent=None):
         return annotf
 
     if not destf:
-        destf = mdbag_annot_file()
+        destf = mdbag_annot_file(bagparent, aipid)
 
     inf = destf
     if not os.path.isfile(inf):
         if os.path.exists(inf):
             raise FatalError("%s: exists but it not a file!" % destf)
-        inf = mdbag_annot_file()
+        inf = mdbag_annot_file(bagparent, aipid)
 
     annot = read_nerd(inf)   # may raise NERDError
 

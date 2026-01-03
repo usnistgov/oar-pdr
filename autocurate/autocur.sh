@@ -7,7 +7,7 @@ execdir=`dirname $0`
 
 OARDATA_DIR="/oar/data"
 PDR_DIR="$OARDATA_DIR/pdr"
-MDBAG_DIR="$PDR_DIR/mdbags"
+MDBAGS_DIR="$PDR_DIR/mdbags"
 LOG_DIR="$OARDATA_DIR/logs"
 STAGE_DIR="$PDR_DIR/stage.midas_review"
 MIDAS_SIP_LOGDIR="$LOG_DIR/preserver/MIDAS3-SIP"
@@ -72,7 +72,7 @@ function clean_pod_file {
         advise ${podf}: not found as a file
         return 1
     }
-    expycmd clean_pod_file $podf
+    expycmd clean_pod_props $podf
 }
 
 # return true if it appears that preservation of a specified publication is
@@ -275,8 +275,65 @@ function ensure_data_dir {
     }
 }
 
+# ensure that a MIDAS data directory that was cached away is restored with any new
+# SHA files folded in.
+# @param id        the AIP or EDI identifier for the publicaiton to be revised
+# @param datadir   the parent directory to search for a corresponding data directory.
+#                  This is typically the path to either the review or uploads directory.
+# 
 function restore_cached_data_dir {
-    false
+    aipid=$1
+    [ -n "$aipid" ] || return 1
+    datadir=$2
+    [ -n "$datadir" ] || return 1
+    [ -d "$datadir" ] || {
+        advise ${datadir}: directory not found
+        return 2
+    }
+    
+    recno=`midas_record_no $aipid`
+    [ "$?" -eq 0 -a -n "$recno" ] || return 1
+
+    recdir=$datadir/$recno
+    cached=$recdir.curate
+    if [ -d "$cached" ]; then
+        if [ -d "$recdir" ]; then
+            files=`ls $recdir | grep -v _preserv`
+            [ -z "$files" ] || {
+                advise Data files found in current datadir: $recdir
+                return 1
+            }
+            files=`ls $recdir/_preserv | grep ${aipid}_.*\.sha256`
+            [ -z "$files" ] || {
+                for f in $files; do
+                    if [ \! -e "$cached/_preserv/$f" ]; then
+                        advise '+' mv "$recdir/_preserv/$f" "$cached/_preserv/$f"
+                        mv "$recdir/_preserv/$f" "$cached/_preserv/$f" || {
+                            advise Trouble moving SHA files to cachedir, $cached
+                            return 1
+                        }
+                    else
+                        cmp -s "$recdir/_preserv/$f" "$cached/_preserv/$f" || {
+                            advise Two identically-named SHA files with different values: \
+                                   $recdir/_preserv/$f\; will not overwrite.
+                            return 1
+                        }
+                    fi
+                done
+            }
+
+            advise '+' rm -rf $recdir
+            rm -rf $recdir || {
+                advise Failed to remove $recdir
+                return 1
+            }
+        fi
+        advise '+' mv $cached $recdir
+        mv $cached $recdir || {
+            advise Failed to move cached $cached back into place
+            return 1
+        }
+    fi
 }
 
 # start the revision process of a publication by initializing the metadata bag based 
@@ -314,7 +371,7 @@ function fix_history {
         advise ${aipid}: "can't find metadata bag:" $bagdir
         return 1
     }
-    expycmd fix_history "$@"
+    expycmd fix_history $bagdir
 }
 
 # merge the new collection metadata into the metadata bag
@@ -336,11 +393,12 @@ function collmdmerge {
 #                 "added to Additive Manufacturing collection")
 function update_version {
     AIPID=$1
-    desc=$2
-    advise '+' pdr -l $LOG -c $PDR_CONFIG pub setver -am $AIPID -b $MDBAG_DIR
-    pdr -l $LOG -c $PDR_CONFIG pub setver -am $AIPID -b $MDBAG_DIR || return 1
-    advise '+' pdr -l $LOG -c $PDR_CONFIG pub setver -aH "$desc" $AIPID -b $MDBAG_DIR
-    pdr -l $LOG -c $PDR_CONFIG pub setver -aH "$desc" $AIPID -b $MDBAG_DIR || return 1
+    shift
+    desc="$@"
+    advise '+' pdr -l $LOG -c $PDR_CONFIG pub setver -am $AIPID -b $MDBAGS_DIR
+    pdr -l $LOG -c $PDR_CONFIG pub setver -am $AIPID -b $MDBAGS_DIR || return 1
+    advise '+' pdr -l $LOG -c $PDR_CONFIG pub setver -aH "$desc" $AIPID -b $MDBAGS_DIR
+    pdr -l $LOG -c $PDR_CONFIG pub setver -aH "$desc" $AIPID -b $MDBAGS_DIR || return 1
 }
 
 # cache a NERDm record for perviewing the record over the web
@@ -348,8 +406,8 @@ function update_version {
 #
 function servenerd {
     AIPID=$1
-    advise '+' pdr -l $LOG -c $PDR_CONFIG pub servenerd $AIPID -b $MDBAG_DIR
-    pdr -l $LOG -c $PDR_CONFIG pub servenerd $AIPID -b $MDBAG_DIR
+    advise '+' pdr -l $LOG -c $PDR_CONFIG pub servenerd $AIPID -b $MDBAGS_DIR
+    pdr -l $LOG -c $PDR_CONFIG pub servenerd $AIPID -b $MDBAGS_DIR
 }
 
 function init {
@@ -429,7 +487,7 @@ function preserve {
     aipid=$1
     [ -n "$aipid" ] || return 1
 
-    bagdir=$MDBAG_DIR/$aipid
+    bagdir=$MDBAGS_DIR/$aipid
     [ -d "$bagdir" ] || {
         advise "${aipid}: draft metadata bag not found"
         return 1
@@ -453,13 +511,13 @@ function preserve {
     }
 
     # Now submit for preservation
-    advise '+' curl -vk -X PATCH --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid
-    stat=`curl -vk -X PATCH --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid |& grep HTTP/ | tail -1 | sed -e 's/^.* HTTP/\d\w+ //'`
+    advise '+' curl -vk -X PATCH --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid
+    stat=`curl -vk -X PATCH --data @$podf -H "Authorization: Bearer $DPKEY" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid |& grep HTTP/ | tail -1 | sed -e 's/^.* HTTP\/1\.[0-9] //'`
     [ "$?" -eq 0 ] || {
         advise Failed to submit $aipid for preservation "(status: $stat)"
         return 1
     }
-    { echo $stat | grep -qs 200; } || {
+    { echo $stat | egrep -qs '200|201|202'; } || {
         advise Failed to submit $aipid for preservation "(status: $stat)"
         return 1
     }
@@ -470,8 +528,8 @@ function preserve {
 function presstatus {
     aipid=$1
     [ -n "$aipid" ] || return 1
-    advise '+' curl -k --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid
-    curl -k --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/pdr/preserve/midas/$aipid | jq -r '.message'
+    advise '+' curl -k --data @$podf -H "'Authorization: Bearer ******'" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid
+    curl -k --data @$podf -H "Authorization: Bearer $DPKEY" https://datapub.nist.gov/preserve/midas/ark:/88434/$aipid | jq -r '.message + " " + .updated'
     [ "$?" -eq 0 ] || {
         advise Failed to get status of $aipid preservation
         return 1
