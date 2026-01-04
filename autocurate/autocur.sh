@@ -141,10 +141,10 @@ function ensure_revision_ready {
     fi
 
     # has the POD been updated?
-    diffs=`expycmd json_difference $headbag/metadata/pod.json $bagparent/$id/metadata/pod.json | grep -Pv '^_'`
+    diffs=`expycmd json_differences $headbag/metadata/pod.json $bagparent/$id/metadata/pod.json | grep -Pv '^_'`
     [ -z "$diffs" ] || {
         # temporarily move the metadata bag out of the way
-        dest="$bagparent/$id.podupated"
+        dest="$bagparent/$id.podupdated"
         [ \! -d "$dest" ] || {
             advise "${dest}: pending migrated metadata bag file exists already"
             return 1
@@ -155,12 +155,12 @@ function ensure_revision_ready {
     }
 
     # has the NERDm metadata been updated?
-    diffs=`expycmd json_difference $headbag/metadata/annot.json $bagparent/$id/metadata/annot.json | grep -Pv '^_'`
+    diffs=`expycmd json_differences $headbag/metadata/annot.json $bagparent/$id/metadata/annot.json | grep -Pv '^_'`
     diffs=`echo $diffs | sed -e 's/versionHistory//' -e 's/releaseHistory//' -e 's/version//'`
     diffs=`echo $diffs`
     [ -z "$diffs" ] || {
         # temporarily move the metadata bag out of the way
-        dest="$bagparent/$id.nerdupated"
+        dest="$bagparent/$id.nerdupdated"
         [ \! -d "$dest" ] || {
             advise "${dest}: pending migrated metadata bag file exists already"
             return 1
@@ -207,9 +207,9 @@ function restore_inprog_cached {
                 advise "${aipdi}: Failed to restore in progress editing"
                 return 1
             }
-            advise 'o' rm -rf $cached
-            # rm -rf $cached
         fi
+        advise 'o' rm -rf $cached
+        # rm -rf $cached
     else
         advise "FYI: No previous draft bag in progress"
     fi
@@ -468,8 +468,8 @@ function colladd {
     colllabel=$2
     [ -n "$colllabel" ] || colllabel="additiveman"
     id=`cat $mdfile | jq -r '.ediid'`
-    [ -n "$id" ] || id=`cat $mdfile | jq -r '."@id"'`
-    aipid=`echo $id | sed -re 's/ark:\/\d+\///'`
+    [ -n "$id" ] || id=`cat $mdfile | jq -r '.ediid'`
+    aipid=`echo $id | sed -re 's/ark:\/[0-9]+\///'`
 
     # initialize the draft metadata bag
     init $aipid || {
@@ -559,5 +559,14 @@ function cleanup {
     restore_cached_data_dir $id $REVIEW_PARENT || return $?
 
     restore_inprog_cached $id $bagparent
+
+    workbag=`ls $workdir | grep -P $id'.1_\d+_\d+.mbag0.\d-\d+' | sort | tail -1`
+    [ -z "$workbag" ] || {
+        advise '+' rm -rf $workdir/$workbag
+        rm -rf $workdir/$workbag || {
+            advise Failed to remove working bag: $workdir/$workbag
+            return 1
+        }
+    }
 }
 
